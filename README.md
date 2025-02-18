@@ -20,7 +20,8 @@ The package definitions in this repository _extend_ [the default packages provid
 ```scheme
 (cons (channel
         (name 'systole)
-        (url "https://github.com/SystoleOS/guix-systole.git"))
+        (url "https://github.com/SystoleOS/guix-systole.git")
+        (branch "main"))
       %default-channels)
 ```
 
