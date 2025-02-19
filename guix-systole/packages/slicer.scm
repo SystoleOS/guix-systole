@@ -70,14 +70,17 @@
     
     (inputs
       (list libxt
+        ;; Has to be at least version 3.0.0 due to incompatibility with GPL.
+        openssl-3.0
         git
-        openssl
         perl
         libffi
         mesa       ;; libGL equivalent
         libxinerama
 
         wayland
+
+        ; nss-certs ;; to fix broken certificate validation
 
         qtbase-5
         qtmultimedia-5
