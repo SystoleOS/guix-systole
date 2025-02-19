@@ -1,0 +1,18 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 88798d7aa8..69f16480e0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -111,6 +111,13 @@ option(Slicer_SUPERBUILD "Build ${PROJECT_NAME} and the projects it depends on."
+ mark_as_advanced(Slicer_SUPERBUILD)
+ set(Slicer_BINARY_INNER_SUBDIR Slicer-build)
+ 
++#-----------------------------------------------------------------------------
++# Include essential packages in non-superbuild
++#-----------------------------------------------------------------------------
++if(NOT SLICER_SUPERBUILD)
++    find_package(ITK REQUIRED)
++endif()
++
+ #-----------------------------------------------------------------------------
+ include(CTestUseLaunchers OPTIONAL)
+ if(${CTEST_USE_LAUNCHERS})

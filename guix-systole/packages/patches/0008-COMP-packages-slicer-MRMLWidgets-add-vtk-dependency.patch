@@ -1,0 +1,12 @@
+diff --git a/Libs/MRML/Widgets/CMakeLists.txt b/Libs/MRML/Widgets/CMakeLists.txt
+index 7df4a7b653..b669179098 100644
+--- a/Libs/MRML/Widgets/CMakeLists.txt
++++ b/Libs/MRML/Widgets/CMakeLists.txt
+@@ -484,6 +484,7 @@ add_library(${lib_name}
+ set(MRMLWidgets_LIBRARIES
+   ${QT_LIBRARIES}
+   ${CTK_LIBRARIES}
++  VTK::IOExportGL2PS
+   MRMLLogic
+   MRMLDisplayableManager
+   VTK::RenderingQt

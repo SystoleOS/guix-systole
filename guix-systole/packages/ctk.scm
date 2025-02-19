@@ -123,7 +123,7 @@ efforts includes the topics DICOM, DICOM Application Hosting, Widgets, and
 Plugin Framework.")
     (license license:asl2.0)))
 
-(define-public ctkapplauncher-slicer
+(define-public ctkapplauncher
   (package
     (name "ctkapplauncher")
     (version "0.1")
@@ -140,7 +140,6 @@ Plugin Framework.")
        #:configure-flags (list "-DBUILD_TESTING=OFF"
                                "-DCTKAppLauncher_QT_VERSION=5"
                                "-DCTKAppLauncher_INSTALL_LauncherLibrary=ON"
-                               ;; "-DCTK_INSTALL_LIB_DIR=lib64"
                                )))
     (inputs (list qtbase-5))
     (home-page "http://www.commontk.org/")

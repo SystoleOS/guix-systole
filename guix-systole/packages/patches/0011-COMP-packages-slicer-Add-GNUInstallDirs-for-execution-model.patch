@@ -1,0 +1,33 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 917e3f7..84cb21b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -27,6 +27,28 @@ project(SlicerExecutionModel
+         HOMEPAGE_URL   "https://github.com/Slicer/SlicerExecutionModel"
+         LANGUAGES C CXX)
+ 
++# --------------------------------------------------------------------------
++# Directories
++# --------------------------------------------------------------------------
++#
++include(GNUInstallDirs)
++
++if(NOT ${PROJECT_NAME}_INSTALL_BIN_DIR)
++  set(${PROJECT_NAME}_INSTALL_BIN_DIR "${CMAKE_INSTALL_BINDIR}")
++endif()
++if(NOT ${PROJECT_NAME}_INSTALL_LIB_DIR)
++  set(${PROJECT_NAME}_INSTALL_LIB_DIR "${CMAKE_INSTALL_LIBDIR}")
++endif()
++if(NOT ${PROJECT_NAME}_INSTALL_CMAKE_DIR)
++  set(${PROJECT_NAME}_INSTALL_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake")
++endif()
++if(NOT ${PROJECT_NAME}_INSTALL_INCLUDE_DIR)
++  set(${PROJECT_NAME}_INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}-${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}")
++endif()
++if(NOT ${PROJECT_NAME}_INSTALL_DOC_DIR)
++  set(${PROJECT_NAME}_INSTALL_DOC_DIR "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}-${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}/doc")
++endif()
++
+ #-----------------------------------------------------------------------------
+ 
+ include(CMakeDependentOption)

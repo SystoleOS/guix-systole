@@ -1,0 +1,10 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 69f16480e0..f7fdc5646c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1333,4 +1333,4 @@ endif()
+ # The commands in this directory are intended to be executed as
+ # the end of the whole configuration process, as a "last step".
+ # This directory is typically the last add_subdirectory in the main CMakeLists.txt.
+-add_subdirectory(CMake/LastConfigureStep)
++#add_subdirectory(CMake/LastConfigureStep)
