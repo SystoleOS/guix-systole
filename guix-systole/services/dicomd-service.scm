@@ -41,8 +41,6 @@
            (default "DICOMD"))
   (output-directory dicomd-configuration-output-directory
                     (default "/var/dicom-store"))
-  (log-level dicomd-configuration-log-level
-             (default "info"))
   (account dicomd-configuration-account
            (default (car %dicomd-account-service)))
   (group dicomd-configuration-group
@@ -50,7 +48,7 @@
 
 (define dicomd-shepherd-service
   (match-lambda
-    (($ <dicomd-configuration> package port aetitle log-level output-directory account)
+    (($ <dicomd-configuration> package port aetitle output-directory account)
      (let ((dicomd (least-authority-wrapper
                     (file-append package "/bin/storescp")
                     #:name "dicomd"
@@ -58,7 +56,7 @@
                     (fold delq %namespaces '(net))
                     #:mappings (list (file-system-mapping
                                       (source output-directory)
-                                      (target source)
+                                      (target output-directory)
                                       (writable? #t))))))
        (shepherd-service
         (provision '(dicom-daemon))
@@ -69,7 +67,6 @@
                   (list #$dicomd
                         "--aetitle" #$aetitle
                         "--output-directory" #$output-directory
-                        "--log-level" #$log-level
                         #$(number->string port))
                   #:user #$(user-account-name account) #:group #$(user-account-group account)))
         (stop #~(make-kill-destructor)))))))
