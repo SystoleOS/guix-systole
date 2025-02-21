@@ -68,7 +68,9 @@
                         "--aetitle" #$aetitle
                         "--output-directory" #$output-directory
                         #$(number->string port))
-                  #:user #$(user-account-name account) #:group #$(user-account-group account)))
+                  #:user #$(user-account-name account)
+                  #:group #$(user-account-group account)
+                  #:file-creation-mask #o002))
         (stop #~(make-kill-destructor)))))))
 
 (define (dicomd-activation config)
@@ -79,7 +81,8 @@
                                     (directory #$(dicomd-configuration-output-directory config)))
                                ;; dicomd creates a Unix-domain socket in DIRECTORY.
                                (mkdir-p directory)
-                               (chown directory (passwd:uid user) (passwd:gid user))))))
+                               (chown directory (passwd:uid user) (passwd:gid user))
+                               (chmod directory #o775)))))
 
 (define dicomd-service-type
   (service-type
