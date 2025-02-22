@@ -1,4 +1,4 @@
-(define-module (insight-toolkit)
+(define-module (itk)
     #:use-module (gnu packages algebra)
     #:use-module (gnu packages base)
     #:use-module (gnu packages ccache)
@@ -68,12 +68,14 @@
             "-DBUILD_EXAMPLES=OFF"
             ;;-DITK_BUILD_DEFAULT_MODULES:BOOL=ON
             ;;-DGIT_EXECUTABLE:FILEPATH=${GIT_EXECUTABLE} # Used in ITKModuleRemote
-            "-DModule_ITKReview=ON"
-            "-DModule_MGHIO=ON"
-            "-DModule_ITKIOMINC=ON"
-            "-DModule_IOScanco=ON"
-            "-DModule_MorphologicalContourInterpolation=ON"
-            "-DModule_GrowCut=ON"
+
+            ;; TODO: Extensions. Build without them first.
+            "-DModule_ITKReview=OFF"
+            "-DModule_MGHIO=OFF"
+            "-DModule_ITKIOMINC=OFF"
+            "-DModule_IOScanco=OFF"
+            "-DModule_MorphologicalContourInterpolation=OFF"
+            "-DModule_GrowCut=OFF"
             ;;-DModule_SimpleITKFilters:BOOL=${Slicer_USE_SimpleITK}
             ;;-DModule_GenericLabelInterpolator:BOOL=ON
             ;;-DModule_AdaptiveDenoising:BOOL=ON
