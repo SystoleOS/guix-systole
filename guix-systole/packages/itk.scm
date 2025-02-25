@@ -109,3 +109,37 @@
             ; endif()
                 )))
     (home-page "https://github.com/Slicer/ITK/")))
+
+
+
+(define-public itk-growcut
+  (package
+    (name "itk-growcut")
+    (version "0.2.1")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/InsightSoftwareConsortium/ITKGrowCut/")
+             (commit "cbf93ab65117abfbf5798745117e34f22ff04728")))
+       (sha256(base32 "03fzj55bczip5mmis4b074yq7bwjiwzgy49yvqfnnlhhjr9lzkm9"))))
+    (build-system cmake-build-system)
+    (arguments
+      `(#:configure-flags
+      (list
+      "-DITK_DIR=/ITK/Insight-Toolkit-5.4.0"
+
+        )))
+    (inputs
+     `(("git" ,git)
+       ))
+    (native-inputs
+     (list pkg-config))
+
+    ;(properties '((tunable? . #t)))
+
+    (home-page "https://github.com/Slicer/ITK/")
+    (synopsis "ITKGrowCut is a remote module for ITK.")
+    (description "ITKGrowCut is a remote module for ITK. It segments a 3D image
+        from user-provided foreground and background seeds. ")
+    (license license:asl2.0)))
