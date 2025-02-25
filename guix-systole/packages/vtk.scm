@@ -88,7 +88,7 @@
 			   ;(file-name (git-file-name name version))
 			   (sha256
 			     (base32
-			       "1s8vd34nhrgnw1bf9zhfn062d53fwq3csjfwvm7lxcr5a8lvkizx"))
+			       "1lnfx7qf7l64klysv98qsik4fnd8hb538w7ppvxdv4kxxc0f5k6q"))
 			   (modules '((guix build utils)))
 			   (snippet
 			     '(begin
@@ -211,3 +211,5 @@
 		   a suite of 3D interaction widgets, supports parallel processing, and
 		   integrates with various databases on GUI toolkits such as Qt and Tk.")
 		   (license license:bsd-3)))
+
+vtk
