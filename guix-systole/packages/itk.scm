@@ -7,9 +7,10 @@
     #:use-module (gnu packages check)
     #:use-module (gnu packages compression)
     #:use-module (gnu packages image)
-    #:use-module ((gnu packages image-processing) #:prefix imgproc:)
+    #:use-module (gnu packages image-processing)
     #:use-module (gnu packages gl)
     #:use-module (gnu packages maths)
+    #:use-module (gnu packages ninja)
     #:use-module (gnu packages perl)
     #:use-module (gnu packages pkg-config)
     #:use-module (gnu packages python)
@@ -27,10 +28,10 @@
     #:use-module ((guix licenses) #:prefix license:)
     #:use-module (guix packages))
 
-(define-public insight-toolkit
+(define-public systole-insight-toolkit
   (package
-    (name "insight-toolkit")
-    (version "5.4.0")
+    (inherit insight-toolkit)
+    (version "slicer-5.4.0")
     (source
      (origin
        (method git-fetch)
@@ -38,7 +39,6 @@
              (url "https://github.com/Slicer/ITK")
              (commit "29b78d73c81d6c00c393416598d16058704c535c")))
        (sha256(base32 "13iz2f8r5rr9xi8w2j42iidrpn18yi9mkvnw47n6d2wyrvjjl1aj"))))
-    (build-system cmake-build-system)
     (arguments
       `( #:tests? #f        ; tests require network access and external data
         #:configure-flags
@@ -131,51 +131,5 @@
             ;       )
             ;   endforeach()
             ; endif()
-                )
-
-          ;;  #:phases 
-          ;;  (modify-phases %standard-phases
-          ;;      (add-after 'unpack 'do-not-tune
-          ;;          (lambda _
-          ;;              (substitute* "CMake/ITKSetStandardCompilerFlags.cmake"
-          ;;                  (("-mute=native") ""))
-          ;;              #t)))
-                       ))
-    (inputs
-     `(("ccache", ccache)
-       ("eigen" ,eigen)
-       ("expat" ,expat)
-       ("fftw" ,fftw)
-       ("fftwf" ,fftwf)
-       ("git" ,git)
-       ("hdf5" ,hdf5)
-       ("libjpeg" ,libjpeg-turbo)
-       ("libpng" ,libpng)
-       ("libtiff" ,libtiff)
-       ("mesa" ,mesa-opencl)
-       ("nss-certs", nss-certs)
-       ("perl" ,perl)
-       ("python" ,python-3.9)
-       ("tbb" ,tbb)
-       ("vxl" ,imgproc:vxl-1)
-       ("zlib" ,zlib)
-       ))
-    (native-inputs
-     (list googletest pkg-config))
-
-    ;; The 'CMake/ITKSetStandardCompilerFlags.cmake' file normally sets
-    ;; '-mtune=native -march=corei7', suggesting there's something to be
-    ;; gained from CPU-specific optimizations.
-    ;; (properties '((tunable? . #t)))
-
-    (home-page "https://github.com/Slicer/ITK/")
-    (synopsis "Scientific image processing, segmentation and registration")
-    (description "The Insight Toolkit (ITK) is a toolkit for N-dimensional
-scientific image processing, segmentation, and registration.  Segmentation is
-the process of identifying and classifying data found in a digitally sampled
-representation.  Typically the sampled representation is an image acquired
-from such medical instrumentation as CT or MRI scanners.  Registration is the
-task of aligning or developing correspondences between data.  For example, in
-the medical environment, a CT scan may be aligned with a MRI scan in order to
-combine the information contained in both.")
-    (license license:asl2.0)))
+                )))
+    (home-page "https://github.com/Slicer/ITK/")))
