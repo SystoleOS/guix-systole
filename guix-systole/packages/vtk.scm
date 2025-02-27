@@ -77,7 +77,7 @@
 (define-public vtk
                (package
                  (inherit imgproc:vtk)
-                 (version "slicer-9.2.20230607-1ff325c54-2")
+                 (version "slicer-9.2")
                  (source (origin
                            (method git-fetch)
                            (uri (git-reference
