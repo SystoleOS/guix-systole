@@ -29,6 +29,7 @@
          (shell (file-append shadow "/sbin/nologin")))
         (user-group
          (name "dicom")
+         (id 1031)
          (system? #t))))
 
 (define-record-type* <dicomd-configuration>
@@ -67,6 +68,7 @@
                   (list #$dicomd
                         "--aetitle" #$aetitle
                         "--output-directory" #$output-directory
+                        "-sp"
                         #$(number->string port))
                   #:user #$(user-account-name account)
                   #:group #$(user-account-group account)
