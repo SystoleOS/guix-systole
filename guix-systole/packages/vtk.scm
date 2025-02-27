@@ -110,7 +110,7 @@
 		 (arguments
 		   (list #:build-type "Release"           ;Build without '-g' to save space.
 			 #:configure-flags
-			 #~'( ;;"-DBUILD_TESTING:BOOL=TRUE"  ;not honored
+			 #~'( ;;"-DBUILD_TESTING=TRUE"  ;not honored
 			      "-DVTK_USE_EXTERNAL=OFF"           ;default
 			      "-DVTK_MODULE_USE_EXTERNAL_VTK_doubleconversion=ON"
 			      "-DVTK_MODULE_USE_EXTERNAL_VTK_eigen=ON"
@@ -135,15 +135,88 @@
 			      "-DVTK_MODULE_USE_EXTERNAL_VTK_zlib=ON"
 			      "-DVTK_MODULE_ENABLE_VTK_RenderingExternal=YES" ;for F3D
 			      "-DVTK_WRAP_PYTHON=ON"
-			      "-DVTK_PYTHON_VERSION:STRING=3"
+			      "-DVTK_PYTHON_VERSION=3"
 
-			      "-DVTK_SMP_ENABLE_OPENNMP=ON"
+			      ; "-DVTK_SMP_ENABLE_OPENNMP=ON"
 			      "-DVTK_SMP_ENABLE_TBB=ON"
 			      "-DVTK_USE_MPI=ON"
-			      #$@(if (target-riscv64?)
-				   '("-DCMAKE_SHARED_LINKER_FLAGS=-latomic"
-				     "-DCMAKE_EXE_LINKER_FLAGS=-latomic")
-				   '()))
+				   ;   #$@(if (target-riscv64?)
+				   ; '("-DCMAKE_SHARED_LINKER_FLAGS=-latomic"
+				   ;   "-DCMAKE_EXE_LINKER_FLAGS=-latomic")
+				   ; '())
+
+            ; Optional dependencies for PythonQt
+            ; "-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}"
+            ; "-DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE_DIR}"
+            ; "-DPYTHON_LIBRARY=${PYTHON_LIBRARY}"
+            ; "-DPython3_ROOT_DIR=${Python3_ROOT_DIR}"
+            ; "-DPython3_INCLUDE_DIR=${Python3_INCLUDE_DIR}"
+            ; "-DPython3_LIBRARY=${Python3_LIBRARY}"
+            ; "-DPython3_LIBRARY_DEBUG=${Python3_LIBRARY_DEBUG}"
+            ; "-DPython3_LIBRARY_RELEASE=${Python3_LIBRARY_RELEASE}"
+            ; "-DPython3_EXECUTABLE=${Python3_EXECUTABLE}"
+            "-DVTK_USE_TK=OFF"
+
+            ; External project optional VTK9 CMake cache args
+            ; "-DVTK_MODULE_ENABLE_VTK_SplineDrivenImageSlicer=YES"
+            "-DVTK_MODULE_ENABLE_VTK_ChartsCore=YES"
+            "-DVTK_MODULE_ENABLE_VTK_ViewsContext2D=YES"
+            "-DVTK_MODULE_ENABLE_VTK_RenderingContext2D=YES"
+            "-DVTK_MODULE_ENABLE_VTK_RenderingContextOpenGL2=YES"
+
+            "-DVTK_MODULE_ENABLE_VTK_GUISupportQt=YES"
+            "-DVTK_GROUP_ENABLE_Qt=YES"
+
+            "-DVTK_QT_VERSION=5"
+            "-DVTK_Group_Qt=ON"
+            ; "-DQt5_DIR=${Qt5_DIR}"
+
+            ; If use TBB
+            ; "-DTBB_DIR=${TBB_DIR}"
+
+            ; if APPLE
+            ;; "-DVTK_USE_CARBON=OFF"
+            ;; "-DVTK_USE_COCOA=ON # Default to Cocoa, VTK/CMakeLists.txt will enable Carbon and disable cocoa if needed"
+            ;; "-DVTK_USE_X=OFF"
+            ;; "-DVTK_REQUIRED_OBJCXX_FLAGS="
+
+            ; if UNIX and not APPLE
+            ; how to replicate the following?
+            #|find_package(Fontconfig QUIET)
+            if(Fontconfig_FOUND)
+            list(APPEND EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS
+                        -DModule_vtkRenderingFreeTypeFontConfig=ON
+                        )
+            endif()|#
+            ; "-DOpenGL_GL_PREFERENCE=${OpenGL_GL_PREFERENCE}"
+
+            "-DVTK_BUILD_TESTING=OFF"
+            ; "-DVTK_MODULE_ENABLE_VTK_AcceleratorsVTKm=NO"
+            "-DCMAKE_INSTALL_LIBDIR=lib" ;Force value to prevent lib64 from being used on Linux
+            "-DVTK_MODULE_ENABLE_VTK_GUISupportQtQuick=NO"
+
+            ; "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+            ; "-DCMAKE_CXX_FLAGS=${ep_common_cxx_flags}"
+            ; "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
+            ; "-DCMAKE_C_FLAGS=${ep_common_c_flags}"
+            ; "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}"
+            ; "-DCMAKE_CXX_STANDARD_REQUIRED=${CMAKE_CXX_STANDARD_REQUIRED}"
+            ; "-DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}"
+            ; "-DVTK_DEBUG_LEAKS=${VTK_DEBUG_LEAKS}"
+            "-DVTK_LEGACY_REMOVE=ON"
+            ; "-DVTK_USE_RPATH=ON # Unused"
+            ; "-DVTK_WRAP_PYTHON=${VTK_WRAP_PYTHON}"
+            ; "-DVTK_INSTALL_RUNTIME_DIR=${Slicer_INSTALL_BIN_DIR}"
+            ; "-DVTK_INSTALL_LIBRARY_DIR=${Slicer_INSTALL_LIB_DIR}"
+            ; "-DVTK_INSTALL_ARCHIVE_DIR=${Slicer_INSTALL_LIB_DIR}"
+            "-DVTK_Group_Qt=ON"
+            ; "-DVTK_USE_SYSTEM_ZLIB=ON"
+            ; "-DZLIB_ROOT=${ZLIB_ROOT}"
+            ; "-DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR}"
+            ; "-DZLIB_LIBRARY=${ZLIB_LIBRARY}"
+            "-DVTK_ENABLE_KITS=ON"
+            ; "-DVTK_SMP_IMPLEMENTATION_TYPE=${Slicer_VTK_SMP_IMPLEMENTATION_TYPE}"
+            )
 
 			 #:phases
 			 #~(modify-phases %standard-phases
@@ -162,7 +235,12 @@
 								      "Common/Core/vtkBuild.h.in" ;dummy >=v9.3
 								      "Common/Core/vtkConfigureDeprecated.h.in" ;v9.x
 								      "Common/Core/vtkConfigure.h.in") ;v7.x
-								    (("@CMAKE_CXX_COMPILER@") "c++")))))
+								    (("@CMAKE_CXX_COMPILER@") "c++"))))
+            ; (add-before 'build 'build-debug-env
+            ;             (lambda* (#:key inputs native-inputs #:allow-other-keys)
+            ;                      (let ((bar-src (assoc-ref native-inputs "bar")))
+            ;                        (format #t "")
+            )
 
 			 #:tests? #f))                          ;XXX: test data not included
 		 (inputs
@@ -192,7 +270,11 @@
 			 ;("pugixml" ,pugixml)
 			 sqlite
 			 xorgproto
-			 zlib))
+			 zlib
+
+       python-pyqt
+
+       qtbase-5))
 		 (propagated-inputs
 		   ;; VTK's 'VTK-vtk-module-find-packages.cmake' calls
 		   ;; 'find_package(THEORA)', which in turns looks for libogg.  Likewise for
