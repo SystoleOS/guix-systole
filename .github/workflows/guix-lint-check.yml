@@ -1,0 +1,29 @@
+
+name: "Guix Lint Check"
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  guix-lint:
+    runs-on: ubuntu-24.04
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Install Guix (if not already available in the runner)
+      - name: Install Guix
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y guix guile-library
+
+      # 3. Run the guix lint check
+      - name: Run Guix Lint
+        run: |
+          guix lint -L $GITHUB_WORKSPACE --exclude=archival vtk@slicer-9.2
