@@ -110,8 +110,17 @@
             )
         )
 
-        ;(inputs
-        ;    ()
+        (inputs
+            (list
+                qtbase-5
+                qttools-5  ; Use qttools-5 instead of qttools (which would be Qt6)
+            )
+        )
+
+        ;(native-inputs
+        ;    (list
+        ;        git
+        ;    )    
         ;)
 
         ; ---------------------------- REQUIRED INFO FIELDS -----------------------------
@@ -128,3 +137,16 @@
         ; -------------------------------------------------------------------------------
     )
 )
+
+
+;; Try to create package definition for CTK-DATA if you cannot find another solution to 
+;; fix the issues regarding CTKDATA reqiorements for CTK
+;;      - CTKDATA has it own Git repository. 
+
+
+; ----------------------------------------------------------;
+;                                                           ;
+;               CTKdata package definition                  ;
+;                                                           ;
+; ----------------------------------------------------------;
+
