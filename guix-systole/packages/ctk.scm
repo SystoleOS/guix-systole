@@ -20,7 +20,8 @@
     #:use-module (gnu packages cmake)               ;; For CMake build system
     #:use-module (guix build-system cmake)          ;; Using CMake as the build system
     #:use-module (gnu packages image-processing)
-    #:use-module ((guix licenses) #:prefix license)
+    #:use-module ((guix licenses) #:prefix license:)
+    #:use-module (guix download)
 )
 
 ; Potential external packages
@@ -31,6 +32,7 @@
 
     (package                                ; Creating a new package.
         (name "CTK")                        ; Setting name for package definition.
+                                            ;   - This is the name you use when to build the package.
         (version "0.1")                     ; Using a specific slicer version for this package definition.
         ;(inherit) 
         ;   | -> Inherit is only needed when inheriting from an already made guix package.
@@ -52,7 +54,7 @@
         (build-system cmake-build-system)
 
         (arguments
-            (#:tests? #f
+            '(#:tests? #f
                 #:configure-flags
                 (list         
                     ;"DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}"
@@ -121,9 +123,7 @@
 
         (description "The common toolkit is an open source library for... ")
 
-        (license
-            (license:asl2.0)
-        )  
+        (license license:asl2.0)  
 
         ; -------------------------------------------------------------------------------
     )
