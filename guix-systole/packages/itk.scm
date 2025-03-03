@@ -1,4 +1,4 @@
-(define-module (itk)
+(define-module (guix-systole packages itk)
     #:use-module (gnu packages algebra)
     #:use-module (gnu packages base)
     #:use-module (gnu packages ccache)
