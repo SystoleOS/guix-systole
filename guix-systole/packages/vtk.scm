@@ -21,7 +21,7 @@
                            "/Slicer/VTK/archive/refs/heads/"
                            "slicer-v9.2.20230607-1ff325c54-2.zip"))
        (sha256
-        (base32 "15f3ryx945p7d95asic9gnpz8jmais2gv1gh6vfcxm7malsl8m85"))))
+        (base32 "0vkhk2mnzjs2yf9r3gmvsz2d7p58376fcqr3b41x9jvvza27mj7a"))))
     (arguments
      (list
       #:build-type "Release"
