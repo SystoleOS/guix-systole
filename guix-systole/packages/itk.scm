@@ -1,44 +1,20 @@
 (define-module (guix-systole packages itk)
-    #:use-module (gnu packages algebra)
-    #:use-module (gnu packages base)
-    #:use-module (gnu packages ccache)
-    #:use-module (gnu packages certs)
-    #:use-module (gnu packages cmake)
-    #:use-module (gnu packages check)
-    #:use-module (gnu packages compression)
-    #:use-module (gnu packages image)
     #:use-module (gnu packages image-processing)
-    #:use-module (gnu packages gl)
-    #:use-module (gnu packages maths)
-    #:use-module (gnu packages ninja)
-    #:use-module (gnu packages perl)
-    #:use-module (gnu packages pkg-config)
-    #:use-module (gnu packages python)
-    #:use-module (gnu packages swig)
-    #:use-module (gnu packages tbb)
-    #:use-module (gnu packages version-control)
-    #:use-module (gnu packages xml)
-    
     #:use-module (guix build-system cmake)
-    #:use-module (guix build python-build-system)
-    #:use-module (guix build utils)
-    
-    #:use-module (guix gexp)
-    #:use-module (guix git-download)
-    #:use-module ((guix licenses) #:prefix license:)
-    #:use-module (guix packages))
+    #:use-module (guix download)
+    #:use-module (guix packages)
+    )
 
-(define-public systole-insight-toolkit
+(define-public itk-slicer
   (package
     (inherit insight-toolkit)
-    (version "slicer-5.4.0")
+    (version "5.4.0")
     (source
      (origin
-       (method git-fetch)
-       (uri (git-reference
-             (url "https://github.com/Slicer/ITK")
-             (commit "29b78d73c81d6c00c393416598d16058704c535c")))
-       (sha256(base32 "13iz2f8r5rr9xi8w2j42iidrpn18yi9mkvnw47n6d2wyrvjjl1aj"))))
+       (method url-fetch)
+       (uri
+             "https://github.com/Slicer/ITK/archive/29b78d73c81d6c00c393416598d16058704c535c.tar.gz")
+       (sha256(base32 "1cqy2rzcskfjaszww4isp6g2mg4viqcp7qacfvrc97pq1qvrs5lb"))))
     (arguments
       `( #:tests? #f        ; tests require network access and external data
         #:configure-flags
