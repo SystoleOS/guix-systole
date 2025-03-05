@@ -11,6 +11,7 @@
 (define-public itk-slicer
   (package
     (inherit insight-toolkit)
+    (name "itk-slicer")
     (version "5.4.0")
     (source (origin
               (method url-fetch)
