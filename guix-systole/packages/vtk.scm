@@ -10,10 +10,11 @@
   #:use-module ((gnu packages image-processing)
                 #:prefix imgproc:))
 
-(define-public vtk
+(define-public vtk-slicer
   (package
     (inherit imgproc:vtk)
-    (version "slicer-9.2")
+    (name "vtk-slicer")
+    (version "9.2")
     (source
      (origin
        (method url-fetch)
