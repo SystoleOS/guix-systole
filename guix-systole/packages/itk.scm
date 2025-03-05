@@ -44,7 +44,7 @@
                           ;; -DITK_INSTALL_ARCHIVE_DIR:PATH=${Slicer_INSTALL_LIB_DIR}
                           ;; -DITK_INSTALL_LIBRARY_DIR:PATH=${Slicer_INSTALL_LIB_DIR}
                           "-DBUILD_TESTING:BOOL=OFF"
-                          "-DBUILD_EXAMPLES:BOOL=OFF"
+                          "-DBUILD_EXAMPLES:BOOL=ON"
                           ;; -DITK_BUILD_DEFAULT_MODULES:BOOL=ON
                           ;; -DGIT_EXECUTABLE:FILEPATH=${GIT_EXECUTABLE} # Used in ITKModuleRemote
                           
