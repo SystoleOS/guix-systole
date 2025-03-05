@@ -1,5 +1,4 @@
 name: "Commit Message Check"
-
 on:
   pull_request:
     types:
@@ -11,40 +10,15 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
-  commit-message-check:
+  check-commit-message:
     runs-on: ubuntu-latest
     steps:
-      # 1. Check out the repository
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # 2. Verify that the commit messages follow the expected pattern.
-      - name: Validate commit messages
-        run: |
-          # Determine the merge-base between the current branch and main.
-          BASE=$(git merge-base origin/main HEAD)
-          echo "Checking commits since base: $BASE"
-          # Get the commit SHAs from BASE to HEAD.
-          COMMITS=$(git log $BASE..HEAD --format="%H")
-
-          # Regular expression:
-          #   • Must start with a tag in square brackets, one of: STYLE, DOC, ENH, BUG, WIP
-          #   • Followed by one or more spaces and a component tag in square brackets (should not be empty)
-          #   • Followed by one or more spaces and then the commit title.
-          #
-          # Example valid commit title:
-          #   [ENH] [packages/vtk] Improve CMake module detection
-          regex='^\[(STYLE|DOC|ENH|BUG|WIP)\][[:space:]]+\[[^]]+\][[:space:]]+.+$'
-
-          status=0
-          for commit in $COMMITS; do
-            msg=$(git log -1 --pretty=%B $commit | head -n1)
-            echo "Commit $commit: $msg"
-            if [[ ! "$msg" =~ $regex ]]; then
-              echo "ERROR: Commit $commit does not follow the required format."
-              echo "It must start with a mandatory tag [STYLE|DOC|ENH|BUG|WIP], followed by a non-empty component tag (e.g. [packages/vtk]), then the commit title."
-              status=1
-            fi
-          done
-          exit $status
+      - name: Check Commit Message
+        uses: SystoleOS/guix-systole-check-commit-message-action@9669ce2822b007f9c2191f2ccb534b2bfa5c6e6f #v1.0.0.x
+        with:
+          token: ${{ secrets.TOKEN }}
