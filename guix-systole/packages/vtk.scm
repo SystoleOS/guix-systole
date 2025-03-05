@@ -7,7 +7,8 @@
   #:use-module (gnu packages qt)
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-1)
-  #:use-module (gnu packages image-processing))
+  #:use-module ((gnu packages image-processing)
+                #:prefix imgproc:))
 
 (define-public vtk-slicer
   (package
@@ -68,5 +69,5 @@
           "-DVTK_Group_Qt:BOOL=ON"
           "-DVTK_ENABLE_KITS:BOOL=ON")
       #:tests? #f))
-    (inputs (modify-inputs (package-inputs vtk)
+    (inputs (modify-inputs (package-inputs imgproc:vtk)
               (append python-pyqt qtbase-5)))))
