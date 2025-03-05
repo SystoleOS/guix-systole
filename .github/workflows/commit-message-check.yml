@@ -21,4 +21,4 @@ jobs:
       - name: Check Commit Message
         uses: SystoleOS/guix-systole-check-commit-message-action@9669ce2822b007f9c2191f2ccb534b2bfa5c6e6f #v1.0.0.x
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
