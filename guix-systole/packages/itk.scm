@@ -114,20 +114,19 @@
                           )
 
        #:phases (modify-phases %standard-phases
-                  (add-before 'configure 'copy-growcut
+                  (add-after 'configure 'copy-growcut
                     (lambda* (#:key inputs outputs #:allow-other-keys)
-                      (let ((src (assoc-ref inputs "itk-growcut"))
-                            (dest "Modules/ITKGrowCut"))
-                        ;; Ensure the correct relative path
-                        (mkdir-p dest) ;Create destination directory if it doesn't exist
-                        (copy-recursively src dest)) ;Correct function to copy directories
-                      #t)))))
-    (native-inputs `(("itk-growcut" ,(origin
-                                       (method git-fetch)
-                                       (uri (git-reference (url
-                                                            "https://github.com/InsightSoftwareConsortium/ITKGrowCut/")
-                                                           (commit
-                                                            "cbf93ab65117abfbf5798745117e34f22ff04728")))
-                                       (sha256 (base32
-                                                "03fzj55bczip5mmis4b074yq7bwjiwzgy49yvqfnnlhhjr9lzkm9"))))))
+                      (let ((src (assoc-ref inputs "itk-growcut")))
+                        (symlink src "Modules/ITKGrowCut") #t))))))
+    (inputs (let ((itk-inputs (package-inputs insight-toolkit)))
+              (append itk-inputs
+                      `(("itk-growcut" ,(origin
+                                      (method git-fetch)
+                                      (uri (git-reference (url
+                                                           "https://github.com/InsightSoftwareConsortium/ITKGrowCut/")
+                                                          (commit
+                                                           "cbf93ab65117abfbf5798745117e34f22ff04728")))
+                                      (sha256 (base32
+                                               "03fzj55bczip5mmis4b074yq7bwjiwzgy49yvqfnnlhhjr9lzkm9"))))))))
+
     (home-page "https://github.com/Slicer/ITK/")))
