@@ -1,5 +1,6 @@
 (define-module (guix-systole packages qrestapi)
                #:use-module (guix packages)
+               #:use-module (gnu packages qt)
                #:use-module ((guix licenses) #:prefix license:)
                #:use-module (guix download)
                #:use-module (guix build-system cmake))
@@ -16,17 +17,17 @@
                        (base32 "0jfnja3frcm4vkibi1vygdh7f4dmhqxni43bbb3rmlcl6jlyaibl"))))
                  (build-system cmake-build-system)
                  (arguments
-                   (list
-                     #:build-type "Release"
+                   '(#:tests? #f
                      #:configure-flags
-                     #~'(; Explicitly use Qt version 5
-                         "-DqRestAPI_QT_VERSION:STRING=5"
-                         "-DBUILD_SHARED_LIBS:BOOL=ON"
-                         "-DBUILD_TESTING:BOOL=OFF"
-                         "-DqRestAPI_STATIC:BOOL=OFF"
-                         ))
+                     (list
+                       ; Explicitly use Qt version 5)
+                       "-DqRestAPI_QT_VERSION:STRING=5"
+                       "-DBUILD_SHARED_LIBS:BOOL=ON"
+                       "-DBUILD_TESTING:BOOL=OFF"
+                       "-DqRestAPI_STATIC:BOOL=OFF"
+                       )))
                  (inputs (list
-                           qtbase-5))
+                           qtbase-5 qtdeclarative-5))
                  (home-page "https://github.com/commontk/qRestAPI")
                  (synopsis "Simple Qt library allowing to synchronously or asynchronously query a REST server.")
                  (description "qRestAPI is a cross-platform [Qt-based](https://www.qt.io/) library 
@@ -42,4 +43,4 @@
 
                               [girder]: https://github.com/girder/girder
                               [midas]: https://github.com/midasplatform/midas")
-                (license license:asl2.0))))
+                (license license:asl2.0)))
