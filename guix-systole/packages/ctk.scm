@@ -5,30 +5,32 @@
 ;------------------------------------------------------------;
 
 ; Defining module
-(define-module (guix-systole packages ctk)
-    #:use-module (guix packages)
-    #:use-module (gnu packages qt)                  ;; For Qt dependencies (includes QtCore, QtGui, QtWidgets)
-    ;#:use-module (gnu packages qtwebkit)           ;; If QtWebKit support is enabled
-    ;#:use-module (gnu packages qtmultimedia)       ;; If QtMultimedia is enabled
-    ;#:use-module (gnu packages vtk)                ;; For VTK (Visualization Toolkit)
-    ;#:use-module (gnu packages itk)                ;; For ITK (Image Processing Toolkit)
-    #:use-module (gnu packages python)              ;; For Python support (if needed)
-    ;#:use-module (gnu packages python-qt)          ;; PythonQt wrapper for Qt
-    ;#:use-module (gnu packages dcmtk)              ;; For DICOM support (if needed)
-    #:use-module (guix git-download)                ;; Git  -> CTK is pulling from github
-    #:use-module (gnu packages version-control)     ;; For Git-related dependencies
-    #:use-module (gnu packages cmake)               ;; For CMake build system
-    #:use-module (guix build-system cmake)          ;; Using CMake as the build system
-    #:use-module (gnu packages image-processing)
-    #:use-module ((guix licenses) #:prefix license:)
-    #:use-module (guix download)
+(define-module (guix-systole packages ctk)              ;;
+    #:use-module (guix packages)                        ;;
+    #:use-module (gnu packages qt)                      ;; 
+    ;#:use-module (gnu packages qtwebkit)               ;; 
+    ;#:use-module (gnu packages qtmultimedia)           ;; 
+    ;#:use-module (gnu packages vtk)                    ;; 
+    ;#:use-module (gnu packages itk)                    ;; 
+    #:use-module (gnu packages python)                  ;; 
+    ;#:use-module (gnu packages python-qt)              ;; 
+    ;#:use-module (gnu packages dcmtk)                  ;; 
+    #:use-module (guix git-download)                    ;; 
+    #:use-module (gnu packages version-control)         ;; 
+    #:use-module (gnu packages cmake)                   ;; 
+    #:use-module (guix build-system cmake)              ;; 
+    #:use-module (gnu packages image-processing)        ;;
+    #:use-module ((guix licenses) #:prefix license:)    ;;
+    #:use-module (guix download)                        ;;
+
+    #:use-module (guix-systole packages vtk)            ;;
 )
 
 ; Potential external packages
 ;   - CTKDATA, DCMTK, ITK, Log4QT, PythonQT, QsSOAP, QtTesting, VTK, QrestAPI, qxmlrpc
 
 ; Defining package definition for CTK (Common Toolkit).
-(define-public ctk
+(define-public ctk-slicer
 
     (package                                ; Creating a new package.
         (name "CTK")                        ; Setting name for package definition.
@@ -38,11 +40,11 @@
         ;   | -> Inherit is only needed when inheriting from an already made guix package.
         ;           - ctk doesn't have a guix package definition.
 
-        (source                             ; Specifying source.
+        (source                             ; Specifying tersource.
             (origin                         ; Setting origin for source definition.
                 (method url-fetch)          ; Using url fetch to retrieve source.
 
-                ; Specifying URI (location of origin source).  
+                ; Specifying URI (location of origin source). Reference to a specific commit. 
                 (uri "https://github.com/commontk/CTK/archive/82cae5781621845486bad2697aed095f04cfbe76.tar.gz")
 
                 (sha256
@@ -57,7 +59,7 @@
             '(#:tests? #f
                 #:configure-flags
                 (list         
-                    ;"DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}"
+                    ;"-DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}"
                     ;"-DCMAKE_CXX_FLAGS:STRING=${ep_common_cxx_flags}"
                     ;"-DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}"
                     ;"-DCMAKE_C_FLAGS:STRING=${ep_common_c_flags}"
@@ -72,9 +74,12 @@
                     ;"-DCTK_INSTALL_LIB_DIR:STRING=${Slicer_INSTALL_LIB_DIR}"
                     ;"-DCTK_INSTALL_QTPLUGIN_DIR:STRING=${Slicer_INSTALL_QtPlugins_DIR}"
 
-                    ; ------------ Disabling CTKData as its only used for testing ------------
+                    ; -------------------------- CTKdata flags --------------------------
 
-                    "-DCTK_ENABLE_CTKDATA:BOOL=OFF"
+                    "-DCTK_ENABLE_CTKDATA:BOOL=OFF" ; CTKData is only needed for testing
+                                                    ; so we can disable it.
+
+                    ; -------------------------------------------------------------------
 
                     "-DCTK_USE_GIT_PROTOCOL:BOOL=OFF"  ; turn off git protocol, as it is not supported by GitHub
 
@@ -115,16 +120,17 @@
         )
 
         (inputs
-            (list
-                qtbase-5
-                qttools-5  ; Use qttools-5 instead of qttools (which would be Qt6)
-                qtsvg-5
+            (list           
+                qtbase-5    ;   
+                qttools-5   ;   
+                qtsvg-5     ;   
+                vtk         ;   Trying to pass local 
             )
         )
 
         (native-inputs
             (list
-                git
+                git         ;
             )    
         )
 
@@ -142,16 +148,3 @@
         ; -------------------------------------------------------------------------------
     )
 )
-
-
-;; Try to create package definition for CTK-DATA if you cannot find another solution to 
-;; fix the issues regarding CTKDATA reqiorements for CTK
-;;      - CTKDATA has it own Git repository. 
-
-
-; ----------------------------------------------------------;
-;                                                           ;
-;               CTKdata package definition                  ;
-;                                                           ;
-; ----------------------------------------------------------;
-
