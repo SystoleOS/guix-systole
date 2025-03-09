@@ -4,7 +4,7 @@
 ;                                                            ;
 ;------------------------------------------------------------;
 
-; Defining module
+; Defining modules 
 (define-module (guix-systole packages ctk)              ;;
     #:use-module (guix packages)                        ;;
     #:use-module (gnu packages qt)                      ;; 
@@ -23,11 +23,9 @@
     #:use-module ((guix licenses) #:prefix license:)    ;;
     #:use-module (guix download)                        ;; 
 
-    #:use-module (guix-systole packages vtk)  ;; Import your friend's VTK package
+    #:use-module (guix-systole packages vtk)            ;; Added local VTK file.
 )
 
-; Potential external packages
-;   - CTKDATA, DCMTK, ITK, Log4QT, PythonQT, QsSOAP, QtTesting, VTK, QrestAPI, qxmlrpc
 
 ; Defining package definition for CTK (Common Toolkit).
 (define-public ctk-slicer
@@ -47,6 +45,7 @@
                 ; Specifying URI (location of origin source). Reference to a specific commit. 
                 (uri "https://github.com/commontk/CTK/archive/82cae5781621845486bad2697aed095f04cfbe76.tar.gz")
 
+                ; Added hash for uri above.
                 (sha256
                     (base32 "1g2jv4hjimf4baqbmpmc29ara2f8gk8604g1v8k243x882f0ls9z")
                 )
@@ -121,8 +120,6 @@
                     ;"-DCTK_ENABLE_Python_Wrapping:BOOL=${Slicer_USE_PYTHONQT}"
 
                     ; ---------------------------------------------------------------
-
-                    ;"${EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS}"
                 )
             )
         )
@@ -132,7 +129,7 @@
                 qtbase-5    ;   
                 qttools-5   ;   
                 qtsvg-5     ;   
-                vtk-slicer  ; 
+                vtk-slicer  ; Defined which vtk slicer package to input.
             )
         )
 
