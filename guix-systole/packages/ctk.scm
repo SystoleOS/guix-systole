@@ -21,9 +21,9 @@
     #:use-module (guix build-system cmake)              ;; 
     #:use-module (gnu packages image-processing)        ;;
     #:use-module ((guix licenses) #:prefix license:)    ;;
-    #:use-module (guix download)                        ;;
+    #:use-module (guix download)                        ;; 
 
-    #:use-module (guix-systole packages vtk)            ;;
+    #:use-module (guix-systole packages vtk)  ;; Import your friend's VTK package
 )
 
 ; Potential external packages
@@ -81,12 +81,20 @@
 
                     ; -------------------------------------------------------------------
 
-                    "-DCTK_USE_GIT_PROTOCOL:BOOL=OFF"  ; turn off git protocol, as it is not supported by GitHub
+                    "-DCTK_USE_GIT_PROTOCOL:BOOL=OFF"  ; turning off git protocol, as it is not supported by modern GitHub 
 
-                    ;"-DCTK_USE_SYSTEM_VTK:BOOL=${CTK_USE_SYSTEM_VTK}"
+                    ; ---------------------------- VTK flags ----------------------------
+
+                    "-DCTK_USE_SYSTEM_VTK:BOOL=ON"
                     ;"-DVTK_DIR:PATH=${VTK_DIR}"
+
+                    ; ---------------------------- ITK flags ----------------------------
+
                     ;"-DCTK_USE_SYSTEM_ITK:BOOL=${CTK_USE_SYSTEM_ITK}"
                     ;"-DITK_DIR:PATH=${ITK_DIR}"
+
+                    ; -------------------------------------------------------------------
+
                     "-DCTK_LIB_Widgets:BOOL=ON"
                     "-DCTK_LIB_Visualization/VTK/Widgets:BOOL=ON"
                     "-DCTK_LIB_Visualization/VTK/Widgets_USE_TRANSFER_FUNCTION_CHARTS:BOOL=ON"
@@ -124,7 +132,7 @@
                 qtbase-5    ;   
                 qttools-5   ;   
                 qtsvg-5     ;   
-                vtk         ;   Trying to pass local 
+                vtk-slicer  ; 
             )
         )
 
