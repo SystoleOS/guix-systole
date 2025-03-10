@@ -1,5 +1,15 @@
 (define-module (guix-systole packages itk)
+  #:use-module (gnu packages compression)
+  #:use-module (gnu packages fontutils)
+  #:use-module (gnu packages gl)
   #:use-module (gnu packages image-processing)
+  #:use-module (gnu packages geo)
+  #:use-module (gnu packages gnome)
+  #:use-module (gnu packages maths)
+  #:use-module (gnu packages mpi)
+  #:use-module (gnu packages pdf)
+  #:use-module (gnu packages serialization)
+  #:use-module (gnu packages xiph)
   #:use-module (guix build-system cmake)
   #:use-module (guix build-system copy)
   #:use-module (guix download)
@@ -7,6 +17,7 @@
   #:use-module ((guix licenses)
                 #:prefix license:)
   #:use-module (guix packages)
+  #:use-module (guix-systole packages vtk))
 
 (define-public itk-slicer
   (package
@@ -42,6 +53,7 @@
                           "-DModule_IOScanco:BOOL=OFF"
                           "-DModule_MorphologicalContourInterpolation:BOOL=OFF"
                           "-DModule_GrowCut:BOOL=ON"
+                          "-DModule_ITKVtkGlue:BOOL=ON"
                           "-DITK_FORBID_DOWNLOADS:BOOL=ON")
 
        #:phases (modify-phases %standard-phases
@@ -57,7 +69,24 @@
                          "")))))))
 
     (inputs (modify-inputs (package-inputs insight-toolkit)
-              (append itk-growcut)))
+              (append
+               ;; VTK
+               double-conversion
+               freetype
+               gl2ps
+               glew
+               jsoncpp
+               libharu
+               libtheora
+               libxml++
+               lz4
+               mpich
+               netcdf
+               proj
+               vtk
+
+               ;; GrowCut
+               itk-growcut)))
 
     (home-page "https://github.com/Slicer/ITK/")))
 
