@@ -19,10 +19,10 @@
      (origin
        (method url-fetch)
        (uri (string-append "https://github.com"
-                           "/Slicer/VTK/archive/refs/heads/"
-                           "slicer-v9.2.20230607-1ff325c54-2.zip"))
+                           "/Slicer/VTK/archive/"
+                           "slicer-v9.2.20230607-1ff325c54-2.tar.gz"))
        (sha256
-        (base32 "0vkhk2mnzjs2yf9r3gmvsz2d7p58376fcqr3b41x9jvvza27mj7a"))))
+        (base32 "0a8qghc38nabcf761lppc9gafskgk8dkgdggabvipwxrkdamaq4k"))))
     (arguments
      (list
       #:build-type "Release"
