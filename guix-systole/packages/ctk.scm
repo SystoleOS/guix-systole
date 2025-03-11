@@ -101,14 +101,14 @@
 
                     ;"-DITK_DIR:PATH=${ITK_DIR}"    ;;  Can be removed as its already in
 
-                    ; -------------------------------------------------------------------
+                    ; ------------------------ CTK Widgets Flags-------------------------
 
-                    "-DCTK_LIB_Widgets:BOOL=ON"
+                    "-DCTK_LIB_Widgets:BOOL=OFF"
 
                     ;"-DCTK_LIB_Visualization/VTK/Widgets:BOOL=ON"
                     ;"-DCTK_LIB_Visualization/VTK/Widgets_USE_TRANSFER_FUNCTION_CHARTS:BOOL=ON"
                     ;"-DCTK_LIB_ImageProcessing/ITK/Core:BOOL=ON"
-                    
+
                     "-DCTK_LIB_PluginFramework:BOOL=OFF"
                     "-DCTK_PLUGIN_org.commontk.eventbus:BOOL=OFF"
                     ;"-DCTK_APP_ctkDICOM:BOOL=${Slicer_BUILD_DICOM_SUPPORT}"
