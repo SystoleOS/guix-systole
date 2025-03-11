@@ -4,14 +4,12 @@
 ;                                                            ;
 ;------------------------------------------------------------;
 
-; Defining modules 
+; Defining modules for CTK package definition.  
 (define-module (guix-systole packages ctk)              ;;
     #:use-module (guix packages)                        ;;
     #:use-module (gnu packages qt)                      ;; 
     ;#:use-module (gnu packages qtwebkit)               ;; 
     ;#:use-module (gnu packages qtmultimedia)           ;; 
-    ;#:use-module (gnu packages vtk)                    ;; 
-    ;#:use-module (gnu packages itk)                    ;; 
     #:use-module (gnu packages python)                  ;; 
     ;#:use-module (gnu packages python-qt)              ;; 
     ;#:use-module (gnu packages dcmtk)                  ;; 
@@ -24,6 +22,7 @@
     #:use-module (guix download)                        ;; 
 
     #:use-module (guix-systole packages vtk)            ;; Added local VTK file.
+    ;#:use-module (guix-systole packages itk)           ;; TOTO: Added local ITK file.
 )
 
 
@@ -57,7 +56,11 @@
         (arguments
             '(#:tests? #f
                 #:configure-flags
-                (list         
+                (list       
+                    ; --------------------------- CMake FLAGS ---------------------------
+                  
+                    "-DCTK_USE_GIT_PROTOCOL:BOOL=OFF"  ; turning off git protocol, as it is not supported by modern GitHub 
+
                     ;"-DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}"
                     ;"-DCMAKE_CXX_FLAGS:STRING=${ep_common_cxx_flags}"
                     ;"-DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}"
@@ -65,9 +68,17 @@
                     ;"-DCMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD}"
                     ;"-DCMAKE_CXX_STANDARD_REQUIRED:BOOL=${CMAKE_CXX_STANDARD_REQUIRED}"
                     ;"-DCMAKE_CXX_EXTENSIONS:BOOL=${CMAKE_CXX_EXTENSIONS}"
+
+                    
                     ;"-DADDITIONAL_C_FLAGS:STRING=${ADDITIONAL_C_FLAGS}"
                     ;"-DADDITIONAL_CXX_FLAGS:STRING=${ADDITIONAL_CXX_FLAGS}"
-                    "-DBUILD_TESTING:BOOL=OFF"
+
+                    ; --------------------------- Build Flags ---------------------------
+
+                    "-DCTK_SUPERBUILD:BOOL=OFF"   ; We dont want to build CTK as a superbuild.
+
+                    "-DBUILD_TESTING:BOOL=OFF"  ; Flag for building CTK tests. 
+
                     ;"-DCTK_BUILD_QTDESIGNER_PLUGINS:BOOL=${Slicer_BUILD_QT_DESIGNER_PLUGINS}"
                     ;"-DCTK_INSTALL_BIN_DIR:STRING=${Slicer_INSTALL_BIN_DIR}"
                     ;"-DCTK_INSTALL_LIB_DIR:STRING=${Slicer_INSTALL_LIB_DIR}"
@@ -78,26 +89,26 @@
                     "-DCTK_ENABLE_CTKDATA:BOOL=OFF" ; CTKData is only needed for testing
                                                     ; so we can disable it.
 
-                    ; -------------------------------------------------------------------
-
-                    "-DCTK_USE_GIT_PROTOCOL:BOOL=OFF"  ; turning off git protocol, as it is not supported by modern GitHub 
-
                     ; ---------------------------- VTK flags ----------------------------
 
-                    "-DCTK_USE_SYSTEM_VTK:BOOL=ON"
-                    ;"-DVTK_DIR:PATH=${VTK_DIR}"
+                    "-DCTK_USE_SYSTEM_VTK:BOOL=ON"  ; Enabling VTK.
+
+                    ;"-DVTK_DIR:PATH=${VTK_DIR}"    ;;  Can be removed as its already included in input. 
 
                     ; ---------------------------- ITK flags ----------------------------
 
-                    ;"-DCTK_USE_SYSTEM_ITK:BOOL=${CTK_USE_SYSTEM_ITK}"
-                    ;"-DITK_DIR:PATH=${ITK_DIR}"
+                    ;"-DCTK_USE_SYSTEM_ITK:BOOL=ON"
+
+                    ;"-DITK_DIR:PATH=${ITK_DIR}"    ;;  Can be removed as its already in
 
                     ; -------------------------------------------------------------------
 
                     "-DCTK_LIB_Widgets:BOOL=ON"
+
                     ;"-DCTK_LIB_Visualization/VTK/Widgets:BOOL=ON"
                     ;"-DCTK_LIB_Visualization/VTK/Widgets_USE_TRANSFER_FUNCTION_CHARTS:BOOL=ON"
                     ;"-DCTK_LIB_ImageProcessing/ITK/Core:BOOL=ON"
+                    
                     "-DCTK_LIB_PluginFramework:BOOL=OFF"
                     "-DCTK_PLUGIN_org.commontk.eventbus:BOOL=OFF"
                     ;"-DCTK_APP_ctkDICOM:BOOL=${Slicer_BUILD_DICOM_SUPPORT}"
