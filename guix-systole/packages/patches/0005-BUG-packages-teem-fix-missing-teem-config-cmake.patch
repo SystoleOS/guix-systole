@@ -1,0 +1,39 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8185cc90..00bc8ab6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -537,7 +537,7 @@ else()
+   set(Teem_CV_CONFIG_TO_ROOT "..")
+ endif()
+ 
+-set(Teem_CV_LIBRARY_DEPENDS_FILE "\${Teem_ROOT_DIR}/lib${EXTRA_INSTALL_PATH}/TeemLibraryDepends.cmake")
++set(Teem_CV_LIBRARY_DEPENDS_FILE "\${Teem_ROOT_DIR}/Teem/TeemLibraryDepends.cmake")
+ set(Teem_CV_EXECUTABLE_DIRS "\${Teem_ROOT_DIR}/bin")
+ set(Teem_CV_LIBRARY_DIRS "\${Teem_ROOT_DIR}/lib${EXTRA_INSTALL_PATH}")
+ set(Teem_CV_USE_FILE "\${Teem_ROOT_DIR}/lib${EXTRA_INSTALL_PATH}/TeemUse.cmake")
+@@ -557,6 +557,15 @@ install(FILES
+   "${Teem_SOURCE_DIR}/CMake/TeemUse.cmake"
+   "${Teem_BINARY_DIR}/TeemBuildSettings.cmake"
+   "${Teem_BINARY_DIR}/TeemLibraryDepends.cmake"
+-  DESTINATION lib${EXTRA_INSTALL_PATH}
++  DESTINATION lib${EXTRA_INSTALL_PATH}/cmake/Teem
++  COMPONENT Development
++  )
++
++install(FILES
++  "${Teem_BINARY_DIR}/CMake/TeemConfig.cmake"
++  "${Teem_SOURCE_DIR}/CMake/TeemUse.cmake"
++  "${Teem_BINARY_DIR}/TeemBuildSettings.cmake"
++  "${Teem_BINARY_DIR}/TeemLibraryDepends.cmake"
++  DESTINATION lib${EXTRA_INSTALL_PATH}/cmake/lib
+   COMPONENT Development
+   )
++
+   +install(FILES
++  "${Teem_BINARY_DIR}/CMake/TeemConfig.cmake"
++  "${Teem_SOURCE_DIR}/CMake/TeemUse.cmake"
++  "${Teem_BINARY_DIR}/TeemBuildSettings.cmake"
++  "${Teem_BINARY_DIR}/TeemLibraryDepends.cmake"
++  DESTINATION lib${EXTRA_INSTALL_PATH}/cmake/lib/Teem
+   COMPONENT Development
+   )
