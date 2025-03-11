@@ -1,4 +1,5 @@
 (define-module (guix-systole packages qrestapi)
+               #:use-module (gnu packages)
                #:use-module (guix packages)
                #:use-module (gnu packages qt)
                #:use-module ((guix licenses) #:prefix license:)
@@ -14,7 +15,8 @@
                      (method url-fetch)
                      (uri "https://github.com/commontk/qRestAPI/archive/88c02c5d90169dfe065fa068969e59ada314d3cb.tar.gz")
                      (sha256
-                       (base32 "0jfnja3frcm4vkibi1vygdh7f4dmhqxni43bbb3rmlcl6jlyaibl"))))
+                       (base32 "0jfnja3frcm4vkibi1vygdh7f4dmhqxni43bbb3rmlcl6jlyaibl"))
+                     (patches '("guix-systole/packages/patches/0001-ENH-Refactor-CMake-project-infrastructure.patch"))))
                  (build-system cmake-build-system)
                  (arguments
                    '(#:tests? #f
@@ -25,6 +27,7 @@
                        "-DBUILD_SHARED_LIBS:BOOL=ON"
                        "-DBUILD_TESTING:BOOL=OFF"
                        "-DqRestAPI_STATIC:BOOL=OFF"
+                       ; "-DCMAKE_PREFIX_PATH="
                        )))
                  (inputs (list
                            qtbase-5 qtdeclarative-5))
