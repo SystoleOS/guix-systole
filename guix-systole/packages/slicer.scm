@@ -5,6 +5,7 @@
   #:use-module (guix build-system qt)
   #:use-module (guix-systole packages ctk)
   #:use-module (guix-systole packages itk)
+  #:use-module (guix-systole packages teem)
   #:use-module (guix-systole packages vtk)
   #:use-module (gnu packages)
   #:use-module (gnu packages algebra)
@@ -54,7 +55,7 @@
                           "-DBUILD_TESTING:BOOL=OFF"
                           "-DSlicer_BUILD_EXTENSIONMANAGER_SUPPORT:BOOL=OFF"
                           "-DSlicer_DONT_USE_EXTENSION:BOOL=ON"
-                          "-DSlicer_BUILD_CLI_SUPPORT:BOOL=$(usex cli ON OFF)"
+                          "-DSlicer_BUILD_CLI_SUPPORT:BOOL=OFF"
                           "-DSlicer_BUILD_CLI:BOOL=OFF"
                           "-DCMAKE_CXX_STANDARD:STRING=17"
                           "-DSlicer_REQUIRED_QT_VERSION:STRING=5"
@@ -71,11 +72,12 @@
                           "-DSlicer_VTK_VERSION_MAJOR:STRING=9"
                           "-DSlicer_INSTALL_DEVELOPMENT:BOOL=ON"
                           "-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON"
-                          "-DTeem_DIR:STRING=/usr/lib64"
-                          "-DCTK_INSTALL_QTPLUGIN_DIR:STRING=/usr/lib64/qt5/plugins"
-                          "-DQT_PLUGINS_DIR:STRING=/usr/lib64/designer"
-                          "-DSlicer_QtPlugins_DIR:STRING=/usr/lib64/designer"
-                          "-DjqPlot_DIR:STRING=/usr/share/jqPlot"
+                          ;; "-DTeem_DIR:STRING="
+                          "-DSlicer_USE_SYSTEM_teem:BOOL=ON"
+                          ;; "-DCTK_INSTALL_QTPLUGIN_DIR:STRING=/usr/lib64/qt5/plugins"
+                          ;; "-DQT_PLUGINS_DIR:STRING=/usr/lib64/designer"
+                          ;; "-DSlicer_QtPlugins_DIR:STRING=/usr/lib64/designer"
+                          ;; "-DjqPlot_DIR:STRING=/usr/share/jqPlot"
                           ;; "-DSlicer_VTK_WRAP_HIERARCHY_DIR:STRING=#{$\x7b;BUILD_DIR\x7d;}#"
                           ;; "-DSlicer_BUILD_vtkAddon:BOOL=OFF"
                           ;; "-DSlicer_USE_SimpleITK:BOOL=OFF"
@@ -86,30 +88,28 @@
                           ;; "-DPython3_EXECUTABLE:FILEPATH="
                           ;; "-DVTK_WRAP_PYTHON:BOOL=OFF"
                           )
-       ;; #:phases
-       ;; (modify-phases %standard-phases
-       ;; (add-before 'build 'prepare-build-environment
-       ;; (lambda _
-       ;; ;; Fix shebang in setup script
-       ;; (substitute* "Utilities/SetupForDevelopment.sh"
-       ;; (("#!/bin/sh") "#!/bin/bash"))
-       
-       ;; ;; Create build directory
-       ;; (mkdir-p "Slicer-SuperBuild-Debug")
-       ;; (chdir "Slicer-SuperBuild-Debug")
-       
-       ;; ;; Set environment variables
-       ;; (setenv "CMAKE_TLS_VERIFY" "0")
-       ;; (setenv "EP_EXECUTE_DISABLE_CAPTURE_OUTPUTS" "1")
-       ;; #t))
-       
-       ;; (replace 'install
-       ;; (lambda* (#:key outputs #:allow-other-keys)
-       ;; (let ((out (assoc-ref outputs "out")))
-       ;; (install-file "Slicer-build/Slicer"
-       ;; (string-append out "/bin"))
-       ;; #t)))
-       ))
+       #:phases (modify-phases %standard-phases
+                  ;; (add-before 'build 'prepare-build-environment
+                  ;; (lambda _
+                  ;; ;; Fix shebang in setup script
+                  ;; (substitute* "Utilities/SetupForDevelopment.sh"
+                  ;; (("#!/bin/sh") "#!/bin/bash"))
+                  
+                  ;; ;; Create build directory
+                  ;; (mkdir-p "Slicer-SuperBuild-Debug")
+                  ;; (chdir "Slicer-SuperBuild-Debug")
+                  
+                  ;; ;; Set environment variables
+                  ;; (setenv "CMAKE_TLS_VERIFY" "0")
+                  ;; (setenv "EP_EXECUTE_DISABLE_CAPTURE_OUTPUTS" "1")
+                  ;; #t))
+                  
+                  (add-after 'unpack 'list-files-and-fail
+                    (lambda* (#:key inputs outputs #:allow-other-keys)
+                      (system* "ls" "-lR"
+                               (assoc-ref inputs "teem-slicer")) ;List all files in the current directory
+                      ;; (error "Stopping build after listing files") ;Forcefully stop the build
+                      #t)))))
 
     (inputs (list libxt
                   eigen
@@ -153,12 +153,10 @@
                   netcdf
                   proj
 
+                  ctk-slicer
                   itk-slicer
-                  ctk-slicer))
-    ;; ("python" ,python-3.14)
-    (native-inputs `(("gcc" ,gcc)
-                     ("cmake" ,cmake)
-                     ("pkg-config" ,pkg-config)))
+                  teem-slicer))
+    (native-inputs (list gcc cmake pkg-config))
     (synopsis "3D Slicer - Medical visualization and computing environment")
     (description
      "3D Slicer is a multi-platform, free and open source software package for 
