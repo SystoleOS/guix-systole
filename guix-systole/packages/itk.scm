@@ -69,7 +69,7 @@
                           "-DITK_LEGACY_REMOVE:BOOL=OFF" ;<-- Allow LEGACY ITKv4 features for now.
                           "-DITK_LEGACY_SILENT:BOOL=OFF" ;<-- Use of legacy code will produce compiler warnings
                           "-DModule_ITKDeprecated:BOOL=ON" ;<-- Needed for ITKv5 now. (itkMultiThreader.h and MutexLock backwards compatibility.)
-                          
+
                           ;; Optimization
                           "-DITK_CXX_OPTIMIZATION_FLAGS:STRING=" ;Force compiler-default instruction set to ensure compatibility with older CPUs
                           "-DITK_C_OPTIMIZATION_FLAGS:STRING=" ;Force compiler-default instruction set to ensure compatibility with older CPUs
@@ -117,7 +117,7 @@
 
     (home-page "https://github.com/Slicer/ITK/")))
 
-(define-public itk-growcut
+(define itk-growcut
   (package
     (name "itk-growcut")
     (version "0.2.1")
@@ -130,7 +130,7 @@
         (base32 "0is0a2lic6r3d2h4md7csmlbpphfwgqkjmwlh7yvwfbyy1mdngbd"))))
     (build-system copy-build-system)
     (arguments
-     
+
      `(#:install-plan '(("." "/"))
        #:phases (modify-phases %standard-phases
                   (delete 'build))))
@@ -139,7 +139,7 @@
     (description "This package provides the ITK GrowCut segmentation module.")
     (license license:asl2.0)))
 
-(define-public itk-mghimageio
+(define itk-mghimageio
   (package
     (name "itk-mghimageio")
     (version "5.1.0")
@@ -160,7 +160,7 @@
     (description "ITK IO for images stored in mgh, mgz and mgh.gz formats.")
     (license license:cc-by4.0)))
 
-(define-public itk-adaptivedenoising
+(define itk-adaptivedenoising
   (package
     (name "itk-adaptivedenoising")
     (version "5.1.0")
@@ -181,7 +181,7 @@
     (description "ITK IO for images stored in mgh, mgz and mgh.gz formats.")
     (license license:asl2.0)))
 
-(define-public itk-ioscanco
+(define itk-ioscanco
   (package
     (name "itk-ioscanco")
     (version "5.1.0")
@@ -202,7 +202,7 @@
     (description "ITK Image IO for Scanco MicroCT .ISQ files")
     (license license:asl2.0)))
 
-(define-public itk-morphologicalcontourinterpolation
+(define itk-morphologicalcontourinterpolation
   (package
     (name "itk-morphologicalcontourinterpolation")
     (version "5.1.0")
