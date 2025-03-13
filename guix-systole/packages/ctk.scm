@@ -21,8 +21,8 @@
     #:use-module ((guix licenses) #:prefix license:)    ;;
     #:use-module (guix download)                        ;; 
 
-    #:use-module (guix-systole packages vtk)            ;; Added systole VTK file.
-    ;#:use-module (guix-systole packages itk)           ;; TODO: Add systole ITK file.
+    #:use-module (guix-systole packages vtk)            ;; Systole VTK file.
+    #:use-module (guix-systole packages itk)            ;; Systole ITK file
 )
 
 
@@ -80,7 +80,7 @@
 
                     ; ---------------------------- ITK flags ----------------------------
 
-                    ;"-DCTK_USE_SYSTEM_ITK:BOOL=ON" ; ITK will be integrated soon!
+                    "-DCTK_USE_SYSTEM_ITK:BOOL=ON" ; Enabling ITK.
 
                     ; ------------------------ CTK Widgets Flags-------------------------
 
@@ -124,6 +124,7 @@
                 qttools-5   ;   
                 qtsvg-5     ;   
                 vtk-slicer  ; Defined which vtk slicer package to input.
+                itk-slicer  ; Defined which itk slicer package to input.
             )
         )
 
