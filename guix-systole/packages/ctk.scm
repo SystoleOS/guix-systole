@@ -12,12 +12,11 @@
     ;#:use-module (gnu packages qtmultimedia)           ;; 
     ;#:use-module (gnu packages python)                 ;; 
     ;#:use-module (gnu packages python-qt)              ;; 
-    ;#:use-module (gnu packages dcmtk)                  ;; 
+    #:use-module (gnu packages image-processing)        ;; Added Dicom module 
     #:use-module (guix git-download)                    ;; 
     #:use-module (gnu packages version-control)         ;; 
     #:use-module (gnu packages cmake)                   ;; 
     #:use-module (guix build-system cmake)              ;; 
-    #:use-module (gnu packages image-processing)        ;;
     #:use-module ((guix licenses) #:prefix license:)    ;;
     #:use-module (guix download)                        ;; 
 
@@ -82,6 +81,10 @@
 
                     "-DCTK_USE_SYSTEM_ITK:BOOL=ON" ; Enabling ITK.
 
+                    ; --------------------------- DICOM Flags ---------------------------
+
+                    "-DCTK_USE_SYSTEM_DCMTK:BOOL=ON"    ; Enabling Dicom and dicom libraries.
+
                     ; ------------------------ CTK Widgets Flags-------------------------
 
                     "-DCTK_LIB_Widgets:BOOL=OFF"    ; This should be ON as widgets are required to function.
@@ -123,6 +126,7 @@
                 qtbase-5    ;   
                 qttools-5   ;   
                 qtsvg-5     ;   
+                dcmtk       ; Dicom input library.
                 vtk-slicer  ; Defined which vtk slicer package to input.
                 itk-slicer  ; Defined which itk slicer package to input.
             )
