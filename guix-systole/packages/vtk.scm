@@ -17,12 +17,17 @@
     (version "9.2")
     (source
      (origin
-       (method url-fetch)
-       (uri (string-append "https://github.com"
-                           "/Slicer/VTK/archive/"
-                           "slicer-v9.2.20230607-1ff325c54-2.tar.gz"))
+
+       (method url-fetch)   
+       ; URI from VTK version: slicer-v9.2.20230607-1ff325c54-2
+       (uri 
+            (string-append 
+                "https://github.com/Slicer/VTK/archive/"
+                "59ec450206012e86d4855bc669800499254bfc77.tar.gz"
+            )
+        )
        (sha256
-        (base32 "0a8qghc38nabcf761lppc9gafskgk8dkgdggabvipwxrkdamaq4k"))))
+        (base32 "0dmibmx170aj59qqqfgh28dhlvkakpdfnzgh4zn4hvn24i9j0id9"))))
     (arguments
      (list
       #:build-type "Release"
