@@ -1,0 +1,80 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a900776..b70fc9e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -7,6 +7,14 @@ project(vtkAddon
+   DESCRIPTION "General-purpose features that may be integrated into VTK library in the future."
+ )
+ 
++# --------------------------------------------------------------------------
++# CTK version number.  An even minor number corresponds to releases.
++# --------------------------------------------------------------------------
++set(${PROJECT_NAME}_MAJOR_VERSION 0)
++set(${PROJECT_NAME}_MINOR_VERSION 1)
++set(${PROJECT_NAME}_PATCH_VERSION 0)
++set(${PROJECT_NAME}_VERSION "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_VERSION}")
++
+ 
+ set(vtkAddon_CMAKE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
+ set(CMAKE_MODULE_PATH ${vtkAddon_CMAKE_DIR} ${CMAKE_MODULE_PATH})
+@@ -50,6 +58,27 @@ if(NOT DEFINED vtkAddon_LAUNCH_COMMAND)
+   set(vtkAddon_LAUNCH_COMMAND "" CACHE STRING "Command for setting up environment and running executables")
+ endif()
+ 
++# --------------------------------------------------------------------------
++# Directories
++# --------------------------------------------------------------------------
++#
++include(GNUInstallDirs)
++
++if(NOT ${PROJECT_NAME}_INSTALL_BIN_DIR)
++  set(${PROJECT_NAME}_INSTALL_BIN_DIR "${CMAKE_INSTALL_BINDIR}")
++endif()
++if(NOT ${PROJECT_NAME}_INSTALL_LIB_DIR)
++  set(${PROJECT_NAME}_INSTALL_LIB_DIR "${CMAKE_INSTALL_LIBDIR}")
++endif()
++if(NOT ${PROJECT_NAME}_INSTALL_CMAKE_DIR)
++  set(${PROJECT_NAME}_INSTALL_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake")
++endif()
++if(NOT ${PROJECT_NAME}_INSTALL_INCLUDE_DIR)
++  set(${PROJECT_NAME}_INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}-${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}")
++endif()
++if(NOT ${PROJECT_NAME}_INSTALL_DOC_DIR)
++  set(${PROJECT_NAME}_INSTALL_DOC_DIR "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}-${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}/doc")
++endif()
+ # --------------------------------------------------------------------------
+ # Configure headers
+ # --------------------------------------------------------------------------
+@@ -69,10 +98,6 @@ endif()
+ 
+ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+ 
+-  if(NOT DEFINED ${PROJECT_NAME}_INSTALL_INCLUDE_DIR)
+-    set(${PROJECT_NAME}_INSTALL_INCLUDE_DIR include/${PROJECT_NAME})
+-  endif()
+-
+   file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+   install(
+     FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
+@@ -202,9 +227,6 @@ export(TARGETS ${lib_name} APPEND FILE ${${PROJECT_NAME}_EXPORT_FILE})
+ if(NOT DEFINED ${PROJECT_NAME}_INSTALL_BIN_DIR)
+   set(${PROJECT_NAME}_INSTALL_BIN_DIR bin)
+ endif()
+-if(NOT DEFINED ${PROJECT_NAME}_INSTALL_LIB_DIR)
+-  set(${PROJECT_NAME}_INSTALL_LIB_DIR lib/${PROJECT_NAME})
+-endif()
+ 
+ install(TARGETS ${lib_name}
+   RUNTIME DESTINATION ${${PROJECT_NAME}_INSTALL_BIN_DIR} COMPONENT RuntimeLibraries
+@@ -284,11 +306,6 @@ configure_file(
+ # Install configuration files
+ # --------------------------------------------------------------------------
+ 
+-# Set vtkAddon_INSTALL_CMAKE_DIR
+-if(NOT DEFINED ${PROJECT_NAME}_INSTALL_CMAKE_DIR)
+-  set(${PROJECT_NAME}_INSTALL_CMAKE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
+-endif()
+-
+ # Install vtkAddonConfig.cmake
+ install(
+   FILES ${CMAKE_CURRENT_BINARY_DIR}/install/vtkAddonConfig.cmake
