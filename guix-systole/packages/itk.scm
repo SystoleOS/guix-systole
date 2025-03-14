@@ -8,6 +8,7 @@
   #:use-module (gnu packages maths)
   #:use-module (gnu packages mpi)
   #:use-module (gnu packages pdf)
+  #:use-module (gnu packages qt)
   #:use-module (gnu packages serialization)
   #:use-module (gnu packages xiph)
   #:use-module (guix build-system cmake)
@@ -69,7 +70,7 @@
                           "-DITK_LEGACY_REMOVE:BOOL=OFF" ;<-- Allow LEGACY ITKv4 features for now.
                           "-DITK_LEGACY_SILENT:BOOL=OFF" ;<-- Use of legacy code will produce compiler warnings
                           "-DModule_ITKDeprecated:BOOL=ON" ;<-- Needed for ITKv5 now. (itkMultiThreader.h and MutexLock backwards compatibility.)
-
+                          
                           ;; Optimization
                           "-DITK_CXX_OPTIMIZATION_FLAGS:STRING=" ;Force compiler-default instruction set to ensure compatibility with older CPUs
                           "-DITK_C_OPTIMIZATION_FLAGS:STRING=" ;Force compiler-default instruction set to ensure compatibility with older CPUs
@@ -90,6 +91,9 @@
                       (symlink (assoc-ref inputs
                                 "itk-morphologicalcontourinterpolation")
                        "Modules/Remote/ITKMorphologicalContourInterpolation")
+                      (symlink (assoc-ref inputs "itk-iotransformdcmtk")
+                               "Modules/Remote/ITKIOTransformDCMTK")
+
                       #t)))))
 
     (inputs (modify-inputs (package-inputs insight-toolkit)
@@ -106,13 +110,15 @@
                       mpich
                       netcdf
                       proj
-                      vtk
+                      qtbase-5
+                      vtk-slicer
 
                       ;; GrowCut
                       itk-growcut
                       itk-mghimageio
                       itk-adaptivedenoising
                       itk-ioscanco
+                      itk-iotransformdcmtk
                       itk-morphologicalcontourinterpolation)))
 
     (home-page "https://github.com/Slicer/ITK/")))
@@ -130,7 +136,6 @@
         (base32 "0is0a2lic6r3d2h4md7csmlbpphfwgqkjmwlh7yvwfbyy1mdngbd"))))
     (build-system copy-build-system)
     (arguments
-
      `(#:install-plan '(("." "/"))
        #:phases (modify-phases %standard-phases
                   (delete 'build))))
@@ -223,4 +228,26 @@
      "An ITK-based implementation of morphological contour interpolation")
     (description
      "An ITK-based implementation of morphological contour interpolation")
+    (license license:asl2.0)))
+
+(define itk-iotransformdcmtk
+  (package
+    (name "itk-iotransformdcmtk")
+    (version "5.1.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri
+        "https://github.com/InsightSoftwareConsortium/ITKIOTransformDCMTK/archive/e97e0e8c27809eea1834dd534a47fc06168e3e45.tar.gz")
+       (sha256
+        (base32 "0f2bv3rwbcdyqw4xwpar1461haxlm9gp2nlpcavy6xcq5y0ms1c7"))))
+    (build-system copy-build-system)
+    (arguments
+     `(#:install-plan '(("." "/"))
+       #:phases (modify-phases %standard-phases
+                  (delete 'build))))
+    (home-page
+     "https://github.com/InsightSoftwareConsortium/ITKIOTransformDCMTK")
+    (synopsis "An ITK module to read DICOM spatial transforms.")
+    (description "An ITK module to read DICOM spatial transforms.")
     (license license:asl2.0)))
