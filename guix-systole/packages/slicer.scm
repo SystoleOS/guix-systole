@@ -9,6 +9,7 @@
   #:use-module (guix-systole packages vtk)
   #:use-module (gnu packages)
   #:use-module (gnu packages algebra)
+  #:use-module (gnu packages backup)
   #:use-module (gnu packages cmake)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages fontutils)
@@ -53,6 +54,7 @@
                           "-DSlicer_USE_PYTHONQT:BOOL=OFF"
                           "-DSlicer_SUPERBUILD:BOOL=OFF"
                           "-DBUILD_TESTING:BOOL=OFF"
+                          "-DBUILD_SHARED_LIBS:BOOL=ON"
                           "-DSlicer_BUILD_EXTENSIONMANAGER_SUPPORT:BOOL=OFF"
                           "-DSlicer_DONT_USE_EXTENSION:BOOL=ON"
                           "-DSlicer_BUILD_CLI_SUPPORT:BOOL=OFF"
@@ -66,12 +68,14 @@
                           ;; "-DSlicer_BUILD_QT_DESIGNER_PLUGINS:BOOL=ON"
                           ;; "-DSlicer_USE_CTKAPPLAUNCHER:BOOL=OFF"
                           "-DSlicer_USE_QtTesting:BOOL=OFF"
-                          ;; "-DSlicer_USE_SlicerITK:BOOL=OFF"
+                          "-DSlicer_USE_SlicerITK:BOOL=ON"
                           ;; "-DSlicer_USE_SimpleITK:BOOL=OFF"
                           ;; "-DSlicer_VTK_RENDERING_BACKEND:STRING=OpenGL2"
                           "-DSlicer_VTK_VERSION_MAJOR:STRING=9"
+                          "-DSlicer_BUILD_vtkAddon:BOOL=ON" ;Include things like "vtkMacroKitPythonWrap"
+                          
                           "-DSlicer_INSTALL_DEVELOPMENT:BOOL=ON"
-                          "-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON"
+                          ;; "-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON"
                           ;; "-DTeem_DIR:STRING="
                           "-DSlicer_USE_SYSTEM_teem:BOOL=ON"
                           ;; "-DCTK_INSTALL_QTPLUGIN_DIR:STRING=/usr/lib64/qt5/plugins"
@@ -79,37 +83,15 @@
                           ;; "-DSlicer_QtPlugins_DIR:STRING=/usr/lib64/designer"
                           ;; "-DjqPlot_DIR:STRING=/usr/share/jqPlot"
                           ;; "-DSlicer_VTK_WRAP_HIERARCHY_DIR:STRING=#{$\x7b;BUILD_DIR\x7d;}#"
-                          ;; "-DSlicer_BUILD_vtkAddon:BOOL=OFF"
+                          "-DSlicer_BUILD_vtkAddon:BOOL=ON"
                           ;; "-DSlicer_USE_SimpleITK:BOOL=OFF"
+                          "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=OFF" ;Disabled as we do not have IODCMTK support yet
                           
                           ;; Python
                           ;; "-DPython3_INCLUDE_DIR:FILEPATH="
                           ;; "-DPython3_LIBRARY:FILEPATH="
                           ;; "-DPython3_EXECUTABLE:FILEPATH="
-                          ;; "-DVTK_WRAP_PYTHON:BOOL=OFF"
-                          )
-       #:phases (modify-phases %standard-phases
-                  ;; (add-before 'build 'prepare-build-environment
-                  ;; (lambda _
-                  ;; ;; Fix shebang in setup script
-                  ;; (substitute* "Utilities/SetupForDevelopment.sh"
-                  ;; (("#!/bin/sh") "#!/bin/bash"))
-                  
-                  ;; ;; Create build directory
-                  ;; (mkdir-p "Slicer-SuperBuild-Debug")
-                  ;; (chdir "Slicer-SuperBuild-Debug")
-                  
-                  ;; ;; Set environment variables
-                  ;; (setenv "CMAKE_TLS_VERIFY" "0")
-                  ;; (setenv "EP_EXECUTE_DISABLE_CAPTURE_OUTPUTS" "1")
-                  ;; #t))
-                  
-                  (add-after 'unpack 'list-files-and-fail
-                    (lambda* (#:key inputs outputs #:allow-other-keys)
-                      (system* "ls" "-lR"
-                               (assoc-ref inputs "teem-slicer")) ;List all files in the current directory
-                      ;; (error "Stopping build after listing files") ;Forcefully stop the build
-                      #t)))))
+                          "-DVTK_WRAP_PYTHON:BOOL=OFF")))
 
     (inputs (list libxt
                   eigen
@@ -117,6 +99,7 @@
                   openssl-3.0
                   git
                   hdf5
+                  libarchive
                   libffi
                   libjpeg-turbo
                   libxinerama
