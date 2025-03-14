@@ -1,16 +1,32 @@
 (define-module (guix-systole packages vtk)
   #:use-module ((guix licenses)
-                #:prefix license:) ;)
+                #:prefix license:)
   #:use-module (guix packages)
-  #:use-module (guix gexp)
+  #:use-module (gnu packages algebra)
+  #:use-module (gnu packages)
+  #:use-module (gnu packages base)
+  #:use-module (gnu packages xml)
   #:use-module (guix download)
+  #:use-module (guix build-system cmake)
+  #:use-module (guix gexp)
   #:use-module (gnu packages qt)
   #:use-module (gnu packages mpi)
   #:use-module (gnu packages tbb)
   #:use-module (ice-9 match)
   #:use-module (srfi srfi-1)
+  #:use-module (gnu packages image)
   #:use-module ((gnu packages image-processing)
-                #:prefix imgproc:))
+                #:prefix imgproc:)
+  #:use-module (gnu packages compression)
+  #:use-module (gnu packages fontutils)
+  #:use-module (gnu packages gl)
+  #:use-module (gnu packages geo)
+  #:use-module (gnu packages gnome)
+  #:use-module (gnu packages maths)
+  #:use-module (gnu packages mpi)
+  #:use-module (gnu packages pdf)
+  #:use-module (gnu packages serialization)
+  #:use-module (gnu packages xiph))
 
 (define-public vtk-slicer
   (package
@@ -56,7 +72,7 @@
           "-DVTK_MODULE_USE_EXTERNAL_VTK_tiff:BOOL=ON"
           "-DVTK_MODULE_USE_EXTERNAL_VTK_zlib:BOOL=ON"
           "-DVTK_MODULE_ENABLE_VTK_RenderingExternal:STRING=YES" ;for F3D
-          "-DVTK_WRAP_PYTHON:BOOL=ON"
+          "-DVTK_WRAP_PYTHON:BOOL=OFF"
           "-DVTK_SMP_ENABLE_TBB:BOOL=ON"
           "-DVTK_USE_MPI:BOOL=ON"
           "-DVTK_USE_TK:BOOL=OFF"
