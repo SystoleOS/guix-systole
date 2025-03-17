@@ -43,7 +43,7 @@
 (define-public slicer
   (package
     (name "slicer")
-    (version "5.8.0")
+    (version "5.8.1")
     (source
      (origin
        (method url-fetch)
