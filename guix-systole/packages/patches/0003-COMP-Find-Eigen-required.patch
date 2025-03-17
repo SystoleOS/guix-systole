@@ -1,0 +1,28 @@
+From 19fedcd387ee8119753451b0d65c945df5864a4e Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 24 Jan 2023 09:55:32 +0100
+Subject: [PATCH 02/32] COMP: Find Eigen (required)
+
+---
+ CMakeLists.txt | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 76df451209..a38abbb0fa 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -888,6 +888,11 @@ if(NOT TARGET ${VTK_GUI_SUPPORT_QT_TARGET_NAME})
+ endif()
+ set(VTK_RENDERING_BACKEND "${Slicer_VTK_RENDERING_BACKEND}")
+ 
++#-----------------------------------------------------------------------------
++# Eigen
++#-----------------------------------------------------------------------------
++find_package(Eigen3 3.3 REQUIRED CONFIG)
++
+ #-----------------------------------------------------------------------------
+ # CTK
+ #-----------------------------------------------------------------------------
+-- 
+2.39.3
+

@@ -55,6 +55,8 @@
                        "patches/0002-COMP-Add-vtk-CommonSystem-component-as-requirement.patch")
                       (local-file
                        "patches/0003-COMP-Find-Eigen-required.patch")
+                      (local-file
+                       "patches/0004-COMP-Adapt-to-new-qRestAPI-cmake.patch")
                       ))))
     (build-system cmake-build-system)
     (arguments
