@@ -35,15 +35,10 @@
     (version "9.2")
     (source
      (origin
-
-       (method url-fetch)   
-       ; URI from VTK version: slicer-v9.2.20230607-1ff325c54-2
-       (uri 
-            (string-append 
-                "https://github.com/Slicer/VTK/archive/"
-                "59ec450206012e86d4855bc669800499254bfc77.tar.gz"
-            )
-        )
+       (method url-fetch)
+       ;; URI from VTK version: slicer-v9.2.20230607-1ff325c54-2
+       (uri (string-append "https://github.com/Slicer/VTK/archive/"
+                           "59ec450206012e86d4855bc669800499254bfc77.tar.gz"))
        (sha256
         (base32 "0dmibmx170aj59qqqfgh28dhlvkakpdfnzgh4zn4hvn24i9j0id9"))))
     (arguments
@@ -85,7 +80,7 @@
           "-DVTK_QT_VERSION:STRING=5"
           "-DVTK_Group_Qt:BOOL=ON"
           "-DVTK_BUILD_TESTING:BOOL=OFF"
-          ;Force value to prevent lib64 from being used on Linux
+          ;; Force value to prevent lib64 from being used on Linux
           "-DCMAKE_INSTALL_LIBDIR:STRING=lib"
           "-DVTK_MODULE_ENABLE_VTK_GUISupportQtQuick:STRING=NO"
           "-DVTK_LEGACY_REMOVE:BOOL=ON"

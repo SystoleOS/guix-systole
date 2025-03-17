@@ -104,6 +104,7 @@ Plugin Framework.")
        #:configure-flags (list "-DBUILD_TESTING=OFF"
                                "-DCTKAppLauncher_QT_VERSION=5"
                                "-DCTKAppLauncher_INSTALL_LauncherLibrary=ON"
+                               ;; "-DCTK_INSTALL_LIB_DIR=lib64"
                                )))
     (inputs (list qtbase-5))
     (home-page "http://www.commontk.org/")
