@@ -28,4 +28,4 @@ jobs:
       # 3. Run the guix lint check
       - name: Run Guix Lint
         run: |
-          guix lint -L $GITHUB_WORKSPACE --exclude=archival vtk-slicer@9.2 itk-slicer@5.4.0
+          guix lint -L $GITHUB_WORKSPACE --exclude=archival vtk-slicer@9.2 itk-slicer@5.4.0 ctk@0.1
