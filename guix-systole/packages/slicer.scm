@@ -66,9 +66,11 @@
                           ;; "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=OFF"
                           ;; "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"
                           ;; "-DSlicer_BUILD_QT_DESIGNER_PLUGINS:BOOL=ON"
-                          ;; "-DSlicer_USE_CTKAPPLAUNCHER:BOOL=OFF"
+                          "-DSlicer_USE_SYSTEM_QT:BOOL=ON"
                           "-DSlicer_USE_QtTesting:BOOL=OFF"
                           "-DSlicer_USE_SlicerITK:BOOL=ON"
+                          "-DSlicer_USE_CTKAPPLAUNCHER:BOOL=ON"
+
                           ;; "-DSlicer_USE_SimpleITK:BOOL=OFF"
                           ;; "-DSlicer_VTK_RENDERING_BACKEND:STRING=OpenGL2"
                           "-DSlicer_VTK_VERSION_MAJOR:STRING=9"
@@ -137,6 +139,7 @@
                   proj
 
                   ctk-slicer
+                  ctkapplauncher
                   itk-slicer
                   teem-slicer))
     (native-inputs (list gcc cmake pkg-config))
