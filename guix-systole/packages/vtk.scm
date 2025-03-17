@@ -105,7 +105,7 @@
        (uri
         "https://github.com/Slicer/vtkAddon/archive/b5aa0615a6486b6bdceeb13bd59c2fb9f89cce42.tar.gz")
        (sha256
-        (base32 "0wazsirav972mxkawfaw0lpnkylxfr19xjrd5s03blr2kid50a91"))
+        (base32 "0wazsirav972mxkawfaw0lpnkylxfr19xjrd5s03blr2kid50a91"))))
     (build-system cmake-build-system)
     (outputs '("out"))
     (arguments
@@ -113,11 +113,11 @@
        #:configure-flags (list "-DBUILD_SHARED_LIBS:BOOL=ON"
                                "-DBUILD_TESTING:BOOL=OFF"
                                "-DvtkAddon_INSTALL_NO_DEVELOPMENT:BOOL=OFF"
-                               ;; "-DvtkAddon_USE_UTF8=ON"
-                               "-DvtkAddon_WRAP_PYTHON=OFF" ;Enable whenever Python support is enabled
-                               "-DVTK_WRAP_PYTHON=OFF"
+                               ;; "-DvtkAddon_USE_UTF8:BOOL=ON"
+                               "-DvtkAddon_WRAP_PYTHON:BOOL=OFF" ;Enable whenever Python support is enabled
+                               "-DVTK_WRAP_PYTHON:BOOL=ON"
                                ;; "-DvtkAddon_LAUNCH_COMMAND:STRING=" ;; Needs testing
-                               "-DCMAKE_BUILD_WITH_INSTALL_RPATH=ON")))
+                               "-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON")))
 
     (inputs (list vtk-slicer
                   eigen

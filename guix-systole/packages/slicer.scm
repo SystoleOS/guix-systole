@@ -1,10 +1,12 @@
 (define-module (guix-systole packages slicer)
   #:use-module (guix packages)
   #:use-module (guix download)
+  #:use-module (guix gexp)
   #:use-module (guix build-system cmake)
   #:use-module (guix build-system qt)
   #:use-module (guix-systole packages ctk)
   #:use-module (guix-systole packages itk)
+  #:use-module (guix-systole packages qrestapi)
   #:use-module (guix-systole packages teem)
   #:use-module (guix-systole packages vtk)
   #:use-module (gnu packages)
@@ -28,8 +30,10 @@
   #:use-module (gnu packages python)
   #:use-module (gnu packages qt)
   #:use-module (gnu packages serialization)
+  #:use-module (gnu packages tbb)
   #:use-module (gnu packages tls)
   #:use-module (gnu packages version-control)
+  #:use-module (gnu packages web)
   #:use-module (gnu packages xiph)
   #:use-module (gnu packages xml)
   #:use-module (gnu packages xorg)
@@ -51,7 +55,6 @@
     (arguments
      `(#:tests? #f
        #:configure-flags (list "-DSlicer_USE_SYSTEM_LibFFI:BOOL=ON"
-                          "-DSlicer_USE_PYTHONQT:BOOL=OFF"
                           "-DSlicer_SUPERBUILD:BOOL=OFF"
                           "-DBUILD_TESTING:BOOL=OFF"
                           "-DBUILD_SHARED_LIBS:BOOL=ON"
@@ -76,10 +79,13 @@
                           "-DSlicer_VTK_VERSION_MAJOR:STRING=9"
                           "-DSlicer_BUILD_vtkAddon:BOOL=ON" ;Include things like "vtkMacroKitPythonWrap"
                           
-                          "-DSlicer_INSTALL_DEVELOPMENT:BOOL=ON"
+                          "-DSlicer_INSTALL_DEVELOPMENT:BOOL=OFF"
                           ;; "-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON"
                           ;; "-DTeem_DIR:STRING="
                           "-DSlicer_USE_SYSTEM_teem:BOOL=ON"
+                          "-DSlicer_USE_TBB:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_tbb:BOOL=ON"
+
                           ;; "-DCTK_INSTALL_QTPLUGIN_DIR:STRING=/usr/lib64/qt5/plugins"
                           ;; "-DQT_PLUGINS_DIR:STRING=/usr/lib64/designer"
                           ;; "-DSlicer_QtPlugins_DIR:STRING=/usr/lib64/designer"
@@ -93,8 +99,13 @@
                           ;; "-DPython3_INCLUDE_DIR:FILEPATH="
                           ;; "-DPython3_LIBRARY:FILEPATH="
                           ;; "-DPython3_EXECUTABLE:FILEPATH="
-                          "-DVTK_WRAP_PYTHON:BOOL=OFF")))
+                          "-DVTK_WRAP_PYTHON:BOOL=OFF"
+                          "-DSlicer_USE_PYTHONQT:BOOL=OFF"
+                          "-DSlicer_USE_SYSTEM_python:BOOL=OFF"
 
+                          ;; Hack to fix error "Variable Slicer_WC_LAST_CHANGED_DATE is expected to be defined."
+                          "-DSlicer_WC_LAST_CHANGED_DATE:STRING=2021-12-21 22:15:05 +0800")
+                  ))
     (inputs (list libxt
                   eigen
                   expat
@@ -108,11 +119,14 @@
                   mesa ;libGL equivalent
                   perl
                   python-3.10
+                  rapidjson
+                  tbb
 
                   ;; wayland
                   
                   ;; nss-certs ;; to fix broken certificate validation
                   
+                  ;; QT5
                   qtbase-5
                   qtmultimedia-5
                   qtxmlpatterns
@@ -141,7 +155,8 @@
                   ctk-slicer
                   ctkapplauncher
                   itk-slicer
-                  teem-slicer))
+                  teem-slicer
+                  qrestapi))
     (native-inputs (list gcc cmake pkg-config))
     (synopsis "3D Slicer - Medical visualization and computing environment")
     (description
