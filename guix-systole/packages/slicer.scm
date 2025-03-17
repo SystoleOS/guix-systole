@@ -50,7 +50,10 @@
        (uri
         "https://github.com/Slicer/Slicer/archive/11eaf62e5a70b828021ff8beebbdd14d10d4f51c.tar.gz")
        (sha256
-        (base32 "05rz797ddci3a2m8297zyzv2g2hp6bd6djmwa1n0gbsla8b175bx"))))
+        (base32 "05rz797ddci3a2m8297zyzv2g2hp6bd6djmwa1n0gbsla8b175bx"))
+       (patches (list (local-file
+                       "patches/0002-COMP-Add-vtk-CommonSystem-component-as-requirement.patch")
+                      ))))
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f
