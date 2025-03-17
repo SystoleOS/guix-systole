@@ -53,6 +53,8 @@
         (base32 "05rz797ddci3a2m8297zyzv2g2hp6bd6djmwa1n0gbsla8b175bx"))
        (patches (list (local-file
                        "patches/0002-COMP-Add-vtk-CommonSystem-component-as-requirement.patch")
+                      (local-file
+                       "patches/0003-COMP-Find-Eigen-required.patch")
                       ))))
     (build-system cmake-build-system)
     (arguments
