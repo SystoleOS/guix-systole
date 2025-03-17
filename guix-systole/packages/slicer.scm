@@ -152,7 +152,7 @@
                   netcdf
                   proj
 
-                  ctk-slicer
+                  ctk
                   ctkapplauncher
                   itk-slicer
                   teem-slicer
