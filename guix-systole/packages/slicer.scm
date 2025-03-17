@@ -129,10 +129,6 @@
                   rapidjson
                   tbb
 
-                  ;; wayland
-                  
-                  ;; nss-certs ;; to fix broken certificate validation
-                  
                   ;; QT5
                   qtbase-5
                   qtmultimedia-5
@@ -159,6 +155,7 @@
                   netcdf
                   proj
 
+                  ;; Other Slicer modules
                   ctk
                   ctkapplauncher
                   itk-slicer
@@ -177,15 +174,3 @@ visualization and medical image computing. It provides capabilities for:
 @end itemize")
     (home-page "https://www.slicer.org/")
     (license license:bsd-3)))
-
-;; (define-public 3d-slicer-dev
-;;   (package
-;;     (inherit 3d-slicer)
-;;     (name "3d-slicer-dev")
-;;     (inputs
-;;      `(("3d-slicer" ,3d-slicer)
-;;        ,@(package-inputs 3d-slicer)))
-;;     (native-inputs
-;;      `(("debug-tools" ,gdb)
-;;        ,@(package-native-inputs 3d-slicer)))
-;;     (synopsis "Development environment for 3D Slicer")))
