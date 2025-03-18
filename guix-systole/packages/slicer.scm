@@ -57,7 +57,7 @@
                        "patches/0003-COMP-Find-Eigen-required.patch")
                       (local-file
                        "patches/0004-COMP-Adapt-to-new-qRestAPI-cmake.patch")
-                      ))))
+                      (local-file "patches/cpack-patch.patch")))))
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f
