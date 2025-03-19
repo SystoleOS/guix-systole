@@ -1,16 +1,17 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 8185cc90..305bad5b 100644
+index 8185cc90..52d42187 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -403,6 +403,7 @@ add_library(teem ${Teem_SOURCES})
- # RPATH stuff, and mac will ingore the INSTALL_RPATH.  Make sure for
- # macs to set BUILD_WITH_INSTALL_RPATH OFF and set INSTALL_NAME_DIR.
- # I belive INSTALL_NAME_DIR will be ignored on linux.
-+
- set_target_properties(teem PROPERTIES
-   BUILD_WITH_INSTALL_RPATH OFF
-   INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib
-@@ -557,6 +558,6 @@ install(FILES
+@@ -537,7 +537,7 @@ else()
+   set(Teem_CV_CONFIG_TO_ROOT "..")
+ endif()
+ 
+-set(Teem_CV_LIBRARY_DEPENDS_FILE "\${Teem_ROOT_DIR}/lib${EXTRA_INSTALL_PATH}/TeemLibraryDepends.cmake")
++set(Teem_CV_LIBRARY_DEPENDS_FILE "\${Teem_ROOT_DIR}/Teem/TeemLibraryDepends.cmake")
+ set(Teem_CV_EXECUTABLE_DIRS "\${Teem_ROOT_DIR}/bin")
+ set(Teem_CV_LIBRARY_DIRS "\${Teem_ROOT_DIR}/lib${EXTRA_INSTALL_PATH}")
+ set(Teem_CV_USE_FILE "\${Teem_ROOT_DIR}/lib${EXTRA_INSTALL_PATH}/TeemUse.cmake")
+@@ -557,6 +557,6 @@ install(FILES
    "${Teem_SOURCE_DIR}/CMake/TeemUse.cmake"
    "${Teem_BINARY_DIR}/TeemBuildSettings.cmake"
    "${Teem_BINARY_DIR}/TeemLibraryDepends.cmake"
