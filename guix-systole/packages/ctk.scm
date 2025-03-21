@@ -89,7 +89,7 @@ Plugin Framework.")
 
 (define-public ctkapplauncher
   (package
-    (name "ctkapplauncher-slicer")
+    (name "ctkapplauncher")
     (version "0.1")
     (source
      (origin
