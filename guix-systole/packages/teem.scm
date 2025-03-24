@@ -1,5 +1,4 @@
 (define-module (guix-systole packages teem)
-  #:use-module (guix-systole packages vtk)
   #:use-module (guix build-system cmake)
   #:use-module (guix download)
   #:use-module (guix gexp)
@@ -28,7 +27,6 @@
        #:configure-flags (list "-DBUILD_SHARED_LIBS:BOOL=ON"
                                "-DBUILD_TESTING:BOOL=OFF")))
     ;; https://discourse.slicer.org/t/unknown-cmake-command-vtkmacrokitpythonwrap-in-snapshot-release-for-vtkteem/13838
-    (inputs (list vtkaddon-slicer))
     (home-page "https://github.com/Slicer/teem/")
     (synopsis
      "A group of libraries for representing, processing and visualizing scientific raster data.")
