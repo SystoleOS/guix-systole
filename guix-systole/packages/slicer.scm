@@ -6,6 +6,7 @@
   #:use-module (guix build-system qt)
   #:use-module (guix-systole packages ctk)
   #:use-module (guix-systole packages itk)
+  #:use-module (guix-systole packages libarchive)
   #:use-module (guix-systole packages qrestapi)
   #:use-module (guix-systole packages teem)
   #:use-module (guix-systole packages vtk)
@@ -119,13 +120,10 @@
                   openssl-3.0
                   git
                   hdf5
-                  libarchive
                   libffi
                   libjpeg-turbo
                   libxinerama
                   mesa ;libGL equivalent
-                  perl
-                  python-3.10
                   rapidjson
                   tbb
 
@@ -159,7 +157,9 @@
                   ctk
                   ctkapplauncher
                   itk-slicer
+                  libarchive-slicer
                   teem-slicer
+                  vtkaddon-slicer
                   qrestapi))
     (native-inputs (list gcc cmake pkg-config))
     (synopsis "3D Slicer - Medical visualization and computing environment")
