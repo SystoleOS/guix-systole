@@ -57,7 +57,8 @@
                        "patches/0003-COMP-Find-Eigen-required.patch")
                       (local-file
                        "patches/0004-COMP-Adapt-to-new-qRestAPI-cmake.patch")
-                      (local-file "patches/0010-COMP-packages-slicer-Limit-CPack.patch")))))
+                      (local-file
+                       "patches/0010-COMP-packages-slicer-Limit-CPack.patch")))))
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f
@@ -125,8 +126,20 @@
                           "-DSlicer_USE_SYSTEM_zlib:BOOL=ON"
 
                           ;; Hack to fix error "Variable Slicer_WC_LAST_CHANGED_DATE is expected to be defined."
-                          "-DSlicer_WC_LAST_CHANGED_DATE:STRING=2021-12-21 22:15:05 +0800")
-                  ))
+                          "-DSlicer_WC_LAST_CHANGED_DATE:STRING=2025-3-19 11:00:00 +0800")
+       ;; #:make-flags (list "-j8")
+       #:out-of-source? #t
+       #:phases (modify-phases %standard-phases
+                  (add-before 'configure 'set-cmake-paths
+                    (lambda* (#:key inputs #:allow-other-keys)
+                      ;; Make 'vtkaddon-slicer' discoverable by CMake
+                      
+                      (setenv "CMAKE_PREFIX_PATH"
+                              (string-append (assoc-ref inputs
+                                                        "vtkaddon-slicer")
+                                             "/lib/cmake:"
+                                             (or (getenv "CMAKE_PREFIX_PATH")
+                                                 ""))) #t)))))
     (inputs (list libxt
                   eigen
                   expat
