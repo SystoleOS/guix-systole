@@ -13,7 +13,6 @@
   #:use-module (gnu packages)
   #:use-module (gnu packages algebra)
   #:use-module (gnu packages backup)
-  #:use-module (gnu packages cmake)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages fontutils)
   #:use-module (gnu packages gcc)
@@ -58,7 +57,7 @@
                        "patches/0003-COMP-Find-Eigen-required.patch")
                       (local-file
                        "patches/0004-COMP-Adapt-to-new-qRestAPI-cmake.patch")
-                      (local-file "patches/cpack-patch.patch")))))
+                      (local-file "patches/0010-COMP-packages-slicer-Limit-CPack.patch")))))
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f
@@ -161,7 +160,7 @@
                   teem-slicer
                   vtkaddon-slicer
                   qrestapi))
-    (native-inputs (list gcc cmake pkg-config))
+    (native-inputs (list pkg-config))
     (synopsis "3D Slicer - Medical visualization and computing environment")
     (description
      "3D Slicer is a multi-platform, free and open source software package for 
