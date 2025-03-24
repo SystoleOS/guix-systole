@@ -62,7 +62,15 @@
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f
-       #:configure-flags (list "-DSlicer_USE_SYSTEM_LibFFI:BOOL=ON"
+                          ;; Compiler info
+                          ;; https://stackoverflow.com/a/41361741
+                          "-DCMAKE_BUILD_TYPE:STRING=Release"
+                          "-DCMAKE_CXX_COMPILER:STRING=g++"
+                          "-DCMAKE_C_COMPILER:STRING=gcc"
+                          "-DCMAKE_CXX_STANDARD:STRING=17"
+                          ;; Compiler flags
+                          "-DCMAKE_CXX_FLAGS:STRING=-O2 -Wno-dev"
+                          "-DCMAKE_EXE_LINKER_FLAGS=-pthread"
                           "-DSlicer_SUPERBUILD:BOOL=OFF"
                           "-DBUILD_TESTING:BOOL=OFF"
                           "-DBUILD_SHARED_LIBS:BOOL=ON"
@@ -74,10 +82,11 @@
                           "-DSlicer_REQUIRED_QT_VERSION:STRING=5"
                           ;; "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=$(usex DICOM ON OFF)"
                           "-DSlicer_BUILD_ITKPython:BOOL=OFF"
-                          ;; "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=OFF"
-                          ;; "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"
-                          ;; "-DSlicer_BUILD_QT_DESIGNER_PLUGINS:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_QT:BOOL=ON"
+
+                          ;; QT
+                          "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=OFF"
+                          "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"
+                          "-DSlicer_BUILD_QT_DESIGNER_PLUGINS:BOOL=OFF" ;Turn ON?
                           "-DSlicer_USE_QtTesting:BOOL=OFF"
                           "-DSlicer_USE_SlicerITK:BOOL=ON"
                           "-DSlicer_USE_CTKAPPLAUNCHER:BOOL=ON"
