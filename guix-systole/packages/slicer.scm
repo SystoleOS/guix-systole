@@ -84,21 +84,18 @@
                           ;; "-DSlicer_USE_SimpleITK:BOOL=OFF"
                           ;; "-DSlicer_VTK_RENDERING_BACKEND:STRING=OpenGL2"
                           "-DSlicer_VTK_VERSION_MAJOR:STRING=9"
-                          "-DSlicer_BUILD_vtkAddon:BOOL=ON" ;Include things like "vtkMacroKitPythonWrap"
+                          "-DSlicer_BUILD_vtkAddon:BOOL=OFF" ;This should be OFF, so Slicer uses the system installed one.
                           
                           "-DSlicer_INSTALL_DEVELOPMENT:BOOL=OFF"
                           ;; "-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON"
                           ;; "-DTeem_DIR:STRING="
-                          "-DSlicer_USE_SYSTEM_teem:BOOL=ON"
                           "-DSlicer_USE_TBB:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_tbb:BOOL=ON"
 
                           ;; "-DCTK_INSTALL_QTPLUGIN_DIR:STRING=/usr/lib64/qt5/plugins"
                           ;; "-DQT_PLUGINS_DIR:STRING=/usr/lib64/designer"
                           ;; "-DSlicer_QtPlugins_DIR:STRING=/usr/lib64/designer"
                           ;; "-DjqPlot_DIR:STRING=/usr/share/jqPlot"
                           ;; "-DSlicer_VTK_WRAP_HIERARCHY_DIR:STRING=#{$\x7b;BUILD_DIR\x7d;}#"
-                          "-DSlicer_BUILD_vtkAddon:BOOL=ON"
                           ;; "-DSlicer_USE_SimpleITK:BOOL=OFF"
                           "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=OFF" ;Disabled as we do not have IODCMTK support yet
                           
@@ -109,6 +106,23 @@
                           "-DVTK_WRAP_PYTHON:BOOL=OFF"
                           "-DSlicer_USE_PYTHONQT:BOOL=OFF"
                           "-DSlicer_USE_SYSTEM_python:BOOL=OFF"
+
+                          ;; Other required external modules. These are required, otherwise Slicer tries to download them.
+                          "-DSlicer_USE_SYSTEM_bzip2:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_CTK:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_TBB:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_teem:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_QT:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_curl:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_DCMTK:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_ITK:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_LibArchive:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_LibFFI:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_LZMA:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_RapidJSON:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_sqlite:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_VTK:BOOL=ON"
+                          "-DSlicer_USE_SYSTEM_zlib:BOOL=ON"
 
                           ;; Hack to fix error "Variable Slicer_WC_LAST_CHANGED_DATE is expected to be defined."
                           "-DSlicer_WC_LAST_CHANGED_DATE:STRING=2021-12-21 22:15:05 +0800")
