@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 8185cc90..52d42187 100644
+index 8185cc90..9eb0dba3 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -537,7 +537,7 @@ else()
@@ -11,11 +11,20 @@ index 8185cc90..52d42187 100644
  set(Teem_CV_EXECUTABLE_DIRS "\${Teem_ROOT_DIR}/bin")
  set(Teem_CV_LIBRARY_DIRS "\${Teem_ROOT_DIR}/lib${EXTRA_INSTALL_PATH}")
  set(Teem_CV_USE_FILE "\${Teem_ROOT_DIR}/lib${EXTRA_INSTALL_PATH}/TeemUse.cmake")
-@@ -557,6 +557,6 @@ install(FILES
+@@ -557,6 +557,15 @@ install(FILES
    "${Teem_SOURCE_DIR}/CMake/TeemUse.cmake"
    "${Teem_BINARY_DIR}/TeemBuildSettings.cmake"
    "${Teem_BINARY_DIR}/TeemLibraryDepends.cmake"
 -  DESTINATION lib${EXTRA_INSTALL_PATH}
 +  DESTINATION lib${EXTRA_INSTALL_PATH}/cmake/Teem
++  COMPONENT Development
++  )
++
++install(FILES
++  "${Teem_BINARY_DIR}/CMake/TeemConfig.cmake"
++  "${Teem_SOURCE_DIR}/CMake/TeemUse.cmake"
++  "${Teem_BINARY_DIR}/TeemBuildSettings.cmake"
++  "${Teem_BINARY_DIR}/TeemLibraryDepends.cmake"
++  DESTINATION lib${EXTRA_INSTALL_PATH}/cmake/lib
    COMPONENT Development
    )
