@@ -1,17 +1,13 @@
 (define-module (guix-systole packages ctk)
-    #:use-module (guix packages)
-    #:use-module (gnu packages qt)
-    #:use-module (gnu packages image-processing)
-    #:use-module (guix git-download)
-    #:use-module (gnu packages version-control)
-    #:use-module (gnu packages cmake)
-    #:use-module (guix build-system cmake)
-    #:use-module ((guix licenses) #:prefix license:)
-    #:use-module (guix download)
-    #:use-module (guix-systole packages vtk)
-    #:use-module (guix-systole packages itk)
-)
-
+  #:use-module (guix packages)
+  #:use-module (gnu packages qt)
+  #:use-module (gnu packages image-processing)
+  #:use-module (guix build-system cmake)
+  #:use-module ((guix licenses)
+                #:prefix license:)
+  #:use-module (guix download)
+  #:use-module (guix-systole packages vtk)
+  #:use-module (guix-systole packages itk))
 
 ;; --------------------------- CTK ---------------------------
 (define-public ctk
@@ -76,9 +72,18 @@
                   dcmtk
                   vtk-slicer
                   itk-slicer))
-
-        (native-inputs (list git))
         (home-page "github.com/commontk/CTK")
-        (synopsis "CTK (Common Toolkit) Guile scheme package definition for Guix")
-        (description "The common toolkit is an open source library for... ")
+    (synopsis "A set of common support code for medical imaging, surgical 
+navigation, and related purposes. ")
+    (description
+     "The goal of CTK is to support biomedical image computing. CTK
+code is licensed under Apache 2.0. This means that users of CTK are allowed to
+use the code for academic, commercial, or other purposes without paying license
+fees or being restricted in their ability to redistribute their code or keep it
+private.
+
+CTK works on topics that are not covered by existing toolkits that support the
+mutual interest and needs of the CTK community. The main scope of current CTK
+efforts includes the topics DICOM, DICOM Application Hosting, Widgets, and 
+Plugin Framework.")
         (license license:asl2.0)))
