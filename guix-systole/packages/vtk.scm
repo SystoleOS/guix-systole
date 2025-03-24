@@ -26,6 +26,7 @@
   #:use-module (gnu packages mpi)
   #:use-module (gnu packages pdf)
   #:use-module (gnu packages serialization)
+  #:use-module (gnu packages tbb)
   #:use-module (gnu packages xiph))
 
 (define-public vtk-slicer
@@ -100,9 +101,10 @@
        (uri
         "https://github.com/Slicer/vtkAddon/archive/b5aa0615a6486b6bdceeb13bd59c2fb9f89cce42.tar.gz")
        (sha256
-        (base32 "0wazsirav972mxkawfaw0lpnkylxfr19xjrd5s03blr2kid50a91"))))
+        (base32 "0wazsirav972mxkawfaw0lpnkylxfr19xjrd5s03blr2kid50a91"))
+       (patches (list (local-file
+                       "patches/0007-ENH-packages-vtk-use-CMAKE-GNUInstallDirs.patch")))))
     (build-system cmake-build-system)
-    (outputs '("out"))
     (arguments
      `(#:tests? #f
        #:configure-flags (list "-DBUILD_SHARED_LIBS:BOOL=ON"
@@ -113,7 +115,6 @@
                                "-DVTK_WRAP_PYTHON:BOOL=ON"
                                ;; "-DvtkAddon_LAUNCH_COMMAND:STRING=" ;; Needs testing
                                "-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON")))
-
     (inputs (list vtk-slicer
                   eigen
                   expat
@@ -121,6 +122,7 @@
                   freetype
                   gl2ps
                   glew
+                  hdf5
                   libjpeg-turbo
                   libxml2
                   jsoncpp
@@ -131,9 +133,8 @@
                   mpich
                   netcdf
                   proj
-                  python-3.10
                   qtbase-5
-                  hdf5))
+                  tbb))
 
     (native-inputs (list coreutils))
     (home-page "https://github.com/Slicer/vtkAddon/")
