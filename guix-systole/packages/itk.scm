@@ -8,6 +8,7 @@
   #:use-module (gnu packages maths)
   #:use-module (gnu packages mpi)
   #:use-module (gnu packages pdf)
+  #:use-module (gnu packages qt)
   #:use-module (gnu packages serialization)
   #:use-module (gnu packages xiph)
   #:use-module (guix build-system cmake)
@@ -106,7 +107,8 @@
                       mpich
                       netcdf
                       proj
-                      vtk
+                      qtbase-5
+                      vtk-slicer
 
                       ;; GrowCut
                       itk-growcut
