@@ -32,4 +32,5 @@ jobs:
           vtk-slicer@9.2 \
           itk-slicer@5.4.0 \
           ctk@0.1 \
-          libarchive-slicer@3.6.1
+          libarchive-slicer@3.6.1 \
+          qrestapi@0.1
