@@ -58,6 +58,8 @@
                       (local-file
                        "patches/0004-COMP-Adapt-to-new-qRestAPI-cmake.patch")
                       (local-file
+                       "patches/0006-COMP-packages-slicer-hard-code-libteem-so.patch")
+                      (local-file
                        "patches/0010-COMP-packages-slicer-Limit-CPack.patch")))))
     (build-system cmake-build-system)
     (arguments
@@ -79,7 +81,6 @@
                           "-DSlicer_DONT_USE_EXTENSION:BOOL=ON"
                           "-DSlicer_BUILD_CLI_SUPPORT:BOOL=OFF"
                           "-DSlicer_BUILD_CLI:BOOL=OFF"
-                          "-DCMAKE_CXX_STANDARD:STRING=17"
                           "-DSlicer_REQUIRED_QT_VERSION:STRING=5"
                           ;; "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=$(usex DICOM ON OFF)"
                           "-DSlicer_BUILD_ITKPython:BOOL=OFF"
@@ -98,8 +99,6 @@
                           "-DSlicer_BUILD_vtkAddon:BOOL=OFF" ;This should be OFF, so Slicer uses the system installed one.
                           
                           "-DSlicer_INSTALL_DEVELOPMENT:BOOL=OFF"
-                          ;; "-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON"
-                          ;; "-DTeem_DIR:STRING="
                           "-DSlicer_USE_TBB:BOOL=ON"
 
                           ;; "-DCTK_INSTALL_QTPLUGIN_DIR:STRING=/usr/lib64/qt5/plugins"
