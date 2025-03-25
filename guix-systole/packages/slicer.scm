@@ -62,6 +62,7 @@
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f
+       #:configure-flags (list
                           ;; Compiler info
                           ;; https://stackoverflow.com/a/41361741
                           "-DCMAKE_BUILD_TYPE:STRING=Release"
@@ -136,7 +137,6 @@
 
                           ;; Hack to fix error "Variable Slicer_WC_LAST_CHANGED_DATE is expected to be defined."
                           "-DSlicer_WC_LAST_CHANGED_DATE:STRING=2025-3-19 11:00:00 +0800")
-       ;; #:make-flags (list "-j8")
        #:out-of-source? #t
        #:phases (modify-phases %standard-phases
                   (add-before 'configure 'set-cmake-paths
