@@ -20,7 +20,7 @@
        (sha256
         (base32 "0y8wwzkflj6v5nx0v8cgzryqlxii0px3mcgb3bff1nhyr5zf9yp1"))
        (patches (list (local-file
-                       "patches/0001-BUG-packages-teem-fix-missing-teem-config-cmake.patch")))))
+                       "patches/0005-BUG-packages-teem-fix-missing-teem-config-cmake.patch")))))
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f
