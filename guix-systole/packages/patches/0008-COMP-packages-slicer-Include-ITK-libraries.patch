@@ -1,0 +1,16 @@
+diff --git a/Libs/vtkSegmentationCore/CMakeLists.txt b/Libs/vtkSegmentationCore/CMakeLists.txt
+index ed39d1ee63..c20a064b98 100644
+--- a/Libs/vtkSegmentationCore/CMakeLists.txt
++++ b/Libs/vtkSegmentationCore/CMakeLists.txt
+@@ -97,8 +97,11 @@ set(vtkSegmentationCore_INCLUDE_DIRS
+ # Build the library
+ # --------------------------------------------------------------------------
+ 
++find_package(ITK REQUIRED)
++
+ set(vtkSegmentationCore_LIBS
+   ${VTK_LIBRARIES}
++  ${ITK_LIBRARIES}
+   )
+ 
+ if (${PROJECT_NAME}_USE_UUID)

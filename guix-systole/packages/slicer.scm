@@ -60,6 +60,8 @@
                       (local-file
                        "patches/0006-COMP-packages-slicer-hard-code-libteem-so.patch")
                       (local-file
+                       "patches/0008-COMP-packages-slicer-Include-ITK-libraries.patch")
+                      (local-file
                        "patches/0010-COMP-packages-slicer-Limit-CPack.patch")))))
     (build-system cmake-build-system)
     (arguments
