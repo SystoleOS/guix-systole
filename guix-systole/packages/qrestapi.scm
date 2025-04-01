@@ -29,7 +29,8 @@
                           "-DqRestAPI_QT_VERSION:STRING=5"
                           "-DBUILD_SHARED_LIBS:BOOL=ON"
                           "-DBUILD_TESTING:BOOL=OFF"
-                          "-DqRestAPI_STATIC:BOOL=OFF")))
+                          "-DqRestAPI_STATIC:BOOL=OFF"
+                          "-DqRestAPI_INSTALL_NO_DEVELOPMENT:BOOL=OFF")))
     (inputs (list qtbase-5 qtdeclarative-5))
     (home-page "https://github.com/commontk/qRestAPI")
     (synopsis
