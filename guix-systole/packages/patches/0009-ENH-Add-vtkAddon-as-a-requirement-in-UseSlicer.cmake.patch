@@ -1,0 +1,26 @@
+diff --git a/CMake/UseSlicer.cmake.in b/CMake/UseSlicer.cmake.in
+index f80bd6884c..8226dd541b 100644
+--- a/CMake/UseSlicer.cmake.in
++++ b/CMake/UseSlicer.cmake.in
+@@ -37,7 +37,20 @@
+ #  -- Skipping SlicerBlockPlatformCheck
+ #
+ # This is can avoided by setting the variable Slicer_VERBOSE_SKIP to TRUE
+-#
++
++# --------------------------------------------------------------------------
++# Requirements
++# --------------------------------------------------------------------------
++find_package(VTK REQUIRED)
++
++find_package(ITK REQUIRED)
++include(${ITK_USE_FILE})
++
++find_package(CTK REQUIRED)
++include(${CTK_USE_FILE})
++
++find_package(vtkAddon REQUIRED)
++find_package(Qt5 COMPONENTS Widgets Network Xml PrintSupport REQUIRED)
+ 
+ # --------------------------------------------------------------------------
+ # Helper function(s) and macro(s)

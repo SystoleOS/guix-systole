@@ -4,6 +4,7 @@
   #:use-module (guix gexp)
   #:use-module (guix build-system cmake)
   #:use-module (guix build-system qt)
+  #:use-module (guix-systole packages)
   #:use-module (guix-systole packages ctk)
   #:use-module (guix-systole packages itk)
   #:use-module (guix-systole packages libarchive)
@@ -57,30 +58,50 @@
                  "0004-COMP-Adapt-to-new-qRestAPI-cmake.patch"
                  "0006-COMP-packages-slicer-hard-code-libteem-so.patch"
                  "0008-COMP-packages-slicer-Include-ITK-libraries.patch"
-                 "0010-COMP-packages-slicer-Limit-CPack.patch"))))
+                 ;; "0009-ENH-Add-vtkAddon-as-a-requirement-in-UseSlicer.cmake.patch"
+                 "0010-COMP-packages-slicer-Limit-CPack.patch"
+                 "remove-fortify.patch"))))
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f
+       #:parallel-build? #f
        #:configure-flags (list
+                          ;; CMake debugging
+                          ;; "--trace-expand"
+                          ;; "--debug-output"
+                          
                           ;; Compiler info
                           ;; https://stackoverflow.com/a/41361741
-                          "-DCMAKE_BUILD_TYPE:STRING=Release"
+                          "-DCMAKE_BUILD_TYPE:STRING=Debug"
                           "-DCMAKE_CXX_COMPILER:STRING=g++"
                           "-DCMAKE_C_COMPILER:STRING=gcc"
                           "-DCMAKE_CXX_STANDARD:STRING=17"
                           ;; Compiler flags
-                          "-DCMAKE_CXX_FLAGS:STRING=-O2 -Wno-dev"
-                          "-DCMAKE_EXE_LINKER_FLAGS=-pthread"
+                          "-DCMAKE_CXX_FLAGS:STRING=-Wno-dev"
+                          "-DCMAKE_EXE_LINKER_FLAGS=-pthread "
+                          ;; "-DCMAKE_MODULE_LINKER_FLAGS=-pthread"
+                          ;; "-DCMAKE_SHARED_LINKER_FLAGS=-pthread"
+                          ;; https://discourse.cmake.org/t/pass-argument-directly-to-the-compiler/1181/2
+                          ;; "-DCMAKE_CXX_COMPILER_LAUNCHER=-pthread"
+                          ;; "-DCMAKE_CXX_FLAGS_RELEASE:STRING=-O3"
+                          ;; "-DCMAKE_CXX_FLAGS_DEBUG:STRING=-g"
+                          "-DCMAKE_VERBOSE_MAKEFILE:STRING=ON" ;FOR DEBUGGING
+                          
+                          ;; Linking
+                          "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH:BOOL=OFF"
+
                           "-DSlicer_SUPERBUILD:BOOL=OFF"
                           "-DBUILD_TESTING:BOOL=OFF"
                           "-DBUILD_SHARED_LIBS:BOOL=ON"
                           "-DSlicer_BUILD_EXTENSIONMANAGER_SUPPORT:BOOL=OFF"
                           "-DSlicer_DONT_USE_EXTENSION:BOOL=ON"
-                          "-DSlicer_BUILD_CLI_SUPPORT:BOOL=OFF"
-                          "-DSlicer_BUILD_CLI:BOOL=OFF"
                           "-DSlicer_REQUIRED_QT_VERSION:STRING=5"
                           ;; "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=$(usex DICOM ON OFF)"
                           "-DSlicer_BUILD_ITKPython:BOOL=OFF"
+
+                          ;; CLI
+                          "-DSlicer_BUILD_CLI:BOOL=OFF"
+                          "-DSlicer_BUILD_CLI_SUPPORT:BOOL=OFF"
 
                           ;; QT
                           "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=OFF"
@@ -95,7 +116,10 @@
                           "-DSlicer_VTK_VERSION_MAJOR:STRING=9"
                           "-DSlicer_BUILD_vtkAddon:BOOL=OFF" ;This should be OFF, so Slicer uses the system installed one.
                           
+                          ;; Disable development settings
                           "-DSlicer_INSTALL_DEVELOPMENT:BOOL=OFF"
+                          "-DMRMLCore_INSTALL_NO_DEVELOPMENT:BOOL=ON"
+
                           "-DSlicer_USE_TBB:BOOL=ON"
 
                           ;; "-DCTK_INSTALL_QTPLUGIN_DIR:STRING=/usr/lib64/qt5/plugins"
