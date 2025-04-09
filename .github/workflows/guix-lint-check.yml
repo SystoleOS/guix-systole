@@ -30,7 +30,7 @@ jobs:
         run: |
           guix lint -L $GITHUB_WORKSPACE --exclude=archival \
           vtk-slicer@9.2 \
-          vtkaddon-slicer@b5aa061 \
+          vtkaddon@b5aa061 \
           itk-slicer@5.4.0 \
           ctk@0.1 \
           libarchive-slicer@3.6.1 \

@@ -94,9 +94,9 @@
     (inputs (modify-inputs (package-inputs imgproc:vtk)
               (append python-pyqt qtbase-5 tbb openmpi)))))
 
-(define-public vtkaddon-slicer
+(define-public vtkaddon
   (package
-    (name "vtkaddon-slicer")
+    (name "vtkaddon")
     (version "b5aa061")
     (source
      (origin

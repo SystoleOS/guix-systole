@@ -137,19 +137,17 @@
                          "-DSlicer_USE_SYSTEM_VTK:BOOL=ON"
                          "-DSlicer_USE_SYSTEM_zlib:BOOL=ON"
 
-                         ;; Hack to fix error "Variable Slicer_WC_LAST_CHANGED_DATE is expected to be defined."
-                         "-DSlicer_WC_LAST_CHANGED_DATE:STRING=2025-3-2 19:58:36 -0500")
-      #:out-of-source? #t
-      #:validate-runpath? #f
-      #:phases (modify-phases %standard-phases
-                              (add-before 'configure 'set-cmake-paths
-                                          (lambda* (#:key inputs #:allow-other-keys)
-                                            ;; Make 'vtkaddon-slicer' discoverable by CMake
-
-                                            (setenv "CMAKE_PREFIX_PATH"
-                                                    (string-append (assoc-ref inputs
-                                                                              "vtkaddon-slicer")
-                                                                   "/lib/cmake:"
+                          ;; Hack to fix error "Variable Slicer_WC_LAST_CHANGED_DATE is expected to be defined."
+                          "-DSlicer_WC_LAST_CHANGED_DATE:STRING=2025-3-2 19:58:36 -0500")
+       #:out-of-source? #t
+       #:phases (modify-phases %standard-phases
+                  (add-before 'configure 'set-cmake-paths
+                    (lambda* (#:key inputs #:allow-other-keys)
+                      ;; Make 'vtkaddon' discoverable by CMake
+                      
+                      (setenv "CMAKE_PREFIX_PATH"
+                              (string-append (assoc-ref inputs "vtkaddon")
+                                             "/lib/cmake:"
 
                                                                    (assoc-ref inputs
                                                                               "slicerexecutionmodel")
@@ -196,19 +194,19 @@
                  netcdf
                  proj
 
-                 ;; Other Slicer modules
-                 ctk
-                 ctkapplauncher
-                 itk-slicer
-                 libarchive-slicer
-                 teem-slicer
-                 vtkaddon-slicer
-                 slicerexecutionmodel
-                 qrestapi))
-   (native-inputs (list pkg-config))
-   (synopsis "3D Slicer - Medical visualization and computing environment")
-   (description
-    "3D Slicer is a multi-platform, free and open source software package for
+                  ;; Other Slicer modules
+                  ctk
+                  ctkapplauncher
+                  itk-slicer
+                  libarchive-slicer
+                  teem-slicer
+                  vtkaddon
+                  slicerexecutionmodel
+                  qrestapi))
+    (native-inputs (list pkg-config))
+    (synopsis "3D Slicer - Medical visualization and computing environment")
+    (description
+     "3D Slicer is a multi-platform, free and open source software package for 
 visualization and medical image computing. It provides capabilities for:
 @itemize
 @item Medical image processing and analysis
