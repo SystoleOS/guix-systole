@@ -64,6 +64,7 @@
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f
+       #:validate-runpath? #f
        #:configure-flags (list
                           ;; Compiler info
                           ;; https://stackoverflow.com/a/41361741
@@ -154,7 +155,16 @@
                                              "/lib/CMake:"
 
                                              (or (getenv "CMAKE_PREFIX_PATH")
-                                                 ""))) #t)))))
+                                                 ""))) #t))
+
+                  (add-after 'install 'symlink-slicer-applauncher
+                    (lambda* (#:key outputs #:allow-other-keys)
+                      (symlink (string-append (assoc-ref outputs "out")
+                                              "/Slicer")
+                               (string-append (string-append (assoc-ref
+                                                              outputs "out")
+                                                             "/bin/Slicer")))
+                      #t)))))
     (inputs (list libxt
                   eigen
                   expat
