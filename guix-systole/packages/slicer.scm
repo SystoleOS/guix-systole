@@ -89,7 +89,7 @@
                           "-DSlicer_BUILD_CLI_SUPPORT:BOOL=ON"
 
                           ;; QT
-                          "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=OFF"
+                          "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=ON" ;; Required to use Slicer modules
                           "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"
                           "-DSlicer_BUILD_QT_DESIGNER_PLUGINS:BOOL=OFF" ;Turn ON?
                           "-DSlicer_USE_QtTesting:BOOL=OFF"
