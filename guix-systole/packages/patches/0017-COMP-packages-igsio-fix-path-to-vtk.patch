@@ -1,0 +1,26 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bfb00a1..f78e691 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -88,7 +88,7 @@ endif()
+ 
+ # --------------------------------------------------------------------------
+ # Try to find VTK and include its settings (otherwise complain)
+-find_package(VTK NO_MODULE REQUIRED PATHS ${VTK_DIR} NO_DEFAULT_PATH)
++find_package(VTK NO_MODULE REQUIRED)
+ if(VTK_FOUND AND VTK_VERSION VERSION_LESS 8.9.0)
+   include(${VTK_USE_FILE})
+ endif()
+diff --git a/Codecs/CMakeLists.txt b/Codecs/CMakeLists.txt
+index d08de84..5585d29 100644
+--- a/Codecs/CMakeLists.txt
++++ b/Codecs/CMakeLists.txt
+@@ -3,7 +3,7 @@ project(vtkIGSIOCodecs)
+ set(${PROJECT_NAME}_EXPORT_DIRECTIVE "VTK_IGSIO_CODECS_EXPORT")
+ 
+ if (NOT IGSIO_USE_3DSlicer)
+-  find_package(vtkAddon REQUIRED)
++  find_package(vtkAddon REQUIRED NO_MODULE)
+ else()
+   find_package(Slicer REQUIRED)
+ endif()

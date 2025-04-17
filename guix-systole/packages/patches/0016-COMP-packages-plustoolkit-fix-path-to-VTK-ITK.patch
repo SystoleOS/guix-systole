@@ -1,0 +1,28 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 5e7f0ff7..4b4ce030 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ # --------------------------------------------------------------------------
+ # Try to find VTK and include its settings (otherwise complain)
+-FIND_PACKAGE(VTK NO_MODULE REQUIRED PATHS ${VTK_DIR} NO_DEFAULT_PATH)
++FIND_PACKAGE(VTK NO_MODULE REQUIRED)
+ 
+ IF(VTK_VERSION VERSION_LESS 8.9.0)
+   INCLUDE(${VTK_USE_FILE})
+@@ -21,7 +21,7 @@ ENDIF()
+ 
+ # --------------------------------------------------------------------------
+ # Try to find ITK and include its settings (otherwise complain)
+-FIND_PACKAGE (ITK REQUIRED PATHS ${ITK_DIR} NO_DEFAULT_PATH)
++FIND_PACKAGE (ITK REQUIRED PATHS)
+ IF(ITK_FOUND)
+   IF(ITK_NO_IO_FACTORY_REGISTER_MANAGER)
+     MESSAGE("ITK_NO_IO_FACTORY_REGISTER_MANAGER is true, disabling default I/O factory manager")
+@@ -570,4 +570,4 @@ INSTALL(FILES
+   "${CMAKE_BINARY_DIR}/CMakeFiles/install/UsePlusLib.cmake"
+   "${CMAKE_CURRENT_BINARY_DIR}/PlusLibConfigVersion.cmake"
+   DESTINATION "${PLUSLIB_CMAKE_INSTALL}"
+-  )
+\ No newline at end of file
++  )
