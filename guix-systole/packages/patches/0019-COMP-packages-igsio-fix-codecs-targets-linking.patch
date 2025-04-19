@@ -1,0 +1,38 @@
+diff --git a/IGSIOCommon/CMakeLists.txt b/IGSIOCommon/CMakeLists.txt
+index 8d7d3da..92199f2 100644
+--- a/IGSIOCommon/CMakeLists.txt
++++ b/IGSIOCommon/CMakeLists.txt
+@@ -68,11 +68,11 @@ else()
+   list(APPEND ${PROJECT_NAME}_LIBS VTK::vtksys)
+ endif()
+ 
+-if(IGSIO_BUILD_CODECS)
+-  list(APPEND ${PROJECT_NAME}_LIBS
+-    vtkIGSIOCodecs
+-    )
+-endif()
++# if(IGSIO_BUILD_CODECS)
++#   list(APPEND ${PROJECT_NAME}_LIBS
++#     vtkIGSIOCodecs
++#     )
++# endif()
+ 
+ set(${PROJECT_NAME}_LIBS_PRIVATE
+   )
+@@ -91,9 +91,15 @@ else()
+   add_library(${PROJECT_NAME} ${${PROJECT_NAME}_SRCS})
+ endif()
+ target_link_libraries(${PROJECT_NAME}
+-  PUBLIC ${${PROJECT_NAME}_LIBS}
++  PUBLIC
++  # $<TARGET_FILE:vtkIGSIOCodecs>
++    # vtkAddon
++    ${${PROJECT_NAME}_LIBS} # Fallback to any external libraries
+   PRIVATE ${${PROJECT_NAME}_LIBS_PRIVATE}
+   )
++if(IGSIO_BUILD_CODECS AND TARGET vtkIGSIOCodecs)
++  target_link_libraries(${PROJECT_NAME} PUBLIC vtkIGSIOCodecs)
++endif()
+ 
+ install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}
+   RUNTIME DESTINATION ${IGSIO_INSTALL_BIN_DIR} COMPONENT RuntimeLibraries

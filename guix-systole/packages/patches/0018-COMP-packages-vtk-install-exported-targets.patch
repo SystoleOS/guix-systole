@@ -1,0 +1,36 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a900776..e36727f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -212,6 +212,31 @@ install(TARGETS ${lib_name}
+   ARCHIVE DESTINATION ${${PROJECT_NAME}_INSTALL_LIB_DIR} COMPONENT Development
+   )
+ 
++# Tell CMake to register the library into an export set named "ctkAddonTargets"
++install(TARGETS ${lib_name}
++  EXPORT vtkAddonTargets
++  RUNTIME DESTINATION ${${PROJECT_NAME}_INSTALL_BIN_DIR} COMPONENT RuntimeLibraries
++  LIBRARY DESTINATION ${${PROJECT_NAME}_INSTALL_LIB_DIR} COMPONENT RuntimeLibraries
++  ARCHIVE DESTINATION ${${PROJECT_NAME}_INSTALL_LIB_DIR} COMPONENT Development
++)
++
++# Install the export set file so downstream projects (IGSIO) can do find_package(vtkAddon)
++install(EXPORT vtkAddonTargets
++  FILE vtkAddonTargets.cmake
++  NAMESPACE vtkAddon::
++  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake
++)
++
++# --------------------------------------------------------------------------
++# Install configuration file
++# --------------------------------------------------------------------------
++
++# Put vtkAddonConfig.cmake next to the targets
++# install (
++#   FILES ${CMAKE_CURRENT_BINARY_DIR}/install/vtkAddonConfig.cmake
++#   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
++# )
++
+ # --------------------------------------------------------------------------
+ # Python Wrapping
+ # --------------------------------------------------------------------------

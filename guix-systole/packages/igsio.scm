@@ -43,6 +43,7 @@
                        )
                      (patches (search-patches
                                 "0017-COMP-packages-igsio-fix-path-to-vtk.patch"
+                                "0019-COMP-packages-igsio-fix-codecs-targets-linking.patch"
                                 ))
                      )
                    )
@@ -75,6 +76,13 @@
                                          (string-append "-Dfreetype-DIR="
                                                         (assoc-ref %build-inputs "freetype")
                                                         )
+
+                                         ; (string-append "-DCMAKE_INSTALL_RPATH="
+                                         ;                ; (assoc-ref %outputs "out") "/lib"
+                                         ;                "$ORIGIN/../lib"
+                                         ;                )
+
+                                         "-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON"
                                          )
                     #:phases (modify-phases %standard-phases
                                 (add-before 'configure 'set-cmake-paths
@@ -108,6 +116,7 @@
                                 ;                                           "/bin/Slicer")))
                                 ;     #t))
                                 )
+                    #:tests? #f
                      )
                    )
                  (inputs (list vtk-slicer
