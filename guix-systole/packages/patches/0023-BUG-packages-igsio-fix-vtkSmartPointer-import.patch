@@ -1,0 +1,12 @@
+diff --git a/Converter/igtlioBaseConverter.h b/Converter/igtlioBaseConverter.h
+index b06ac83..bfaf5e0 100644
+--- a/Converter/igtlioBaseConverter.h
++++ b/Converter/igtlioBaseConverter.h
+@@ -6,6 +6,7 @@
+ #include <igtlMessageBase.h>
+ #include <vtkObject.h>
+ #include <vtkSmartPointer.h>
++#include <vtkUnsignedCharArray.h>
+ 
+ 
+ //---------------------------------------------------------------------------

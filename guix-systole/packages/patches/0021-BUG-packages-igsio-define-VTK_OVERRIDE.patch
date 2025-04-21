@@ -1,0 +1,170 @@
+diff --git a/Devices/igtlioDevice.h b/Devices/igtlioDevice.h
+index b8e5f40..4c38fc0 100644
+--- a/Devices/igtlioDevice.h
++++ b/Devices/igtlioDevice.h
+@@ -24,6 +24,10 @@
+ 
+ typedef vtkSmartPointer<class igtlioDevice> igtlioDevicePointer;
+ 
++#ifndef VTK_OVERRIDE
++#define VTK_OVERRIDE override
++#endif
++
+ /// A vtkIGTLIODevice represents one device connected over OpenIGTLink.
+ ///
+ /// The Device has a specific type, e.g. Image, Transform..., and
+diff --git a/Devices/igtlioImageDevice.h b/Devices/igtlioImageDevice.h
+index 9ddb9c0..29c0864 100644
+--- a/Devices/igtlioImageDevice.h
++++ b/Devices/igtlioImageDevice.h
+@@ -25,6 +25,10 @@ class vtkImageData;
+ 
+ typedef vtkSmartPointer<class igtlioImageDevice> igtlioImageDevicePointer;
+ 
++#ifndef VTK_OVERRIDE
++#define VTK_OVERRIDE override
++#endif
++
+ /// A Device supporting the IMAGE igtl Message.
+ class OPENIGTLINKIO_DEVICES_EXPORT igtlioImageDevice : public igtlioDevice
+ {
+diff --git a/Devices/igtlioPolyDataDevice.h b/Devices/igtlioPolyDataDevice.h
+index b661430..159d431 100644
+--- a/Devices/igtlioPolyDataDevice.h
++++ b/Devices/igtlioPolyDataDevice.h
+@@ -24,6 +24,10 @@
+ class vtkPolyDataData;
+ typedef vtkSmartPointer<class igtlioPolyDataDevice> igtlioPolyDataDevicePointer;
+ 
++#ifndef VTK_OVERRIDE
++#define VTK_OVERRIDE override
++#endif
++
+ class OPENIGTLINKIO_DEVICES_EXPORT igtlioPolyDataDevice : public igtlioDevice
+ {
+ public:
+diff --git a/Devices/igtlioStatusDevice.h b/Devices/igtlioStatusDevice.h
+index 94efecd..46c106c 100644
+--- a/Devices/igtlioStatusDevice.h
++++ b/Devices/igtlioStatusDevice.h
+@@ -8,6 +8,10 @@
+ 
+ typedef vtkSmartPointer<class igtlioStatusDevice> igtlioStatusDevicePointer;
+ 
++#ifndef VTK_OVERRIDE
++#define VTK_OVERRIDE override
++#endif
++
+ class OPENIGTLINKIO_DEVICES_EXPORT igtlioStatusDevice : public igtlioDevice
+ {
+ public:
+diff --git a/Devices/igtlioStringDevice.h b/Devices/igtlioStringDevice.h
+index 8b5a4fb..63894da 100644
+--- a/Devices/igtlioStringDevice.h
++++ b/Devices/igtlioStringDevice.h
+@@ -10,6 +10,10 @@ class vtkImageData;
+ 
+ typedef vtkSmartPointer<class igtlioStringDevice> igtlioStringDevicePointer;
+ 
++#ifndef VTK_OVERRIDE
++#define VTK_OVERRIDE override
++#endif
++
+ class OPENIGTLINKIO_DEVICES_EXPORT igtlioStringDevice : public igtlioDevice
+ {
+ public:
+diff --git a/Devices/igtlioTransformDevice.h b/Devices/igtlioTransformDevice.h
+index ec0c2ce..94a218b 100644
+--- a/Devices/igtlioTransformDevice.h
++++ b/Devices/igtlioTransformDevice.h
+@@ -24,6 +24,10 @@ class vtkImageData;
+ 
+ typedef vtkSmartPointer<class igtlioTransformDevice> igtlioTransformDevicePointer;
+ 
++#ifndef VTK_OVERRIDE
++#define VTK_OVERRIDE override
++#endif
++
+ /// A Device supporting the IMAGE igtl Message.
+ class OPENIGTLINKIO_DEVICES_EXPORT igtlioTransformDevice : public igtlioDevice
+ {
+diff --git a/Devices/igtlioVideoDevice.h b/Devices/igtlioVideoDevice.h
+index 7baae0d..187b245 100644
+--- a/Devices/igtlioVideoDevice.h
++++ b/Devices/igtlioVideoDevice.h
+@@ -23,6 +23,10 @@ class vtkImageData;
+ 
+ typedef vtkSmartPointer<class igtlioVideoDevice> igtlioVideoDevicePointer;
+ 
++#ifndef VTK_OVERRIDE
++#define VTK_OVERRIDE override
++#endif
++
+ /// A Device supporting the Video igtl Message.
+ class OPENIGTLINKIO_DEVICES_EXPORT igtlioVideoDevice : public igtlioDevice
+ {
+diff --git a/Logic/igtlioCircularBuffer.h b/Logic/igtlioCircularBuffer.h
+index 68a380b..f685fac 100644
+--- a/Logic/igtlioCircularBuffer.h
++++ b/Logic/igtlioCircularBuffer.h
+@@ -18,6 +18,9 @@
+ #define IGTLCB_CIRC_BUFFER_SIZE    3
+ 
+ class vtkMutexLock;
++#ifndef VTK_OVERRIDE
++#define VTK_OVERRIDE override
++#endif
+ 
+ class OPENIGTLINKIO_LOGIC_EXPORT igtlioCircularBuffer : public vtkObject
+ {
+diff --git a/Logic/igtlioCircularSectionBuffer.h b/Logic/igtlioCircularSectionBuffer.h
+index 7ccc7dd..011338a 100644
+--- a/Logic/igtlioCircularSectionBuffer.h
++++ b/Logic/igtlioCircularSectionBuffer.h
+@@ -19,6 +19,9 @@
+ #define IGTLCB_CIRC_BUFFER_SIZE_VIDEOSTREAM   50
+ 
+ class vtkMutexLock;
++#ifndef VTK_OVERRIDE
++#define VTK_OVERRIDE override
++#endif
+ 
+ class OPENIGTLINKIO_LOGIC_EXPORT igtlioCircularSectionBuffer : public vtkObject
+ {
+diff --git a/Logic/igtlioCommand.h b/Logic/igtlioCommand.h
+index 94a30be..e99bb5a 100644
+--- a/Logic/igtlioCommand.h
++++ b/Logic/igtlioCommand.h
+@@ -32,6 +32,10 @@ Ontario with funds provided by the Ontario Ministry of Health and Long-Term Care
+ 
+ typedef vtkSmartPointer<class igtlioCommand> igtlioCommandPointer;
+ 
++#ifndef VTK_OVERRIDE
++#define VTK_OVERRIDE override
++#endif
++
+ enum igtlioCommandStatus
+ {
+   CommandUnknown,
+@@ -163,4 +167,4 @@ private:
+ 
+ };
+ 
+-#endif // igtlioCommand_H
+\ No newline at end of file
++#endif // igtlioCommand_H
+diff --git a/Logic/igtlioConnector.h b/Logic/igtlioConnector.h
+index edc90f0..a2303e8 100644
+--- a/Logic/igtlioConnector.h
++++ b/Logic/igtlioConnector.h
+@@ -47,6 +47,10 @@ typedef vtkSmartPointer<class igtlioConnector> igtlioConnectorPointer;
+ typedef vtkSmartPointer<class igtlioCircularBuffer> igtlioCircularBufferPointer;
+ typedef vtkSmartPointer<class igtlioCircularSectionBuffer> igtlioCircularSectionBufferPointer;
+ 
++#ifndef VTK_OVERRIDE
++#define VTK_OVERRIDE override
++#endif
++
+ 
+ enum CONNECTION_ROLE
+ {

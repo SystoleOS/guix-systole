@@ -25,6 +25,7 @@
                #:use-module (guix-systole packages)
                #:use-module (guix-systole packages vtk)
                #:use-module (guix-systole packages itk)
+               #:use-module (guix-systole packages openigtlink)
                )
 
 (define-public igsio
@@ -72,6 +73,8 @@
                                          ;                (assoc-ref %build-inputs "libvpx")
                                          ;                "/lib/libvpx.so"
                                          ;                )
+
+                                         ; "-DPLUSBUILD_USE_OpenIGTLink:BOOL=ON"
 
                                          (string-append "-Dfreetype-DIR="
                                                         (assoc-ref %build-inputs "freetype")
@@ -159,5 +162,75 @@
                  (synopsis "A collection of tools and algorithms for image guided systems")
                  (description "A collection of tools and algorithms for image guided systems")
                  (license license:bsd-3)
+                 )
+               )
+
+(define-public openigtlinkio-igsio
+               (package
+                 (name "openigtlinkio-igsio")
+                 (version "1a2eda5")  ;; version used by PlusBuild (Plus 2.8)
+                 ; (version "a262c1f")
+                 (source
+                   (origin
+                     (method url-fetch)
+                     (uri
+                       "https://github.com/IGSIO/OpenIGTLinkIO/archive/1a2eda5ddb795df8bb5bfbba589c9650095ba4cd.tar.gz"
+                       ; "https://github.com/IGSIO/OpenIGTLinkIO/archive/a262c1f5e63c00831cbf67d5284f4734f8a7b143.tar.gz"
+                       )
+                     (sha256
+                       (base32
+                         "0z2g2kh0a9k5rmi2j0p1nf1bwz6j8rr3rydgbn2lrj376mym6mvn"
+                         ; "01y6nhv7c5m57clpql8vg1g43k4k37mvb0bvasl28r90mqm4dvsm"
+                         )
+                     )
+                     (patches (search-patches
+                                "0020-BUG-packages-igsio-fix-bug-cmath-not-included.patch"
+                                "0021-BUG-packages-igsio-define-VTK_OVERRIDE.patch"
+                                "0022-BUG-packages-igsio-fix-missing-semicolons.patch"
+                                "0023-BUG-packages-igsio-fix-vtkSmartPointer-import.patch"
+                                "0024-BUG-packages-igsio-replace-mutex-lock.patch"
+                                ))
+                   )
+                   )
+                   (build-system cmake-build-system)
+                   (arguments
+                     `(#:configure-flags (list
+                                           "-DBUILD_EXAMPLES:BOOL=OFF"
+                                           "-DBUILD_TESTING:BOOL=OFF"
+                                           "-DIGTLIO_USE_GUI:BOOL=OFF"
+
+                                           ; "-DCMAKE_CXX_FLAGS=-no-pie"
+                                           )
+                       #:tests? #f)
+                     )
+                   (inputs (list vtk-slicer
+                                 openigtlink
+                                 qtbase-5
+                                 glew
+                                 hdf5
+                                 libtheora
+                                 netcdf
+                                 proj
+                                 jsoncpp
+                                 libxml2
+                                 libharu
+                                 gl2ps
+                                 libpng
+                                 eigen
+                                 openmpi
+                                 expat
+                                 double-conversion
+                                 lz4
+                                 ijg-libjpeg
+                                 freetype
+                                 ))
+                   (home-page "https://github.com/IGSIO/OpenIGTLinkIO")
+                   (synopsis "Library for interfacing to openigtlink/OpenIGTLink, dependent on VTK and Qt. Based on openigtlink/OpenIGTLinkIF")
+                   (description "OpenIGTLink utility library.
+
+Originally forked from OpenIGTLinkIF.
+
+OpenIGTLinkIO contains several wrapper layers on top of OpenIGTLink. The code originates from OpenIGTLink/OpenIGTLinkIF. The main intent of the library is to share igtl code between Slicer, CustusX, IBIS, MITK and other systems.")
+(license license:asl2.0)
                  )
                )

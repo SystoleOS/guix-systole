@@ -25,6 +25,7 @@
                #:use-module (guix-systole packages vtk)
                #:use-module (guix-systole packages itk)
                #:use-module (guix-systole packages igsio)
+               #:use-module (guix-systole packages openigtlink)
                )
 
 (define-public pluslib
@@ -87,6 +88,9 @@
                                ; openjpeg
                                ijg-libjpeg
                                freetype
+
+                               openigtlink
+                               openigtlinkio-igsio
                                ))
                  (home-page "plustoolkit.github.io")
                  (synopsis "Software library for data acquisition, pre-processing, and calibration for navigated image-guided interventions.")

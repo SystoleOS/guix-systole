@@ -1,0 +1,26 @@
+diff --git a/Devices/igtlioImageDevice.cxx b/Devices/igtlioImageDevice.cxx
+index 962c9db..4b34a0c 100644
+--- a/Devices/igtlioImageDevice.cxx
++++ b/Devices/igtlioImageDevice.cxx
+@@ -91,7 +91,7 @@ igtl::MessageBase::Pointer igtlioImageDevice::GetIGTLMessage()
+ {
+  if (!Content.image)
+   {
+-  vtkWarningMacro("Image is NULL, message not generated.")
++  vtkWarningMacro("Image is NULL, message not generated.");
+   return 0;
+   }
+ 
+diff --git a/Devices/igtlioVideoDevice.cxx b/Devices/igtlioVideoDevice.cxx
+index 0ee9653..8a7070f 100644
+--- a/Devices/igtlioVideoDevice.cxx
++++ b/Devices/igtlioVideoDevice.cxx
+@@ -166,7 +166,7 @@ igtl::MessageBase::Pointer igtlioVideoDevice::GetIGTLMessage()
+ {
+  if (!Content.image)
+   {
+-  vtkWarningMacro("Video is NULL, message not generated.")
++  vtkWarningMacro("Video is NULL, message not generated.");
+   return 0;
+   }
+   int imageSizePixels[3] = { 0 };
