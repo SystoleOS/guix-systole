@@ -1,0 +1,29 @@
+diff --git a/src/PlusCommon/CMakeLists.txt b/src/PlusCommon/CMakeLists.txt
+index 716ae13c..ef7005da 100644
+--- a/src/PlusCommon/CMakeLists.txt
++++ b/src/PlusCommon/CMakeLists.txt
+@@ -61,15 +61,8 @@ IF(VTKVIDEOIO_ENABLE_MKV)
+   LIST(APPEND ${PROJECT_NAME}_HDRS IO/vtkPlusMkvSequenceIO.h)
+ ENDIF()
+ 
+-# If igtlioConverter was compiled as a static library, we do not need igtlio in the install configuration
+-GET_PROPERTY(IGTLIO_LIB_TYPE TARGET igtlioConverter PROPERTY STATIC_LIBRARY_FLAGS)
+-IF(NOT IGTLIO_LIB_TYPE STREQUAL "STATIC_LIBRARY")
+-  SET(OPENIGTLINKIO_CONFIG_CODE [=[
+-    IF(NOT DEFINED OpenIGTLinkIO_DIR)
+-      SET(OpenIGTLinkIO_DIR "@OpenIGTLinkIO_DIR@")
+-    ENDIF()
+-    FIND_PACKAGE(OpenIGTLinkIO NO_MODULE REQUIRED)]=])
+-ENDIF()
++# OpenIGTLinkIO is build externally; skip checking target properties and find package instead
++FIND_PACKAGE(OpenIGTLinkIO NO_MODULE REQUIRED)
+ 
+ # --------------------------------------------------------------------------
+ # Build the library
+@@ -160,4 +153,4 @@ PlusLibInstallLibrary(vtk${PROJECT_NAME} ${PROJECT_NAME})
+ #
+ IF(BUILD_TESTING)
+   SUBDIRS(Testing)
+-ENDIF()
+\ No newline at end of file
++ENDIF()

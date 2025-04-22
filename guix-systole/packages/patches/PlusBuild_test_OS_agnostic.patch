@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5a2255f..498f2c1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -68,6 +68,7 @@ ELSE()
+     PATHS
+       "c:/Program Files/Git/bin/"
+       "c:/Program Files (x86)/Git/bin/"
++      "/gnu/store/"
+     )
+   FIND_PACKAGE(Git)
+ 
