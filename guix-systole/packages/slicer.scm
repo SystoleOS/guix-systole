@@ -32,6 +32,7 @@
   #:use-module (guix build-system qt)
   #:use-module (guix download)
   #:use-module (guix gexp)
+  #:use-module (guix git-download)
   #:use-module (guix packages)
   #:use-module (guix-systole packages ctk)
   #:use-module (guix-systole packages itk)
@@ -60,7 +61,8 @@
                  "0008-COMP-packages-slicer-MRMLWidgets-add-vtk-dependency.patch"
                  "0009-COMP-packages-slicer-Add-itk-as-required.patch"
                  "0010-COMP-packages-slicer-Limit-CPack.patch"
-                 "0015-COMP-packages-slicer-Remove-LastConfigureStep.patch"))))
+                 "0015-COMP-packages-slicer-Remove-LastConfigureStep.patch"
+                 "0016-COMP-packages-slicer-Disable-modules.patch"))))
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f
@@ -89,8 +91,8 @@
                           "-DSlicer_BUILD_CLI_SUPPORT:BOOL=ON"
 
                           ;; QT
-                          "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=ON" ;; Required to use Slicer modules
-                          "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"
+                          ;; "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=ON" ;Required to use Slicer modules
+                          ;; "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"
                           "-DSlicer_BUILD_QT_DESIGNER_PLUGINS:BOOL=OFF" ;Turn ON?
                           "-DSlicer_USE_QtTesting:BOOL=OFF"
                           "-DSlicer_USE_SlicerITK:BOOL=ON"
@@ -288,4 +290,173 @@ application developers. The Execution Model provides a simple mechanism for
 incorporating command line programs as Slicer modules. These command line
 modules are self-describing, emitting an XML description of its command line
 arguments. Slicer uses this XML description to construct a GUI for the module.")
+    (license license:bsd-2)))
+
+;; -----------------------------------------------------------------------------
+;; Slicer Core Modules
+;; -----------------------------------------------------------------------------
+;; (define-public slicer-core-loadable-plots
+;;   (package
+;;     (name "slicer-core-loadable-plots")
+;;     (version "2.0.0")
+;;     (source
+;;      (origin
+;;        (method git-fetch)
+;;        (uri (git-reference
+;;              (url "https://github.com/Slicer/Slicer.git")
+;;              (commit "11eaf62e5a70b828021ff8beebbdd14d10d4f51c")))
+
+;;        (sha256
+;;         (base32 "00kgzgl0x7acrcb34sfg9vqwxaqh9w9ddnlp0s61br9fbfdhssrw"))
+;;        (patches (search-patches
+;;                  "0017-ENH-packages-slicer-Make-Plots-a-separate-module.patch"))))
+;;     (build-system cmake-build-system)
+;;     (arguments
+;;      `(#:tests? #f
+;;        #:parallel-build? #f
+;;        #:configure-flags (list "-DBUILD_TESTING:BOOL=OFF"
+;;                                "-DSlicer_SUPERBUILD:BOOL=OFF")
+
+;;        #:phases (modify-phases %standard-phases
+;;                   (add-after 'unpack 'sparse-checkout
+;;                     (lambda* (#:key inputs outputs #:allow-other-keys)
+;;                       (invoke "git" "sparse-checkout" "set"
+;;                               "Modules/Loadable/Plots"))))))
+;;     (inputs (list slicer-5.8
+;;                   git
+
+;;                   ;; TODO Check if the inputs are required
+;;                   libxt
+;;                   eigen
+;;                   expat
+;;                   openssl-3.0
+;;                   git
+;;                   hdf5
+;;                   libffi
+;;                   libjpeg-turbo
+;;                   libxinerama
+;;                   mesa ;libGL equivalent
+;;                   rapidjson
+;;                   tbb
+
+;;                   ;; QT5
+;;                   qtbase-5
+;;                   qtmultimedia-5
+;;                   qtxmlpatterns
+;;                   qtdeclarative-5
+;;                   qtsvg-5
+;;                   qtx11extras
+;;                   qtwebengine-5
+;;                   qtwebchannel-5
+;;                   qttools-5
+
+;;                   ;; VTK
+;;                   vtk-slicer
+;;                   double-conversion
+;;                   freetype
+;;                   gl2ps
+;;                   glew
+;;                   jsoncpp
+;;                   libharu
+;;                   libtheora
+;;                   libxml++
+;;                   lz4
+;;                   mpich
+;;                   netcdf
+;;                   proj))
+;;     (home-page
+;;      "https://slicer.readthedocs.io/en/latest/user_guide/modules/plots.html")
+;;     (synopsis
+;;      "This module can display interactive line and bar plots in the view layout.")
+;;     (description
+;;      " A plot chart can display one or more plot series. The plot series 
+;; specifies the plot type (line, bar, scatter, scatter bar), data source (table 
+;; and column for x and y data), and appearance (lines style, marker style, etc.).")
+;;     (license license:bsd-2)))
+
+(define-public slicer-core-loadable-plots
+  (package
+    (name "slicer-core-loadable-plots")
+    (version "2.0.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri
+        "https://github.com/Slicer/Slicer/archive/11eaf62e5a70b828021ff8beebbdd14d10d4f51c.tar.gz")
+       (sha256
+        (base32 "05rz797ddci3a2m8297zyzv2g2hp6bd6djmwa1n0gbsla8b175bx"))
+       (patches (search-patches
+                 "0017-ENH-packages-slicer-Make-Plots-a-separate-module.patch"))))
+    (build-system cmake-build-system)
+    (arguments
+     `(#:tests? #f
+       #:parallel-build? #f
+       #:configure-flags (list "-DBUILD_TESTING:BOOL=OFF"
+                               "-DSlicer_SUPERBUILD:BOOL=OFF"
+                               "-DCMAKE_USE_DIR=Modules/Loadable/Plots"
+                               
+                               ;; Python
+                               "-DVTK_WRAP_PYTHON:BOOL=OFF"
+                               "-DSlicer_USE_PYTHONQT:BOOL=OFF"
+                               "-DSlicer_USE_SYSTEM_python:BOOL=OFF"
+                               "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=OFF" ;Disabled as we do not have IODCMTK support yet
+                               )))
+    (inputs (list slicer-5.8
+                  git ;TODO Check if the inputs are required
+                  libxt
+                  eigen
+                  expat
+                  openssl-3.0
+                  git
+                  hdf5
+                  libffi
+                  libjpeg-turbo
+                  libxinerama
+                  mesa ;libGL equivalent
+                  rapidjson
+                  tbb
+
+                  ;; QT5
+                  qtbase-5
+                  qtmultimedia-5
+                  qtxmlpatterns
+                  qtdeclarative-5
+                  qtsvg-5
+                  qtx11extras
+                  qtwebengine-5
+                  qtwebchannel-5
+                  qttools-5
+
+                  ;; VTK
+                  vtk-slicer
+                  double-conversion
+                  freetype
+                  gl2ps
+                  glew
+                  jsoncpp
+                  libharu
+                  libtheora
+                  libxml++
+                  lz4
+                  mpich
+                  netcdf
+                  proj
+
+                  ;; Other Slicer modules
+                  ctk
+                  ctkapplauncher
+                  itk-slicer
+                  libarchive-slicer
+                  teem-slicer
+                  vtkaddon
+                  slicerexecutionmodel
+                  qrestapi))
+    (home-page
+     "https://slicer.readthedocs.io/en/latest/user_guide/modules/plots.html")
+    (synopsis
+     "This module can display interactive line and bar plots in the view layout.")
+    (description
+     " A plot chart can display one or more plot series. The plot series 
+specifies the plot type (line, bar, scatter, scatter bar), data source (table 
+and column for x and y data), and appearance (lines style, marker style, etc.).")
     (license license:bsd-2)))

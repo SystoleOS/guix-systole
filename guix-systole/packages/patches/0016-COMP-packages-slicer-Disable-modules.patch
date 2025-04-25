@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f7fdc5646c..eee11ba33a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1087,7 +1087,7 @@ set(Slicer_GUI_LIBRARY qSlicerBaseQTApp)
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Modules/Core)
+ add_subdirectory(Base/QTApp)
+-add_subdirectory(Modules)
++#add_subdirectory(Modules)
+ add_subdirectory(
+   ${Slicer_APPLICATIONS_DIR}
+   ${CMAKE_CURRENT_BINARY_DIR}/Applications
