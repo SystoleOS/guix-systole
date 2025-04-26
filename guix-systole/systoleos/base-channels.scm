@@ -3,6 +3,10 @@
 ;; The Nonguix channel is necessary for the Linux kernel with nonfree blobs,
 ;; required by most commercial hardware.
 
+(define-module (guix-systole systoleos base-channels))
+
+(use-modules (guix channels))
+
 (cons* (channel
         (name 'nonguix)
         (url "https://gitlab.com/nonguix/nonguix")
