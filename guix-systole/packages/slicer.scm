@@ -374,9 +374,9 @@ arguments. Slicer uses this XML description to construct a GUI for the module.")
 ;; and column for x and y data), and appearance (lines style, marker style, etc.).")
 ;;     (license license:bsd-2)))
 
-(define-public slicer-core-loadable-plots
+(define-public slicer-plots
   (package
-    (name "slicer-core-loadable-plots")
+    (name "slicer-plots")
     (version "2.0.0")
     (source
      (origin
