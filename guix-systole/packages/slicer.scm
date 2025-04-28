@@ -53,9 +53,9 @@
        (sha256
         (base32 "05rz797ddci3a2m8297zyzv2g2hp6bd6djmwa1n0gbsla8b175bx"))
        (patches (search-patches
-                 "0002-COMP-Add-vtk-CommonSystem-component-as-requirement.patch"
-                 "0003-COMP-Find-Eigen-required.patch"
-                 "0004-COMP-Adapt-to-new-qRestAPI-cmake.patch"
+                 "0002-COMP-packages-slicer-Add-vtk-CommonSystem-component-as-requirement.patch"
+                 "0003-COMP-packages-slicer-Find-Eigen-required.patch"
+                 "0004-COMP-packages-slicer-Adapt-to-new-qRestAPI-cmake.patch"
                  "0006-COMP-packages-slicer-hard-code-libteem-so.patch"
                  "0008-COMP-packages-slicer-MRMLWidgets-add-vtk-dependency.patch"
                  "0009-COMP-packages-slicer-Add-itk-as-required.patch"
