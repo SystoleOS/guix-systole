@@ -20,7 +20,7 @@
        (sha256
         (base32 "0jfnja3frcm4vkibi1vygdh7f4dmhqxni43bbb3rmlcl6jlyaibl"))
        (patches (search-patches
-                 "0001-ENH-Refactor-CMake-project-infrastructure.patch"))))
+                 "0001-ENH-packages-slicer-Refactor-CMake-project-infrastructure.patch"))))
     (build-system cmake-build-system)
     (arguments
      '(#:tests? #f
