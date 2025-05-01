@@ -3,7 +3,7 @@
   (dependencies
     (channel
       (name 'nonguix)
-      (url "https://gitlab.com/nonguix/nonguix";)
+      (url "https://gitlab.com/nonguix/nonguix")
       ;; Enable signature verification
       (introduction
         (make-channel-introduction
@@ -14,6 +14,5 @@
         )
       )
     )
-    %default-channels
   )
 )
