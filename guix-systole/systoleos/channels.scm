@@ -3,9 +3,11 @@
 ;; The Nonguix channel is necessary for the Linux kernel with nonfree blobs,
 ;; required by most commercial hardware.
 
-(define-module (guix-systole systoleos base-channels))
+; (define-module (guix-systole systoleos base-channels))
+(define-module (channels)
+               #:use-module (guix channels)
+               #:export (channels))
 
-(use-modules (guix channels))
 
 (cons* (channel
         (name 'nonguix)
@@ -19,6 +21,7 @@
        (channel
          (name 'guix-systole)
          (url "https://github.com/SystoleOS/guix-systole")
-         (branch "dev")
+         ; (branch "dev")
+         (branch "SCRUM-126-Define-package-for-SystoleOS-including-Slicer")
          )
        %default-channels)

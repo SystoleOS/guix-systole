@@ -19,7 +19,6 @@
                #:use-module (gnu services base)
                #:use-module (gnu services desktop)
                #:use-module (gnu services xorg)
-               ; #:use-module (gnu services sddm)
                #:use-module (gnu services lightdm)
                #:use-module (gnu system)
                #:use-module (gnu system image)
@@ -30,6 +29,7 @@
                #:use-module (gnu bootloader)
                #:use-module (gnu bootloader grub)
                #:use-module (gnu image)
+               #:use-module (gnu packages)
                #:use-module (nongnu packages linux)
                #:use-module (nongnu system linux-initrd)
                #:use-module (guix-systole services dicomd-service)
@@ -57,13 +57,16 @@
          (channel
            (name 'guix-systole)
            (url "https://github.com/SystoleOS/guix-systole")
+           ; (branch "dev")
+           (branch "SCRUM-126-Define-package-for-SystoleOS-including-Slicer")
            )
          %default-channels))
 
 (define systoleos-configuration
   (operating-system
     (inherit installation-os)
-    (kernel linux-lts)
+    ; (kernel linux-lts)
+    (kernel linux)
     ; (initrd microcode-initrd)
     (firmware (list linux-firmware iucode-tool amd-microcode))
 
@@ -98,6 +101,13 @@
                    )
                  %base-user-accounts))
 
+    ; (guix-configuration
+    ;   (channels %channels)
+    ;   (authorized-keys (cons* %signing-key %default-authorized-guix-keys))
+    ;   (substitute-urls (append %default-substitute-urls
+    ;                            (list "https://substitutes.nonguix.org")))
+    ;   )
+
     (packages (append (list
                         ;; Slicer
                         slicer-5.8
@@ -114,7 +124,7 @@
                       %base-packages))
 
     (services
-                (cons*
+                (append (list
 
                     ;; LightDM display manager
                     ;; Configuration documentation: https://guix.gnu.org/manual/en/html_node/X-Window.html
@@ -153,7 +163,6 @@
                       )
 
                     ;; Use Dicomd service defined in guix-systole
-                    ; (list (service dicomd-service-type))
                     (service dicomd-service-type)
 
                 ;; Include the channel file so that it can be used during installation
@@ -161,14 +170,23 @@
                 ;                 (list `("channels.scm" ,(local-file "base-channels.scm")))
                 ;                 )
 
-                ;; Use nonguix channel and include the nonguix substitutes server
+                ;; Include the channel file so that it can be used during installation
+                (extra-special-file
+                  "/etc/guix/channels.scm"
+                  (local-file "channels.scm")
+                  ; (local-file "guix-systole/systoleos/channels.scm")
+                  )
+
+                )
+
+                ; Use nonguix channel and include the nonguix substitutes server
                 ; (modify-services (operating-system-user-services installation-os)
-                ;                  (guix-system-type
+                ;                  (guix-service-type
                 ;                    config => (guix-configuration
                 ;                                (inherit config)
                 ;                                (guix (guix-for-channels %channels))
                 ;                                (authorized-keys
-                ;                                  (list %signing-key
+                ;                                  (cons* %signing-key
                 ;                                        %default-authorized-guix-keys)
                 ;                                  )
                 ;                                (substitute-urls
@@ -183,8 +201,38 @@
                 ; %desktop-services
                 (modify-services %desktop-services
                                  (delete gdm-service-type)
+                                 (guix-service-type
+                                   config => (guix-configuration
+                                               (inherit config)
+                                               (guix (guix-for-channels %channels))
+                                               (authorized-keys
+                                                 (cons* %signing-key
+                                                       %default-authorized-guix-keys)
+                                                 )
+                                               (substitute-urls
+                                                 `(,@%default-substitute-urls
+                                                    "https://substitutes.nonguix.org")
+                                                 )
+                                               (channels %channels)
+                                               )
+                                   )
+                                  ; (set-xorg-configuration
+                                  ;   (xorg-configuration
+                                  ;     (keyboard-layout (keyboard-layout "altgr-intl"))
+                                  ;     )
+                                  ;   lightdm-service-type
+                                  ;   )
                                  )
-                ; %base-services
+                ; (modify-services %desktop-services
+                ;                  (delete gdm-service-type)
+                ;                  (xorg-service-type config =>
+                ;                                     (xorg-configuration
+                ;                                       (inherit config)
+                ;                                       (keyboard-layout (keyboard-layout "altgr-intl"))
+                ;                                       )
+                ;                                     ; lightdm-service-type
+                ;                                     )
+                ;                  )
                 )
               )
 
