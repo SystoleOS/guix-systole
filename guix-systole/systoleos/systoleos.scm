@@ -80,8 +80,8 @@
     #~(begin
         (with-output-to-file %output
                              (lambda ()
-                               ; (display (sexp->string '%(%channels)))
-                               (write #$%channels)
+                               (display (sexp->string '%(%channels)))
+                               ; (write #$%channels)
                                (newline)
                                )
                              )
