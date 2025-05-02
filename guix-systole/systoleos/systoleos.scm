@@ -73,7 +73,7 @@
                                                   )
                                                 )
                        out)
-        #:local-build? #t)))
+        #:local-build? #t))))
 
 (define systoleos-configuration
   (operating-system
