@@ -62,6 +62,19 @@
            )
          %default-channels))
 
+;; Serialise the contents of %channels into a file at build time
+(let ((serialise-channels
+        (computed-file "channels.scm"
+                       #~(let ((out (string-append %output "/channels.scm")))
+                           (with-output-to-file out
+                                                (lambda ()
+                                                  (write #$%channels)
+                                                  (newline)
+                                                  )
+                                                )
+                       out)
+        #:local-build? #t)))
+
 (define systoleos-configuration
   (operating-system
     (inherit installation-os)
@@ -173,8 +186,9 @@
                 ;; Include the channel file so that it can be used during installation
                 (extra-special-file
                   "/etc/guix/channels.scm"
-                  (local-file "channels.scm")
+                  ; (local-file "channels.scm")
                   ; (local-file "guix-systole/systoleos/channels.scm")
+                  serialise-channels
                   )
 
                 )

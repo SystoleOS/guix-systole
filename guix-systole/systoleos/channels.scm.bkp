@@ -4,9 +4,9 @@
 ;; required by most commercial hardware.
 
 ; (define-module (guix-systole systoleos base-channels))
-; (define-module (channels)
-;                #:use-module (guix channels)
-;                #:export (channels))
+(define-module (guix-systole systoleos channels)
+               #:use-module (guix channels)
+               #:export (channels))
 
 
 (cons* (channel
