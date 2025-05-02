@@ -74,14 +74,27 @@
 ;                                                 )
 ;                        out)
 ;         #:local-build? #t))))
+; (define serialise-channels
+;   (computed-file
+;     "channels.scm"
+;     #~(begin
+;         (with-output-to-file %output
+;                              (lambda ()
+;                                (display (sexp->string '%(%channels)))
+;                                ; (write #$%channels)
+;                                (newline)
+;                                )
+;                              )
+;         )
+;     )
+;   )
 (define serialise-channels
-  (computed-file
+  (scheme-file
     "channels.scm"
     #~(begin
         (with-output-to-file %output
                              (lambda ()
                                (display (sexp->string '%(%channels)))
-                               ; (write #$%channels)
                                (newline)
                                )
                              )
