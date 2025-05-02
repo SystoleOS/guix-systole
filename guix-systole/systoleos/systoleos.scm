@@ -63,17 +63,31 @@
          %default-channels))
 
 ;; Serialise the contents of %channels into a file at build time
-(let ((serialise-channels
-        (computed-file "channels.scm"
-                       #~(let ((out (string-append %output "/channels.scm")))
-                           (with-output-to-file out
-                                                (lambda ()
-                                                  (write #$%channels)
-                                                  (newline)
-                                                  )
-                                                )
-                       out)
-        #:local-build? #t))))
+; (let ((serialise-channels
+;         (computed-file "channels.scm"
+;                        #~(let ((out (string-append %output "/channels.scm")))
+;                            (with-output-to-file out
+;                                                 (lambda ()
+;                                                   (write #$%channels)
+;                                                   (newline)
+;                                                   )
+;                                                 )
+;                        out)
+;         #:local-build? #t))))
+(define serialise-channels
+  (computed-file
+    "channels.scm"
+    #~(begin
+        (with-output-to-file %output
+                             (lambda ()
+                               ; (display (sexp->string '%(%channels)))
+                               (write #$%channels)
+                               (newline)
+                               )
+                             )
+        )
+    )
+  )
 
 (define systoleos-configuration
   (operating-system
