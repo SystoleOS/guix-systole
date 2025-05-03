@@ -5,7 +5,7 @@
 
 # Build the iso image
 printf 'Building the image...\n\n'
-image=$(guix time-machine -C './guix-systole/systoleos/channels.scm' \
+image=$(guix time-machine -C './guix-systole/systoleos/channels.scm.bkp' \
 --substitute-urls='https://ci.guix.gnu.org https://bordeaux.guix.gnu.org https://substitutes.nonguix.org' \
 -- system image -t iso9660 './guix-systole/systoleos/systoleos.scm')
 

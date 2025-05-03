@@ -34,7 +34,6 @@
                #:use-module (nongnu system linux-initrd)
                #:use-module (guix-systole services dicomd-service)
                #:use-module (guix-systole packages slicer)
-               #:use-module (guix-systole packages qrestapi)
                )
 
 ;; https://substitutes.nonguix.org/signing-key.pub
@@ -56,15 +55,15 @@
             (openpgp-fingerprint
              "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
          (channel
-         (name 'guix)
-         (url "https://codeberg.org/guix/guix-mirror.git")
-         (branch "master")
-         (introduction
-           (make-channel-introduction
-             "c91e27c60864faa229198f6f0caf620275c429a2"
-             (openpgp-fingerprint
-               "2841 9AC6 5038 7440 C7E9 2FFA 2208 D209 58C1 DEB0"))
-           )
+          (name 'guix)
+          (url "https://codeberg.org/guix/guix-mirror.git")
+          (branch "master")
+          (introduction
+            (make-channel-introduction
+              "c91e27c60864faa229198f6f0caf620275c429a2"
+              (openpgp-fingerprint
+                "2841 9AC6 5038 7440 C7E9 2FFA 2208 D209 58C1 DEB0"))
+            )
          )
          (channel
            (name 'guix-systole)
@@ -152,13 +151,6 @@
                    (supplementary-groups (list "wheel" "netdev" "audio" "video"))
                    )
                  %base-user-accounts))
-
-    ; (guix-configuration
-    ;   (channels %channels)
-    ;   (authorized-keys (cons* %signing-key %default-authorized-guix-keys))
-    ;   (substitute-urls (append %default-substitute-urls
-    ;                            (list "https://substitutes.nonguix.org")))
-    ;   )
 
     (packages (append (list
                         ;; Slicer

@@ -1,8 +1,5 @@
 (channel
   (version 0)
-  (name guix-systole)
-  (url "https://github.com/SystoleOS/guix-systole")
-  (branch "SCRUM-126-Define-package-for-SystoleOS-including-Slicer")
   (dependencies
     (channel
       (name nonguix)
