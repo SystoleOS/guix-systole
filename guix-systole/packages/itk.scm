@@ -111,7 +111,6 @@
                       netcdf
                       proj
                       qtbase-5
-                      hdf5
                       vtk-slicer
 
                       ;; GrowCut
