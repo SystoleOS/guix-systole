@@ -34,6 +34,7 @@
                #:use-module (nongnu system linux-initrd)
                #:use-module (guix-systole services dicomd-service)
                #:use-module (guix-systole packages slicer)
+               #:use-module (guix-systole packages qrestapi)
                )
 
 ;; https://substitutes.nonguix.org/signing-key.pub
