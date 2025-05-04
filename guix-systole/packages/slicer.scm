@@ -36,7 +36,7 @@
   #:use-module (guix-systole packages ctk)
   #:use-module (guix-systole packages itk)
   #:use-module (guix-systole packages libarchive)
-  #:use-module (guix-systole packages qrestapi)
+  ; #:use-module (guix-systole packages qrestapi)
   #:use-module (guix-systole packages teem)
   #:use-module (guix-systole packages vtk)
   #:use-module (guix-systole packages))
@@ -212,7 +212,8 @@
                   teem-slicer
                   vtkaddon
                   slicerexecutionmodel
-                  qrestapi))
+                  ; qrestapi))
+                  ))
     (native-inputs (list pkg-config))
     (synopsis "3D Slicer - Medical visualization and computing environment")
     (description
