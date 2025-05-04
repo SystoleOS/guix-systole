@@ -124,7 +124,7 @@
                   freetype
                   gl2ps
                   glew
-                  hdf5-1.10
+                  hdf5
                   libjpeg-turbo
                   libxml2
                   jsoncpp

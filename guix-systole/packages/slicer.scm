@@ -170,7 +170,7 @@
                   expat
                   openssl-3.0
                   git
-                  hdf5-1.10
+                  hdf5
                   libffi
                   libjpeg-turbo
                   libxinerama
@@ -262,7 +262,7 @@ visualization and medical image computing. It provides capabilities for:
              freetype
              gl2ps
              glew
-             hdf5-1.10
+             hdf5
              libharu
              libjpeg-turbo
              libogg

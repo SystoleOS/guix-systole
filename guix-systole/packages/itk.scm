@@ -97,7 +97,6 @@
                       #t)))))
 
     (inputs (modify-inputs (package-inputs insight-toolkit)
-                           (replace "hdf5" hdf5-1.10)
               (append ;vtk
                       double-conversion
                       freetype
