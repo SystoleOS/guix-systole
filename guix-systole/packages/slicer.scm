@@ -164,7 +164,24 @@
                                (string-append (string-append (assoc-ref
                                                               outputs "out")
                                                              "/bin/Slicer")))
-                      #t)))))
+                      #t))
+                  (add-after 'install 'desktop-entry
+                    (lambda* (#:key outputs #:allow-other-keys)
+                      (let* ((out (assoc-ref outputs "out"))
+                             (apps-dir (string-append out
+                                                      "/share/applications"))
+                             (desktop (string-append apps-dir
+                                                     "/slicer.desktop")))
+                        (mkdir-p apps-dir)
+                        (make-desktop-entry-file desktop
+                         #:name "3dslicer"
+                         #:comment
+                         "A free, open source and multi-platform software package widely used for medical, biomedical, and related imaging research"
+                         ;; #:exec (string-append out "/bin/Slicer")
+                         #:exec (string-append out "/Slicer")
+                         #:categories '("Graphics" "MedicalSoftware" "Science")
+                         #:startup-notify #f
+                         #:terminal #f)) #t)))))
     (inputs (list libxt
                   eigen
                   expat
