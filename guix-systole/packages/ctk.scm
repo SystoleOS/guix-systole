@@ -88,7 +88,7 @@
            vtk-slicer
            itk-slicer
                                         ; --- Libraries for Visualization VTK widgets and ITK core ---
-           hdf5
+           hdf5-1.10
            python
            glew
            libtheora
