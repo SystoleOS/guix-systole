@@ -21,7 +21,7 @@
        (sha256
         (base32 "0jfnja3frcm4vkibi1vygdh7f4dmhqxni43bbb3rmlcl6jlyaibl"))
        ; (patches (search-patches
-       (patches (list (search-patch
+       (patches (list (local-file
                  "0001-ENH-Refactor-CMake-project-infrastructure.patch"))))
      )
     (build-system cmake-build-system)
