@@ -6,7 +6,8 @@
   #:use-module (guix build-system cmake)
   #:use-module ((guix licenses)
                 #:prefix license:)
-  #:use-module (guix-systole packages))
+  ; #:use-module (guix-systole packages)
+  )
 
 (define-public qrestapi
   (package
@@ -19,8 +20,10 @@
         "https://github.com/commontk/qRestAPI/archive/88c02c5d90169dfe065fa068969e59ada314d3cb.tar.gz")
        (sha256
         (base32 "0jfnja3frcm4vkibi1vygdh7f4dmhqxni43bbb3rmlcl6jlyaibl"))
-       (patches (search-patches
+       ; (patches (search-patches
+       (patches (list (search-patch
                  "0001-ENH-Refactor-CMake-project-infrastructure.patch"))))
+     )
     (build-system cmake-build-system)
     (arguments
      '(#:tests? #f
