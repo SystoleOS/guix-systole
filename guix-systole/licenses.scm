@@ -1,4 +1,5 @@
 (define-module (guix-systole licenses)
+               #:use-module (guix licenses)
   #:export (slul))
 
 ;; Guix does not export the license record constructor.
