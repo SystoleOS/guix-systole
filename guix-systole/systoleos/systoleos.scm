@@ -132,8 +132,7 @@
                        ;; utils
                        git
                        curl
-                       vim
-                       stow) %base-packages))
+                       vim) %base-packages))
 
     (services
      (append (list
