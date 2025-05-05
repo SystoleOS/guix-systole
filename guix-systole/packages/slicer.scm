@@ -29,6 +29,7 @@
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages)
   #:use-module (guix build-system cmake)
+  #:use-module (guix build-system copy)
   #:use-module (guix build-system qt)
   #:use-module (guix download)
   #:use-module (guix gexp)
@@ -60,7 +61,8 @@
                  "0008-COMP-packages-slicer-MRMLWidgets-add-vtk-dependency.patch"
                  "0009-COMP-packages-slicer-Add-itk-as-required.patch"
                  "0010-COMP-packages-slicer-Limit-CPack.patch"
-                 "0015-COMP-packages-slicer-Remove-LastConfigureStep.patch"))))
+                 "0015-COMP-packages-slicer-Remove-LastConfigureStep.patch"
+                 "0016-ENH-packages-slicer-Add-External-Modules-directory.patch"))))
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f
@@ -164,7 +166,16 @@
                                (string-append (string-append (assoc-ref
                                                               outputs "out")
                                                              "/bin/Slicer")))
-                      #t)))))
+                      #t))
+
+                  ;; Symlink Slicer Core Modules
+                  (add-before 'configure 'core-modules-symlink
+                    (lambda* (#:key inputs outputs #:allow-other-keys)
+                      ;; Loadables
+                      (symlink (assoc-ref inputs "slicer-plots")
+                               "Modules/External/Plots") #t))
+
+                  )))
     (inputs (list libxt
                   eigen
                   expat
@@ -188,6 +199,9 @@
                   qtwebengine-5
                   qtwebchannel-5
                   qttools-5
+
+                  ;; Slicer Core Modules
+                  slicer-plots
 
                   ;; VTK
                   vtk-slicer
@@ -288,4 +302,35 @@ application developers. The Execution Model provides a simple mechanism for
 incorporating command line programs as Slicer modules. These command line
 modules are self-describing, emitting an XML description of its command line
 arguments. Slicer uses this XML description to construct a GUI for the module.")
+    (license license:bsd-2)))
+
+;; -----------------------------------------------------------------------------
+;; Slicer Core Modules
+;; -----------------------------------------------------------------------------
+(define slicer-plots
+  (package
+    (name "slicer-plots")
+    (version "2.0.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri
+        "https://github.com/Slicer/Slicer/archive/11eaf62e5a70b828021ff8beebbdd14d10d4f51c.tar.gz")
+       (sha256
+        (base32 "05rz797ddci3a2m8297zyzv2g2hp6bd6djmwa1n0gbsla8b175bx"))
+       (patches (search-patches
+                 "0017-ENH-packages-slicer-Include-macros-to-Plots-module.patch"))))
+    (build-system copy-build-system)
+    (arguments
+     `(#:install-plan '(("./Modules/Loadable/Plots" "/"))
+       #:phases (modify-phases %standard-phases
+                  (delete 'build))))
+    (home-page
+     "https://slicer.readthedocs.io/en/latest/user_guide/modules/plots.html")
+    (synopsis
+     "This module can display interactive line and bar plots in the view layout.")
+    (description
+     " A plot chart can display one or more plot series. The plot series 
+specifies the plot type (line, bar, scatter, scatter bar), data source (table 
+and column for x and y data), and appearance (lines style, marker style, etc.).")
     (license license:bsd-2)))

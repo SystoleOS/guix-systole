@@ -1,0 +1,25 @@
+diff --git a/Modules/Loadable/CMakeLists.txt b/Modules/Loadable/CMakeLists.txt
+index 606011bac6..745232e19b 100644
+--- a/Modules/Loadable/CMakeLists.txt
++++ b/Modules/Loadable/CMakeLists.txt
+@@ -18,7 +18,7 @@ set(qtmodules
+   Transforms
+   Data
+   Models
+-  Plots
++  #Plots
+   Segmentations
+   Sequences
+   SlicerWelcome
+diff --git a/Modules/Loadable/Plots/CMakeLists.txt b/Modules/Loadable/Plots/CMakeLists.txt
+index 4685399f1f..4a8c56dee6 100644
+--- a/Modules/Loadable/Plots/CMakeLists.txt
++++ b/Modules/Loadable/Plots/CMakeLists.txt
+@@ -2,6 +2,7 @@
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Plots)
+ 
++include(${Slicer_CMAKE_DIR}/SlicerMacroBuildLoadableModule.cmake)
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
+ #-----------------------------------------------------------------------------

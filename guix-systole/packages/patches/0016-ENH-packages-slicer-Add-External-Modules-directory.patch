@@ -1,0 +1,28 @@
+diff --git a/Modules/CMakeLists.txt b/Modules/CMakeLists.txt
+index 3f6fa9eab4..a29305d328 100644
+--- a/Modules/CMakeLists.txt
++++ b/Modules/CMakeLists.txt
+@@ -12,3 +12,6 @@ endif()
+ if(Slicer_BUILD_CLI_SUPPORT AND Slicer_BUILD_CLI)
+   add_subdirectory(CLI)
+ endif()
++
++# Build external modules
++add_subdirectory(External)
+diff --git a/Modules/External/CMakeLists.txt b/Modules/External/CMakeLists.txt
+new file mode 100644
+index 0000000000..fde9267043
+--- /dev/null
++++ b/Modules/External/CMakeLists.txt
+@@ -0,0 +1,11 @@
++## External dependencies can be added to this directory. Slicer will
++## automatically build them.
++
++file(GLOB children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} */)
++
++foreach(child ${children})
++    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${child}" AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${child}/CMakeLists.txt")
++      add_subdirectory(${child})
++    endif()
++endforeach()
++
