@@ -1,0 +1,10 @@
+table Icon
+Caption: DICOM-Store
+CaptionTip: DICOM-Store directory
+Command: thunar /var/dicom-store
+Icon: /run/current-system/profile/share/icons/oxygen/base/64x64/places/folder.png
+Width: 64
+Height: 64
+X: 64
+Y: 64
+end

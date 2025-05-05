@@ -1,0 +1,7 @@
+#! Unbind all default key bindings
+#none none :nop
+# Normal window movement.
+OnTitlebar Move1 :StartMoving
+OnLeftGrip Move1 :StartResizing bottomleft
+OnRightGrip Move1 :StartResizing bottomright
+OnWindowBorder Move1 :StartMoving

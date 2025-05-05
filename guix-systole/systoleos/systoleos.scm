@@ -2,7 +2,7 @@
 ;; `guix system image -L . -t iso9660 guix-systole/systoleos/systoleos.scm`
 
 (define-module (guix-systole systoleos systoleos)
-  #:use-module (guix)
+  ; #:use-module (guix)
   #:use-module (guix channels)
   ;; #:use-module (guix packages)
   #:use-module (guix gexp)
@@ -18,11 +18,19 @@
   #:use-module (gnu packages package-management)
   #:use-module (gnu packages terminals)
   #:use-module (gnu packages xorg)
+  #:use-module (gnu packages conky)
+  #:use-module (gnu packages image-viewers)
+  #:use-module (gnu packages fonts)
+  #:use-module (gnu packages wm)
+  #:use-module (gnu packages kde-frameworks)
+  #:use-module (gnu packages xfce)
   #:use-module (gnu services)
   #:use-module (gnu services base)
+  #:use-module (gnu services guix)
   #:use-module (gnu services desktop)
   #:use-module (gnu services xorg)
   #:use-module (gnu services lightdm)
+  #:use-module (gnu services networking)
   #:use-module (gnu system)
   #:use-module (gnu system image)
   #:use-module (gnu system install)
@@ -33,6 +41,8 @@
   #:use-module (gnu bootloader grub)
   #:use-module (gnu image)
   #:use-module (gnu packages)
+  #:use-module (gnu home)
+  #:use-module (gnu home services)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
   #:use-module (guix-systole services dicomd-service)
@@ -59,6 +69,15 @@
              (openpgp-fingerprint
               "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
          (channel
+           (name 'guix)
+           (url "https://codeberg.org/guix/guix-mirror.git")
+           (branch "master")
+           (introduction
+            (make-channel-introduction
+             "c91e27c60864faa229198f6f0caf620275c429a2"
+             (openpgp-fingerprint
+              "2841 9AC6 5038 7440 C7E9 2FFA 2208 D209 58C1 DEB0"))))
+         (channel
            (name 'guix-systole)
            (url "https://github.com/SystoleOS/guix-systole")
            ;; (branch "dev")
@@ -73,6 +92,42 @@
                        (display (sexp->string '%
                                               (%channels)))
                        (newline))))))
+
+;; Fluxbox configuration inspired by guix-psy-dicom
+;; https://github.com/OUH-MESHLab/guix-psy-dicom/blob/enhancement/psydicom_system/config.scm
+(define conkyrc
+  (local-file "etc/conky/conky.conf"))
+(define fluxbox-init
+  (local-file "etc/fluxbox/init"))
+(define fluxbox-keys
+  (local-file "etc/fluxbox/keys"))
+(define fluxbox-menu
+  (local-file "etc/fluxbox/menu"))
+(define fluxbox-startup
+  (local-file "etc/fluxbox/startup"))
+(define ideskrc
+  (local-file "etc/idesk/ideskrc"))
+(define idesk-icon-lnk
+  (local-file "etc/idesk/DICOMStore.lnk"))
+(define nftables-config
+  (local-file "etc/misc/nftables.conf"))
+(define user-home
+  (home-environment
+    (services
+     (cons*
+      (service
+       home-xdg-configuration-files-service-type
+       `())
+      (service
+       home-files-service-type
+       `((".fluxbox/init" ,fluxbox-init)
+         (".fluxbox/keys" ,fluxbox-keys)
+         (".fluxbox/startup" ,fluxbox-startup)
+         (".idesktop/DICOMStore.lnk" ,idesk-icon-lnk)
+         (".conkyrc" ,conkyrc)
+         (".ideskrc" ,ideskrc)
+         ))
+      %base-home-services))))
 
 (define systoleos-configuration
   (operating-system
@@ -102,7 +157,7 @@
                                   (type "vfat"))) %base-file-systems))
 
     ;; The `brainlabmirror` account must be initialised with `passwd` command
-    (users (cons (user-account
+    (users (append (list (user-account
                    (name "brainlabmirror")
                    (comment "BrainLab")
                    (password "")
@@ -113,7 +168,7 @@
                    (name "admin")
                    (comment "Admin")
                    (group "users")
-                   (supplementary-groups (list "wheel" "netdev" "audio" "video")))
+                   (supplementary-groups (list "wheel" "netdev" "audio" "video"))))
                  %base-user-accounts))
 
     (sudoers-file
@@ -132,7 +187,17 @@
                        ;; utils
                        git
                        curl
-                       vim) %base-packages))
+                       vim
+
+                       ;; desktop environment
+                       conky
+                       feh
+                       fluxbox
+                       font-bitstream-vera
+                       font-dejavu
+                       idesk
+                       oxygen-icons
+                       thunar) %base-packages))
 
     (services
      (append (list
@@ -149,11 +214,21 @@
                                                                      #t))))
                                                    (seats (list (lightdm-seat-configuration
                                                                  (name "*")
+                                                                 (autologin-user "brainlabmirror")
                                                                  (user-session
-                                                                  "xfce.desktop"))))))
+                                                                  ; "xfce.desktop"
+                                                                  "fluxbox"))))))
 
                    ;; Services for xfce desktop environment
-                   (service xfce-desktop-service-type)
+                   ; (service xfce-desktop-service-type)
+                   
+                   ;; nftables service
+                   (service nftables-service-type
+                            (nftables-configuration
+                              (ruleset (local-file "etc/nftables.conf"))))
+
+                   (service guix-home-service-type
+                            `(("brainlabmirror" ,user-home)))
 
                    (set-xorg-configuration
                     (xorg-configuration (keyboard-layout (keyboard-layout

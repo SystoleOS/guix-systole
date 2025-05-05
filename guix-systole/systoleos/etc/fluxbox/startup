@@ -1,0 +1,9 @@
+#! /bin/sh
+
+fbpid=$!
+idesk &
+exec fluxbox -log ~/.fluxbox/log &
+sleep 1
+feh --bg-scale /run/current-system/profile/share/backgrounds/systole/backgrounds/Systole_Magnet_base_1280_1024.png
+conky &
+wait $fbpid

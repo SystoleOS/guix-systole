@@ -1,0 +1,42 @@
+table Config
+  FontName: helvetica
+  FontSize: 12
+  FontColor: #000000
+  FontNameTip: helvetica
+  FontSizeTip: 9
+  ForeColorTip: #0000FF
+  BackColorTip: #FFFFFF
+  PaddingX: 10
+  PaddingY: 10
+  Transparency: 75
+  HighContrast: true
+  Locked: true
+  Shadow: false
+  ShadowColor: #0006FA
+  ShadowX: 2
+  ShadowY: 2
+  SnapShadow: true
+  IconSnap: true
+  SnapWidth: 10
+  SnapHeight: 10
+  SnapOrigin: BottomRight
+  SnapShadowTrans: 300
+  CaptionOnHover: false
+  Bold: true
+  ToolTip.FontSize: 11
+  ToolTip.FontName: gothic
+  ToolTip.ForeColor: #0000FF
+  ToolTip.BackColor: #FFFFFF
+  ToolTip.CaptionOnHover: false
+  ToolTip.CaptionPlacement: Right
+  Background.Delay: 0
+  # Background.Source: /home/aavelar/.idesktop/icons
+  # Background.File: /run/current-system/profile/share/backgrounds/systole/backgrounds/Systole_Magnet_base.png
+  # Background.Mode: Scale
+  # Background.Color: #C2CCFF
+end
+
+table Actions
+  Execute[0]: left singleClk 
+  Execute[1]: right doubleClk
+end

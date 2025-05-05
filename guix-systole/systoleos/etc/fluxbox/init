@@ -1,0 +1,3 @@
+session.screen0.toolbar.visible: false
+session.screen0.slit.placement: Center
+session.screen0.slit.autoHide: false
