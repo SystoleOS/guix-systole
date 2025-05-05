@@ -179,7 +179,7 @@
                          "A free, open source and multi-platform software package widely used for medical, biomedical, and related imaging research"
                          ;; #:exec (string-append out "/bin/Slicer")
                          #:exec (string-append out "/Slicer")
-                         #:categories '("Graphics" "MedicalSoftware" "Science")
+                         #:categories '("Graphics" "Medical" "Science")
                          #:startup-notify #f
                          #:terminal #f)) #t)))))
     (inputs (list libxt
