@@ -73,6 +73,7 @@
                           "-DVTK_SMP_ENABLE_TBB:BOOL=ON"
                           "-DVTK_USE_MPI:BOOL=ON"
                           "-DVTK_USE_TK:BOOL=OFF"
+                          "-DVTK_USE_QT:BOOL=ON"  ;; Required by PlusApp
 
                           ;; Enable VTK modules
                           "-DVTK_MODULE_ENABLE_VTK_ChartsCore:STRING=YES"
@@ -80,8 +81,13 @@
                           "-DVTK_MODULE_ENABLE_VTK_RenderingContext2D:STRING=YES"
                           "-DVTK_MODULE_ENABLE_VTK_RenderingContextOpenGL2:STRING=YES"
                           "-DVTK_MODULE_ENABLE_VTK_GUISupportQt:STRING=YES"
+                          "-DVTK_MODULE_ENABLE_VTK_ViewsQt:STRING=YES"
+                          "-DVTK_MODULE_ENABLE_VTK_RenderingQt:STRING=YES"
                           "-DVTK_MODULE_ENABLE_VTK_IOExportGL2PS:STRING=YES"
 
+                          (string-append "-DQt5_DIR:PATH="
+                                         (assoc-ref %build-inputs "qtbase")
+                                         "/lib/cmake/Qt5")
                           "-DVTK_GROUP_ENABLE_Qt:STRING=YES"
                           "-DVTK_QT_VERSION:STRING=5"
                           "-DVTK_Group_Qt:BOOL=ON"
@@ -93,7 +99,14 @@
                           "-DVTK_Group_Qt:BOOL=ON"
                           "-DVTK_ENABLE_KITS:BOOL=ON")))
     (inputs (modify-inputs (package-inputs imgproc:vtk)
-              (append python-pyqt qtbase-5 tbb openmpi)))))
+              (append python-pyqt
+                      qtbase-5
+                      qtsvg-5
+                      qtdeclarative-5
+                      qtx11extras
+                      qtmultimedia-5
+                      qttools-5
+                      tbb)))))
 
 (define-public vtkaddon
   (package

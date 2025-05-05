@@ -1,0 +1,808 @@
+diff --git a/SuperBuild/External_IGSIO.cmake b/SuperBuild/External_IGSIO.cmake
+index 2926093..da356e3 100644
+--- a/SuperBuild/External_IGSIO.cmake
++++ b/SuperBuild/External_IGSIO.cmake
+@@ -8,14 +8,25 @@ IF(IGSIO_DIR)
+ 
+   SET (PLUS_IGSIO_DIR "${IGSIO_DIR}" CACHE INTERNAL "Path to store IGSIO binaries")
+ ELSE()
++  IF(NOT DEFINED PLUS_IGSIO_SRC_DIR)
++    SetGitRepositoryTag(
++      IGSIO
++      "${GIT_PROTOCOL}://github.com/IGSIO/IGSIO.git"
++      "93b197fd3f8fb5353ccfdc51c1bca1d6b919d7cb"
++      )
+ 
+-  SetGitRepositoryTag(
+-    IGSIO
+-    "${GIT_PROTOCOL}://github.com/IGSIO/IGSIO.git"
+-    "93b197fd3f8fb5353ccfdc51c1bca1d6b919d7cb"
+-    )
++    SET(PLUS_IGSIO_SRC_DIR ${CMAKE_BINARY_DIR}/Deps/IGSIO CACHE INTERNAL "Path to store IGSIO contents.")
++
++    SET(DOWNLOAD_STEPS
++      GIT_REPOSITORY ${IGSIO_GIT_REPOSITORY}
++      GIT_TAG ${IGSIO_GIT_TAG})
++  ELSE()
++    MESSAGE(STATUS "Using existing IGSIO source at: ${PLUS_IGSIO_SRC_DIR}")
++    SET(DOWNLOAD_STEPS
++      DOWNLOAD_COMMAND ""
++      SOURCE_DIR ${PLUS_IGSIO_SRC_DIR})
++  ENDIF()
+ 
+-  SET(PLUS_IGSIO_SRC_DIR ${CMAKE_BINARY_DIR}/Deps/IGSIO CACHE INTERNAL "Path to store IGSIO contents.")
+   SET(PLUS_IGSIO_PREFIX_DIR ${CMAKE_BINARY_DIR}/Deps/IGSIO-prefix CACHE INTERNAL "Path to store IGSIO prefix data.")
+   SET(PLUS_IGSIO_DIR ${CMAKE_BINARY_DIR}/Deps/IGSIO-bin CACHE INTERNAL "Path to store IGSIO binaries")
+ 
+@@ -40,11 +51,8 @@ ELSE()
+   ExternalProject_Add( IGSIO
+     PREFIX ${PLUS_IGSIO_PREFIX_DIR}
+     "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+-    SOURCE_DIR ${PLUS_IGSIO_SRC_DIR}
++    ${DOWNLOAD_STEPS}
+     BINARY_DIR ${PLUS_IGSIO_DIR}
+-    #--Download step--------------
+-    GIT_REPOSITORY ${IGSIO_GIT_REPOSITORY}
+-    GIT_TAG ${IGSIO_GIT_TAG}
+     #--Configure step-------------
+     CMAKE_ARGS
+       ${ep_common_args}
+diff --git a/SuperBuild/External_InfraredSeekCam.cmake b/SuperBuild/External_InfraredSeekCam.cmake
+index 1653cbd..f2b343e 100644
+--- a/SuperBuild/External_InfraredSeekCam.cmake
++++ b/SuperBuild/External_InfraredSeekCam.cmake
+@@ -9,23 +9,35 @@ IF(SeekCameraLib_DIR)
+   SET(PLUS_SeekCameraLib_DIR ${SeekCameraLib_DIR} CACHE INTERNAL "Path to store SeekCameraLib binaries")
+ ELSE()
+   # SeekCameraLib has not been built yet, so download and build it as an external project
+-  SetGitRepositoryTag(
+-    SeekCameraLib
+-    "${GIT_PROTOCOL}://github.com/medtec4susdev/libseek-thermal.git"
+-    "c4fa40f200ef1277675e882358884049b8934d5e"
+-    )
+ 
+-  SET (PLUS_SeekCameraLib_SRC_DIR "${CMAKE_BINARY_DIR}/Deps/SeekCameraLib")
+-  SET (PLUS_SeekCameraLib_DIR "${CMAKE_BINARY_DIR}/Deps/SeekCameraLib-bin" CACHE INTERNAL "Path to store SeekCameraLib binaries")
++  # Check if source directory has already been provided
++  IF(NOT DEFINED PLUS_SeekCameraLib_SRC_DIR)
++    SetGitRepositoryTag(
++      SeekCameraLib
++      "${GIT_PROTOCOL}://github.com/medtec4susdev/libseek-thermal.git"
++      "c4fa40f200ef1277675e882358884049b8934d5e"
++      )
++
++    SET (PLUS_SeekCameraLib_SRC_DIR "${CMAKE_BINARY_DIR}/Deps/SeekCameraLib")
+ 
++    # Will use download step in ExternalProject_Add
++    SET(DOWNLOAD_STEPS
++      GIT_REPOSITORY ${SeekCameraLib_GIT_REPOSITORY}
++      GIT_TAG ${SeekCameraLib_GIT_TAG})
++  ELSE()
++    MESSAGE(STATUS "Using existing SeekCameraLib source at: ${PLUS_SeekCameraLib_SRC_DIR}")
++    # Skip download step
++    SET(DOWNLOAD_STEPS
++      DOWNLOAD_COMMAND ""
++      SOURCE_DIR ${PLUS_SeekCameraLib_SRC_DIR})
++  ENDIF()
++
++  SET (PLUS_SeekCameraLib_DIR "${CMAKE_BINARY_DIR}/Deps/SeekCameraLib-bin" CACHE INTERNAL "Path to store SeekCameraLib binaries")
+   ExternalProject_Add( SeekCameraLib
+     "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+     PREFIX "${CMAKE_BINARY_DIR}/Deps/SeekCameraLib-prefix"
+-    SOURCE_DIR "${PLUS_SeekCameraLib_SRC_DIR}"
++    ${DOWNLOAD_STEPS}
+     BINARY_DIR "${PLUS_SeekCameraLib_DIR}"
+-    #--Download step--------------
+-    GIT_REPOSITORY ${SeekCameraLib_GIT_REPOSITORY}
+-    GIT_TAG ${SeekCameraLib_GIT_TAG}
+     #--Configure step-------------
+     CMAKE_ARGS
+       ${ep_common_args}
+diff --git a/SuperBuild/External_IntersonSDKCxx.cmake b/SuperBuild/External_IntersonSDKCxx.cmake
+index 91258c0..6985cfa 100644
+--- a/SuperBuild/External_IntersonSDKCxx.cmake
++++ b/SuperBuild/External_IntersonSDKCxx.cmake
+@@ -17,21 +17,32 @@ IF(IntersonSDKCxx_DIR)
+   SET(PLUS_IntersonSDKCxx_DIR "${IntersonSDKCxx_DIR}" CACHE INTERNAL "Path to store IntersonSDKCxx binaries")
+ ELSE()
+   # IntersonSDKCxx has not been built yet, so download and build it as an external project
+-  SetGitRepositoryTag(
+-    IntersonSDKCxx
+-    "${GIT_PROTOCOL}://github.com/KitwareMedical/IntersonSDKCxx.git"
+-    "819d620052be7e9b232e12d8946793c15cfbf5a3"
+-    )
+ 
+-  SET (PLUS_IntersonSDKCxx_SRC_DIR "${CMAKE_BINARY_DIR}/Deps/IntersonSDKCxx")
++  # Check if source directory has already been provided
++  IF(NOT DEFINED PLUS_IntersonSDKCxx_SRC_DIR)
++    SetGitRepositoryTag(
++      IntersonSDKCxx
++      "${GIT_PROTOCOL}://github.com/KitwareMedical/IntersonSDKCxx.git"
++      "819d620052be7e9b232e12d8946793c15cfbf5a3"
++      )
++
++    SET (PLUS_IntersonSDKCxx_SRC_DIR "${CMAKE_BINARY_DIR}/Deps/IntersonSDKCxx")
++
++    SET(DOWNLOAD_STEPS
++      GIT_REPOSITORY ${IntersonSDKCxx_GIT_REPOSITORY}
++      GIT_TAG ${IntersonSDKCxx_GIT_TAG})
++  ELSE()
++    MESSAGE(STATUS "Using existing IntersonSDKCxx source at: ${PLUS_IntersonSDKCxx_SRC_DIR}")
++    SET(DOWNLOAD_STEPS
++      DOWNLOAD_COMMAND ""
++      SOURCE_DIR ${PLUS_IntersonSDKCxx_SRC_DIR})
++  ENDIF()
++
+   SET (PLUS_IntersonSDKCxx_DIR "${CMAKE_BINARY_DIR}/Deps/IntersonSDKCxx-bin" CACHE INTERNAL "Path to store IntersonSDKCxx binaries")
+   ExternalProject_Add( IntersonSDKCxx
+     PREFIX "${CMAKE_BINARY_DIR}/Deps/IntersonSDKCxx-prefix"
+-    SOURCE_DIR "${PLUS_IntersonSDKCxx_SRC_DIR}"
++    ${DOWNLOAD_STEPS}
+     BINARY_DIR "${PLUS_IntersonSDKCxx_DIR}"
+-    #--Download step--------------
+-    GIT_REPOSITORY ${IntersonSDKCxx_GIT_REPOSITORY}
+-    GIT_TAG ${IntersonSDKCxx_GIT_TAG}
+     #--Configure step-------------
+     CMAKE_ARGS 
+       ${ep_common_args}
+@@ -48,4 +59,4 @@ ELSE()
+     INSTALL_COMMAND ""
+     DEPENDS ${IntersonSDKCxx_DEPENDENCIES}
+     )
+-ENDIF()
+\ No newline at end of file
++ENDIF()
+diff --git a/SuperBuild/External_OpenIGTLink.cmake b/SuperBuild/External_OpenIGTLink.cmake
+index fdf0ed5..31c6558 100644
+--- a/SuperBuild/External_OpenIGTLink.cmake
++++ b/SuperBuild/External_OpenIGTLink.cmake
+@@ -13,22 +13,35 @@ IF(OpenIGTLink_DIR)
+   SET (PLUS_OpenIGTLink_DIR "${OpenIGTLink_DIR}" CACHE INTERNAL "Path to store OpenIGTLink binaries")
+ ELSE()
+   # OpenIGTLink has not been built yet, so download and build it as an external project
+-  SetGitRepositoryTag(
+-    OpenIGTLink
+-    "${GIT_PROTOCOL}://github.com/openigtlink/OpenIGTLink.git"
+-    "2081e418c48c02e920487e2284996c1e577c1024"
+-    )
+ 
+-  SET (PLUS_OpenIGTLink_SRC_DIR "${CMAKE_BINARY_DIR}/Deps/OpenIGTLink")
++  # Check if source directory has already been provided
++  IF(NOT DEFINED PLUS_OpenIGTLink_SRC_DIR)
++    SetGitRepositoryTag(
++      OpenIGTLink
++      "${GIT_PROTOCOL}://github.com/openigtlink/OpenIGTLink.git"
++      "2081e418c48c02e920487e2284996c1e577c1024"
++      )
++
++    SET (PLUS_OpenIGTLink_SRC_DIR "${CMAKE_BINARY_DIR}/Deps/OpenIGTLink")
++
++    # Will use download step in ExternalProject_Add
++    SET(DOWNLOAD_STEPS
++      GIT_REPOSITORY ${OpenIGTLink_GIT_REPOSITORY}
++      GIT_TAG ${OpenIGTLink_GIT_TAG})
++  ELSE()
++    MESSAGE(STATUS "Using existing OpenIGTLink source at: ${PLUS_OpenIGTLink_SRC_DIR}")
++    # Skip download step
++    SET(DOWNLOAD_STEPS
++      DOWNLOAD_COMMAND ""
++      SOURCE_DIR ${PLUS_OpenIGTLink_SRC_DIR})
++  ENDIF()
++
+   SET (PLUS_OpenIGTLink_DIR "${CMAKE_BINARY_DIR}/Deps/OpenIGTLink-bin" CACHE INTERNAL "Path to store OpenIGTLink binaries")
+   ExternalProject_Add( OpenIGTLink
+     "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+     PREFIX "${CMAKE_BINARY_DIR}/Deps/OpenIGTLink-prefix"
+-    SOURCE_DIR "${PLUS_OpenIGTLink_SRC_DIR}"
++    ${DOWNLOAD_STEPS}
+     BINARY_DIR "${PLUS_OpenIGTLink_DIR}"
+-    #--Download step--------------
+-    GIT_REPOSITORY ${OpenIGTLink_GIT_REPOSITORY}
+-    GIT_TAG ${OpenIGTLink_GIT_TAG}
+     #--Configure step-------------
+     CMAKE_ARGS 
+       ${ep_common_args}
+@@ -51,4 +64,4 @@ ELSE()
+     INSTALL_COMMAND ""
+     DEPENDS ${OpenIGTLink_DEPENDENCIES}
+     )  
+-ENDIF()
+\ No newline at end of file
++ENDIF()
+diff --git a/SuperBuild/External_OpenIGTLinkIO.cmake b/SuperBuild/External_OpenIGTLinkIO.cmake
+index bdfa78a..7005204 100644
+--- a/SuperBuild/External_OpenIGTLinkIO.cmake
++++ b/SuperBuild/External_OpenIGTLinkIO.cmake
+@@ -10,22 +10,35 @@ IF(OpenIGTLinkIO_DIR)
+   SET (PLUS_OpenIGTLinkIO_DIR "${OpenIGTLinkIO_DIR}" CACHE INTERNAL "Path to store OpenIGTLinkIO binaries")
+ ELSE()
+   # OpenIGTLinkIO has not been built yet, so download and build it as an external project
+-  SetGitRepositoryTag(
+-    OpenIGTLinkIO
+-    "${GIT_PROTOCOL}://github.com/IGSIO/OpenIGTLinkIO.git"
+-    "1a2eda5ddb795df8bb5bfbba589c9650095ba4cd"
+-    )
+ 
+-  SET (PLUS_OpenIGTLinkIO_SRC_DIR "${CMAKE_BINARY_DIR}/Deps/OpenIGTLinkIO")
++  # Check if source directory has already been provided
++  IF(NOT DEFINED PLUS_OpenIGTLinkIO_SRC_DIR)
++    SetGitRepositoryTag(
++      OpenIGTLinkIO
++      "${GIT_PROTOCOL}://github.com/IGSIO/OpenIGTLinkIO.git"
++      "1a2eda5ddb795df8bb5bfbba589c9650095ba4cd"
++      )
++
++    SET (PLUS_OpenIGTLinkIO_SRC_DIR "${CMAKE_BINARY_DIR}/Deps/OpenIGTLinkIO")
++
++    # Will use download step in ExternalProject_Add
++    SET(DOWNLOAD_STEPS
++      GIT_REPOSITORY ${OpenIGTLinkIO_GIT_REPOSITORY}
++      GIT_TAG ${OpenIGTLinkIO_GIT_TAG})
++  ELSE()
++    MESSAGE(STATUS "Using existing OpenIGTLinkIO source at: ${PLUS_OpenIGTLinkIO_SRC_DIR}")
++    # Skip download step
++    SET(DOWNLOAD_STEPS
++      DOWNLOAD_COMMAND ""
++      SOURCE_DIR ${PLUS_OpenIGTLinkIO_SRC_DIR})
++  ENDIF()
++
+   SET (PLUS_OpenIGTLinkIO_DIR "${CMAKE_BINARY_DIR}/Deps/OpenIGTLinkIO-bin" CACHE INTERNAL "Path to store OpenIGTLinkIO binaries")
+   ExternalProject_Add( OpenIGTLinkIO
+     "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+     PREFIX "${CMAKE_BINARY_DIR}/Deps/OpenIGTLinkIO-prefix"
+-    SOURCE_DIR "${PLUS_OpenIGTLinkIO_SRC_DIR}"
++    ${DOWNLOAD_STEPS}
+     BINARY_DIR "${PLUS_OpenIGTLinkIO_DIR}"
+-    #--Download step--------------
+-    GIT_REPOSITORY ${OpenIGTLinkIO_GIT_REPOSITORY}
+-    GIT_TAG ${OpenIGTLinkIO_GIT_TAG}
+     #--Configure step-------------
+     CMAKE_ARGS 
+       ${ep_common_args}
+@@ -45,4 +58,4 @@ ELSE()
+     INSTALL_COMMAND ""
+     DEPENDS ${OpenIGTLinkIO_DEPENDENCIES}
+     )  
+-ENDIF()
+\ No newline at end of file
++ENDIF()
+diff --git a/SuperBuild/External_OvrvisionPro.cmake b/SuperBuild/External_OvrvisionPro.cmake
+index 70a4ab9..ae9f1b6 100644
+--- a/SuperBuild/External_OvrvisionPro.cmake
++++ b/SuperBuild/External_OvrvisionPro.cmake
+@@ -17,10 +17,7 @@ ELSE()
+ 
+   # --------------------------------------------------------------------------
+   # OvrvisionPro SDK
+-  SET (PLUS_OvrvisionPro_src_DIR ${CMAKE_BINARY_DIR}/Deps/OvrvisionPro CACHE INTERNAL "Path to store OvrvisionPro contents.")
+-  SET (PLUS_OvrvisionPro_prefix_DIR ${CMAKE_BINARY_DIR}/Deps/OvrvisionPro-prefix CACHE INTERNAL "Path to store OvrvisionPro prefix data.")
+-  SET (PLUS_OvrvisionPro_DIR ${CMAKE_BINARY_DIR}/Deps/OvrvisionPro-bin CACHE INTERNAL "Path to store OvrvisionPro binaries")
+-  
++ 
+   # Since OvrvisionPro SDK uses #pragma comment(lib...) commands, we need to pass in the directories containing the requested libraries directly...
+   #   ippicvmt.lib
+   IF( MSVC AND ${BUILD_ARCHITECTURE} MATCHES "x64" )
+@@ -33,20 +30,35 @@ ELSE()
+     # Linux?
+   ENDIF()
+ 
+-  SetGitRepositoryTag(
+-    OvrvisionPro
+-    "${GIT_PROTOCOL}://github.com/PLUSToolkit/OvrvisionProCMake.git"
+-    "761a54917e6070a8148dc373d640a2ffe191ac7d"
+-    )
++  # Check if source directory has already been provided
++  IF(NOT DEFINED PLUS_OvrvisionPro_src_DIR)
++    SetGitRepositoryTag(
++      OvrvisionPro
++      "${GIT_PROTOCOL}://github.com/PLUSToolkit/OvrvisionProCMake.git"
++      "761a54917e6070a8148dc373d640a2ffe191ac7d"
++      )
++
++    SET (PLUS_OvrvisionPro_src_DIR ${CMAKE_BINARY_DIR}/Deps/OvrvisionPro CACHE INTERNAL "Path to store OvrvisionPro contents.")
++    SET (PLUS_OvrvisionPro_prefix_DIR ${CMAKE_BINARY_DIR}/Deps/OvrvisionPro-prefix CACHE INTERNAL "Path to store OvrvisionPro prefix data.")
+ 
++    # Will use download step in ExternalProject_Add
++    SET(DOWNLOAD_STEP
++      GIT_REPOSITORY ${OvrvisionPro_GIT_REPOSITORY}
++      GIT_TAG ${OvrvisionPro_GIT_TAG})
++  ELSE()
++    MESSAGE(STATUS "Using existing OvrvisionPro source at: ${PLUS_OvrvisionPro_src_DIR}")
++    # Skip download step
++    SET(DOWNLOAD_STEP
++      DOWNLOAD_COMMAND ""
++      SOURCE_DIR ${PLUS_OvrvisionPro_src_DIR})
++  ENDIF()
++
++  SET (PLUS_OvrvisionPro_DIR ${CMAKE_BINARY_DIR}/Deps/OvrvisionPro-bin CACHE INTERNAL "Path to store OvrvisionPro binaries")
+   ExternalProject_Add( OvrvisionPro
+     PREFIX ${PLUS_OvrvisionPro_prefix_DIR}
+     "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+-    SOURCE_DIR "${PLUS_OvrvisionPro_src_DIR}"
++    ${DOWNLOAD_STEP}
+     BINARY_DIR "${PLUS_OvrvisionPro_DIR}"
+-    #--Download step--------------
+-    GIT_REPOSITORY ${OvrvisionPro_GIT_REPOSITORY}
+-    GIT_TAG ${OvrvisionPro_GIT_TAG}
+     #--Configure step-------------
+     CMAKE_ARGS
+       ${ep_common_args}
+@@ -62,4 +74,4 @@ ELSE()
+     #--Dependencies-----------------
+     DEPENDS ${OvrvisionPro_DEPENDENCIES}
+     )
+-ENDIF()
+\ No newline at end of file
++ENDIF()
+diff --git a/SuperBuild/External_PlusApp.cmake b/SuperBuild/External_PlusApp.cmake
+index d11669c..c63f119 100644
+--- a/SuperBuild/External_PlusApp.cmake
++++ b/SuperBuild/External_PlusApp.cmake
+@@ -8,11 +8,26 @@ IF(BUILDNAME)
+   )
+ ENDIF()
+ 
+-IF(NOT DEFINED(PLUSAPP_GIT_REPOSITORY))
+-  SET(PLUSAPP_GIT_REPOSITORY "${GIT_PROTOCOL}://github.com/PlusToolkit/PlusApp.git" CACHE STRING "Set PlusApp desired git url")
+-ENDIF()
+-IF(NOT DEFINED(PLUSAPP_GIT_REVISION))
+-  SET(PLUSAPP_GIT_REVISION "master" CACHE STRING "Set PlusApp desired git hash (master means latest)")
++IF(NOT DEFINED PLUS_PLUSAPP_DIR)
++  IF(NOT DEFINED(PLUSAPP_GIT_REPOSITORY))
++    SET(PLUSAPP_GIT_REPOSITORY "${GIT_PROTOCOL}://github.com/PlusToolkit/PlusApp.git" CACHE STRING "Set PlusApp desired git url")
++  ENDIF()
++  IF(NOT DEFINED(PLUSAPP_GIT_REVISION))
++    SET(PLUSAPP_GIT_REVISION "master" CACHE STRING "Set PlusApp desired git hash (master means latest)")
++  ENDIF()
++
++  SET (PLUS_PLUSAPP_DIR ${CMAKE_BINARY_DIR}/PlusApp CACHE INTERNAL "Path to store PlusApp contents.")
++
++  # Will use download step in ExternalProject_Add
++  SET(DOWNLOAD_STEPS
++    GIT_REPOSITORY ${PLUSAPP_GIT_REPOSITORY}
++    GIT_TAG ${PLUSAPP_GIT_REVISION})
++ELSE()
++  MESSAGE(STATUS "Using existing PlusApp source at: ${PLUS_PLUSAPP_DIR}")
++  # Skip download step
++  SET(DOWNLOAD_STEPS
++    DOWNLOAD_COMMAND ""
++    SOURCE_DIR ${PLUS_PLUSAPP_DIR})
+ ENDIF()
+ 
+ IF(PLUSBUILD_DOCUMENTATION)
+@@ -24,15 +39,11 @@ IF(PLUSBUILD_DOCUMENTATION)
+     )
+ ENDIF()
+ 
+-SET (PLUS_PLUSAPP_DIR ${CMAKE_BINARY_DIR}/PlusApp CACHE INTERNAL "Path to store PlusApp contents.")
+ SET (PLUSAPP_DIR ${CMAKE_BINARY_DIR}/PlusApp-bin CACHE PATH "The directory containing PlusApp binaries" FORCE)                
+ ExternalProject_Add(PlusApp
+   "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+-  SOURCE_DIR "${PLUS_PLUSAPP_DIR}" 
++  ${DOWNLOAD_STEPS}
+   BINARY_DIR "${PLUSAPP_DIR}"
+-  #--Download step--------------
+-  GIT_REPOSITORY ${PLUSAPP_GIT_REPOSITORY}
+-  GIT_TAG ${PLUSAPP_GIT_REVISION}
+   #--Configure step-------------
+   CMAKE_ARGS 
+     ${ep_common_args}
+@@ -94,4 +105,4 @@ ELSE()
+     DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+     FILES_MATCHING REGEX .*${CMAKE_SHARED_LIBRARY_SUFFIX}
+     )
+-ENDIF()
+\ No newline at end of file
++ENDIF()
+diff --git a/SuperBuild/External_PlusLib.cmake b/SuperBuild/External_PlusLib.cmake
+index eb9525b..d804f37 100644
+--- a/SuperBuild/External_PlusLib.cmake
++++ b/SuperBuild/External_PlusLib.cmake
+@@ -355,11 +355,26 @@ IF(BUILDNAME)
+     )
+ ENDIF(BUILDNAME)
+ 
+-IF(NOT DEFINED(PLUSLIB_GIT_REPOSITORY))
+-  SET(PLUSLIB_GIT_REPOSITORY "${GIT_PROTOCOL}://github.com/PlusToolkit/PlusLib.git" CACHE STRING "Set PlusLib desired git url")
+-ENDIF()
+-IF(NOT DEFINED(PLUSLIB_GIT_REVISION))
+-  SET(PLUSLIB_GIT_REVISION "master" CACHE STRING "Set PlusLib desired git hash (master means latest)")
++IF(NOT DEFINED PLUS_PLUSLIB_DIR)
++  IF(NOT DEFINED(PLUSLIB_GIT_REPOSITORY))
++    SET(PLUSLIB_GIT_REPOSITORY "${GIT_PROTOCOL}://github.com/PlusToolkit/PlusLib.git" CACHE STRING "Set PlusLib desired git url")
++  ENDIF()
++  IF(NOT DEFINED(PLUSLIB_GIT_REVISION))
++    SET(PLUSLIB_GIT_REVISION "master" CACHE STRING "Set PlusLib desired git hash (master means latest)")
++  ENDIF()
++
++  SET (PLUS_PLUSLIB_DIR ${CMAKE_BINARY_DIR}/PlusLib CACHE INTERNAL "Path to store PlusLib contents.")
++
++  # Will use download step in ExternalProject_Add
++  SET(DOWNLOAD_STEPS
++    GIT_REPOSITORY ${PLUSLIB_GIT_REPOSITORY}
++    GIT_TAG ${PLUSLIB_GIT_REVISION})
++ELSE()
++  MESSAGE(STATUS "Using existing PlusLib source at: ${PLUS_PLUSLIB_DIR}")
++  # Skip download step
++  SET(DOWNLOAD_STEPS
++    DOWNLOAD_COMMAND ""
++    SOURCE_DIR ${PLUS_PLUSLIB_DIR})
+ ENDIF()
+ 
+ IF(UNIX AND NOT APPLE)
+@@ -369,15 +384,11 @@ IF(UNIX AND NOT APPLE)
+ ENDIF()
+ # --------------------------------------------------------------------------
+ # PlusLib
+-SET (PLUS_PLUSLIB_DIR ${CMAKE_BINARY_DIR}/PlusLib CACHE INTERNAL "Path to store PlusLib contents.")
+ SET (PLUSLIB_DIR ${CMAKE_BINARY_DIR}/PlusLib-bin CACHE PATH "The directory containing PlusLib binaries" FORCE)
+ ExternalProject_Add(PlusLib
+   "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+-  SOURCE_DIR "${PLUS_PLUSLIB_DIR}"
++  ${DOWNLOAD_STEPS}
+   BINARY_DIR "${PLUSLIB_DIR}"
+-  #--Download step--------------
+-  GIT_REPOSITORY ${PLUSLIB_GIT_REPOSITORY}
+-  GIT_TAG ${PLUSLIB_GIT_REVISION}
+   #--Configure step-------------
+   CMAKE_ARGS
+     ${ep_common_args}
+diff --git a/SuperBuild/External_PlusLibData.cmake b/SuperBuild/External_PlusLibData.cmake
+index cd85d1e..1500e44 100644
+--- a/SuperBuild/External_PlusLibData.cmake
++++ b/SuperBuild/External_PlusLibData.cmake
+@@ -1,19 +1,30 @@
+ #--------------------------------------------------------------------------
+ # PlusLibData
+-IF(NOT DEFINED(PLUSBUILD_PLUSLIBDATA_GIT_REPOSITORY))
+-  SET(PLUSBUILD_PLUSLIBDATA_GIT_REPOSITORY "${GIT_PROTOCOL}://github.com/PlusToolkit/PlusLibData.git" CACHE STRING "Set PlusLibData desired git url.")
+-ENDIF()
+-IF(NOT DEFINED(PLUSBUILD_PLUSLIBDATA_GIT_REVISION))
+-  SET(PLUSBUILD_PLUSLIBDATA_GIT_REVISION "master" CACHE STRING "Set PlusLibData desired git hash (master means latest).")
++IF(NOT DEFINED PLUS_PLUSLIBDATA_DIR)
++  IF(NOT DEFINED(PLUSBUILD_PLUSLIBDATA_GIT_REPOSITORY))
++    SET(PLUSBUILD_PLUSLIBDATA_GIT_REPOSITORY "${GIT_PROTOCOL}://github.com/PlusToolkit/PlusLibData.git" CACHE STRING "Set PlusLibData desired git url.")
++  ENDIF()
++  IF(NOT DEFINED(PLUSBUILD_PLUSLIBDATA_GIT_REVISION))
++    SET(PLUSBUILD_PLUSLIBDATA_GIT_REVISION "master" CACHE STRING "Set PlusLibData desired git hash (master means latest).")
++  ENDIF()
++
++  SET (PLUS_PLUSLIBDATA_DIR ${CMAKE_BINARY_DIR}/PlusLibData CACHE INTERNAL "Path to store PlusLib contents.")
++
++# Will use download step in ExternalProject_Add
++  SET(DOWNLOAD_STEPS
++    GIT_REPOSITORY ${PLUSBUILD_PLUSLIBDATA_GIT_REPOSITORY}
++    GIT_TAG ${PLUSBUILD_PLUSLIBDATA_GIT_REVISION})
++ELSE()
++  MESSAGE(STATUS "Using existing PlusLibData source at: ${PLUS_PLUSLIBDATA_DIR}")
++  # Skip download step
++  SET(DOWNLOAD_STEPS
++    DOWNLOAD_COMMAND ""
++    SOURCE_DIR ${PLUS_PLUSLIBDATA_DIR})
+ ENDIF()
+ 
+-SET (PLUS_PLUSLIBDATA_DIR ${CMAKE_BINARY_DIR}/PlusLibData CACHE INTERNAL "Path to store PlusLib contents.")
+ ExternalProject_Add(PlusLibData
+   "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+-  SOURCE_DIR "${PLUS_PLUSLIBDATA_DIR}"
+-  #--Download step--------------
+-  GIT_REPOSITORY ${PLUSBUILD_PLUSLIBDATA_GIT_REPOSITORY}
+-  GIT_TAG ${PLUSBUILD_PLUSLIBDATA_GIT_REVISION}
++  ${DOWNLOAD_STEPS}
+   #--Configure step-------------
+   CONFIGURE_COMMAND ""
+   #--Build step-----------------
+@@ -21,4 +32,4 @@ ExternalProject_Add(PlusLibData
+   #--Install step-----------------
+   INSTALL_COMMAND ""
+   )
+-SET(PLUSLIB_DATA_DIR ${PLUS_PLUSLIBDATA_DIR} CACHE PATH "The directory containing PlusLib data" FORCE)
+\ No newline at end of file
++SET(PLUSLIB_DATA_DIR ${PLUS_PLUSLIBDATA_DIR} CACHE PATH "The directory containing PlusLib data" FORCE)
+diff --git a/SuperBuild/External_PlusModelCatalog.cmake b/SuperBuild/External_PlusModelCatalog.cmake
+index 4b3f2c2..46c8260 100644
+--- a/SuperBuild/External_PlusModelCatalog.cmake
++++ b/SuperBuild/External_PlusModelCatalog.cmake
+@@ -1,20 +1,32 @@
+ # --------------------------------------------------------------------------
+ # PlusModelCatalog
+ 
+-SetGitRepositoryTag(
+-  PlusModelCatalog
+-  "${GIT_PROTOCOL}://github.com/PlusToolkit/PlusModelCatalog.git"
+-  "651be1563b40a3552f18436f580d1c14d1b388f9"
+-  )
++# Check if source directory has already been provided
++IF(NOT DEFINED PLUS_PLUSMODELCATALOG_DIR)
++  SetGitRepositoryTag(
++    PlusModelCatalog
++    "${GIT_PROTOCOL}://github.com/PlusToolkit/PlusModelCatalog.git"
++    "651be1563b40a3552f18436f580d1c14d1b388f9"
++    )
++
++  SET (PLUS_PLUSMODELCATALOG_DIR ${CMAKE_BINARY_DIR}/PlusModelCatalog CACHE INTERNAL "Path to store Plus Model Catalog.")
++
++  # Will use download step in ExternalProject_Add
++  SET(DOWNLOAD_STEPS
++    GIT_REPOSITORY ${PlusModelCatalog_GIT_REPOSITORY}
++    GIT_TAG ${PlusModelCatalog_GIT_TAG})
++ELSE()
++  MESSAGE(STATUS "Using existing PlusModelCatalog source at: ${PLUS_PLUSMODELCATALOG_DIR}")
++  # Skip download step
++  SET(DOWNLOAD_STEPS
++    DOWNLOAD_COMMAND ""
++    SOURCE_DIR ${PLUS_PLUSMODELCATALOG_DIR})
++ENDIF()
+ 
+-SET (PLUS_PLUSMODELCATALOG_DIR ${CMAKE_BINARY_DIR}/PlusModelCatalog CACHE INTERNAL "Path to store Plus Model Catalog.")
+ ExternalProject_Add(PlusModelCatalog
+   "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+-  SOURCE_DIR "${PLUS_PLUSMODELCATALOG_DIR}" 
++  ${DOWNLOAD_STEPS}
+   BINARY_DIR "PlusModelCatalog-bin"
+-  #--Download step--------------
+-  GIT_REPOSITORY ${PlusModelCatalog_GIT_REPOSITORY}
+-  GIT_TAG ${PlusModelCatalog_GIT_TAG}
+   #--Configure step-------------
+   CMAKE_ARGS 
+     ${ep_common_args}
+diff --git a/SuperBuild/External_Tesseract.cmake b/SuperBuild/External_Tesseract.cmake
+index 92ed1b1..c030bbd 100644
+--- a/SuperBuild/External_Tesseract.cmake
++++ b/SuperBuild/External_Tesseract.cmake
+@@ -4,28 +4,37 @@ SET(tesseract_ROOT_DIR ${CMAKE_BINARY_DIR}/Deps)
+ 
+ # --------------------------------------------------------------------------
+ # leptonica
+-SetGitRepositoryTag(
+-  leptonica
+-  "${GIT_PROTOCOL}://github.com/PLUSToolkit/leptonica.git"
+-  "3130874380fcc2b0268d4f57863cbacdf9d1e9a4"
+-  )
+-
+ IF(leptonica_DIR)
+   FIND_PACKAGE(leptonica REQUIRED NO_MODULE)
+ 
+   SET(PLUS_leptonica_DIR ${leptonica_DIR} CACHE INTERNAL "Path to store leptonica binaries.")
+ ELSE()
+-  SET (PLUS_leptonica_src_DIR ${tesseract_ROOT_DIR}/leptonica CACHE INTERNAL "Path to store leptonica contents.")
++  IF(NOT DEFINED PLUS_leptonica_src_DIR)
++    SetGitRepositoryTag(
++      leptonica
++      "${GIT_PROTOCOL}://github.com/PLUSToolkit/leptonica.git"
++      "3130874380fcc2b0268d4f57863cbacdf9d1e9a4"
++      )
++
++    SET (PLUS_leptonica_src_DIR ${tesseract_ROOT_DIR}/leptonica CACHE INTERNAL "Path to store leptonica contents.")
++
++    SET(DOWNLOAD_STEPS
++      GIT_REPOSITORY ${leptonica_GIT_REPOSITORY}
++      GIT_TAG ${leptonica_GIT_TAG})
++  ELSE()
++    MESSAGE(STATUS "Using existing leptonica source at: ${PLUS_leptonica_src_DIR}")
++    SET(DOWNLOAD_STEPS
++      DOWNLOAD_COMMAND ""
++      SOURCE_DIR ${PLUS_leptonica_src_DIR})
++  ENDIF()
++
+   SET (PLUS_leptonica_prefix_DIR ${tesseract_ROOT_DIR}/leptonica-prefix CACHE INTERNAL "Path to store leptonica prefix data.")
+   SET (PLUS_leptonica_DIR "${tesseract_ROOT_DIR}/leptonica-bin" CACHE INTERNAL "Path to store leptonica binaries.")
+   ExternalProject_Add( leptonica
+     PREFIX ${PLUS_leptonica_prefix_DIR}
+     "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+-    SOURCE_DIR "${PLUS_leptonica_src_DIR}"
++    ${DOWNLOAD_STEPS}
+     BINARY_DIR "${PLUS_leptonica_DIR}"
+-    #--Download step--------------
+-    GIT_REPOSITORY ${leptonica_GIT_REPOSITORY}
+-    GIT_TAG ${leptonica_GIT_TAG}
+     #--Configure step-------------
+     CMAKE_ARGS
+         ${ep_common_args}
+@@ -43,12 +52,6 @@ ENDIF()
+ 
+ # --------------------------------------------------------------------------
+ # tessdata
+-SetGitRepositoryTag(
+-  tessdata
+-  "${GIT_PROTOCOL}://github.com/PLUSToolkit/tessdata.git"
+-  "436f296294e97e01a2fbcd0744edf8577c491a8d"
+-  )
+-
+ IF(tessdata_DIR)
+   IF(NOT EXISTS ${tessdata_DIR})
+     MESSAGE(FATAL_ERROR "Folder specified by tessdata_DIR does not exist.")
+@@ -56,16 +59,31 @@ IF(tessdata_DIR)
+   
+   SET(PLUS_tessdata_src_DIR ${tessdata_DIR} CACHE INTERNAL "Path to store tesseract language data contents.")
+ ELSE()
+-  SET (PLUS_tessdata_src_DIR ${tesseract_ROOT_DIR}/tessdata CACHE INTERNAL "Path to store tesseract language data contents.")
++  IF(NOT DEFINED PLUS_tessdata_src_DIR)
++    SetGitRepositoryTag(
++      tessdata
++      "${GIT_PROTOCOL}://github.com/PLUSToolkit/tessdata.git"
++      "436f296294e97e01a2fbcd0744edf8577c491a8d"
++      )
++
++    SET (PLUS_tessdata_src_DIR ${tesseract_ROOT_DIR}/tessdata CACHE INTERNAL "Path to store tesseract language data contents.")
++
++    SET(DOWNLOAD_STEPS
++      GIT_REPOSITORY ${tessdata_GIT_REPOSITORY}
++      GIT_TAG ${tessdata_GIT_TAG})
++  ELSE()
++    MESSAGE(STATUS "Using existing tessdata source at: ${PLUS_tessdata_src_DIR}")
++    SET(DOWNLOAD_STEPS
++      DOWNLOAD_COMMAND ""
++      SOURCE_DIR ${PLUS_tessdata_src_DIR})
++  ENDIF()
++
+   SET (PLUS_tessdata_prefix_DIR ${tesseract_ROOT_DIR}/tessdata-prefix CACHE INTERNAL "Path to store tesseract language prefix data.")
+   ExternalProject_Add( tessdata
+     "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+     PREFIX ${PLUS_tessdata_prefix_DIR}
+-    SOURCE_DIR "${PLUS_tessdata_src_DIR}"
++    ${DOWNLOAD_STEPS}
+     BINARY_DIR "${PLUS_tessdata_src_DIR}"
+-    #--Download step--------------
+-    GIT_REPOSITORY ${tessdata_GIT_REPOSITORY}
+-    GIT_TAG ${tessdata_GIT_TAG}
+     #--Configure step-------------
+     CONFIGURE_COMMAND ""
+     #--Build step-----------------
+@@ -85,23 +103,32 @@ IF(tesseract_DIR)
+   
+   SET (PLUS_tesseract_DIR ${tesseract_DIR} CACHE INTERNAL "Path to store tesseract binaries")
+ ELSE()
+-  SetGitRepositoryTag(
+-    tesseract
+-    "${GIT_PROTOCOL}://github.com/PLUSToolkit/tesseract-ocr-cmake.git"
+-    "21855d0568a9253dede4e223aae71c0249b90438"
+-    )
++  IF(NOT DEFINED PLUS_tesseract_src_DIR)
++    SetGitRepositoryTag(
++      tesseract
++      "${GIT_PROTOCOL}://github.com/PLUSToolkit/tesseract-ocr-cmake.git"
++      "21855d0568a9253dede4e223aae71c0249b90438"
++      )
++
++    SET (PLUS_tesseract_src_DIR ${tesseract_ROOT_DIR}/tesseract CACHE INTERNAL "Path to store tesseract contents.")
++
++    SET(DOWNLOAD_STEPS
++      GIT_REPOSITORY ${tesseract_GIT_REPOSITORY}
++      GIT_TAG ${tesseract_GIT_TAG})
++  ELSE()
++    MESSAGE(STATUS "Using existing Tesseract at: ${PLUS_tesseract_src_DIR}")
++    SET(DOWNLOAD_STEPS
++      DOWNLOAD_COMMAND ""
++      SOURCE_DIR ${PLUS_tesseract_src_DIR})
++  ENDIF()
+ 
+-  SET (PLUS_tesseract_src_DIR ${tesseract_ROOT_DIR}/tesseract CACHE INTERNAL "Path to store tesseract contents.")
+   SET (PLUS_tesseract_prefix_DIR ${tesseract_ROOT_DIR}/tesseract-prefix CACHE INTERNAL "Path to store tesseract prefix data.")
+   SET (PLUS_tesseract_DIR "${tesseract_ROOT_DIR}/tesseract-bin" CACHE INTERNAL "Path to store tesseract binaries")
+   ExternalProject_Add( tesseract
+     PREFIX ${PLUS_tesseract_prefix_DIR}
+     "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+-    SOURCE_DIR "${PLUS_tesseract_src_DIR}"
++    ${DOWNLOAD_STEPS}
+     BINARY_DIR "${PLUS_tesseract_DIR}"
+-    #--Download step--------------
+-    GIT_REPOSITORY ${tesseract_GIT_REPOSITORY}
+-    GIT_TAG ${tesseract_GIT_TAG}
+     #--Configure step-------------
+     CMAKE_ARGS
+       ${ep_common_args}
+@@ -119,4 +146,4 @@ ELSE()
+     #--Dependencies-----------------
+     DEPENDS ${tesseract_DEPENDENCIES}
+   )
+-ENDIF()
+\ No newline at end of file
++ENDIF()
+diff --git a/SuperBuild/External_aruco.cmake b/SuperBuild/External_aruco.cmake
+index 36e1e96..81c5d91 100644
+--- a/SuperBuild/External_aruco.cmake
++++ b/SuperBuild/External_aruco.cmake
+@@ -9,24 +9,35 @@ IF(aruco_DIR)
+   SET (PLUS_aruco_DIR ${aruco_DIR} CACHE INTERNAL "Path to store aruco binaries")
+ ELSE()
+   # aruco has not been built yet, so download and build it as an external project
+-  SetGitRepositoryTag(
+-    aruco
+-    "${GIT_PROTOCOL}://github.com/PlusToolkit/aruco.git"
+-    "cf93865edf157aa45c64c8f2084dcef59e58dda3"
+-    )
+ 
+-  SET (PLUS_aruco_src_DIR ${CMAKE_BINARY_DIR}/Deps/aruco CACHE INTERNAL "Path to store aruco contents")
++  # Check if source directory has already been provided
++  IF(NOT DEFINED PLUS_aruco_src_DIR)
++    SetGitRepositoryTag(
++      aruco
++      "${GIT_PROTOCOL}://github.com/PlusToolkit/aruco.git"
++      "cf93865edf157aa45c64c8f2084dcef59e58dda3"
++      )
++
++    SET (PLUS_aruco_src_DIR ${CMAKE_BINARY_DIR}/Deps/aruco CACHE INTERNAL "Path to store aruco contents")
++
++    SET(DOWNLOAD_STEPS
++      GIT_REPOSITORY ${aruco_GIT_REPOSITORY}
++      GIT_TAG ${aruco_GIT_TAG})
++  ELSE()
++    MESSAGE(STATUS "Using existing aruco source at: ${PLUS_aruco_src_DIR}")
++    SET(DOWNLOAD_STEPS
++      DOWNLOAD_COMMAND ""
++      SOURCE_DIR ${PLUS_aruco_src_DIR})
++  ENDIF()
++
+   SET (PLUS_aruco_prefix_DIR ${CMAKE_BINARY_DIR}/Deps/aruco-prefix CACHE INTERNAL "Path to store aruco prefix data.")
+   SET (PLUS_aruco_DIR ${CMAKE_BINARY_DIR}/Deps/aruco-bin CACHE INTERNAL "Path to store aruco binaries.")
+ 
+   ExternalProject_Add( aruco
+     PREFIX ${PLUS_aruco_prefix_DIR}
+     "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+-    SOURCE_DIR "${PLUS_aruco_src_DIR}"
++    ${DOWNLOAD_STEPS}
+     BINARY_DIR "${PLUS_aruco_DIR}"
+-    #--Download step--------------
+-    GIT_REPOSITORY ${aruco_GIT_REPOSITORY}
+-    GIT_TAG ${aruco_GIT_TAG}
+     #--Configure step-------------
+     CMAKE_ARGS
+       ${ep_common_args}
+@@ -49,4 +60,4 @@ ELSE()
+     #--Dependencies-----------------
+     DEPENDS OpenCV
+   )
+-ENDIF()
+\ No newline at end of file
++ENDIF()
+diff --git a/SuperBuild/External_ndicapi.cmake b/SuperBuild/External_ndicapi.cmake
+index 4bdca31..892c8d2 100644
+--- a/SuperBuild/External_ndicapi.cmake
++++ b/SuperBuild/External_ndicapi.cmake
+@@ -8,26 +8,33 @@ IF(ndicapi_DIR)
+ 
+   SET(PLUS_ndicapi_DIR ${ndicapi_DIR} CACHE INTERNAL "Path to store ndicapi binaries")
+ ELSE()
+-  SetGitRepositoryTag(
+-    ndicapi
+-    "${GIT_PROTOCOL}://github.com/PlusToolkit/ndicapi.git"
+-    "7af09f359cf713de095246bf0dae2763b1c7d135"
+-    )
++  IF(NOT DEFINED PLUS_ndicapi_src_DIR)
++    SetGitRepositoryTag(
++      ndicapi
++      "${GIT_PROTOCOL}://github.com/PlusToolkit/ndicapi.git"
++      "7af09f359cf713de095246bf0dae2763b1c7d135"
++      )
++
++    SET (PLUS_ndicapi_src_DIR ${CMAKE_BINARY_DIR}/Deps/ndicapi CACHE INTERNAL "Path to store ndicapi contents.")
++
++    SET(DOWNLOAD_STEPS
++      GIT_REPOSITORY ${ndicapi_GIT_REPOSITORY}
++      GIT_TAG ${ndicapi_GIT_TAG})
++  ELSE()
++    MESSAGE(STATUS "Using existing ndicapi source at: ${PLUS_ndicapi_src_DIR}")
++    SET(DOWNLOAD_STEPS
++      DOWNLOAD_COMMAND ""
++      SOURCE_DIR ${PLUS_ndicapi_src_DIR})
++  ENDIF()
+ 
+-  # --------------------------------------------------------------------------
+-  # OvrvisionPro SDK
+-  SET (PLUS_ndicapi_src_DIR ${CMAKE_BINARY_DIR}/Deps/ndicapi CACHE INTERNAL "Path to store ndicapi contents.")
+   SET (PLUS_ndicapi_prefix_DIR ${CMAKE_BINARY_DIR}/Deps/ndicapi-prefix CACHE INTERNAL "Path to store ndicapi prefix data.")
+   SET (PLUS_ndicapi_DIR ${CMAKE_BINARY_DIR}/Deps/ndicapi-bin CACHE INTERNAL "Path to store ndicapi binaries")
+   
+   ExternalProject_Add( ndicapi
+     PREFIX ${PLUS_ndicapi_prefix_DIR}
+     "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+-    SOURCE_DIR "${PLUS_ndicapi_src_DIR}"
++    ${DOWNLOAD_STEPS}
+     BINARY_DIR "${PLUS_ndicapi_DIR}"
+-    #--Download step--------------
+-    GIT_REPOSITORY ${ndicapi_GIT_REPOSITORY}
+-    GIT_TAG ${ndicapi_GIT_TAG}
+     #--Configure step-------------
+     CMAKE_ARGS
+       ${ep_common_args}

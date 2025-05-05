@@ -2,10 +2,11 @@
                #:use-module ((guix-systole licenses)
                              #:prefix license:)
                #:use-module (guix packages)
-               #:use-module (gnu packages)
                #:use-module (guix download)
                #:use-module (guix git-download)
+               #:use-module (guix gexp)
                #:use-module (guix build-system cmake)
+               #:use-module (gnu packages)
                #:use-module (gnu packages base)
                #:use-module (gnu packages qt)
                #:use-module (gnu packages gl)
@@ -125,212 +126,223 @@
                          "0pd3q1djxdkdfnalcpq2h5wy4v7h44j1i6yjfhs6f1i8b69sl3w0"))
                      ; (patch-flags '("--ignore-whitespace" "-F" "3"))
                      (patches (search-patches
-                                "PlusBuild_test_OS_agnostic.patch"))))
+                                "PlusBuild_test_OS_agnostic.patch"
+                                "PlusBuild-deps-allow-preset-src-dir.patch"))))
                  (build-system cmake-build-system)
                  (arguments
                    `(
-                     ; #:phases
-                     ; (modify-phases %standard-phases
-                     ;                (add-before 'configure 'fetch-deps
-                     ;                               (lambda* (#:key source outputs inputs #:allow-other-keys)
-                     ;                                        ;; Prepare the Deps directory
-                     ;                                        ; (let* ((build-dir (string-append source "/build/Deps"))
-                     ;                                        (let* ((build-dir "build/Deps")
-                     ;                                               (repos     (list
-                     ;                                                            (list "PlusLib"
-                     ;                                                                  "https://github.com/PlusToolkit/PlusLib.git"
-                     ;                                                                  "Plus-2.8")
-                     ;                                                            (list "PlusApp"
-                     ;                                                                  "https://github.com/PlusToolkit/PlusApp.git"
-                     ;                                                                  "Plus-2.8")
-                     ;                                                            (list "OpenIGTLink"
-                     ;                                                                  "https://github.com/openigtlink/OpenIGTLink.git"
-                     ;                                                                  "2081e418c48c02e920487e2284996c1e577c1024")
-                     ;                                                            (list "OpenIGTLinkIO"
-                     ;                                                                  "https://github.com/IGSIO/OpenIGTLinkIO.git"
-                     ;                                                                  "1a2eda5ddb795df8bb5bfbba589c9650095ba4cd")
-                     ;                                                            (list "OvrvisionPro"
-                     ;                                                                  "https://github.com/PlusToolkit/OvrvisionProCMake.git"
-                     ;                                                                  "761a54917e6070a8148dc373d640a2ffe191ac7d")
-                     ;                                                            (list "PlusLibData"
-                     ;                                                                  "https://github.com/PlusToolkit/PlusLibData.git"
-                     ;                                                                  "Plus-2.8")
-                     ;                                                            (list "PlusModelCatalog"
-                     ;                                                                  "https://github.com/PlusToolkit/PlusModelCatalog.git"
-                     ;                                                                  "651be1563b40a3552f18436f580d1c14d1b388f9")
-                     ;                                                            (list "Tesseract"
-                     ;                                                                  "https://github.com/PlusToolkit/leptonica.git"
-                     ;                                                                  "3130874380fcc2b0268d4f57863cbacdf9d1e9a4")
-                     ;                                                            (list "aruco"
-                     ;                                                                  "https://github.com/PlusToolkit/aruco.git"
-                     ;                                                                  "cf93865edf157aa45c64c8f2084dcef59e58dda3")
-                     ;                                                            (list "ndicapi"
-                     ;                                                                  "https://github.com/PlusToolkit/ndicapi.git"
-                     ;                                                                  "7af09f359cf713de095246bf0dae2763b1c7d135")
-                     ;                                                            (list "InfraredSeekCam"
-                     ;                                                                  "https://github.com/medtec4susdev/libseek-thermal.git"
-                     ;                                                                  "c4fa40f200ef1277675e882358884049b8934d5e")
-                     ;                                                            (list "IntersonSDKCxx"
-                     ;                                                                  "https://github.com/KitwareMedical/IntersonSDKCxx"
-                     ;                                                                  "819d620052be7e9b232e12d8946793c15cfbf5a30")
-                     ;                                                            ))
-                     ;                                               ; (git-exec (assoc-ref inputs "git"))
-                     ;                                               )
-                     ;                                          ;; Make sure that the Deps directory exists
-                     ;                                          (invoke "mkdir" "-p" build-dir)
-                     ;                                          (for-each
-                     ;                                            (lambda (trip)
-                     ;                                              (let* ((name (list-ref trip 0))
-                     ;                                                     (url  (list-ref trip 1))
-                     ;                                                     (ref  (list-ref trip 2))
-                     ;                                                     (dest (string-append build-dir "/" name)))
-                     ;                                                ;; Clone the refs
-                     ;                                                (invoke "git"
-                     ;                                                        "clone"
-                     ;                                                        "--depth" "1" ;; Shallow clone
-                     ;                                                        "--branch" ref
-                     ;                                                        "--single-branch" ;; Only history for that ref
-                     ;                                                        url
-                     ;                                                        dest)
-                     ;                                                ;; If ref is a commit SHA, ensure we checkout it
-                     ;                                                (invoke "git"
-                     ;                                                        "--git-dir" (string-append dest "/.git")
-                     ;                                                        "--work-tree" dest
-                     ;                                                        "checkout"
-                     ;                                                        ref)))
-                     ;                                            repos)
-                     ;                                          #t)))
-                     ;                                    )
                     #:configure-flags (list
                                           ; "-DPLUSBUILD_USE_GIT_PROTOCOL:BOOL=ON"
                                           "-DPLUSBUILD_OFFLINE_BUILD:BOOL=ON"
+
+                                          ;; Set source dirs
+                                          
+                                          ;; Prebuilt packages
+                                          (string-append "-DVTK_DIR:PATH="
+                                                         (assoc-ref %build-inputs "vtk"))
+                                          (string-append "-DITK_DIR:PATH="
+                                                         (assoc-ref %build-inputs "itk"))
+
+                                          ;; Source code
+                                          (string-append "-DPLUS_OpenIGTLink_SRC_DIR:PATH="
+                                                         (assoc-ref %build-inputs "OpenIGTLink"))
+                                          (string-append "-DPLUS_OpenIGTLinkIO_SRC_DIR:PATH="
+                                                         (assoc-ref %build-inputs "OpenIGTLinkIO"))
+                                          (string-append "-DPLUS_IGSIO_SRC_DIR:PATH="
+                                                         (assoc-ref %build-inputs "IGSIO"))
+                                          (string-append "-DPLUS_SeekCameraLib_SRC_DIR:PATH="
+                                                         (assoc-ref %build-inputs "InfraredSeekCam"))
+                                          (string-append "-DPLUS_IntersonSDKCxx_SRC_DIR:PATH="
+                                                         (assoc-ref %build-inputs "IntersonSDKCxx"))
+                                          (string-append "-DPLUS_OvrvisionPro_src_DIR:PATH="
+                                                         (assoc-ref %build-inputs "OvrvisionPro"))
+                                          (string-append "-DPLUS_PLUSAPP_DIR:PATH="
+                                                         (assoc-ref %build-inputs "PlusApp"))
+                                          (string-append "-DPLUS_PLUSLIB_DIR:PATH="
+                                                         (assoc-ref %build-inputs "PlusLib"))
+                                          (string-append "-DPLUS_PLUSLIBDATA_DIR:PATH="
+                                                         (assoc-ref %build-inputs "PlusLibData"))
+                                          (string-append "-DPLUS_PLUSMODELCATALOG_DIR:PATH="
+                                                         (assoc-ref %build-inputs "PlusModelCatalog"))
+                                          (string-append "-DPLUS_leptonica_src_DIR:PATH="
+                                                         (assoc-ref %build-inputs "leptonica"))
+                                          (string-append "-DPLUS_tessdata_src_DIR:PATH="
+                                                         (assoc-ref %build-inputs "tessdata"))
+                                          (string-append "-DPLUS_tesseract_src_DIR:PATH="
+                                                         (assoc-ref %build-inputs "Tesseract"))
+                                          (string-append "-DPLUS_aruco_src_DIR:PATH="
+                                                         (assoc-ref %build-inputs "aruco"))
+                                          (string-append "-DPLUS_ndicapi_src_DIR:PATH="
+                                                         (assoc-ref %build-inputs "ndicapi"))
                                           )))
-                 (inputs (list qtbase-5
-                               vtk-slicer
-                               itk-slicer
-                               kdevelop
-                               qtmultimedia-5
-                               qttools-5
-                               libglvnd
-                               qtxmlpatterns
-                               qtx11extras
-                               libxt
-                               qtdeclarative-5
-                               qtwebengine-5
-                               opencv
+                 (inputs `(
+                           ("qtbase" ,qtbase-5)
+                           ("vtk" ,vtk-slicer)
+                           ("itk" ,itk-slicer)
+                           ("kdevelop", kdevelop)
+                           ("qtmultimedia" ,qtmultimedia-5)
+                           ("qttools" ,qttools-5)
+                           ("libglvnd" ,libglvnd)
+                           ("qtxmlpatterns" ,qtxmlpatterns)
+                           ("qtx11extras" ,qtx11extras)
+                           ("libxt" ,libxt)
+                           ("qtdeclarative" ,qtdeclarative-5)
+                           ("qtwebengine" ,qtwebengine-5)
+                           ("opencv" ,opencv)
+                           ("glew" ,glew)
+                           ("hdf5" ,hdf5-1.10)
+                           ("libtheora" ,libtheora)
+                           ("netcdf" ,netcdf)
+                           ("proj" ,proj)
+                           ("jsoncpp" ,jsoncpp)
+                           ("libxml2" ,libxml2)
+                           ("libharu" ,libharu)
+                           ("gl2ps" ,gl2ps)
+                           ("libpng" ,libpng)
+                           ("eigen" ,eigen)
+                           ("openmpi" ,openmpi)
+                           ("expat" ,expat)
+                           ("double-conversion" ,double-conversion)
+                           ("lz4" ,lz4)
+                           ("ijg-libjpeg" ,ijg-libjpeg)
+                           ("freetype" ,freetype)
 
-                               ;; PlusLib
-                               (origin
-                                 (method git-fetch)
-                                 (uri (git-reference (url "https://github.com/PlusToolkit/PlusLib.git")
-                                                     (commit "Plus-2.8")
-                                                     ))
-                                 (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
-                                 )
+                            ;; PlusLib
+                            ("PlusLib" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/PlusToolkit/PlusLib.git")
+                                                  (commit "Plus-2.8")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
 
-                               ;; PlusApp
-                               (origin
-                                 (method git-fetch)
-                                 (uri (git-reference (url "https://github.com/PlusToolkit/PlusApp.git")
-                                                     (commit "Plus-2.8")
-                                                     ))
-                                 (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
-                                 )
+                            ;; PlusApp
+                            ("PlusApp" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/PlusToolkit/PlusApp.git")
+                                                  (commit "Plus-2.8")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
 
-                               ;; OpenIGTLink
-                               (origin
-                                 (method git-fetch)
-                                 (uri (git-reference (url "https://github.com/openigtlink/OpenIGTLink.git")
-                                                     (commit "2081e418c48c02e920487e2284996c1e577c1024")
-                                                     ))
-                                 (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
-                                 )
+                            ;; IGSIO
+                            ("IGSIO" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/IGSIO/IGSIO.git")
+                                                  (commit "93b197fd3f8fb5353ccfdc51c1bca1d6b919d7cb")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
 
-                               ;; OpenIGTLinkIO
-                               (origin
-                                 (method git-fetch)
-                                 (uri (git-reference (url "https://github.com/IGSIO/OpenIGTLinkIO.git")
-                                                     (commit "1a2eda5ddb795df8bb5bfbba589c9650095ba4cd")
-                                                     ))
-                                 (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
-                                 )
+                            ;; OpenIGTLink
+                            ("OpenIGTLink" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/openigtlink/OpenIGTLink.git")
+                                                  (commit "2081e418c48c02e920487e2284996c1e577c1024")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
 
-                               ;; OvrvisionPro
-                               (origin
-                                 (method git-fetch)
-                                 (uri (git-reference (url "https://github.com/PlusToolkit/OvrvisionProCMake.git")
-                                                     (commit "761a54917e6070a8148dc373d640a2ffe191ac7d")
-                                                     ))
-                                 (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
-                                 )
+                            ;; OpenIGTLinkIO
+                            ("OpenIGTLinkIO" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/IGSIO/OpenIGTLinkIO.git")
+                                                  (commit "1a2eda5ddb795df8bb5bfbba589c9650095ba4cd")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
 
-                               ;; PlusLibData
-                               (origin
-                                 (method git-fetch)
-                                 (uri (git-reference (url "https://github.com/PlusToolkit/PlusLibData.git")
-                                                     (commit "Plus-2.8")
-                                                     ))
-                                 (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
-                                 )
+                            ;; OvrvisionPro
+                            ("OvrvisionPro" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/PlusToolkit/OvrvisionProCMake.git")
+                                                  (commit "761a54917e6070a8148dc373d640a2ffe191ac7d")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
 
-                               ;; PlusModelCatalog
-                               (origin
-                                 (method git-fetch)
-                                 (uri (git-reference (url "https://github.com/PlusToolkit/PlusModelCatalog.git")
-                                                     (commit "651be1563b40a3552f18436f580d1c14d1b388f9")
-                                                     ))
-                                 (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
-                                 )
+                            ;; PlusLibData
+                            ("PlusLibData" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/PlusToolkit/PlusLibData.git")
+                                                  (commit "Plus-2.8")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
 
-                               ;; Tesseract
-                               (origin
-                                 (method git-fetch)
-                                 (uri (git-reference (url "https://github.com/PlusToolkit/leptonica.git")
-                                                     (commit "3130874380fcc2b0268d4f57863cbacdf9d1e9a4")
-                                                     ))
-                                 (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
-                                 )
+                            ;; PlusModelCatalog
+                            ("PlusModelCatalog" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/PlusToolkit/PlusModelCatalog.git")
+                                                  (commit "651be1563b40a3552f18436f580d1c14d1b388f9")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
 
-                               ;; aruco
-                               (origin
-                                 (method git-fetch)
-                                 (uri (git-reference (url "https://github.com/PlusToolkit/aruco.git")
-                                                     (commit "cf93865edf157aa45c64c8f2084dcef59e58dda3")
-                                                     ))
-                                 (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
-                                 )
+                            ;; leptonica
+                            ("leptonica" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/PLUSToolkit/leptonica.git")
+                                                  (commit "3130874380fcc2b0268d4f57863cbacdf9d1e9a4")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
 
-                               ;; ndicapi
-                               (origin
-                                 (method git-fetch)
-                                 (uri (git-reference (url "https://github.com/PlusToolkit/ndicapi.git")
-                                                     (commit "7af09f359cf713de095246bf0dae2763b1c7d135")
-                                                     ))
-                                 (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
-                                 )
+                            ;; tessdata
+                            ("tessdata" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/PLUSToolkit/tessdata.git")
+                                                  (commit "436f296294e97e01a2fbcd0744edf8577c491a8d")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
 
-                               ;; InfraredSeekCam
-                               (origin
-                                 (method git-fetch)
-                                 (uri (git-reference (url "https://github.com/medtec4susdev/libseek-thermal.git")
-                                                     (commit "c4fa40f200ef1277675e882358884049b8934d5e")
-                                                     ))
-                                 (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
-                                 )
+                            ;; Tesseract
+                            ("Tesseract" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/PLUSToolkit/tesseract-ocr-cmake.git")
+                                                  (commit "21855d0568a9253dede4e223aae71c0249b90438")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
 
-                               ;; IntersonSDKCxx
-                               (origin
-                                 (method git-fetch)
-                                 (uri (git-reference (url "https://github.com/KitwareMedical/IntersonSDKCxx")
-                                                     (commit "819d620052be7e9b232e12d8946793c15cfbf5a30")
-                                                     ))
-                                 (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
-                                 )
+                            ;; aruco
+                            ("aruco" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/PlusToolkit/aruco.git")
+                                                  (commit "cf93865edf157aa45c64c8f2084dcef59e58dda3")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
 
-                               ))
-                 ; (native-inputs (list dos2unix
-                 ;                      sed
-                 ;                      git))
+                            ;; ndicapi
+                            ("ndicapi" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/PlusToolkit/ndicapi.git")
+                                                  (commit "7af09f359cf713de095246bf0dae2763b1c7d135")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
+
+                            ;; InfraredSeekCam
+                            ("InfraredSeekCam" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/medtec4susdev/libseek-thermal.git")
+                                                  (commit "c4fa40f200ef1277675e882358884049b8934d5e")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
+
+                            ;; IntersonSDKCxx
+                            ("IntersonSDKCxx" ,(origin
+                              (method git-fetch)
+                              (uri (git-reference (url "https://github.com/KitwareMedical/IntersonSDKCxx")
+                                                  (commit "819d620052be7e9b232e12d8946793c15cfbf5a30")
+                                                  ))
+                              (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                              ))
+
+                            ))
                  (home-page "plustoolkit.github.io")
                  (synopsis "CMake scripts for building Plus library, applications, and all required dependencies")
                  (description "This project contains CMake scripts for building Plus library, applications, and all required dependencies.")
