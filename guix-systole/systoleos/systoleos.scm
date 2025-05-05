@@ -89,10 +89,10 @@
                   (bootloader grub-efi-bootloader)
                   (targets '("/boot/efi"))))
 
-    ;; Assume the target root file system is labelled "my-root",
+    ;; Assume the target root file system is labelled "root",
     ;; and the EFI System Partition has UUID 1234-ABCD.
     (file-systems (append (list (file-system
-                                  (device (file-system-label "my-root"))
+                                  (device (file-system-label "root"))
                                   (mount-point "/")
                                   (type "ext4"))
                                 (file-system
@@ -101,14 +101,26 @@
                                   (mount-point "/boot/efi")
                                   (type "vfat"))) %base-file-systems))
 
-    ;; The account must be initialised with `passwd` command
+    ;; The `brainlabmirror` account must be initialised with `passwd` command
     (users (cons (user-account
-                   (name "systole")
-                   (comment "SystoleOS user")
-                   (password #f)
+                   (name "brainlabmirror")
+                   (comment "BrainLab")
+                   (password "")
                    (group "users")
-                   (supplementary-groups (list "wheel" "netdev" "audio"
-                                               "video"))) %base-user-accounts))
+                   (supplementary-groups (list "dicom" "netdev" "audio"
+                                               "video")))
+                 (user-account
+                   (name "admin")
+                   (comment "Admin")
+                   (group "users")
+                   (supplementary-groups (list "wheel" "netdev" "audio" "video")))
+                 %base-user-accounts))
+
+    (sudoers-file
+     (plain-file "sudoers"
+                 (string-append (plain-file-content %sudoers-specification)
+                                (format #f "~a ALL = NOPASSWD: ALL~%"
+                                        "admin"))))
 
     (packages (append (list
                        ;; Slicer
