@@ -53,14 +53,14 @@
        (sha256
         (base32 "05rz797ddci3a2m8297zyzv2g2hp6bd6djmwa1n0gbsla8b175bx"))
        (patches (search-patches
-                 "0002-COMP-packages-slicer-Add-vtk-CommonSystem-component-as-requirement.patch"
-                 "0003-COMP-packages-slicer-Find-Eigen-required.patch"
-                 "0004-COMP-packages-slicer-Adapt-to-new-qRestAPI-cmake.patch"
-                 "0006-COMP-packages-slicer-hard-code-libteem-so.patch"
-                 "0008-COMP-packages-slicer-MRMLWidgets-add-vtk-dependency.patch"
-                 "0009-COMP-packages-slicer-Add-itk-as-required.patch"
-                 "0010-COMP-packages-slicer-Limit-CPack.patch"
-                 "0015-COMP-packages-slicer-Remove-LastConfigureStep.patch"))))
+                 "0001-COMP-Add-vtk-CommonSystem-component-as-requirement.patch"
+                 "0002-COMP-Find-Eigen-required.patch"
+                 "0003-COMP-Adapt-to-new-qRestAPI-cmake.patch"
+                 "0004-COMP-Hard-code-path-to-teem-library.patch"
+                 "0005-COMP-Add-vtk-dependency-to-MRMLWidgets.patch"
+                 "0006-COMP-Find-itk-on-non-superbuild.patch"
+                 "0007-COMP-Scope-CPack-blocks.patch"
+                 "0008-COMP-Remove-LastConfigureStep.patch"))))
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f
@@ -101,7 +101,7 @@
                           ;; "-DSlicer_VTK_RENDERING_BACKEND:STRING=OpenGL2"
                           "-DSlicer_VTK_VERSION_MAJOR:STRING=9"
                           "-DSlicer_BUILD_vtkAddon:BOOL=OFF" ;This should be OFF, so Slicer uses the system installed one.
-                          
+
                           "-DSlicer_INSTALL_DEVELOPMENT:BOOL=OFF"
                           "-DSlicer_USE_TBB:BOOL=ON"
 
@@ -112,7 +112,7 @@
                           ;; "-DSlicer_VTK_WRAP_HIERARCHY_DIR:STRING=#{$\x7b;BUILD_DIR\x7d;}#"
                           ;; "-DSlicer_USE_SimpleITK:BOOL=OFF"
                           "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=OFF" ;Disabled as we do not have IODCMTK support yet
-                          
+
                           ;; Python
                           ;; "-DPython3_INCLUDE_DIR:FILEPATH="
                           ;; "-DPython3_LIBRARY:FILEPATH="
@@ -145,7 +145,7 @@
                   (add-before 'configure 'set-cmake-paths
                     (lambda* (#:key inputs #:allow-other-keys)
                       ;; Make 'vtkaddon' discoverable by CMake
-                      
+
                       (setenv "CMAKE_PREFIX_PATH"
                               (string-append (assoc-ref inputs "vtkaddon")
                                              "/lib/cmake:"
@@ -216,7 +216,7 @@
     (native-inputs (list pkg-config))
     (synopsis "3D Slicer - Medical visualization and computing environment")
     (description
-     "3D Slicer is a multi-platform, free and open source software package for 
+     "3D Slicer is a multi-platform, free and open source software package for
 visualization and medical image computing. It provides capabilities for:
 @itemize
 @item Medical image processing and analysis

@@ -12,7 +12,8 @@
   (let* ((this-file (current-filename))
          (this-dir (dirname this-file))
          (root-dir (dirname this-dir)))
-    (string-append root-dir "/guix-systole/packages/patches")))
+    (string-append root-dir
+                   "/guix-systole/packages/patches")))
 
 ;; Get the original %patch-path value and extend it
 (define %original-patch-path
@@ -27,7 +28,9 @@
 
 ;; Define a modified %patch-path that includes custom patch directory
 (define %patch-path
-  (make-parameter (cons systole-patches %original-patch-path)))
+  (make-parameter (list systole-patches
+                        (string-append systole-patches "/slicer")
+                        %original-patch-path)))
 
 ;; Define search-patch function
 (define (search-patch file-name)
