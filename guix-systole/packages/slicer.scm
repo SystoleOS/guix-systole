@@ -37,6 +37,7 @@
   #:use-module (guix-systole packages ctk)
   #:use-module (guix-systole packages itk)
   #:use-module (guix-systole packages libarchive)
+  #:use-module (guix-systole packages openigtlink)
   #:use-module (guix-systole packages qrestapi)
   #:use-module (guix-systole packages teem)
   #:use-module (guix-systole packages vtk)
@@ -172,8 +173,10 @@
                   (add-before 'configure 'core-modules-symlink
                     (lambda* (#:key inputs outputs #:allow-other-keys)
                       ;; Loadables
-                      (symlink (assoc-ref inputs "slicer-plots")
-                               "Modules/External/Plots") #t))
+                      (symlink (assoc-ref inputs "slicer-plots-src")
+                               "Modules/External/Plots")
+                      (symlink (assoc-ref inputs "openigtlinkif-src")
+                               "Modules/External/OpenIGTLinkIF") #t))
 
                   )))
     (inputs (list libxt
@@ -201,7 +204,12 @@
                   qttools-5
 
                   ;; Slicer Core Modules
-                  slicer-plots
+                  slicer-plots-src
+
+                  ;; External Slicer Modules
+                  sliceropenigtlinkif-src
+                  openigtlink
+                  openigtlinkio
 
                   ;; VTK
                   vtk-slicer
@@ -307,9 +315,9 @@ arguments. Slicer uses this XML description to construct a GUI for the module.")
 ;; -----------------------------------------------------------------------------
 ;; Slicer Core Modules
 ;; -----------------------------------------------------------------------------
-(define slicer-plots
+(define slicer-plots-src
   (package
-    (name "slicer-plots")
+    (name "slicer-plots-src")
     (version "2.0.0")
     (source
      (origin

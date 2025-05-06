@@ -1,0 +1,50 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6f43133..4f0b8b8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -17,8 +17,8 @@ set(SUPERBUILD_TOPLEVEL_PROJECT inner)
+ 
+ #-----------------------------------------------------------------------------
+ # Extension dependencies
+-find_package(Slicer REQUIRED)
+-include(${Slicer_USE_FILE})
++#find_package(Slicer REQUIRED)
++#include(${Slicer_USE_FILE})
+ mark_as_superbuild(Slicer_DIR)
+ 
+ #-----------------------------------------------------------------------------
+@@ -30,10 +30,10 @@ mark_as_superbuild(SlicerOpenIGTLink_USE_VP9)
+ # SuperBuild setup
+ option(${EXTENSION_NAME}_SUPERBUILD "Build ${EXTENSION_NAME} and the projects it depends on." ON)
+ mark_as_advanced(${EXTENSION_NAME}_SUPERBUILD)
+-if(${EXTENSION_NAME}_SUPERBUILD)
+-  include("${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild.cmake")
+-  return()
+-endif()
++#if(${EXTENSION_NAME}_SUPERBUILD)
++#  include("${CMAKE_CURRENT_SOURCE_DIR}/SuperBuild.cmake")
++#  return()
++#endif()
+ 
+ #-----------------------------------------------------------------------------
+ # Extension modules
+@@ -55,11 +55,11 @@ include(${Slicer_EXTENSION_GENERATE_CONFIG})
+ 
+ #-----------------------------------------------------------------------------
+ # Packaging
+-set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
+-list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${OpenIGTLink_DIR};OpenIGTLink;RuntimeLibraries;/")
+-list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${OpenIGTLinkIO_DIR};OpenIGTLinkIO;RuntimeLibraries;/")
+-set(${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS "${EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS}" CACHE STRING "List of external projects to install" FORCE)
+-list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
+-list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS}")
+-include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/SlicerBlockInstallVP9.cmake)
+-include(${Slicer_EXTENSION_CPACK})
++#set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
++#list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${OpenIGTLink_DIR};OpenIGTLink;RuntimeLibraries;/")
++#list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${OpenIGTLinkIO_DIR};OpenIGTLinkIO;RuntimeLibraries;/")
++#set(${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS "${EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS}" CACHE STRING "List of external projects to install" FORCE)
++#list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
++#list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS}")
++#include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/SlicerBlockInstallVP9.cmake)
++#include(${Slicer_EXTENSION_CPACK})
