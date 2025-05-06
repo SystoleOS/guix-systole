@@ -2,9 +2,7 @@
 ;; `guix system image -L . -t iso9660 guix-systole/systoleos/systoleos.scm`
 
 (define-module (guix-systole systoleos systoleos)
-  ; #:use-module (guix)
   #:use-module (guix channels)
-  ;; #:use-module (guix packages)
   #:use-module (guix gexp)
   #:use-module (guix build utils)
   #:use-module (guix build-system trivial)
@@ -114,20 +112,15 @@
 (define user-home
   (home-environment
     (services
-     (cons*
-      (service
-       home-xdg-configuration-files-service-type
-       `())
-      (service
-       home-files-service-type
-       `((".fluxbox/init" ,fluxbox-init)
-         (".fluxbox/keys" ,fluxbox-keys)
-         (".fluxbox/startup" ,fluxbox-startup)
-         (".idesktop/DICOMStore.lnk" ,idesk-icon-lnk)
-         (".conkyrc" ,conkyrc)
-         (".ideskrc" ,ideskrc)
-         ))
-      %base-home-services))))
+     (cons* (service home-xdg-configuration-files-service-type
+                     `())
+            (service home-files-service-type
+                     `((".fluxbox/init" ,fluxbox-init)
+                       (".fluxbox/keys" ,fluxbox-keys)
+                       (".fluxbox/startup" ,fluxbox-startup)
+                       (".idesktop/DICOMStore.lnk" ,idesk-icon-lnk)
+                       (".conkyrc" ,conkyrc)
+                       (".ideskrc" ,ideskrc))) %base-home-services))))
 
 (define systoleos-configuration
   (operating-system
@@ -158,24 +151,26 @@
 
     ;; The `brainlabmirror` account must be initialised with `passwd` command
     (users (append (list (user-account
-                   (name "brainlabmirror")
-                   (comment "BrainLab")
-                   (password "")
-                   (group "users")
-                   (supplementary-groups (list "dicom" "netdev" "audio"
-                                               "video")))
-                 (user-account
-                   (name "admin")
-                   (comment "Admin")
-                   (group "users")
-                   (supplementary-groups (list "wheel" "netdev" "audio" "video"))))
-                 %base-user-accounts))
+                           (name "brainlabmirror")
+                           (comment "BrainLab")
+                           (password "")
+                           (group "users")
+                           (supplementary-groups (list "dicom" "netdev"
+                                                       "audio" "video")))
+                         (user-account
+                           (name "admin")
+                           (comment "Admin")
+                           (group "users")
+                           (supplementary-groups (list "wheel" "netdev"
+                                                       "audio" "video"))))
+                   %base-user-accounts))
 
-    (sudoers-file
-     (plain-file "sudoers"
-                 (string-append (plain-file-content %sudoers-specification)
-                                (format #f "~a ALL = NOPASSWD: ALL~%"
-                                        "admin"))))
+    (sudoers-file (plain-file "sudoers"
+                              (string-append (plain-file-content
+                                              %sudoers-specification)
+                                             (format #f
+                                              "~a ALL = NOPASSWD: ALL~%"
+                                              "admin"))))
 
     (packages (append (list
                        ;; Slicer
@@ -214,18 +209,19 @@
                                                                      #t))))
                                                    (seats (list (lightdm-seat-configuration
                                                                  (name "*")
-                                                                 (autologin-user "brainlabmirror")
+                                                                 (autologin-user
+                                                                  "brainlabmirror")
                                                                  (user-session
-                                                                  ; "xfce.desktop"
+                                                                  ;; "xfce.desktop"
                                                                   "fluxbox"))))))
 
                    ;; Services for xfce desktop environment
-                   ; (service xfce-desktop-service-type)
+                   ;; (service xfce-desktop-service-type)
                    
                    ;; nftables service
                    (service nftables-service-type
-                            (nftables-configuration
-                              (ruleset (local-file "etc/nftables.conf"))))
+                            (nftables-configuration (ruleset (local-file
+                                                              "etc/nftables.conf"))))
 
                    (service guix-home-service-type
                             `(("brainlabmirror" ,user-home)))
