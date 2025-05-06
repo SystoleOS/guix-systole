@@ -23,6 +23,7 @@
                #:use-module (gnu packages mpi)
                #:use-module (gnu packages compression)
                #:use-module (gnu packages fontutils)
+               #:use-module (gnu packages libusb)
 
                ;; PlusBuild specific modules
                ; #:use-module (gnu packages text-utils)
@@ -33,6 +34,7 @@
                #:use-module (guix-systole packages)
                #:use-module (guix-systole packages vtk)
                #:use-module (guix-systole packages itk)
+               ; #:use-module (guix-systole packages slicer)
                #:use-module (guix-systole packages igsio)
                #:use-module (guix-systole packages openigtlink)
                )
@@ -127,21 +129,49 @@
                      ; (patch-flags '("--ignore-whitespace" "-F" "3"))
                      (patches (search-patches
                                 "PlusBuild_test_OS_agnostic.patch"
-                                "PlusBuild-deps-allow-preset-src-dir.patch"))))
+                                "PlusBuild-deps-allow-preset-src-dir.patch"
+                                ; "PlusBuild-disable-VTK_USE_QT-check.patch"
+                                ))))
                  (build-system cmake-build-system)
                  (arguments
                    `(
                     #:configure-flags (list
                                           ; "-DPLUSBUILD_USE_GIT_PROTOCOL:BOOL=ON"
                                           "-DPLUSBUILD_OFFLINE_BUILD:BOOL=ON"
+                                          ; "-DPLUSBUILD_BUILD_SHARED_LIBS:BOOL=OFF"
+                                          "-DPLUSBUILD_BUILD_PLUSAPP:BOOL=OFF"
+
+                                          ; "-DPLUSBUILD_USE_3DSlicer:BOOL=ON"
+
+                                          "-DPLUS_USE_NDI:BOOL=ON"
+                                          ; "-DPLUS_USE_BKPROFOCUS_CAMERALINK:BOOL=ON"
+                                          ; "-DPLUS_USE_BKPROFOCUS_VIDEO:BOOL=ON"
+                                          "-DPLUS_USE_VTKVIDEOIO_MKV:BOOL=ON"
+                                          "-DPLUS_USE_IGSIO:BOOL=ON"
+                                          "-DPLUS_USE_TextRecognizer:BOOL=ON"
+                                          "-DPLUSBUILD_USE_Tesseract:BOOL=ON"
+                                          "-DPLUS_USE_Tesseract:BOOL=ON"
+                                          "-DPLUS_USE_OvrvisionPro:BOOL=ON"
+                                          "-DPLUS_USE_OpenCV_VIDEO:BOOL=ON"
+                                          "-DPLUSBUILD_USE_OpenCV:BOOL=ON"
+                                          ; "-DPLUS_USE_INFRARED_SEEK_CAM:BOOL=ON"
+                                          "-DPLUS_USE_OPTICAL_MARKER_TRACKER:BOOL=ON"
+                                          "-DPLUSBUILD_USE_aruco:BOOL=ON"
 
                                           ;; Set source dirs
                                           
                                           ;; Prebuilt packages
                                           (string-append "-DVTK_DIR:PATH="
-                                                         (assoc-ref %build-inputs "vtk"))
+                                                         (assoc-ref %build-inputs "vtk")
+                                                         "/lib/cmake/vtk-9.2")
                                           (string-append "-DITK_DIR:PATH="
-                                                         (assoc-ref %build-inputs "itk"))
+                                                         (assoc-ref %build-inputs "itk")
+                                                         "/lib/cmake/ITK-5.4")
+                                          ; (string-append "-DOpenCV_DIR:PATH="
+                                          ;                (assoc-ref %build-inputs "opencv"))
+                                          ; (string-append "-DPLUSBUILD_SLICER_BIN_DIRECTORY:PATH="
+                                          ;                (assoc-ref %build-inputs "slicer")
+                                          ;                "/lib/Slicer-5.8")
 
                                           ;; Source code
                                           (string-append "-DPLUS_OpenIGTLink_SRC_DIR:PATH="
@@ -174,12 +204,17 @@
                                                          (assoc-ref %build-inputs "aruco"))
                                           (string-append "-DPLUS_ndicapi_src_DIR:PATH="
                                                          (assoc-ref %build-inputs "ndicapi"))
+                                          (string-append "-DPLUS_OpenCV_src_DIR:PATH="
+                                                         (assoc-ref %build-inputs "opencv"))
+                                          (string-append "-DLibUSB_DIR:PATH="
+                                                         (assoc-ref %build-inputs "libsub"))
                                           )))
                  (inputs `(
                            ("qtbase" ,qtbase-5)
                            ("vtk" ,vtk-slicer)
                            ("itk" ,itk-slicer)
-                           ("kdevelop", kdevelop)
+                           ; ("slicer" ,slicer-5.8)
+                           ("kdevelop" ,kdevelop)
                            ("qtmultimedia" ,qtmultimedia-5)
                            ("qttools" ,qttools-5)
                            ("libglvnd" ,libglvnd)
@@ -188,7 +223,7 @@
                            ("libxt" ,libxt)
                            ("qtdeclarative" ,qtdeclarative-5)
                            ("qtwebengine" ,qtwebengine-5)
-                           ("opencv" ,opencv)
+                           ; ("opencv" ,opencv)
                            ("glew" ,glew)
                            ("hdf5" ,hdf5-1.10)
                            ("libtheora" ,libtheora)
@@ -206,6 +241,8 @@
                            ("lz4" ,lz4)
                            ("ijg-libjpeg" ,ijg-libjpeg)
                            ("freetype" ,freetype)
+                           ("git" ,git)
+                           ("libsub" ,libusb)
 
                             ;; PlusLib
                             ("PlusLib" ,(origin
@@ -341,6 +378,16 @@
                                                   ))
                               (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
                               ))
+
+                            ;; OpenCV (version 3.3.1)
+                            ("opencv" ,(origin
+                                         (method git-fetch)
+                                         (uri (git-reference (url "https://github.com/opencv/opencv.git")
+                                                             (commit "0d6518aaa05bc66b5724844938b6920627c5f13c")
+                                                             ))
+                                         (sha256 (base32 "0p94138lldfi2xaf0ql5w2gb8qi7qqdk15c03k4fc8s6x6c1iibd"))
+                                         )
+                             )
 
                             ))
                  (home-page "plustoolkit.github.io")

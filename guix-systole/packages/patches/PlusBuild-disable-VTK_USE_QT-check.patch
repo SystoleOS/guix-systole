@@ -1,0 +1,31 @@
+diff --git a/SuperBuild/External_VTK.cmake b/SuperBuild/External_VTK.cmake
+index 7f40557..74174f1 100644
+--- a/SuperBuild/External_VTK.cmake
++++ b/SuperBuild/External_VTK.cmake
+@@ -1,12 +1,17 @@
+ IF(VTK_DIR)
++  MESSAGE(STATUS "VTK 1")
++
+   # VTK has been built already
+-  FIND_PACKAGE(VTK REQUIRED)
++  FIND_PACKAGE(VTK REQUIRED COMPONENTS vtkGUISupportQt)
+ 
++  MESSAGE(STATUS "VTK 1.5")
+   IF(NOT ${VTK_VERSION_MAJOR} GREATER 6)
+     MESSAGE(FATAL_ERROR "VTK7+ required for Plus. Found VTK ${VTK_VERSION_MAJOR}.${VTK_VERSION_MINOR}.${VTK_VERSION_PATH}.")
+     SET(VTK_DIR VTK-DIR_NOTFOUND FORCE)
+   ENDIF()
+ 
++  MESSAGE(STATUS "VTK 2")
++
+   MESSAGE(STATUS "Using VTK available at: ${VTK_DIR}")
+ 
+   # Copy libraries to CMAKE_RUNTIME_OUTPUT_DIRECTORY
+@@ -20,6 +25,7 @@ IF(VTK_DIR)
+ 
+   # No target necessary, VTK is provided
+   SET(VTK_BUILD_DEPENDENCY_TARGET CACHE INTERNAL "The name of the target to list as a dependency to ensure build order correctness.")
++  MESSAGE(STATUS "VTK 3")
+ ELSE()
+   # VTK has not been built yet, so download and build it as an external project
+   SET(VTK_VERSION_SPECIFIC_ARGS)

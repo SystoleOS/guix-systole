@@ -1,8 +1,8 @@
 diff --git a/SuperBuild/External_IGSIO.cmake b/SuperBuild/External_IGSIO.cmake
-index 2926093..da356e3 100644
+index 2926093..c5b2263 100644
 --- a/SuperBuild/External_IGSIO.cmake
 +++ b/SuperBuild/External_IGSIO.cmake
-@@ -8,14 +8,25 @@ IF(IGSIO_DIR)
+@@ -8,20 +8,31 @@ IF(IGSIO_DIR)
  
    SET (PLUS_IGSIO_DIR "${IGSIO_DIR}" CACHE INTERNAL "Path to store IGSIO binaries")
  ELSE()
@@ -34,6 +34,13 @@ index 2926093..da356e3 100644
    SET(PLUS_IGSIO_PREFIX_DIR ${CMAKE_BINARY_DIR}/Deps/IGSIO-prefix CACHE INTERNAL "Path to store IGSIO prefix data.")
    SET(PLUS_IGSIO_DIR ${CMAKE_BINARY_DIR}/Deps/IGSIO-bin CACHE INTERNAL "Path to store IGSIO binaries")
  
+   SET(IGSIO_DEPENDENCIES vtk)
+   SET(IGSIO_BUILD_OPTIONS
+-       -DVTK_DIR:PATH=${PLUS_VTK_DIR}
++       -DVTK_DIR:PATH=${VTK_DIR}
+      )
+ 
+   IF (PLUS_USE_VTKVIDEOIO)
 @@ -40,11 +51,8 @@ ELSE()
    ExternalProject_Add( IGSIO
      PREFIX ${PLUS_IGSIO_PREFIX_DIR}
@@ -152,11 +159,72 @@ index 91258c0..6985cfa 100644
 -ENDIF()
 \ No newline at end of file
 +ENDIF()
+diff --git a/SuperBuild/External_OpenCV.cmake b/SuperBuild/External_OpenCV.cmake
+index 424f881..b83714b 100644
+--- a/SuperBuild/External_OpenCV.cmake
++++ b/SuperBuild/External_OpenCV.cmake
+@@ -74,24 +74,32 @@ ELSE()
+     SET(PLUSBUILD_OpenCV_VERSION 0d6518aaa05bc66b5724844938b6920627c5f13c CACHE STRING "Set OpenCV version (version: [major].[minor].[patch])" FORCE)
+   ENDIF()
+ 
+-  # No OpenCV is specified, so download and build
+-  SetGitRepositoryTag(
+-    OpenCV
+-    "${GIT_PROTOCOL}://github.com/opencv/opencv.git"
+-    ${PLUSBUILD_OpenCV_VERSION}
+-    )
++  IF(NOT DEFINED PLUS_OpenCV_src_DIR)
++    SetGitRepositoryTag(
++      OpenCV
++      "${GIT_PROTOCOL}://github.com/opencv/opencv.git"
++      ${PLUSBUILD_OpenCV_VERSION}
++      )
++
++    SET (PLUS_OpenCV_src_DIR ${CMAKE_BINARY_DIR}/Deps/OpenCV CACHE INTERNAL "Path to store OpenCV contents.")
++
++    SET(DOWNLOAD_STEPS
++      GIT_REPOSITORY ${OpenCV_GIT_REPOSITORY}
++      GIT_TAG ${OpenCV_GIT_TAG})
++  ELSE()
++    MESSAGE(STATUS "Using existing OpenCV source at: ${PLUS_OpenCV_src_DIR}")
++    SET(DOWNLOAD_STEPS
++      DOWNLOAD_COMMAND ""
++      SOURCE_DIR ${PLUS_OpenCV_src_DIR})
++  ENDIF()
+ 
+-  SET (PLUS_OpenCV_src_DIR ${CMAKE_BINARY_DIR}/Deps/OpenCV CACHE INTERNAL "Path to store OpenCV contents.")
+   SET (PLUS_OpenCV_prefix_DIR ${CMAKE_BINARY_DIR}/Deps/OpenCV-prefix CACHE INTERNAL "Path to store OpenCV prefix data.")
+   SET (PLUS_OpenCV_DIR ${CMAKE_BINARY_DIR}/Deps/OpenCV-bin CACHE INTERNAL "Path to store OpenCV binaries")
+   ExternalProject_Add( OpenCV
+     PREFIX ${PLUS_OpenCV_prefix_DIR}
+     "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
+-    SOURCE_DIR "${PLUS_OpenCV_src_DIR}"
++    ${DOWNLOAD_STEPS}
+     BINARY_DIR "${PLUS_OpenCV_DIR}"
+-    #--Download step--------------
+-    GIT_REPOSITORY ${OpenCV_GIT_REPOSITORY}
+-    GIT_TAG ${OpenCV_GIT_TAG}
+     #--Configure step-------------
+     CMAKE_ARGS
+       ${ep_common_args}
+@@ -117,4 +125,4 @@ ELSE()
+     #--Dependencies-----------------
+     DEPENDS ${VTK_BUILD_DEPENDENCY_TARGET}
+     )
+-ENDIF()
+\ No newline at end of file
++ENDIF()
 diff --git a/SuperBuild/External_OpenIGTLink.cmake b/SuperBuild/External_OpenIGTLink.cmake
-index fdf0ed5..31c6558 100644
+index fdf0ed5..bf7340a 100644
 --- a/SuperBuild/External_OpenIGTLink.cmake
 +++ b/SuperBuild/External_OpenIGTLink.cmake
-@@ -13,22 +13,35 @@ IF(OpenIGTLink_DIR)
+@@ -1,3 +1,5 @@
++MESSAGE(STATUS "OpenIGTLink 1")
++
+ IF(OpenIGTLink_DIR)
+   # OpenIGTLink has been built already
+   FIND_PACKAGE(OpenIGTLink REQUIRED NO_MODULE)
+@@ -13,22 +15,40 @@ IF(OpenIGTLink_DIR)
    SET (PLUS_OpenIGTLink_DIR "${OpenIGTLink_DIR}" CACHE INTERNAL "Path to store OpenIGTLink binaries")
  ELSE()
    # OpenIGTLink has not been built yet, so download and build it as an external project
@@ -167,6 +235,8 @@ index fdf0ed5..31c6558 100644
 -    )
  
 -  SET (PLUS_OpenIGTLink_SRC_DIR "${CMAKE_BINARY_DIR}/Deps/OpenIGTLink")
++  MESSAGE(STATUS "OpenIGTLink 2")
++
 +  # Check if source directory has already been provided
 +  IF(NOT DEFINED PLUS_OpenIGTLink_SRC_DIR)
 +    SetGitRepositoryTag(
@@ -182,6 +252,8 @@ index fdf0ed5..31c6558 100644
 +      GIT_REPOSITORY ${OpenIGTLink_GIT_REPOSITORY}
 +      GIT_TAG ${OpenIGTLink_GIT_TAG})
 +  ELSE()
++
++  MESSAGE(STATUS "OpenIGTLink 3")
 +    MESSAGE(STATUS "Using existing OpenIGTLink source at: ${PLUS_OpenIGTLink_SRC_DIR}")
 +    # Skip download step
 +    SET(DOWNLOAD_STEPS
@@ -190,6 +262,7 @@ index fdf0ed5..31c6558 100644
 +  ENDIF()
 +
    SET (PLUS_OpenIGTLink_DIR "${CMAKE_BINARY_DIR}/Deps/OpenIGTLink-bin" CACHE INTERNAL "Path to store OpenIGTLink binaries")
++  MESSAGE(STATUS "OpenIGTLink 4")
    ExternalProject_Add( OpenIGTLink
      "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
      PREFIX "${CMAKE_BINARY_DIR}/Deps/OpenIGTLink-prefix"
@@ -202,7 +275,7 @@ index fdf0ed5..31c6558 100644
      #--Configure step-------------
      CMAKE_ARGS 
        ${ep_common_args}
-@@ -51,4 +64,4 @@ ELSE()
+@@ -51,4 +71,4 @@ ELSE()
      INSTALL_COMMAND ""
      DEPENDS ${OpenIGTLink_DEPENDENCIES}
      )  
@@ -335,7 +408,7 @@ index 70a4ab9..ae9f1b6 100644
 \ No newline at end of file
 +ENDIF()
 diff --git a/SuperBuild/External_PlusApp.cmake b/SuperBuild/External_PlusApp.cmake
-index d11669c..c63f119 100644
+index d11669c..abb0cf3 100644
 --- a/SuperBuild/External_PlusApp.cmake
 +++ b/SuperBuild/External_PlusApp.cmake
 @@ -8,11 +8,26 @@ IF(BUILDNAME)
@@ -370,12 +443,13 @@ index d11669c..c63f119 100644
  ENDIF()
  
  IF(PLUSBUILD_DOCUMENTATION)
-@@ -24,15 +39,11 @@ IF(PLUSBUILD_DOCUMENTATION)
+@@ -24,15 +39,12 @@ IF(PLUSBUILD_DOCUMENTATION)
      )
  ENDIF()
  
 -SET (PLUS_PLUSAPP_DIR ${CMAKE_BINARY_DIR}/PlusApp CACHE INTERNAL "Path to store PlusApp contents.")
  SET (PLUSAPP_DIR ${CMAKE_BINARY_DIR}/PlusApp-bin CACHE PATH "The directory containing PlusApp binaries" FORCE)                
++MESSAGE(STATUS "PlusApp 1")
  ExternalProject_Add(PlusApp
    "${PLUSBUILD_EXTERNAL_PROJECT_CUSTOM_COMMANDS}"
 -  SOURCE_DIR "${PLUS_PLUSAPP_DIR}" 
@@ -387,13 +461,23 @@ index d11669c..c63f119 100644
    #--Configure step-------------
    CMAKE_ARGS 
      ${ep_common_args}
-@@ -94,4 +105,4 @@ ELSE()
+@@ -61,6 +73,7 @@ ExternalProject_Add(PlusApp
+   INSTALL_COMMAND ""
+   DEPENDS ${PlusApp_DEPENDENCIES}
+   )
++MESSAGE(STATUS "PlusApp 2")
+ 
+ # --------------------------------------------------------------------------
+ # Copy Qt binaries to CMAKE_RUNTIME_OUTPUT_DIRECTORY
+@@ -94,4 +107,6 @@ ELSE()
      DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
      FILES_MATCHING REGEX .*${CMAKE_SHARED_LIBRARY_SUFFIX}
      )
 -ENDIF()
 \ No newline at end of file
 +ENDIF()
++
++MESSAGE(STATUS "PlusApp 3")
 diff --git a/SuperBuild/External_PlusLib.cmake b/SuperBuild/External_PlusLib.cmake
 index eb9525b..d804f37 100644
 --- a/SuperBuild/External_PlusLib.cmake
@@ -699,6 +783,45 @@ index 92ed1b1..c030bbd 100644
 -ENDIF()
 \ No newline at end of file
 +ENDIF()
+diff --git a/SuperBuild/External_VTK.cmake b/SuperBuild/External_VTK.cmake
+index 7f40557..be9ebec 100644
+--- a/SuperBuild/External_VTK.cmake
++++ b/SuperBuild/External_VTK.cmake
+@@ -1,12 +1,18 @@
+ IF(VTK_DIR)
++  MESSAGE(STATUS "VTK 1")
++  MESSAGE(STATUS "VTK_DIR=${VTK_DIR}")
++
+   # VTK has been built already
+-  FIND_PACKAGE(VTK REQUIRED)
++  FIND_PACKAGE(VTK REQUIRED COMPONENTS vtkGUISupportQt)
+ 
++  MESSAGE(STATUS "VTK 1.5")
+   IF(NOT ${VTK_VERSION_MAJOR} GREATER 6)
+     MESSAGE(FATAL_ERROR "VTK7+ required for Plus. Found VTK ${VTK_VERSION_MAJOR}.${VTK_VERSION_MINOR}.${VTK_VERSION_PATH}.")
+     SET(VTK_DIR VTK-DIR_NOTFOUND FORCE)
+   ENDIF()
+ 
++  MESSAGE(STATUS "VTK 2")
++
+   MESSAGE(STATUS "Using VTK available at: ${VTK_DIR}")
+ 
+   # Copy libraries to CMAKE_RUNTIME_OUTPUT_DIRECTORY
+@@ -20,6 +26,7 @@ IF(VTK_DIR)
+ 
+   # No target necessary, VTK is provided
+   SET(VTK_BUILD_DEPENDENCY_TARGET CACHE INTERNAL "The name of the target to list as a dependency to ensure build order correctness.")
++  MESSAGE(STATUS "VTK 3")
+ ELSE()
+   # VTK has not been built yet, so download and build it as an external project
+   SET(VTK_VERSION_SPECIFIC_ARGS)
+@@ -101,4 +108,4 @@ ELSE()
+     )
+ 
+   SET(VTK_BUILD_DEPENDENCY_TARGET vtk CACHE INTERNAL "The name of the target to list as a dependency to ensure build order correctness.")
+-ENDIF()
+\ No newline at end of file
++ENDIF()
 diff --git a/SuperBuild/External_aruco.cmake b/SuperBuild/External_aruco.cmake
 index 36e1e96..81c5d91 100644
 --- a/SuperBuild/External_aruco.cmake
@@ -756,6 +879,31 @@ index 36e1e96..81c5d91 100644
 -ENDIF()
 \ No newline at end of file
 +ENDIF()
+diff --git a/SuperBuild/External_libusb.cmake b/SuperBuild/External_libusb.cmake
+index b432657..ee88c09 100644
+--- a/SuperBuild/External_libusb.cmake
++++ b/SuperBuild/External_libusb.cmake
+@@ -38,14 +38,15 @@ IF (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+ 
+ ELSE ()
+ 
+-  IF (NOT EXISTS "/usr/include/LibUSB-1.0")
+-    MESSAGE(FATAL_ERROR "LibUSB required but not found at /usr/include/LibUSB-1.0 Please install LibUSB.")
++  # IF (NOT EXISTS "/usr/include/LibUSB-1.0")
++  IF (NOT DEFINED LibUSB_DIR)
++    MESSAGE(FATAL_ERROR "LibUSB required but not found at ${LibUSB_DIR} Please install LibUSB.")
+   ENDIF ()
+ 
+   # Copied from original repository https://github.com/maartenvds/libseek-thermal
+-  SET(LibUSB_INCLUDE_DIRS /usr/include/LibUSB-1.0)
+-  SET(LibUSB_INCLUDES     /usr/include/LibUSB-1.0)
+-  SET(LIBUSB_INCLUDE_DIR  /usr/include/LibUSB-1.0)
++  SET(LibUSB_INCLUDE_DIRS ${LibUSB_DIR})
++  SET(LibUSB_INCLUDES     ${LibUSB_DIR})
++  SET(LIBUSB_INCLUDE_DIR  ${LibUSB_DIR})
+   SET(LibUSB_LIBS    -lusb-1.0)
+   SET(LIBUSB_LIBRARY -lusb-1.0)
+ 
 diff --git a/SuperBuild/External_ndicapi.cmake b/SuperBuild/External_ndicapi.cmake
 index 4bdca31..892c8d2 100644
 --- a/SuperBuild/External_ndicapi.cmake
