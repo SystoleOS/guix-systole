@@ -1,7 +1,115 @@
-#! Unbind all default key bindings
-#none none :nop
-# Normal window movement.
-OnTitlebar Move1 :StartMoving
+https://www.reddit.com/r/fluxbox/comments/2mzgnu/a_tilinglike_keyconfig_im_quite_pleased_with/cm8xosz/
+
+# click on the desktop to get menus
+OnDesktop Mouse1 :HideMenus
+OnDesktop Mouse2 :WorkspaceMenu
+OnDesktop Mouse3 :RootMenu
+
+# scroll on the desktop to change workspaces
+OnDesktop Mouse4 :PrevWorkspace
+OnDesktop Mouse5 :NextWorkspace
+
+# scroll on the toolbar to change current window
+OnToolbar Mouse4 :PrevWindow {static groups} (iconhidden=no)
+OnToolbar Mouse5 :NextWindow {static groups} (iconhidden=no)
+
+# alt + left/right click to move/resize a window #ändrad till mod4.
+OnWindow Mod4 Mouse1 :MacroCmd {Raise} {Focus} {StartMoving}
+OnWindowBorder Move1 :StartMoving
+
+OnWindow Mod4 Mouse3 :MacroCmd {Raise} {Focus} {StartResizing NearestCorner}
 OnLeftGrip Move1 :StartResizing bottomleft
 OnRightGrip Move1 :StartResizing bottomright
-OnWindowBorder Move1 :StartMoving
+
+# alt + middle click to lower the window #never really use this. do you? 
+OnWindow Mod4 Mouse2 :Lower
+
+# control-click a window's titlebar and drag to attach windows
+OnTitlebar Control Mouse1 :StartTabbing
+
+# double click on the titlebar to shade
+OnTitlebar Double Mouse1 :Shade
+OnTitlebar Mouse4 :Shade
+OnTitlebar Mouse5 :Shade
+
+# left click on the titlebar to move the window
+OnTitlebar Mouse1 :MacroCmd {Raise} {Focus} {ActivateTab}
+OnTitlebar Move1  :StartMoving
+
+# middle click on the titlebar to lower #same with this one.
+OnTitlebar Mouse2 :Lower
+
+# right click on the titlebar for a menu of options
+OnTitlebar Mouse3 :WindowMenu
+
+# i didnt use the alt-tab for cycling between windows in a group or what that was for. 
+# this i added in order to be able to cycle between windows, both tabbed and not tabbed ones. 
+# not sure if the "strict" thing is necessary, really.
+Mod4 j :NextWindow {strict} (workspace=[current])
+Mod4 k :PrevWindow {strict} (workspace=[current])
+
+# cycle through tabs in the current window
+Mod4 Tab :NextTab
+Mod4 Shift Tab :PrevTab
+
+# go to a specific tab in the current window #in case you need it:
+#Mod4 1 :Tab 1
+#Mod4 2 :Tab 2
+
+# open a dialog to run programs
+Mod4 r :Exec fbrun
+
+# volume settings, using common keycodes
+# if these don't work, use xev to find out your real keycodes
+176 :Exec amixer sset Master,0 1+
+174 :Exec amixer sset Master,0 1-
+160 :Exec amixer sset Master,0 toggle
+
+# current window commands
+Mod4 m :Maximize
+Mod4 n :Minimize
+Mod4 f :Fullscreen
+
+# open the window menu #never really use this either
+Mod1 space :WindowMenu
+
+# exit fluxbox #and not this one either. could be modified if you really like to have an exit shortcut.
+Control Mod1 Delete :Exit
+
+# send the current window to previous/next workspace
+Mod4 Left :SendToPrevWorkspace
+Mod4 Right :SendToNextWorkspace
+
+# send the current window and follow it to previous/next workspace
+Control Mod4 Left :TakeToPrevWorkspace
+Control Mod4 Right :TakeToNextWorkspace
+
+# change to a specific workspace
+Mod4 1 :Workspace 1
+Mod4 2 :Workspace 2
+
+# send the current window to a specific workspace
+Mod4 Shift 1 :SendToWorkspace 1
+Mod4 Shift 2 :SendToWorkspace 2
+
+# Own stuff (besides the above):
+Mod4 Return :Exec xterm
+
+# these I have in xbindkeys instead:
+#F1 :Exec gedit
+#F2 :Exec pidgin -f
+#F3 :Exec firefox -private
+#F8 :Exec lxrandr
+#F12 :Exec chromium-browser
+#Mod4 p :Exec lxrandr
+
+# one way of switching on and off the titlebar (there is also BORDER, etc):
+Mod4 d :SetDecor TAB
+Mod4 s :SetDecor NORMAL
+
+# move windows, an experiment (using alt conflicted with alt+left as back 
+# in firefox, using control now conflicts with jumping between words in text/gedit):
+Control Right :Move +20 0
+Control Left :Move -20 0
+Control Up :Move 0 -20
+Control Down :Move 0 +20
