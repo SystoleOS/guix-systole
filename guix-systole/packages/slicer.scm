@@ -10,6 +10,7 @@
   #:use-module (gnu packages gl)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages image)
+  #:use-module (gnu packages image-processing)
   #:use-module (gnu packages libffi)
   #:use-module (gnu packages maths)
   #:use-module (gnu packages mpi)
@@ -184,6 +185,7 @@
 
                   )))
     (inputs (list libxt
+                  dcmtk
                   eigen
                   expat
                   openssl-3.0
