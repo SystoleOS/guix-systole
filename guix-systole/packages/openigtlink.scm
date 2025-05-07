@@ -27,14 +27,14 @@
 (define-public openigtlink
   (package
     (name "openigtlink")
-    (version "2081e41") ;version used by PlusBuild (Plus 2.8)
+    (version "c512727") ;version used by PlusBuild (Plus 2.8)
     (source
      (origin
        (method url-fetch)
        (uri
-        "https://github.com/openigtlink/OpenIGTLink/archive/2081e418c48c02e920487e2284996c1e577c1024.tar.gz")
+        "https://github.com/openigtlink/OpenIGTLink/archive/c512727425c2b7a594fabb9cd1fbfac512bf376e.tar.gz")
        (sha256
-        (base32 "0ss2wc2gg28m7xvwyzqkl805684x0x5xqrdwz634rjw66g2jinh0"))))
+        (base32 "0s2rxa4igs2d354205vnp57bf81yj5fpqh91hy5v3zz34gri46j5"))))
     (build-system cmake-build-system)
     (arguments
      `(#:configure-flags (list "-DBUILD_EXAMPLES:BOOL=OFF"
@@ -74,11 +74,9 @@ both industrial and academic developers.")
      (origin
        (method url-fetch)
        (uri
-        "https://github.com/IGSIO/OpenIGTLinkIO/archive/32feaaa5fcff433dec4f071cf7aaa9106e5e5124.tar.gz")
+        "https://github.com/IGSIO/OpenIGTLinkIO/archive/a262c1f5e63c00831cbf67d5284f4734f8a7b143.tar.gz")
        (sha256
-        (base32 "03zdzm4m007bf9cym9fgscc4jp1n94flamqjxqi67jwrxnwd4nl6"))
-       (patches (search-patches
-                 "0019-BUG-packages-openigtlink-Reintroduce-old-fix-with-cmath-for-openigtlinkio.patch"))))
+        (base32 "01y6nhv7c5m57clpql8vg1g43k4k37mvb0bvasl28r90mqm4dvsm"))))
     (build-system cmake-build-system)
     (arguments
      `(#:configure-flags (list "-DBUILD_TESTING:BOOL=OFF"
@@ -107,7 +105,7 @@ both industrial and academic developers.")
                   qtbase-5
                   qtx11extras
                   tbb
-                  vtk))
+                  vtk-slicer))
     (home-page "openigtlink.org")
     (synopsis
      "Library for interfacing to openigtlink/OpenIGTLink, dependent on VTK and Qt. Based on openigtlink/OpenIGTLinkIF ")
@@ -123,12 +121,11 @@ both industrial and academic developers.")
      (origin
        (method url-fetch)
        (uri
-        ;; "https://github.com/openigtlink/OpenIGTLinkIF/archive/37db113599833e34abb3511dc63976803f724a7f.tar.gz"
-        "https://github.com/openigtlink/SlicerOpenIGTLink/archive/6fbdadf16d6ccee8e840d9d408422bec4c95e867.tar.gz")
+        "https://github.com/openigtlink/SlicerOpenIGTLink/archive/73df3c26e169f539123de54096c2eff8de0871c9.tar.gz")
        (sha256
-        (base32 "0m56zqjdv87iv0p6g269kj9bjknjsaq18ijpsjawh9wi2w8ybsaj"))
+        (base32 "053vczsadhxm2c9nqg1bmjx7lbzkzpsjqx9jj2jyqypcc9ry31mx"))
        (patches (search-patches
-                 "0018-COMP-packages-openigtlink-Include-Slicer-macros-in-OpenIGTLinkIF.patch"))))
+                 "0019-COMP-packages-slicer-Port-OpenIGTLinkIF-to-slicer.patch"))))
     (build-system copy-build-system)
     (arguments
      `(#:install-plan '(("." "/"))

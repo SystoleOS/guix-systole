@@ -1,0 +1,15 @@
+diff --git a/CMake/ITKPlatformSpecificChecks.cmake b/CMake/ITKPlatformSpecificChecks.cmake
+index c4cc866f3c..1911df79b1 100644
+--- a/CMake/ITKPlatformSpecificChecks.cmake
++++ b/CMake/ITKPlatformSpecificChecks.cmake
+@@ -112,9 +112,9 @@ endif()
+ 
+ # Add flags for the SUN compiler to provide all the methods for std::allocator.
+ #
+-itkCHECK_CXX_ACCEPTS_FLAGS("-features=no%anachronisms" SUN_COMPILER)
+ if(SUN_COMPILER)
+   itkCHECK_CXX_ACCEPTS_FLAGS("-library=stlport4" SUN_COMPILER_HAS_STL_PORT_4)
++  itkCHECK_CXX_ACCEPTS_FLAGS("-features=no%anachronisms" SUN_COMPILER)
+   if(SUN_COMPILER_HAS_STL_PORT_4)
+     set(ITK_REQUIRED_CXX_FLAGS "${ITK_REQUIRED_CXX_FLAGS} -library=stlport4")
+   endif()

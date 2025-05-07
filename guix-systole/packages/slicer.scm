@@ -63,7 +63,8 @@
                  "0009-COMP-packages-slicer-Add-itk-as-required.patch"
                  "0010-COMP-packages-slicer-Limit-CPack.patch"
                  "0015-COMP-packages-slicer-Remove-LastConfigureStep.patch"
-                 "0016-ENH-packages-slicer-Add-External-Modules-directory.patch"))))
+                 "0016-ENH-packages-slicer-Add-External-Modules-directory.patch"
+                 "0020-COMP-packages-slicer-Fix-no-anachrom-from-Sun-compiler-check.patch"))))
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f
@@ -156,6 +157,9 @@
                                              (assoc-ref inputs
                                               "slicerexecutionmodel")
                                              "/lib/CMake:"
+
+                                             (assoc-ref inputs "openigtlinkio")
+                                             "/lib/cmake/igtlio:"
 
                                              (or (getenv "CMAKE_PREFIX_PATH")
                                                  ""))) #t))
