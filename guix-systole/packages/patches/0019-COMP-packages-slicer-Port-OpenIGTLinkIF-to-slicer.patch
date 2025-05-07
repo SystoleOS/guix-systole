@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 910c39c..d036565 100644
+index 910c39c..13100b3 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -17,8 +17,9 @@ set(SUPERBUILD_TOPLEVEL_PROJECT inner)
@@ -14,7 +14,7 @@ index 910c39c..d036565 100644
  mark_as_superbuild(Slicer_DIR)
  
  #-----------------------------------------------------------------------------
-@@ -28,12 +29,12 @@ mark_as_superbuild(SlicerOpenIGTLink_USE_VP9)
+@@ -28,19 +29,21 @@ mark_as_superbuild(SlicerOpenIGTLink_USE_VP9)
  
  #-----------------------------------------------------------------------------
  # SuperBuild setup
@@ -33,17 +33,17 @@ index 910c39c..d036565 100644
  
  #-----------------------------------------------------------------------------
  # Extension modules
-@@ -41,6 +42,9 @@ add_subdirectory(OpenIGTLinkIF)
+ add_subdirectory(OpenIGTLinkIF)
  add_subdirectory(OpenIGTLinkRemote)
  add_subdirectory(PlusRemote)
- add_subdirectory(UltrasoundRemoteControl)
+-add_subdirectory(UltrasoundRemoteControl)
 +if(Slicer_USE_PYTHONQT)
 +    add_subdirectory(UltrasoundRemoteControl)
 +endif()
  ## NEXT_MODULE
  
  #-----------------------------------------------------------------------------
-@@ -50,7 +54,8 @@ set(SlicerOpenIGTLink_CUSTOM_CONFIG "
+@@ -50,7 +53,8 @@ set(SlicerOpenIGTLink_CUSTOM_CONFIG "
  include(\"${OpenIGTLink_DIR}/OpenIGTLinkConfig.cmake\")
  include(\"${OpenIGTLinkIO_DIR}/OpenIGTLinkIOConfig.cmake\")
  ")
@@ -53,9 +53,21 @@ index 910c39c..d036565 100644
  
  #-----------------------------------------------------------------------------
  # Packaging
-@@ -61,4 +66,4 @@ set(${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS "${EXTENSION_CPACK_INSTALL_CM
+@@ -61,4 +65,4 @@ set(${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS "${EXTENSION_CPACK_INSTALL_CM
  list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
  list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS}")
  include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/SlicerBlockInstallVP9.cmake)
 -include(${Slicer_EXTENSION_CPACK})
 +#include(${Slicer_EXTENSION_CPACK})
+diff --git a/OpenIGTLinkIF/CMakeLists.txt b/OpenIGTLinkIF/CMakeLists.txt
+index 716487f..b7ad1b0 100644
+--- a/OpenIGTLinkIF/CMakeLists.txt
++++ b/OpenIGTLinkIF/CMakeLists.txt
+@@ -73,6 +73,7 @@ set(MODULE_TARGET_LIBRARIES
+   vtkSlicerOpenIGTLinkIFModuleMRML
+   qSlicerOpenIGTLinkIFModuleWidgets
+   ${MRML_LIBRARIES}
++  vtkSlicerMarkupsModuleMRML
+   )
+ 
+ set(MODULE_RESOURCES
