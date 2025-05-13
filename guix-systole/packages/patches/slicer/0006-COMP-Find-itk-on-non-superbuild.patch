@@ -1,7 +1,7 @@
 From b59dc04c1f2a96035fed948bbe5a70ac6a5f205c Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 6 May 2025 10:14:46 +0200
-Subject: [PATCH 6/8] COMP: Find itk on non-superbuild
+Subject: [PATCH 06/11] COMP: Find itk on non-superbuild
 
 Co-authored-by: Khai Duong <duongkhai@gmail.com>
 ---

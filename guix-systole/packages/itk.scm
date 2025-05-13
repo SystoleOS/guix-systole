@@ -48,7 +48,6 @@
                           "-DBUILD_EXAMPLES:BOOL=OFF"
                           "-DITK_WRAPPING:BOOL=OFF"
                           "-DITK_BUILD_DEFAULT_MODULES:BOOL=ON"
-                          "-DITK_INSTALL_NO_DEVELOPMENT:BOOL=ON"
                           "-DITK_WRAP_PYTHON:BOOL=OFF"
                           "-DKWSYS_USE_MD5:BOOL=ON" ;Required by SlicerExecutionModel
                           "-DITK_USE_SYSTEM_DCMTK:BOOL=ON"
@@ -71,7 +70,7 @@
                           "-DITK_LEGACY_REMOVE:BOOL=OFF" ;<-- Allow LEGACY ITKv4 features for now.
                           "-DITK_LEGACY_SILENT:BOOL=OFF" ;<-- Use of legacy code will produce compiler warnings
                           "-DModule_ITKDeprecated:BOOL=ON" ;<-- Needed for ITKv5 now. (itkMultiThreader.h and MutexLock backwards compatibility.)
-                          
+
                           ;; Optimization
                           "-DITK_CXX_OPTIMIZATION_FLAGS:STRING=" ;Force compiler-default instruction set to ensure compatibility with older CPUs
                           "-DITK_C_OPTIMIZATION_FLAGS:STRING=" ;Force compiler-default instruction set to ensure compatibility with older CPUs

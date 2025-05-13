@@ -1,0 +1,195 @@
+From 251d91ea23ad9dea17802471a1acd1b35f03349b Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Mon, 12 May 2025 11:23:55 +0200
+Subject: [PATCH 11/11] ENH: Add installation of Slicer base development files
+
+---
+ Base/CMakeLists.txt                | 40 +++++++++++++++++++++++++-----
+ Base/QTApp/CMakeLists.txt          | 19 ++++++++++++++
+ Base/QTCLI/CMakeLists.txt          | 17 +++++++++++++
+ Base/QTGUI/CMakeLists.txt          | 35 ++++++++++++++++++++++++++
+ CMake/SlicerInstallConfig.cmake.in |  1 +
+ 5 files changed, 106 insertions(+), 6 deletions(-)
+
+diff --git a/Base/CMakeLists.txt b/Base/CMakeLists.txt
+index 87b56a1678..f6db47f78d 100644
+--- a/Base/CMakeLists.txt
++++ b/Base/CMakeLists.txt
+@@ -7,17 +7,45 @@ include_directories(
+   ${CMAKE_CURRENT_BINARY_DIR}/QTCore
+   )
+ 
+-add_subdirectory(Logic)
+-add_subdirectory(QTCore)
+-add_subdirectory(QTGUI)
++ set(Slicer_BASE_SUBDIRS
++    Logic
++  )
++
++ set(qSlicer_BASE_SUBDIRS
++    QTCore
++    QTGUI
++ )
++
+ if(Slicer_BUILD_CLI_SUPPORT)
+-  add_subdirectory(QTCLI)
+-  add_subdirectory(CLI)
++  list(APPEND Slicer_BASE_SUBDIRS
++   CLI
++  )
++
++  list(APPEND qSlicer_BASE_SUBDIRS
++   QTCLI
++  )
+ endif()
+ 
+ if(Slicer_USE_PYTHONQT)
+-  add_subdirectory(Python)
++  list(APPEND Slicer_BASE_SUBDIRS
++    Python
++  )
+ endif()
+ 
++foreach(SUBDIR ${Slicer_BASE_SUBDIRS})
++  if(NOT Slicer_INSTALL_NO_DEVELOPMENT)
++    set(SlicerBase${SUBDIR}_INSTALL_NO_DEVELOPMENT 0)
++    add_subdirectory(${SUBDIR})
++  endif()
++endforeach()
++
++foreach(SUBDIR ${qSlicer_BASE_SUBDIRS})
++  if(NOT Slicer_INSTALL_NO_DEVELOPMENT)
++    set(qSlicerBase${SUBDIR}_INSTALL_NO_DEVELOPMENT 0)
++    add_subdirectory(${SUBDIR})
++  endif()
++endforeach()
++
++
+ # Since "QTApp" depends on "Modules/Core", the folder is included in the top-level CMakeLists.txt
+ # after "Modules/Core" folder.
+diff --git a/Base/QTApp/CMakeLists.txt b/Base/QTApp/CMakeLists.txt
+index 5eb8d19639..41ff88b918 100644
+--- a/Base/QTApp/CMakeLists.txt
++++ b/Base/QTApp/CMakeLists.txt
+@@ -71,6 +71,25 @@ SlicerMacroBuildBaseQtLibrary(
+   WRAP_PYTHONQT
+   )
+ 
++# --------------------------------------------------------------------------
++# Install ui_headers
++# --------------------------------------------------------------------------
++# ui_header files are generated in build time and are not listed by
++# the globbing mechanims in the Slicer build macros. Here we list them and make
++# the installation explicit
++if(NOT DEFINED ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
++  set(${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT ON)
++endif()
++if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
++  set(ui_headers
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerMainWindow.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerErrorReportDialog.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerAboutDialog.h")
++  install(
++    FILES ${ui_headers}
++    DESTINATION ${Slicer_INSTALL_INCLUDE_DIR}/${PROJECT_NAME} COMPONENT Development)
++endif()
++
+ # --------------------------------------------------------------------------
+ if(BUILD_TESTING)
+   add_subdirectory(Testing)
+diff --git a/Base/QTCLI/CMakeLists.txt b/Base/QTCLI/CMakeLists.txt
+index 65a09ccce2..e78d475db9 100644
+--- a/Base/QTCLI/CMakeLists.txt
++++ b/Base/QTCLI/CMakeLists.txt
+@@ -129,6 +129,23 @@ if(Slicer_BUILD_QT_DESIGNER_PLUGINS)
+   add_subdirectory(DesignerPlugins)
+ endif()
+ 
++# -----------------------------------------------------
++# Install ui_headers
++# --------------------------------------------------------------------------
++# ui_header files are generated in build time and are not listed by
++# the globbing mechanims in the Slicer build macros. Here we list them and make
++# the installation explicit
++if(NOT DEFINED ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
++  set(${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT ON)
++endif()
++if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
++  set(ui_headers
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerCLIModuleWidget.h")
++  install(
++    FILES ${ui_headers}
++    DESTINATION ${Slicer_INSTALL_INCLUDE_DIR}/${PROJECT_NAME} COMPONENT Development)
++endif()
++
+ # --------------------------------------------------------------------------
+ # Python Wrapping
+ # --------------------------------------------------------------------------
+diff --git a/Base/QTGUI/CMakeLists.txt b/Base/QTGUI/CMakeLists.txt
+index d5413d555d..333b39c955 100644
+--- a/Base/QTGUI/CMakeLists.txt
++++ b/Base/QTGUI/CMakeLists.txt
+@@ -14,6 +14,7 @@ set(KIT_include_directories
+   ${qSlicerBaseQTCore_BINARY_DIR}
+   )
+ 
++
+ # Source files
+ set(KIT_SRCS
+   qSlicerAbstractModule.cxx
+@@ -367,6 +368,40 @@ SlicerMacroBuildBaseQtLibrary(
+   WRAP_PYTHONQT
+   )
+ 
++# -----------------------------------------------------
++# Install ui_headers
++# --------------------------------------------------------------------------
++# ui_header files are generated in build time and are not listed by
++# the globbing mechanims in the Slicer build macros. Here we list them and make
++# the installation explicit
++if(NOT DEFINED ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
++  set(${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT ON)
++endif()
++if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
++  set(ui_headers
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerWebWidget.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsViewsPanel.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsUserInformationPanel.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsStylesPanel.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsModulesPanel.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsInternationalizationPanel.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsGeneralPanel.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsDeveloperPanel.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsCachePanel.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSaveDataDialog.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerNodeWriterOptionsWidget.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerModulePanel.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerModuleFinderDialog.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerModelsDialog.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerExportNodeDialog.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerDataDialog.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerActionsDialog.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerNodeWriterOptionsWidget.h")
++  install(
++    FILES ${ui_headers}
++    DESTINATION ${Slicer_INSTALL_INCLUDE_DIR}/${PROJECT_NAME} COMPONENT Development)
++endif()
++
+ #-----------------------------------------------------------------------------
+ # Slicer icon engine
+ #-----------------------------------------------------------------------------
+diff --git a/CMake/SlicerInstallConfig.cmake.in b/CMake/SlicerInstallConfig.cmake.in
+index 19eeef67cf..d2df6b945a 100644
+--- a/CMake/SlicerInstallConfig.cmake.in
++++ b/CMake/SlicerInstallConfig.cmake.in
+@@ -116,6 +116,7 @@ set(Slicer_Libs_INCLUDE_DIRS
+   "${Slicer_HOME}/include/RemoteIO"
+   "${Slicer_HOME}/include/vtkITK"
+   "${Slicer_HOME}/include/vtkSegmentationCore"
++  "${Slicer_HOME}/include/SlicerBaseLogic"
+   "${Slicer_HOME}/include/vtkTeem"
+   "${Slicer_HOME}/include/Slicer-5.8/qSlicerBaseQTGUI"
+   "${Slicer_HOME}/include/Slicer-5.8/qSlicerBaseQTCore"
+-- 
+2.49.0
+

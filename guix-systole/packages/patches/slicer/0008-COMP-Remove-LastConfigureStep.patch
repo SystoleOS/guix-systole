@@ -1,7 +1,7 @@
 From f45ed525878e829d6347ca6383d7568150241344 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 6 May 2025 10:17:52 +0200
-Subject: [PATCH 8/8] COMP: Remove LastConfigureStep
+Subject: [PATCH 08/11] COMP: Remove LastConfigureStep
 
 Co-authored-by: Khai Duong <duongkhai@gmail.com>
 ---

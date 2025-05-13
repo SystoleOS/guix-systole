@@ -73,6 +73,7 @@
                           "-DVTK_SMP_ENABLE_TBB:BOOL=ON"
                           "-DVTK_USE_MPI:BOOL=ON"
                           "-DVTK_USE_TK:BOOL=OFF"
+                          "-DVTK_INSTALL_NO_DEVELOPMENT:BOOL=OFF"
 
                           ;; Enable VTK modules
                           "-DVTK_MODULE_ENABLE_VTK_ChartsCore:STRING=YES"

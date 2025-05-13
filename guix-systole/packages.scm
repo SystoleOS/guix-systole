@@ -26,13 +26,17 @@
              (string-append directory "/packages/patches") directory))
        %load-path))
 
-;; Define a modified %patch-path that includes custom patch directory
 (define %patch-path
-  (make-parameter (list systole-patches
-                        (string-append systole-patches "/slicer")
-                        %original-patch-path)))
+  (make-parameter (append
+                   (list systole-patches
+                         (string-append systole-patches "/ctk")
+                         (string-append systole-patches "/qrestapi")
+                         (string-append systole-patches "/slicer")
+                         (string-append systole-patches "/slicer-openigtlink")
+                         )
+                   %original-patch-path)))
 
-;; Define search-patch function
+;; Define search-patch functio
 (define (search-patch file-name)
   "Search the patch FILE-NAME. Raise an error if not found."
   (or (search-path (%patch-path) file-name)

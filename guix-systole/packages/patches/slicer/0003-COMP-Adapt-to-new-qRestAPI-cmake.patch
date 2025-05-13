@@ -1,7 +1,7 @@
 From e267853ea68a6f938a7167fa1253aa9110e93cd6 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 24 Jan 2023 10:01:23 +0100
-Subject: [PATCH 3/8] COMP: Adapt to new qRestAPI cmake
+Subject: [PATCH 03/11] COMP: Adapt to new qRestAPI cmake
 
 This removes the use of the old `qRestAPI_USE_FILE`. As of today, this
 is a SystoleOS adaptation that should not reach the official Slicer

@@ -1,0 +1,52 @@
+From 496cb3feca5b34185382f62a93539f7b810f15e9 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 10 May 2025 13:05:32 +0200
+Subject: [PATCH] ENH: Allow passing DCMTK_DIR for system DCMTK
+
+---
+ CMakeExternals/DCMTK.cmake | 15 ++++++++-------
+ 1 file changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/CMakeExternals/DCMTK.cmake b/CMakeExternals/DCMTK.cmake
+index afd37880..32dfbb8c 100644
+--- a/CMakeExternals/DCMTK.cmake
++++ b/CMakeExternals/DCMTK.cmake
+@@ -6,13 +6,6 @@ set(proj DCMTK)
+ 
+ set(${proj}_DEPENDENCIES "")
+ 
+-ExternalProject_Include_Dependencies(${proj}
+-  PROJECT_VAR proj
+-  DEPENDS_VAR ${proj}_DEPENDENCIES
+-  EP_ARGS_VAR ${proj}_EXTERNAL_PROJECT_ARGS
+-  USE_SYSTEM_VAR ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj}
+-  )
+-
+ # Let the user to chose whether to use libs installed in the system
+ option(${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj} "Use installed ${proj} library in the system" OFF)
+ mark_as_advanced(${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
+@@ -20,6 +13,7 @@ mark_as_advanced(${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
+ if(${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
+   unset(DCMTK_DIR CACHE)
+   find_package(DCMTK REQUIRED)
++  message(FATAL_ERROR ${DCMTK_LIBRARIES})
+ endif()
+ 
+ # Sanity checks
+@@ -27,6 +21,13 @@ if(DEFINED DCMTK_DIR AND NOT EXISTS ${DCMTK_DIR})
+   message(FATAL_ERROR "DCMTK_DIR variable is defined but corresponds to non-existing directory")
+ endif()
+ 
++ExternalProject_Include_Dependencies(${proj}
++  PROJECT_VAR proj
++  DEPENDS_VAR ${proj}_DEPENDENCIES
++  EP_ARGS_VAR ${proj}_EXTERNAL_PROJECT_ARGS
++  USE_SYSTEM_VAR ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj}
++  )
++
+ if(NOT DEFINED DCMTK_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
+   set(revision_tag "11972eaa4ecdbf3aab0f46eff78f33d7e2b16bfe") # patched-DCMTK-3.6.6_20210115
+   if(${proj}_REVISION_TAG)
+-- 
+2.49.0
+

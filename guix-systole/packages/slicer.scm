@@ -54,183 +54,175 @@
        (sha256
         (base32 "05rz797ddci3a2m8297zyzv2g2hp6bd6djmwa1n0gbsla8b175bx"))
        (patches (search-patches
-                 "0001-COMP-Add-vtk-CommonSystem-component-as-requirement.patch"
+                "0001-COMP-Add-vtk-CommonSystem-component-as-requirement.patch"
                  "0002-COMP-Find-Eigen-required.patch"
                  "0003-COMP-Adapt-to-new-qRestAPI-cmake.patch"
                  "0004-COMP-Hard-code-path-to-teem-library.patch"
                  "0005-COMP-Add-vtk-dependency-to-MRMLWidgets.patch"
                  "0006-COMP-Find-itk-on-non-superbuild.patch"
                  "0007-COMP-Scope-CPack-blocks.patch"
-                 "0008-COMP-Remove-LastConfigureStep.patch"))))
+                 "0008-COMP-Remove-LastConfigureStep.patch"
+                 "0009-COMP-Fix-path-for-SlicerConfig.cmake-and-SlicerConfi.patch"
+                 "0010-ENH-Fix-installation-of-development-files.patch"
+                 "0011-ENH-Add-installation-of-Slicer-base-development-file.patch"
+                 ))))
     (build-system cmake-build-system)
     (arguments
-     `(#:tests? #f
-       #:validate-runpath? #f
-       #:configure-flags (list
-                          ;; Compiler info
-                          ;; https://stackoverflow.com/a/41361741
-                          "-DCMAKE_BUILD_TYPE:STRING=Release"
-                          "-DCMAKE_CXX_COMPILER:STRING=g++"
-                          "-DCMAKE_C_COMPILER:STRING=gcc"
-                          "-DCMAKE_CXX_STANDARD:STRING=17"
+     (list #:tests? #f
+           #:validate-runpath? #f
+           #:configure-flags
+           #~(list
+              ;; Compiler info
+              ;; https://stackoverflow.com/a/41361741
+              "-DCMAKE_BUILD_TYPE:STRING=Release"
+              "-DCMAKE_CXX_COMPILER:STRING=g++"
+              "-DCMAKE_C_COMPILER:STRING=gcc"
+              "-DCMAKE_CXX_STANDARD:STRING=17"
 
-                          ;; Compiler flags
-                          "-DCMAKE_EXE_LINKER_FLAGS=-pthread"
-                          "-DSlicer_SUPERBUILD:BOOL=OFF"
-                          "-DBUILD_TESTING:BOOL=OFF"
-                          "-DBUILD_SHARED_LIBS:BOOL=ON"
-                          "-DSlicer_BUILD_EXTENSIONMANAGER_SUPPORT:BOOL=OFF"
-                          "-DSlicer_DONT_USE_EXTENSION:BOOL=ON"
-                          "-DSlicer_REQUIRED_QT_VERSION:STRING=5"
-                          ;; "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=$(usex DICOM ON OFF)"
-                          "-DSlicer_BUILD_ITKPython:BOOL=OFF"
+              ;; Compiler flags
+              "-DCMAKE_EXE_LINKER_FLAGS=-pthread"
+              "-DSlicer_SUPERBUILD:BOOL=OFF"
+              "-DBUILD_TESTING:BOOL=OFF"
+              "-DBUILD_SHARED_LIBS:BOOL=ON"
+              "-DSlicer_BUILD_EXTENSIONMANAGER_SUPPORT:BOOL=OFF"
+              "-DSlicer_DONT_USE_EXTENSION:BOOL=ON"
+              "-DSlicer_REQUIRED_QT_VERSION:STRING=5"
+              ;; "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=$(usex DICOM ON OFF)"
+              "-DSlicer_BUILD_ITKPython:BOOL=OFF"
 
-                          ;; CLI
-                          "-DSlicer_BUILD_CLI:BOOL=OFF"
-                          "-DSlicer_BUILD_CLI_SUPPORT:BOOL=ON"
+              ;; CLI
+              "-DSlicer_BUILD_CLI:BOOL=OFF"
+              "-DSlicer_BUILD_CLI_SUPPORT:BOOL=OFF"
 
-                          ;; QT
-                          "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=OFF"
-                          "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"
-                          "-DSlicer_BUILD_QT_DESIGNER_PLUGINS:BOOL=OFF" ;Turn ON?
-                          "-DSlicer_USE_QtTesting:BOOL=OFF"
-                          "-DSlicer_USE_SlicerITK:BOOL=ON"
-                          "-DSlicer_USE_CTKAPPLAUNCHER:BOOL=ON"
-                          "-DSlicer_BUILD_WEBENGINE_SUPPORT:BOOL=OFF"
+              ;; QT
+              "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=ON"
+              "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"
+              "-DSlicer_BUILD_QT_DESIGNER_PLUGINS:BOOL=OFF" ;Turn ON?
+              "-DSlicer_USE_QtTesting:BOOL=OFF"
+              "-DSlicer_USE_SlicerITK:BOOL=ON"
+              "-DSlicer_USE_CTKAPPLAUNCHER:BOOL=ON"
+              "-DSlicer_BUILD_WEBENGINE_SUPPORT:BOOL=OFF"
+              (string-append "-DQt5_DIR:PATH="
+                             #$(this-package-input "qtbase"))
+              ;; "-DSlicer_USE_SimpleITK:BOOL=OFF"
+              ;; "-DSlicer_VTK_RENDERING_BACKEND:STRING=OpenGL2"
+              "-DSlicer_VTK_VERSION_MAJOR:STRING=9"
+              "-DSlicer_BUILD_vtkAddon:BOOL=OFF" ;This should be OFF, so Slicer uses the system installed one.
 
-                          ;; "-DSlicer_USE_SimpleITK:BOOL=OFF"
-                          ;; "-DSlicer_VTK_RENDERING_BACKEND:STRING=OpenGL2"
-                          "-DSlicer_VTK_VERSION_MAJOR:STRING=9"
-                          "-DSlicer_BUILD_vtkAddon:BOOL=OFF" ;This should be OFF, so Slicer uses the system installed one.
+              "-DSlicer_INSTALL_DEVELOPMENT:BOOL=ON"
+              "-DSlicer_INSTALL_DEVELOPMENT:BOOL=ON"
+              "-DSlicer_USE_TBB:BOOL=ON"
 
-                          "-DSlicer_INSTALL_DEVELOPMENT:BOOL=OFF"
-                          "-DSlicer_USE_TBB:BOOL=ON"
+              ;; "-DCTK_INSTALL_QTPLUGIN_DIR:STRING=/usr/lib64/qt5/plugins"
+              ;; "-DQT_PLUGINS_DIR:STRING=/usr/lib64/designer"
+              ;; "-DSlicer_QtPlugins_DIR:STRING=/usr/lib64/designer"
+              ;; "-DjqPlot_DIR:STRING=/usr/share/jqPlot"
+              ;; "-DSlicer_VTK_WRAP_HIERARCHY_DIR:STRING=#{$\x7b;BUILD_DIR\x7d;}#"
+              ;; "-DSlicer_USE_SimpleITK:BOOL=OFF"
+              "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=OFF" ;Disabled as we do not have IODCMTK support yet
 
-                          ;; "-DCTK_INSTALL_QTPLUGIN_DIR:STRING=/usr/lib64/qt5/plugins"
-                          ;; "-DQT_PLUGINS_DIR:STRING=/usr/lib64/designer"
-                          ;; "-DSlicer_QtPlugins_DIR:STRING=/usr/lib64/designer"
-                          ;; "-DjqPlot_DIR:STRING=/usr/share/jqPlot"
-                          ;; "-DSlicer_VTK_WRAP_HIERARCHY_DIR:STRING=#{$\x7b;BUILD_DIR\x7d;}#"
-                          ;; "-DSlicer_USE_SimpleITK:BOOL=OFF"
-                          "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=OFF" ;Disabled as we do not have IODCMTK support yet
+              ;; Python
+              ;; "-DPython3_INCLUDE_DIR:FILEPATH="
+              ;; "-DPython3_LIBRARY:FILEPATH="
+              ;; "-DPython3_EXECUTABLE:FILEPATH="
+              "-DVTK_WRAP_PYTHON:BOOL=OFF"
+              "-DSlicer_USE_PYTHONQT:BOOL=OFF"
+              "-DSlicer_USE_SYSTEM_python:BOOL=OFF"
 
-                          ;; Python
-                          ;; "-DPython3_INCLUDE_DIR:FILEPATH="
-                          ;; "-DPython3_LIBRARY:FILEPATH="
-                          ;; "-DPython3_EXECUTABLE:FILEPATH="
-                          "-DVTK_WRAP_PYTHON:BOOL=OFF"
-                          "-DSlicer_USE_PYTHONQT:BOOL=OFF"
-                          "-DSlicer_USE_SYSTEM_python:BOOL=OFF"
+              ;; Other required external modules. These are required, otherwise Slicer tries to download them.
+              "-DSlicer_USE_SYSTEM_bzip2:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_CTK:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_TBB:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_teem:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_QT:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_curl:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_DCMTK:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_ITK:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_LibArchive:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_LibFFI:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_LZMA:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_RapidJSON:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_sqlite:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_VTK:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_zlib:BOOL=ON"
 
-                          ;; Other required external modules. These are required, otherwise Slicer tries to download them.
-                          "-DSlicer_USE_SYSTEM_bzip2:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_CTK:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_TBB:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_teem:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_QT:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_curl:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_DCMTK:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_ITK:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_LibArchive:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_LibFFI:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_LZMA:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_RapidJSON:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_sqlite:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_VTK:BOOL=ON"
-                          "-DSlicer_USE_SYSTEM_zlib:BOOL=ON"
+              ;; Hack to fix error "Variable Slicer_WC_LAST_CHANGED_DATE is expected to be defined."
+              "-DSlicer_WC_LAST_CHANGED_DATE:STRING=2025-3-2 19:58:36 -0500")
+           #:out-of-source? #t
+           #:phases
+           #~(modify-phases %standard-phases
+                            (add-before 'configure 'set-cmake-paths
+                                        (lambda* (#:key inputs #:allow-other-keys)
+                                          ;; Make 'vtkaddon' discoverable by CMake
 
-                          ;; Hack to fix error "Variable Slicer_WC_LAST_CHANGED_DATE is expected to be defined."
-                          "-DSlicer_WC_LAST_CHANGED_DATE:STRING=2025-3-2 19:58:36 -0500")
-       #:out-of-source? #t
-       #:phases (modify-phases %standard-phases
-                  (add-before 'configure 'set-cmake-paths
-                    (lambda* (#:key inputs #:allow-other-keys)
-                      ;; Make 'vtkaddon' discoverable by CMake
+                                          (setenv "CMAKE_PREFIX_PATH"
+                                                  (string-append (assoc-ref inputs "vtkaddon")
+                                                                 "/lib/cmake:"
 
-                      (setenv "CMAKE_PREFIX_PATH"
-                              (string-append (assoc-ref inputs "vtkaddon")
-                                             "/lib/cmake:"
+                                                                 ;; (assoc-ref inputs
+                                                                 ;;            "slicerexecutionmodel")
+                                                                 ;; "/lib/CMake:"
 
-                                             (assoc-ref inputs
-                                              "slicerexecutionmodel")
-                                             "/lib/CMake:"
+                                                                 (or (getenv "CMAKE_PREFIX_PATH")
+                                                                     ""))) #t))
 
-                                             (or (getenv "CMAKE_PREFIX_PATH")
-                                                 ""))) #t))
+                            (add-after 'install 'symlink-slicer-applauncher
+                                       (lambda* (#:key outputs #:allow-other-keys)
+                                         (symlink (string-append (assoc-ref outputs "out")
+                                                                 "/Slicer")
+                                                  (string-append (string-append (assoc-ref
+                                                                                 outputs "out")
+                                                                                "/bin/Slicer")))
+                                         #t)))))
+    (inputs
+     (list libxt
+           eigen
+           expat
+           openssl-3.0
+           git
+           hdf5-1.10
+           libffi
+           libjpeg-turbo
+           libxinerama
+           mesa ;libGL equivalent
+           rapidjson
+           tbb
 
-                  (add-after 'install 'symlink-slicer-applauncher
-                    (lambda* (#:key outputs #:allow-other-keys)
-                      (symlink (string-append (assoc-ref outputs "out")
-                                              "/Slicer")
-                               (string-append (string-append (assoc-ref
-                                                              outputs "out")
-                                                             "/bin/Slicer")))
-                      #t))
-                  (add-after 'install 'desktop-entry
-                    (lambda* (#:key outputs #:allow-other-keys)
-                      (let* ((out (assoc-ref outputs "out"))
-                             (apps-dir (string-append out
-                                                      "/share/applications"))
-                             (desktop (string-append apps-dir
-                                                     "/slicer.desktop")))
-                        (mkdir-p apps-dir)
-                        (make-desktop-entry-file desktop
-                         #:name "3dslicer"
-                         #:comment
-                         "A free, open source and multi-platform software package widely used for medical, biomedical, and related imaging research"
-                         ;; #:exec (string-append out "/bin/Slicer")
-                         #:exec (string-append out "/Slicer")
-                         #:categories '("Graphics" "Medical" "Science")
-                         #:startup-notify #f
-                         #:terminal #f)) #t)))))
-    (inputs (list libxt
-                  eigen
-                  expat
-                  openssl-3.0
-                  git
-                  hdf5-1.10
-                  libffi
-                  libjpeg-turbo
-                  libxinerama
-                  mesa ;libGL equivalent
-                  rapidjson
-                  tbb
+           ;; QT5
+           qtbase-5
+           qtmultimedia-5
+           qtxmlpatterns
+           qtdeclarative-5
+           qtsvg-5
+           qtx11extras
+           qtwebengine-5
+           qtwebchannel-5
+           qttools-5
 
-                  ;; QT5
-                  qtbase-5
-                  qtmultimedia-5
-                  qtxmlpatterns
-                  qtdeclarative-5
-                  qtsvg-5
-                  qtx11extras
-                  qtwebengine-5
-                  qtwebchannel-5
-                  qttools-5
+           ;; VTK
+           vtk-slicer
+           double-conversion
+           freetype
+           gl2ps
+           glew
+           jsoncpp
+           libharu
+           libtheora
+           libxml++
+           lz4
+           mpich
+           netcdf
+           proj
 
-                  ;; VTK
-                  vtk-slicer
-                  double-conversion
-                  freetype
-                  gl2ps
-                  glew
-                  jsoncpp
-                  libharu
-                  libtheora
-                  libxml++
-                  lz4
-                  mpich
-                  netcdf-slicer
-                  proj
-
-                  ;; Other Slicer modules
-                  ctk
-                  ctkapplauncher
-                  itk-slicer
-                  libarchive-slicer
-                  teem-slicer
-                  vtkaddon
-                  slicerexecutionmodel
-                  qrestapi))
+           ;; Other Slicer modules
+           ctk
+           ctkapplauncher
+           itk-slicer
+           libarchive-slicer
+           teem-slicer
+           vtkaddon
+           ;;slicerexecutionmodel
+           qrestapi))
     (native-inputs (list pkg-config))
     (synopsis "3D Slicer - Medical visualization and computing environment")
     (description
@@ -245,65 +237,65 @@ visualization and medical image computing. It provides capabilities for:
     (home-page "https://www.slicer.org/")
     (license license:bsd-3)))
 
-(define slicerexecutionmodel
-  (package
-    (name "slicerexecutionmodel")
-    (version "2.0.0")
-    (source
-     (origin
-       (method url-fetch)
-       (uri
-        "https:///github.com/Slicer/SlicerExecutionModel/archive/91b921bd5977c3384916ba4b03705d87b26067f7.tar.gz")
-       (sha256
-        (base32 "10k1m3impplv9hwhxx06wfmvlx9h54avhibv4id1pjlqjn5gjjza"))
-       (patches (search-patches
-                 "0011-COMP-packages-slicer-Add-GNUInstallDirs-for-execution-model.patch"
-                 "0012-COMP-packages-slicer-Generate-configuration-file-for-execution-model.patch"
-                 "0013-ENH-packages-slicer-Generate-configuration-file-for-install-ModuleDe.patch"
-                 "0014-COMP-packages-slicer-Install-GenerateCLP.cmake-GenerateCLP-and-Gener.patch"))))
-    (build-system cmake-build-system)
-    (arguments
-     `(#:tests? #f
-       #:parallel-build? #f
-       #:configure-flags (list "-DBUILD_TESTING:BOOL=OFF"
-                          "-DSlicerExecutionModel_USE_UTF8:BOOL=ON"
-                          "-DSlicerExecutionModel_INSTALL_NO_DEVELOPMENT:BOOL=OFF"
-                          "-DSlicerExecutionModel_DEFAULT_CLI_TARGETS_FOLDER_PREFIX:STRING=Module-")))
-    (inputs (list
-             ;; Slicer modules
-             itk-slicer
+;; (define slicerexecutionmodel
+;;   (package
+;;    (name "slicerexecutionmodel")
+;;    (version "2.0.0")
+;;    (source
+;;     (origin
+;;      (method url-fetch)
+;;      (uri
+;;       "https:///github.com/Slicer/SlicerExecutionModel/archive/91b921bd5977c3384916ba4b03705d87b26067f7.tar.gz")
+;;      (sha256
+;;       (base32 "10k1m3impplv9hwhxx06wfmvlx9h54avhibv4id1pjlqjn5gjjza"))
+;;      (patches (search-patches
+;;                "0011-COMP-packages-slicer-Add-GNUInstallDirs-for-execution-model.patch"
+;;                "0012-COMP-packages-slicer-Generate-configuration-file-for-execution-model.patch"
+;;                "0013-ENH-packages-slicer-Generate-configuration-file-for-install-ModuleDe.patch"
+;;                "0014-COMP-packages-slicer-Install-GenerateCLP.cmake-GenerateCLP-and-Gener.patch"))))
+;;    (build-system cmake-build-system)
+;;    (arguments
+;;     `(#:tests? #f
+;;       #:parallel-build? #f
+;;       #:configure-flags (list "-DBUILD_TESTING:BOOL=OFF"
+;;                               "-DSlicerExecutionModel_USE_UTF8:BOOL=ON"
+;;                               "-DSlicerExecutionModel_INSTALL_NO_DEVELOPMENT:BOOL=OFF"
+;;                               "-DSlicerExecutionModel_DEFAULT_CLI_TARGETS_FOLDER_PREFIX:STRING=Module-")))
+;;    (inputs (list
+;;             ;; Slicer modules
+;;             itk-slicer
 
-             ;; Libraries
-             double-conversion
-             eigen
-             expat
-             freetype
-             gl2ps
-             glew
-             hdf5-1.10
-             libharu
-             libjpeg-turbo
-             libogg
-             libpng
-             libtheora
-             libxml2
-             lz4
-             jsoncpp
-             mpich
-             netcdf-slicer
-             proj
-             qtbase-5
-             tbb))
-    (home-page
-     "https://www.slicer.org/wiki/Documentation/Nightly/Developers/SlicerExecutionModel/")
-    (synopsis
-     "The SlicerExecutionModel is a CMake-based project providing
-macros and associated tools allowing to easily build Slicer CLI (Command line
-module).")
-    (description
-     "It is designed to improve the acceptance and productivity of Slicer
-application developers. The Execution Model provides a simple mechanism for
-incorporating command line programs as Slicer modules. These command line
-modules are self-describing, emitting an XML description of its command line
-arguments. Slicer uses this XML description to construct a GUI for the module.")
-    (license license:bsd-2)))
+;;             ;; Libraries
+;;             double-conversion
+;;             eigen
+;;             expat
+;;             freetype
+;;             gl2ps
+;;             glew
+;;             hdf5-1.10
+;;             libharu
+;;             libjpeg-turbo
+;;             libogg
+;;             libpng
+;;             libtheora
+;;             libxml2
+;;             lz4
+;;             jsoncpp
+;;             mpich
+;;             netcdf-slicer
+;;             proj
+;;             qtbase-5
+;;             tbb))
+;;    (home-page
+;;     "https://www.slicer.org/wiki/Documentation/Nightly/Developers/SlicerExecutionModel/")
+;;    (synopsis
+;;     "The SlicerExecutionModel is a CMake-based project providing
+;; macros and associated tools allowing to easily build Slicer CLI (Command line
+;; module).")
+;;    (description
+;;     "It is designed to improve the acceptance and productivity of Slicer
+;; application developers. The Execution Model provides a simple mechanism for
+;; incorporating command line programs as Slicer modules. These command line
+;; modules are self-describing, emitting an XML description of its command line
+;; arguments. Slicer uses this XML description to construct a GUI for the module.")
+;;    (license license:bsd-2)))
