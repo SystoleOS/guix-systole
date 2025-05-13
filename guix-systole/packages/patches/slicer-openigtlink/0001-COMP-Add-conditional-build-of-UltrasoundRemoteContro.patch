@@ -1,0 +1,64 @@
+From 4ce7337df8e230f6ce58d89e2dcc242d0919a6b8 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 9 May 2025 21:46:31 +0200
+Subject: [PATCH 1/2] COMP: Add conditional build of UltrasoundRemoteControl
+
+---
+ CMakeLists.txt | 38 +++++++++++++++++++++-----------------
+ 1 file changed, 21 insertions(+), 17 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6f43133..a9537af 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -40,26 +40,30 @@ endif()
+ add_subdirectory(OpenIGTLinkIF)
+ add_subdirectory(OpenIGTLinkRemote)
+ add_subdirectory(PlusRemote)
+-add_subdirectory(UltrasoundRemoteControl)
+-add_subdirectory(GenericSerialDeviceRemoteControl)
++if(Slicer_USE_PYTHONQT)
++  add_subdirectory(UltrasoundRemoteControl)
++  add_subdirectory(GenericSerialDeviceRemoteControl)
++endif()
+ ## NEXT_MODULE
+ 
+-#-----------------------------------------------------------------------------
+-# Generate SlicerOpenIGTLinkConfig.cmake file
+-# Add OpenIGTLink and OpenIGTLinkIO targets to SlicerOpenIGTLinkConfig.cmake file
+-set(SlicerOpenIGTLink_CUSTOM_CONFIG "
++if(${EXTENSION_NAME}_SUPERBUILD)
++  #-----------------------------------------------------------------------------
++  # Generate SlicerOpenIGTLinkConfig.cmake file
++  # Add OpenIGTLink and OpenIGTLinkIO targets to SlicerOpenIGTLinkConfig.cmake file
++  set(SlicerOpenIGTLink_CUSTOM_CONFIG "
+ include(\"${OpenIGTLink_DIR}/OpenIGTLinkConfig.cmake\")
+ include(\"${OpenIGTLinkIO_DIR}/OpenIGTLinkIOConfig.cmake\")
+ ")
+-include(${Slicer_EXTENSION_GENERATE_CONFIG})
++  include(${Slicer_EXTENSION_GENERATE_CONFIG})
+ 
+-#-----------------------------------------------------------------------------
+-# Packaging
+-set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
+-list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${OpenIGTLink_DIR};OpenIGTLink;RuntimeLibraries;/")
+-list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${OpenIGTLinkIO_DIR};OpenIGTLinkIO;RuntimeLibraries;/")
+-set(${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS "${EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS}" CACHE STRING "List of external projects to install" FORCE)
+-list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
+-list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS}")
+-include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/SlicerBlockInstallVP9.cmake)
+-include(${Slicer_EXTENSION_CPACK})
++  #-----------------------------------------------------------------------------
++  # Packaging
++  set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
++  list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${OpenIGTLink_DIR};OpenIGTLink;RuntimeLibraries;/")
++  list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${OpenIGTLinkIO_DIR};OpenIGTLinkIO;RuntimeLibraries;/")
++  set(${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS "${EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS}" CACHE STRING "List of external projects to install" FORCE)
++  list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};${EXTENSION_NAME};ALL;/")
++  list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${${EXTENSION_NAME}_CPACK_INSTALL_CMAKE_PROJECTS}")
++  include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/SlicerBlockInstallVP9.cmake)
++  include(${Slicer_EXTENSION_CPACK})
++endif()
+-- 
+2.49.0
+
