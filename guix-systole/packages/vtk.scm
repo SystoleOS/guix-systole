@@ -92,6 +92,7 @@
                           "-DVTK_Group_Qt:BOOL=ON"
                           "-DVTK_ENABLE_KITS:BOOL=ON")))
     (inputs (modify-inputs (package-inputs imgproc:vtk)
+            (replace "hdf5" hdf5-1.10)
               (append python-pyqt qtbase-5 tbb openmpi)))))
 
 (define-public vtkaddon
