@@ -36,6 +36,7 @@
   #:use-module (guix-systole packages ctk)
   #:use-module (guix-systole packages itk)
   #:use-module (guix-systole packages libarchive)
+  #:use-module (guix-systole packages maths)
   #:use-module (guix-systole packages qrestapi)
   #:use-module (guix-systole packages teem)
   #:use-module (guix-systole packages vtk)
@@ -218,7 +219,7 @@
                   libxml++
                   lz4
                   mpich
-                  netcdf
+                  netcdf-slicer
                   proj
 
                   ;; Other Slicer modules
@@ -289,7 +290,7 @@ visualization and medical image computing. It provides capabilities for:
              lz4
              jsoncpp
              mpich
-             netcdf
+             netcdf-slicer
              proj
              qtbase-5
              tbb))

@@ -18,6 +18,7 @@
   #:use-module ((guix licenses)
                 #:prefix license:)
   #:use-module (guix packages)
+  #:use-module (guix-systole packages maths)
   #:use-module (guix-systole packages vtk))
 
 (define-public itk-slicer
@@ -109,7 +110,7 @@
                       libxml++
                       lz4
                       mpich
-                      netcdf
+                      netcdf-slicer
                       proj
                       qtbase-5
                       vtk-slicer

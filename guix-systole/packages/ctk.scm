@@ -21,6 +21,7 @@
                 #:prefix license:)
   #:use-module (guix packages)
   #:use-module (guix-systole packages itk)
+  #:use-module (guix-systole packages maths)
   #:use-module (guix-systole packages vtk))
 
 ;; --------------------------- CTK ---------------------------
@@ -92,7 +93,7 @@
            python
            glew
            libtheora
-           netcdf
+           netcdf-slicer
            proj        ; LibPROJ
            jsoncpp
            libxml2

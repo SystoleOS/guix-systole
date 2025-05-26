@@ -27,7 +27,8 @@
   #:use-module (gnu packages pdf)
   #:use-module (gnu packages serialization)
   #:use-module (gnu packages tbb)
-  #:use-module (gnu packages xiph))
+  #:use-module (gnu packages xiph)
+  #:use-module (guix-systole packages maths))
 
 (define-public vtk-slicer
   (package
@@ -93,6 +94,7 @@
                           "-DVTK_ENABLE_KITS:BOOL=ON")))
     (inputs (modify-inputs (package-inputs imgproc:vtk)
             (replace "hdf5" hdf5-1.10)
+            (replace "netcdf" netcdf-slicer)
               (append python-pyqt qtbase-5 tbb openmpi)))))
 
 (define-public vtkaddon
@@ -134,7 +136,7 @@
                   libxml++
                   lz4
                   mpich
-                  netcdf
+                  netcdf-slicer
                   proj
                   qtbase-5
                   tbb))
