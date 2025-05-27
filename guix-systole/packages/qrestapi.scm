@@ -7,7 +7,7 @@
   #:use-module (guix build-system cmake)
   #:use-module ((guix licenses)
                 #:prefix license:)
-  ; #:use-module (guix-systole packages)
+  #:use-module (guix-systole packages)
   )
 
 (define-public qrestapi

@@ -40,7 +40,7 @@
   #:use-module (guix-systole packages qrestapi)
   #:use-module (guix-systole packages teem)
   #:use-module (guix-systole packages vtk)
-  ; #:use-module (guix-systole packages)
+  #:use-module (guix-systole packages)
   )
 
 (define-public slicer-5.8
@@ -55,7 +55,7 @@
        (sha256
         (base32 "05rz797ddci3a2m8297zyzv2g2hp6bd6djmwa1n0gbsla8b175bx"))
        (patches (search-patches
-                "0001-COMP-Add-vtk-CommonSystem-component-as-requirement.patch"
+                 "0001-COMP-Add-vtk-CommonSystem-component-as-requirement.patch"
                  "0002-COMP-Find-Eigen-required.patch"
                  "0003-COMP-Adapt-to-new-qRestAPI-cmake.patch"
                  "0004-COMP-Hard-code-path-to-teem-library.patch"
