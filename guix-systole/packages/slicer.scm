@@ -40,7 +40,8 @@
   #:use-module (guix-systole packages qrestapi)
   #:use-module (guix-systole packages teem)
   #:use-module (guix-systole packages vtk)
-  #:use-module (guix-systole packages))
+  ; #:use-module (guix-systole packages)
+  )
 
 (define-public slicer-5.8
   (package
