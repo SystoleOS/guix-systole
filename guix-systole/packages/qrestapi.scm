@@ -1,6 +1,7 @@
 (define-module (guix-systole packages qrestapi)
   #:use-module (gnu packages qt)
   #:use-module (gnu packages)
+  #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (guix download)
   #:use-module (guix build-system cmake)
