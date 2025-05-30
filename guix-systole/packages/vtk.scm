@@ -1,4 +1,6 @@
 ;; 
+;; Copyright @ 2025 Oslo University Hospital
+;;
 ;; This file is part of SystoleOS.
 ;;
 ;; SystoleOS is free software: you can redistribute it and/or modify it under the 
