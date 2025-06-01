@@ -131,7 +131,22 @@ both industrial and academic developers.")
                             "/lib/igtl/cmake/igtl-3.1")
              (string-append "-DOpenIGTLinkIO_DIR:PATH="
                             #$(this-package-input "openigtlinkio")
-                            "/lib/cmake/igtlio"))))
+                            "/lib/cmake/igtlio"))
+                            
+         #:phases
+           #~(modify-phases %standard-phases
+            (add-after 'install 'symlink-so-files
+               (lambda* (#:key outputs #:allow-other-keys)
+                  (let* ((out (assoc-ref outputs "out"))
+                        (lib-dir (string-append out "/lib"))
+                        (modules-dir (string-append lib-dir "/Slicer-5.8/SlicerModules")))
+                     (mkdir-p modules-dir)
+                     (for-each
+                     (lambda (file)
+                        (let ((target (string-append modules-dir "/" (basename file))))
+                           (symlink file target)))
+                     (find-files lib-dir "\\.so$"))))))
+                            ))
    (inputs
     (list slicer-5.8
           mesa

@@ -1,0 +1,35 @@
+From 439371cab1c7d9cdf58437b39eb3b981c7e54e0f Mon Sep 17 00:00:00 2001
+From: Khai Duong <duongkhai@gmail.com>
+Date: Sun, 1 Jun 2025 14:58:25 +0200
+Subject: [PATCH] ENH Add SlicerModules lib to AppLauncher
+
+---
+ CMake/SlicerBlockCTKAppLauncherSettings.cmake | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/CMake/SlicerBlockCTKAppLauncherSettings.cmake b/CMake/SlicerBlockCTKAppLauncherSettings.cmake
+index e5d0cce6a2..df235b6b0a 100644
+--- a/CMake/SlicerBlockCTKAppLauncherSettings.cmake
++++ b/CMake/SlicerBlockCTKAppLauncherSettings.cmake
+@@ -97,6 +97,10 @@ if(Slicer_BUILD_QTLOADABLEMODULES)
+     )
+ endif()
+ 
++list(APPEND SLICER_LIBRARY_PATHS_BUILD
++    <APPLAUNCHER_SETTINGS_DIR>/SlicerModules/<CMAKE_CFG_INTDIR>
++)
++
+ # External projects - library paths
+ foreach(varname IN LISTS Slicer_EP_LABEL_LIBRARY_PATHS_LAUNCHER_BUILD)
+   list(APPEND SLICER_LIBRARY_PATHS_BUILD ${${varname}})
+@@ -237,6 +241,7 @@ set(SLICER_LIBRARY_PATHS_INSTALLED
+   <APPLAUNCHER_SETTINGS_DIR>/../${Slicer_LIB_DIR}
+   <APPLAUNCHER_SETTINGS_DIR>/../${Slicer_CLIMODULES_LIB_DIR}
+   <APPLAUNCHER_SETTINGS_DIR>/../${Slicer_QTLOADABLEMODULES_LIB_DIR}
++  <APPLAUNCHER_SETTINGS_DIR>/../${Slicer_LIB_DIR}/SlicerModules
+   )
+ 
+ # The following lines allow Slicer to load a CLI module extension that depends
+-- 
+2.49.0
+

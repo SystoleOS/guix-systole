@@ -83,6 +83,7 @@
                  "0009-COMP-Fix-path-for-SlicerConfig.cmake-and-SlicerConfi.patch"
                  "0010-ENH-Fix-installation-of-development-files.patch"
                  "0011-ENH-Add-installation-of-Slicer-base-development-file.patch"
+                 "0012-ENH-AppLauncher-add-SlicerModules-libdir.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
