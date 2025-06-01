@@ -115,6 +115,7 @@
 
     (inputs (modify-inputs (package-inputs insight-toolkit)
                            (replace "hdf5" hdf5-1.10)
+			   (replace "vxl" vxl-1-slicer)
               (append ;vtk
                       double-conversion
                       freetype
@@ -269,3 +270,13 @@
     (synopsis "An ITK module to read DICOM spatial transforms.")
     (description "An ITK module to read DICOM spatial transforms.")
     (license license:asl2.0)))
+
+(define vxl-1-slicer
+  (package
+    (inherit vxl-1)
+    (name "vxl-1-slicer")
+    (version "1.18.0-slicer")
+    (arguments
+      `(#:tests? #f
+	#:configure-flags (list "-DBUILD_TESTING:BOOL=OFF")
+	))))

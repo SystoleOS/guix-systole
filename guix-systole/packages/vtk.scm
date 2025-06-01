@@ -45,7 +45,8 @@
   #:use-module (gnu packages serialization)
   #:use-module (gnu packages tbb)
   #:use-module (gnu packages xiph)
-  #:use-module (guix-systole packages maths))
+  #:use-module (guix-systole packages maths)
+  #:use-module (guix-systole packages qt))
 
 (define-public vtk-slicer
   (package
@@ -113,7 +114,7 @@
     (inputs (modify-inputs (package-inputs imgproc:vtk)
             (replace "hdf5" hdf5-1.10)
             (replace "netcdf" netcdf-slicer)
-              (append python-pyqt qtbase-5 tbb openmpi)))))
+              (append python-pyqt-slicer qtbase-5 tbb openmpi)))))
 
 (define-public vtkaddon
   (package
