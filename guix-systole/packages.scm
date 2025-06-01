@@ -7,13 +7,31 @@
   #:replace (%patch-path search-patch search-patches)
   #:export (systole-patches))
 
+(define %systole-root-directory
+  ;; This is like %distro-root-directory from (gnu packages), with adjusted
+  ;; paths.
+  (letrec-syntax ((dirname* (syntax-rules ()
+                              ((_ file)
+                               (dirname file))
+                              ((_ file head tail ...)
+                               (dirname (dirname* file tail ...)))))
+                  (try      (syntax-rules ()
+                              ((_ (file things ...) rest ...)
+                               (match (search-path %load-path file)
+                                 (#f
+                                  (try rest ...))
+                                 (absolute
+                                  (dirname* absolute things ...))))
+                              ((_)
+                               #f))))
+    (try ("guix-systole/packages/slicer.scm" guix-systole/ packages/)
+         ("guix-systole/services/dicomd-service.scm" guix-systole/)
+         ("guix-systole/licenses.scm" guix-systole/)
+         )))
+
 ;; Define custom patch directory
 (define systole-patches
-  (let* ((this-file (current-filename))
-         (this-dir (dirname this-file))
-         (root-dir (dirname this-dir)))
-    (string-append root-dir
-                   "/guix-systole/packages/patches")))
+   (string-append %systole-root-directory "/guix-systole/packages/patches"))
 
 ;; Get the original %patch-path value and extend it
 (define %original-patch-path
