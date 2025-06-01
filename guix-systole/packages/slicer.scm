@@ -185,14 +185,30 @@
                                                                  (or (getenv "CMAKE_PREFIX_PATH")
                                                                      ""))) #t))
 
-                            (add-after 'install 'symlink-slicer-applauncher
+                            (add-after 'install 'wrap
                                        (lambda* (#:key outputs #:allow-other-keys)
-                                         (symlink (string-append (assoc-ref outputs "out")
-                                                                 "/Slicer")
-                                                  (string-append (string-append (assoc-ref
-                                                                                 outputs "out")
-                                                                                "/bin/Slicer")))
-                                         #t)))))
+                                                (let* ((out (assoc-ref outputs "out"))
+                                                       (slicer-launcher (string-append out "/Slicer"))
+                                                       (slicer-wrapper (string-append out "/Slicer-wrapper")))
+                                                  ;; Create new wrapper that calls the original launcher with our additions
+                                                  (call-with-output-file slicer-wrapper
+                                                                         (lambda (port)
+                                                                           ; (format port "#!/bin/bash
+                                                                           (format port
+"export LD_LIBRARY_PATH=\"$HOME/.guix-profile/lib/Slicer-5.8/SlicerModules${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"
+exec ~a --additional-module-path \"$HOME/.guix-profile/lib/Slicer-5.8/SlicerModules\" \"$@\"~%"
+                                                                                   slicer-launcher)))
+                                                  ;; Make the new wrapper executable
+                                                  (chmod slicer-wrapper #o755)
+                                                  #t)))
+                            (add-after 'wrap 'symlink-slicer-applauncher
+                                       (lambda* (#:key outputs #:allow-other-keys)
+                                                (symlink (string-append (assoc-ref outputs "out")
+                                                                        "/Slicer-wrapper")
+                                                         (string-append (string-append (assoc-ref
+                                                                                         outputs "out")
+                                                                                       "/bin/Slicer")))
+                                                #t)))))
     (inputs
      (list libxt
            eigen
