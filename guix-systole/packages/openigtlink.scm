@@ -157,7 +157,7 @@ both industrial and academic developers.")
           qtdeclarative-5
           qtsvg-5
           qtx11extras
-          qtwebengine-5
+          ;; qtwebengine-5
           qtwebchannel-5
           qttools-5
           ;;VTK
@@ -233,7 +233,7 @@ both industrial and academic developers.")
          qtdeclarative-5
          qtsvg-5
          qtx11extras
-         qtwebengine-5
+         ;; qtwebengine-5
          qtwebchannel-5
          qttools-5
          ;;VTK

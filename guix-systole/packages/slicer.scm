@@ -230,7 +230,7 @@ exec ~a --additional-module-path \"$HOME/.guix-profile/lib/Slicer-5.8/SlicerModu
            qtdeclarative-5
            qtsvg-5
            qtx11extras
-           qtwebengine-5
+           ;; qtwebengine-5
            qtwebchannel-5
            qttools-5
 
