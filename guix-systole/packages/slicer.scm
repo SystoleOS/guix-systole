@@ -334,3 +334,31 @@ visualization and medical image computing. It provides capabilities for:
 ;; modules are self-describing, emitting an XML description of its command line
 ;; arguments. Slicer uses this XML description to construct a GUI for the module.")
 ;;    (license license:bsd-2)))
+
+(define-public slicer-plots
+  (package
+    (name "slicer-plots")
+    (version "1.0.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri "https://github.com/Slicer/Slicer/archive/11eaf62e5a70b828021ff8beebbdd14d10d4f51c.tar.gz")
+       (sha256 (base32 "05rz797ddci3a2m8297zyzv2g2hp6bd6djmwa1n0gbsla8b175bx"))
+       (patches (search-patches
+                  "0013-COMP-Add-support-to-build-as-independent-module.patch"))))
+    (build-system cmake-build-system)
+    (arguments
+     `(#:tests? #f
+       #:out-of-source? #f
+       #:configure-flags
+         (list "-S" "Modules/Loadable/Plots"  ;; relative to unpacked source
+               "-B" "build"
+               "-DSlicer_BUILD_LOADABLE_MODULES=ON"
+               "-DSlicer_USE_PYTHONQT=ON")))
+    (inputs (list slicer-5.8))
+    (home-page "https://github.com/Slicer/Slicer")
+    (synopsis "a")
+    (description "a")
+    (license license:bsd-3)))
+
+

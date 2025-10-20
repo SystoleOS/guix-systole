@@ -1,0 +1,13 @@
+diff --git a/Modules/Loadable/Plots/CMakeLists.txt b/Modules/Loadable/Plots/CMakeLists.txt
+index 4685399f1f..fc77954da1 100644
+--- a/Modules/Loadable/Plots/CMakeLists.txt
++++ b/Modules/Loadable/Plots/CMakeLists.txt
+@@ -1,3 +1,7 @@
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
+ 
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Plots)
+
