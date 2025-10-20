@@ -1,13 +1,86 @@
 diff --git a/Modules/Loadable/Plots/CMakeLists.txt b/Modules/Loadable/Plots/CMakeLists.txt
-index 4685399f1f..fc77954da1 100644
+index 4685399f1f..28cd85acaf 100644
 --- a/Modules/Loadable/Plots/CMakeLists.txt
 +++ b/Modules/Loadable/Plots/CMakeLists.txt
-@@ -1,3 +1,7 @@
+@@ -1,69 +1,18 @@
 +cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
-+
++project(SlicerPlots)
+ 
+-#-----------------------------------------------------------------------------
+-set(MODULE_NAME Plots)
 +find_package(Slicer REQUIRED)
 +include(${Slicer_USE_FILE})
  
- #-----------------------------------------------------------------------------
- set(MODULE_NAME Plots)
+-string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
++# Extension meta-information
++set(EXTENSION_HOMEPAGE "https://www.slicerigt.org")
++set(EXTENSION_CATEGORY "IGT")
++set(EXTENSION_CONTRIBUTORS "Tamas Ungi (Queen's University), Junichi Tokuda (Brigham and Women's Hospital), Andras Lasso (Queen's University), Isaiah Norton (Brigham and Women's Hospital), Matthew Holden (Queen's University), Laurent Chauvin (SNR), Atsushi Yamada (SNR), Franklin King (Queen's University), Jaime Garcia-Guevara (Queen's University), Amelie Meyer (Queen's University), Mikael Brudfors (UCL), Adam Rankin (Robarts Research Institute)")
++set(EXTENSION_DESCRIPTION "This extension contains modules that enable rapid prototyping of applications for image-guided interventions. Intended users should have real-time imaging and/or tracking hardware (e.g. tracked ultrasound) connected to 3D Slicer through OpenIGTLink network. Specific modules allow patient registration to the navigation coordinate system in 3D Slicer, and real-time update of tracked models and images." )
++set(EXTENSION_ICONURL "https://www.slicer.org/slicerWiki/images/2/2b/SlicerIGTLogo.png" )
++set(EXTENSION_SCREENSHOTURLS "https://www.slicer.org/slicerWiki/images/7/78/SlicerIGTScreenshot.png" )
+ 
+-#-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ add_subdirectory(SubjectHierarchyPlugins)
+ add_subdirectory(Widgets)
+ 
+-#-----------------------------------------------------------------------------
+-set(MODULE_EXPORT_DIRECTIVE "Q_SLICER_QTMODULES_${MODULE_NAME_UPPER}_EXPORT")
+-
+-# Additional includes - Current_{source,binary} and Slicer_{Libs,Base} already included
+-set(MODULE_INCLUDE_DIRECTORIES
+-  ${CMAKE_CURRENT_SOURCE_DIR}/Logic
+-  ${CMAKE_CURRENT_BINARY_DIR}/Logic
+-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets
+-  ${CMAKE_CURRENT_BINARY_DIR}/Widgets
+-  ${CMAKE_CURRENT_SOURCE_DIR}/SubjectHierarchyPlugins
+-  ${CMAKE_CURRENT_BINARY_DIR}/SubjectHierarchyPlugins
+-  ${qSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS}
+-  )
+-
+-set(MODULE_SRCS
+-  qSlicer${MODULE_NAME}Module.cxx
+-  qSlicer${MODULE_NAME}Module.h
+-  qSlicer${MODULE_NAME}ModuleWidget.cxx
+-  qSlicer${MODULE_NAME}ModuleWidget.h
+-  )
+-
+-set(MODULE_MOC_SRCS
+-  qSlicer${MODULE_NAME}Module.h
+-  qSlicer${MODULE_NAME}ModuleWidget.h
+-  )
+-
+-set(MODULE_UI_SRCS
+-  Resources/UI/qSlicer${MODULE_NAME}ModuleWidget.ui
+-  )
+-
+-set(MODULE_TARGET_LIBRARIES
+-  vtkSlicer${MODULE_NAME}ModuleLogic
+-  qMRMLWidgets
+-  qSlicer${MODULE_NAME}SubjectHierarchyPlugins
+-  qSlicer${MODULE_NAME}ModuleWidgets
+-  )
+-
+-set(MODULE_RESOURCES
+-  Resources/qSlicer${MODULE_NAME}Module.qrc
+-  )
+-
+-#-----------------------------------------------------------------------------
+-slicerMacroBuildLoadableModule(
+-  NAME ${MODULE_NAME}
+-  EXPORT_DIRECTIVE ${MODULE_EXPORT_DIRECTIVE}
+-  INCLUDE_DIRECTORIES ${MODULE_INCLUDE_DIRECTORIES}
+-  SRCS ${MODULE_SRCS}
+-  MOC_SRCS ${MODULE_MOC_SRCS}
+-  UI_SRCS ${MODULE_UI_SRCS}
+-  TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
+-  RESOURCES ${MODULE_RESOURCES}
+-  WITH_GENERIC_TESTS
+-  )
+-
+-#-----------------------------------------------------------------------------
+-if(BUILD_TESTING)
+-  add_subdirectory(Testing)
+-endif()
 
