@@ -1,0 +1,14 @@
+desktop {
+  # Header text at top-left
+  title-text: "SystoleOS Installer";
+
+  # Optional: set layout
+  title-font: "DejaVuSans-12.pf2";
+  message-font: "DejaVuSans-10.pf2";
+
+  # Background
+  background: "systole.png";
+
+  # Optional colors
+  title-color: "#ffffff";
+}
