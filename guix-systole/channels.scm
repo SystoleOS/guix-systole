@@ -1,9 +1,15 @@
+(use-modules (guix channels) (guix openpgp))
+
 (list (channel
+        (name 'guix-systole)
+        (url "https://github.com/systoleos/guix-systole")
+        (branch "main"))
+      (channel
         (name 'nonguix)
         (url "https://gitlab.com/nonguix/nonguix")
         (branch "master")
         (commit
-          "1a9423530362ff898683fd9e29894d926587f85f")
+          "bd8c5ca23e694be0b1a8cf72f05f81c70b1d7fc5")
         (introduction
           (make-channel-introduction
             "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
@@ -11,10 +17,10 @@
               "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
       (channel
         (name 'guix)
-        (url "https://git.guix.gnu.org/guix.git")
+        (url "https://codeberg.org/guix/guix.git")
         (branch "master")
         (commit
-          "61b8f6fd58f7a1d1d73a58570f16b1d6705036c6")
+          "1502f231ffe07634c119ba3f11e6add0c7d48db6")
         (introduction
           (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
