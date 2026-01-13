@@ -1,22 +1,22 @@
 ;;; GNU Systole
+;;; Modified from the original in the GNU Guix project:
+;;;   https://codeberg.org/guix/guix
+;;;
 ;;; Copyright © 2024 Janneke Nieuwenhuizen <janneke@gnu.org>
 ;;; Copyright © 2026 Rafael Palomar <rafael.palomar@ous-research.no>
-;;;
-;;; This file is adapted from the original in GNU Guix and
-;;; belongs to GNU Systole
 ;;;
 ;;; GNU Systole is free software; you can redistribute it and/or modify it
 ;;; under the terms of the GNU General Public License as published by
 ;;; the Free Software Foundation; either version 3 of the License, or (at
 ;;; your option) any later version.
 ;;;
-;;; GNU Guix is distributed in the hope that it will be useful, but
+;;; GNU Systole is distributed in the hope that it will be useful, but
 ;;; WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;; GNU General Public License for more details.
 ;;;
 ;;; You should have received a copy of the GNU General Public License
-;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
+;;; along with GNU Systole.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (installer newt systole-kernel)
   #:use-module (gnu installer newt page)

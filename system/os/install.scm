@@ -1,8 +1,11 @@
-;; Original file from https://github.com/kennyballou/dotfiles
+;;; GNU Systole
+;;; Modified from the original at https://github.com/kennyballou/dotfiles
+;;;
 ;;; Copyright © 2019 Alex Griffin <a@ajgrf.com>
 ;;; Copyright © 2019 Pierre Neidhardt <mail@ambrevar.xyz>
 ;;; Copyright © 2019 David Wilson <david@daviwil.com>
 ;;; Copyright © 2023 Kenny Ballou <kb@devnulllabs.io>
+;;; Copyright © 2026 Rafael Palomar <rafael.palomar@ous-research.no>
 ;;;
 ;;; This program is free software: you can redistribute it and/or modify
 ;;; it under the terms of the GNU General Public License as published by
@@ -20,7 +23,6 @@
 ;; Generate a bootable image (e.g. for USB sticks, etc.) with:
 ;; $ guix system image -t iso9660 installer.scm
 
-;; Original file from https://github.com/kennyballou/dotfiles
 
 (define-module (os install)
   #:use-module (gnu bootloader)
@@ -84,35 +86,15 @@
     (label "GNU Systole installation")
 
     (services
-     (append
-      (list
-       (simple-service 'channel-file etc-service-type
-                       (list `("guix/channels.scm" ,(local-file (string-append %systole-root "/system/os/channels.scm.txt"))))))
-      (modify-services (operating-system-user-services installation-os)
-                       (guix-service-type config => (guix-configuration
-                                                     (inherit config)
-                                                     (substitute-urls
-                                                      (append (list "https://substitutes.nonguix.org")
-                                                              %default-substitute-urls))
-                                                     (authorized-keys
-                                                      (append (list (plain-file "non-guix.pub"
-                                                                                "(public-key
-                                                                                  (ecc
-                                                                                    (curve Ed25519)
-                                                                                    (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))"))
-                                                              %default-authorized-guix-keys))))
-                       (kmscon-service-type cfg =>
-                                            (kmscon-configuration
-                                             (inherit cfg)
-                                             (login-program %systole-installer)))
-                       )))
+     (modify-services (operating-system-user-services installation-os)
+                      (kmscon-service-type cfg =>
+                                           (kmscon-configuration
+                                            (inherit cfg)
+                                            (login-program %systole-installer)))))
 
 
     (packages
      (append (list git curl vim lvm2 gptfdisk xfsprogs e2fsprogs guile-gcrypt guile-newt)
              (operating-system-packages installation-os))))))
-
-
-
 
 systole-os-installation
