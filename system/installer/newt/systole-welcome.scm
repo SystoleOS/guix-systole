@@ -1,21 +1,24 @@
-;;; GNU Guix --- Functional package management for GNU
+;;; GNU Systole
+;;; Modified from the original in the GNU Guix project:
+;;;   https://codeberg.org/guix/guix
 ;;; Copyright © 2018 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;; Copyright © 2020, 2022 Ludovic Courtès <ludo@gnu.org>
 ;;; Copyright © 2022 Florian Pelz <pelzflorian@pelzflorian.de>
+;;; Copyright © 2026 Rafael Palomar <rafael.palomar@ous-research.no>
 ;;;
-;;; This file is part of GNU Guix.
+;;; This file is part of GNU Systole.
 ;;;
-;;; GNU Guix is free software; you can redistribute it and/or modify it
+;;; GNU Systole is free software; you can redistribute it and/or modify it
 ;;; under the terms of the GNU General Public License as published by
 ;;; the Free Software Foundation; either version 3 of the License, or (at
 ;;; your option) any later version.
 ;;;
-;;; GNU Guix is distributed in the hope that it will be useful, but
+;;; GNU Systole is distributed in the hope that it will be useful, but
 ;;; WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;
 ;;; You should have received a copy of the GNU General Public License
-;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
+;;; along with GNU Systole. If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (installer newt systole-welcome)
   #:autoload (gnu build linux-modules) (modules-loaded pci-devices)
