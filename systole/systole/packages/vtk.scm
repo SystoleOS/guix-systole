@@ -15,7 +15,7 @@
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
 ;; 
 
-(define-module (guix-systole packages vtk)
+(define-module (systole packages vtk)
   #:use-module ((guix licenses)
                 #:prefix license:)
   #:use-module (guix packages)
@@ -45,7 +45,7 @@
   #:use-module (gnu packages serialization)
   #:use-module (gnu packages tbb)
   #:use-module (gnu packages xiph)
-  #:use-module (guix-systole packages maths))
+  #:use-module (systole packages maths))
 
 (define-public vtk-slicer
   (package

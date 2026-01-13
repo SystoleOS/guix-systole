@@ -15,7 +15,7 @@
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
 ;;
 
-(define-module (guix-systole packages slicer)
+(define-module (systole packages slicer)
   #:use-module ((guix licenses)
                 #:prefix license:)
   #:use-module (gnu packages algebra)
@@ -50,14 +50,14 @@
   #:use-module (guix download)
   #:use-module (guix gexp)
   #:use-module (guix packages)
-  #:use-module (guix-systole packages ctk)
-  #:use-module (guix-systole packages itk)
-  #:use-module (guix-systole packages libarchive)
-  #:use-module (guix-systole packages maths)
-  #:use-module (guix-systole packages qrestapi)
-  #:use-module (guix-systole packages teem)
-  #:use-module (guix-systole packages vtk)
-  #:use-module (guix-systole packages)
+  #:use-module (systole packages ctk)
+  #:use-module (systole packages itk)
+  #:use-module (systole packages libarchive)
+  #:use-module (systole packages maths)
+  #:use-module (systole packages qrestapi)
+  #:use-module (systole packages teem)
+  #:use-module (systole packages vtk)
+  #:use-module (systole packages)
   )
 
 (define-public slicer-5.8

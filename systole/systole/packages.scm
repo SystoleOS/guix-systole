@@ -15,7 +15,7 @@
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
 ;; 
 
-(define-module (guix-systole packages)
+(define-module (systole packages)
   #:use-module (gnu packages)
   #:use-module (guix packages)
   #:use-module (guix diagnostics)
@@ -41,14 +41,14 @@
                                   (dirname* absolute things ...))))
                               ((_)
                                #f))))
-    (try ("guix-systole/packages/slicer.scm" guix-systole/ packages/)
-         ("guix-systole/services/dicomd-service.scm" guix-systole/)
-         ("guix-systole/licenses.scm" guix-systole/)
+    (try ("systole/packages/slicer.scm" systole/ packages/)
+         ("systole/services/dicomd-service.scm" systole/)
+         ("systole/licenses.scm" systole/)
          )))
 
 ;; Define custom patch directory
 (define systole-patches
-   (string-append %systole-root-directory "/guix-systole/packages/patches"))
+   (string-append %systole-root-directory "/systole/packages/patches"))
 
 ;; Get the original %patch-path value and extend it
 (define %original-patch-path

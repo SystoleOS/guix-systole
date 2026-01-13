@@ -16,7 +16,7 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (guix-systole installer kernel)
+(define-module (installer kernel)
   #:use-module (gnu system hurd)
   #:use-module (guix read-print)
   #:use-module (ice-9 match)

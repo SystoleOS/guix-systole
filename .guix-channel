@@ -1,8 +1,9 @@
 (channel
  (version 0)
- ;; (dependencies
- ;;   (channel
- ;;    (name systole-artwork)
- ;;    (url "https://github.com/systoleos/guix-systole-artwork")
- ;;    (branch "main")))
+ (directory "systole")
+ (dependencies
+   (channel
+    (name systole-artwork)
+    (url "https://github.com/systoleos/guix-systole-artwork")
+    (branch "main")))
     )

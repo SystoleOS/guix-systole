@@ -15,7 +15,7 @@
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
 ;; 
 
-(define-module (guix-systole packages itk)
+(define-module (systole packages itk)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages fontutils)
   #:use-module (gnu packages gl)
@@ -35,8 +35,8 @@
   #:use-module ((guix licenses)
                 #:prefix license:)
   #:use-module (guix packages)
-  #:use-module (guix-systole packages maths)
-  #:use-module (guix-systole packages vtk))
+  #:use-module (systole packages maths)
+  #:use-module (systole packages vtk))
 
 (define-public itk-slicer
   (package

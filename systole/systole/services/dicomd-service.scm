@@ -15,7 +15,7 @@
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
 ;; 
 
-(define-module (guix-systole services dicomd-service)
+(define-module (systole services dicomd-service)
   #:autoload   (guix least-authority) (least-authority-wrapper)
   #:use-module (ice-9 match)
   #:use-module (gnu packages admin)

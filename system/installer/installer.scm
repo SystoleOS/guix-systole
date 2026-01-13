@@ -20,7 +20,7 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (guix-systole installer)
+(define-module (installer installer)
   #:use-module (guix build utils)
   #:use-module (guix derivations)
   #:use-module (guix discovery)
@@ -61,8 +61,6 @@
   #:use-module (srfi srfi-1)
   #:use-module (web uri)
   #:use-module (systole)
-  #:use-module (guix-systole installer newt systole-welcome)
-  #:use-module (guix-systole installer newt systole-final)
   #:export (systole-installer-program
             installer-steps
             run-installer))
@@ -78,11 +76,8 @@
     (('gnu 'build _ ...) #t)
     (('guix 'build _ ...) #t)
     (('guix 'read-print) #t)
-    (('guix-systole _ ...) #t)
-    ;; (('nonguix _ ...) #t)
-    ;;(('guix-systole 'installer 'kernel) #t)
-    ;;(('guix-systole 'installer 'steps) #t)
-    (('systole _ ...) #t)
+    (('installer _ ...) #t)
+    (('systole) #t)
     (_ #f)))
 
 (define not-config?
@@ -417,13 +412,15 @@ purposes."
 
   (define steps (installer-steps #:dry-run? dry-run?))
 
+
+
   (define modules
     (append
+     ;; All your installer modules under system/installer/…
      (scheme-modules* (string-append (current-source-directory) "/..")
-                      "guix-systole")
-     ;; (scheme-modules* (string-append (current-source-directory) "/..")
-     ;;                  "gnu/installer")
-     ))
+                      "installer")
+     ;; Top-level (systole) module lives at system/systole.scm
+     (list '(systole))))
 
   (define installer-builder
     ;; Note: Include GUIX as an extension to get all the (gnu system …), (gnu
@@ -434,6 +431,7 @@ purposes."
                            guile-gnutls
                            guile-zlib           ;for (gnu build linux-modules)
                            guile-zstd           ;for (gnu build linux-modules)
+                           guile-newt
                            guix-for-installer)
       (with-imported-modules `(,@(source-module-closure
                                   `(,@modules
@@ -442,12 +440,12 @@ purposes."
                                   #:select? module-to-import?)
                                ((guix config) => ,(make-config.scm)))
         #~(begin
-            (use-modules (guix-systole installer newt systole-welcome)
-                         (guix-systole installer newt systole-kernel)
-                         (guix-systole installer newt systole-final)
-                         (guix-systole installer kernel)
-                         (guix-systole installer final)
-                         (guix-systole installer steps)
+            (use-modules (installer newt systole-welcome)
+                         (installer newt systole-kernel)
+                         (installer newt systole-final)
+                         (installer kernel)
+                         (installer final)
+                         (installer steps)
                          (gnu installer final)
                          (gnu installer steps)
                          (gnu installer record)
@@ -467,6 +465,7 @@ purposes."
                          (guix i18n)
                          (guix build utils)
                          (guix utils)
+                         (webutils multipart)
                          ((system repl debug)
                           #:select (terminal-width))
                          (ice-9 match)
@@ -593,64 +592,69 @@ purposes."
 
 (define* (installer-script #:key dry-run?
                            (steps (installer-steps #:dry-run? dry-run?)))
-  (program-file
-   "installer-script"
-   #~(begin
-       (use-modules (gnu installer)
-                    (gnu installer record)
-                    (gnu installer keymap)
-                    (guix-systole installer steps)
-                    (gnu installer steps)
-                    (gnu installer dump)
-                    (guix-systole installer final)
-                    (gnu installer final)
-                    (gnu installer hostname)
-                    (guix-systole installer kernel)
-                    (gnu installer locale)
-                    (gnu installer parted)
-                    (gnu installer services)
-                    (gnu installer timezone)
-                    (gnu installer user)
-                    (gnu installer utils)
-                    (gnu installer newt)
-                    ((gnu installer newt keymap)
-                     #:select (keyboard-layout->configuration))
-                    (gnu services herd)
-                    (guix i18n)
-                    (guix build utils)
-                    (guix utils)
-                    ((system repl debug)
-                     #:select (terminal-width))
-                    (ice-9 match)
-                    (ice-9 textual-ports))
-       (terminal-width 200)
-       (let* ((current-installer newt-installer)
-              (steps (#$steps current-installer)))
-         (catch #t
-           (lambda _
-             ((installer-init current-installer))
-             (parameterize ((%run-command-in-installer
-                             (if #$dry-run?
-                                 dry-run-command
-                                 (installer-run-command current-installer)))
-                            (%installer-configuration-file
-                             (if #$dry-run?
-                                 "config.scm"
-                                 (%installer-configuration-file))))
-               (let ((results (run-installer-steps
-                               #:rewind-strategy 'menu
-                               #:menu-proc
-                               (installer-menu-page current-installer)
-                               #:steps steps
-                               #:dry-run? #$dry-run?)))
-                 (result-step results 'final)
-                 ((installer-exit current-installer)))))
-           (const #f)
-           (lambda (key . args)
-             (sleep 10)
-             ((installer-exit current-installer))
-             (display-backtrace (make-stack #t) (current-error-port))
-             (apply throw key args)))))))
+
+  (with-extensions (list guile-gcrypt guile-newt guile-parted guile-bytestructures
+                         guile-json-3 guile-git guile-webutils guile-gnutls
+                         guile-zlib guile-zstd guile-newt)
+    (program-file
+     "installer-script"
+     #~(begin
+         (use-modules (gnu installer)
+                      (gnu installer record)
+                      (gnu installer keymap)
+                      (installer steps)
+                      (gnu installer steps)
+                      (gnu installer dump)
+                      (installer final)
+                      (gnu installer final)
+                      (gnu installer hostname)
+                      (installer kernel)
+                      (gnu installer locale)
+                      (gnu installer parted)
+                      (gnu installer services)
+                      (gnu installer timezone)
+                      (gnu installer user)
+                      (gnu installer utils)
+                      (gnu installer newt)
+                      ((gnu installer newt keymap)
+                       #:select (keyboard-layout->configuration))
+                      (gnu services herd)
+                      (guix i18n)
+                      (guix build utils)
+                      (guix utils)
+                      (webutils multipart)
+                      ((system repl debug)
+                       #:select (terminal-width))
+                      (ice-9 match)
+                      (ice-9 textual-ports))
+         (terminal-width 200)
+         (let* ((current-installer newt-installer)
+                (steps (#$steps current-installer)))
+           (catch #t
+             (lambda _
+               ((installer-init current-installer))
+               (parameterize ((%run-command-in-installer
+                               (if #$dry-run?
+                                   dry-run-command
+                                   (installer-run-command current-installer)))
+                              (%installer-configuration-file
+                               (if #$dry-run?
+                                   "config.scm"
+                                   (%installer-configuration-file))))
+                 (let ((results (run-installer-steps
+                                 #:rewind-strategy 'menu
+                                 #:menu-proc
+                                 (installer-menu-page current-installer)
+                                 #:steps steps
+                                 #:dry-run? #$dry-run?)))
+                   (result-step results 'final)
+                   ((installer-exit current-installer)))))
+             (const #f)
+             (lambda (key . args)
+               (sleep 10)
+               ((installer-exit current-installer))
+               (display-backtrace (make-stack #t) (current-error-port))
+               (apply throw key args))))))))
 
 (define* (run-installer #:key dry-run?)
   "To run the installer from Guile without building it:

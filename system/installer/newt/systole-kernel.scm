@@ -18,7 +18,7 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (guix-systole installer newt systole-kernel)
+(define-module (installer newt systole-kernel)
   #:use-module (gnu installer newt page)
   #:use-module (guix i18n)
   #:use-module (guix utils)

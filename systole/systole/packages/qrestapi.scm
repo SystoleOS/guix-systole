@@ -15,7 +15,7 @@
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
 ;; 
 
-(define-module (guix-systole packages qrestapi)
+(define-module (systole packages qrestapi)
   #:use-module (gnu packages qt)
   #:use-module (gnu packages)
   #:use-module (guix gexp)
@@ -24,7 +24,7 @@
   #:use-module (guix build-system cmake)
   #:use-module ((guix licenses)
                 #:prefix license:)
-  #:use-module (guix-systole packages)
+  #:use-module (systole packages)
   )
 
 (define-public qrestapi

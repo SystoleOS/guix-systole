@@ -15,7 +15,7 @@
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
 ;; 
 
-(define-module (guix-systole packages pythonqt)
+(define-module (systole packages pythonqt)
   #:use-module (gnu packages)
   #:use-module (gnu packages qt)
   #:use-module (gnu packages python)

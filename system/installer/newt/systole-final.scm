@@ -18,9 +18,9 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (guix-systole installer newt systole-final)
-  #:use-module (guix-systole installer final)
-  #:use-module (guix-systole installer steps)
+(define-module (installer newt systole-final)
+  #:use-module (installer final)
+  #:use-module (installer steps)
   #:use-module (gnu installer steps)
   #:use-module (gnu installer parted)
   #:use-module (gnu installer utils)

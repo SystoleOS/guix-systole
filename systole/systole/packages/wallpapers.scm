@@ -15,7 +15,7 @@
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
 ;; 
 
-(define-module (guix-systole packages wallpapers)
+(define-module (systole packages wallpapers)
   #:use-module (guix packages)
   #:use-module (guix download)
   #:use-module (guix git-download)
@@ -33,7 +33,7 @@
      (origin
        (method git-fetch)
        (uri (git-reference
-             (url "https://github.com/systoleos/guix-systole-artwork.git")
+             (url "https://github.com/systoleos/systole-artwork.git")
              (commit "d8203496e0a54e51ba74824196d9adebaee14197")))
        (file-name (git-file-name name version))
        (sha256
@@ -49,7 +49,7 @@
                  (target (string-append #$output "/share/backgrounds/systole")))
             (mkdir-p target)
             (copy-recursively source target)))))
-    (home-page "https://github.com/systoleos/guix-systole-artwork")
+    (home-page "https://github.com/systoleos/systole-artwork")
     (synopsis "Systole Wallpapers")
     (description "A collection of wallpapers for the Systole project.")
     (license license:cc0)))

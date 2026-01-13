@@ -22,7 +22,7 @@
 
 ;; Original file from https://github.com/kennyballou/dotfiles
 
-(define-module (system install)
+(define-module (os install)
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu services)
@@ -42,13 +42,14 @@
   #:use-module (gnu packages base)
   #:use-module (gnu packages gnupg)
   #:use-module (gnu system linux-initrd)
-  #:use-module (nongnu packages linux)
   #:autoload   (gnu packages gtk) (guile-cairo guile-rsvg)
+  #:autoload   (gnu packages guile-xyz) (guile-newt)
+  #:use-module (nongnu packages linux)
   #:use-module (guix)
   #:use-module (guix channels)
   #:use-module (nonguix transformations)
   #:use-module (systole)
-  #:use-module (guix-systole installer)
+  #:use-module (installer installer)
   #:use-module (srfi srfi-1)
   #:export (systole-os-installation))
 
@@ -86,7 +87,7 @@
      (append
       (list
        (simple-service 'channel-file etc-service-type
-                       (list `("guix/channels.scm" ,(local-file (string-append %systole-root "/system/channels.scm.txt"))))))
+                       (list `("guix/channels.scm" ,(local-file (string-append %systole-root "/system/os/channels.scm.txt"))))))
       (modify-services (operating-system-user-services installation-os)
                        (guix-service-type config => (guix-configuration
                                                      (inherit config)
@@ -108,7 +109,7 @@
 
 
     (packages
-     (append (list git curl vim lvm2 gptfdisk xfsprogs e2fsprogs guile-gcrypt)
+     (append (list git curl vim lvm2 gptfdisk xfsprogs e2fsprogs guile-gcrypt guile-newt)
              (operating-system-packages installation-os))))))
 
 

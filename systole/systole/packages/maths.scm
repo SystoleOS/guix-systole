@@ -15,7 +15,7 @@
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
 ;; 
 
-(define-module (guix-systole packages maths)
+(define-module (systole packages maths)
   #:use-module (gnu packages maths)
   #:use-module (guix packages))
 

@@ -15,7 +15,7 @@
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
 ;; 
 
-(define-module (guix-systole packages ctk)
+(define-module (systole packages ctk)
   #:use-module (gnu packages algebra)           ; Eigen3
   #:use-module (gnu packages compression)       ; lz4
   #:use-module (gnu packages fontutils)         ; freetype
@@ -39,10 +39,10 @@
   #:use-module ((guix licenses)
                 #:prefix license:)
   #:use-module (guix packages)
-  #:use-module (guix-systole packages itk)
-  #:use-module (guix-systole packages maths)
-  #:use-module (guix-systole packages vtk)
-  #:use-module (guix-systole packages))
+  #:use-module (systole packages itk)
+  #:use-module (systole packages maths)
+  #:use-module (systole packages vtk)
+  #:use-module (systole packages))
 
 ;; --------------------------- CTK ---------------------------
 (define-public ctk

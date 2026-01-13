@@ -15,14 +15,14 @@
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
 ;; 
 
-(define-module (guix-systole packages teem)
+(define-module (systole packages teem)
   #:use-module (guix build-system cmake)
   #:use-module (guix download)
   #:use-module (guix gexp)
   #:use-module ((guix licenses)
                 #:prefix license:)
   #:use-module (guix packages)
-  #:use-module ((guix-systole licenses)
+  #:use-module ((systole licenses)
                 #:prefix license:))
 
 (define-public teem-slicer

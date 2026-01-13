@@ -15,7 +15,7 @@
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
 ;; 
 
-(define-module (guix-systole packages libarchive)
+(define-module (systole packages libarchive)
   #:use-module (guix build-system cmake)
   #:use-module (guix download)
   #:use-module (guix packages)

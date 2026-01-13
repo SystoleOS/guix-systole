@@ -17,10 +17,8 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (guix-systole installer newt systole-welcome)
-  #:use-module ((gnu build linux-modules)
-                #:select (modules-loaded
-                          pci-devices))
+(define-module (installer newt systole-welcome)
+  #:autoload (gnu build linux-modules) (modules-loaded pci-devices)
   #:use-module (gnu installer dump)
   #:use-module (gnu installer hardware)
   #:use-module (gnu installer steps)
@@ -36,6 +34,8 @@
   #:use-module (ice-9 format)
   #:use-module (ice-9 match)
   #:use-module (ice-9 receive)
+  #:use-module (gnu installer newt page)
+  #:use-module (gnu installer newt utils)
   #:use-module (newt)
   #:export (run-systole-welcome-page))
 
