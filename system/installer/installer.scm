@@ -76,6 +76,7 @@
   ;; modules are excluded here.
   (match-lambda
     (('guix 'config) #f)
+    (('installer 'transformations) #f)
     (('gnu 'installer _ ...) #t)
     (('gnu 'build _ ...) #t)
     (('guix 'build _ ...) #t)
@@ -321,18 +322,6 @@ selected keymap."
                      ((installer-user-page current-installer))))
           (configuration-formatter users->configuration))
 
-         ;; Ask the user to select the kernel for the system,
-         ;; for x86 systems only.
-         (installer-step
-          (id 'systole-kernel)
-          (description (G_ "Kernel"))
-          (compute (lambda _
-                     (if (target-x86?)
-                         ((installer-kernel-page current-installer))
-                         '())))
-          (configuration-formatter (lambda (result)
-                                     (systole-kernel->configuration result #$dry-run?))))
-
          ;; Ask the user to choose one or many desktop environment(s).
          (installer-step
           (id 'services)
@@ -445,9 +434,7 @@ purposes."
                                ((guix config) => ,(make-config.scm)))
         #~(begin
             (use-modules (installer newt systole-welcome)
-                         (installer newt systole-kernel)
                          (installer newt systole-final)
-                         (installer kernel)
                          (installer final)
                          (installer steps)
                          (gnu installer final)
@@ -511,7 +498,6 @@ purposes."
             (define current-installer
               (installer (inherit newt-installer)
                          (welcome-page run-systole-welcome-page)
-                         (kernel-page run-systole-kernel-page)
                          (final-page run-systole-final-page)
                          ))
 
@@ -606,13 +592,14 @@ purposes."
          (use-modules (gnu installer)
                       (gnu installer record)
                       (gnu installer keymap)
+                      (installer newt systole-welcome)
+                      (installer newt systole-final)
                       (installer steps)
                       (gnu installer steps)
                       (gnu installer dump)
                       (installer final)
                       (gnu installer final)
                       (gnu installer hostname)
-                      (installer kernel)
                       (gnu installer locale)
                       (gnu installer parted)
                       (gnu installer services)
@@ -632,8 +619,11 @@ purposes."
                       (ice-9 match)
                       (ice-9 textual-ports))
          (terminal-width 200)
-         (let* ((current-installer newt-installer)
-                (steps (#$steps current-installer)))
+         (define current-installer
+           (installer (inherit newt-installer)
+                      (welcome-page run-systole-welcome-page)
+                      (final-page run-systole-final-page)))
+         (let* ((steps (#$steps current-installer)))
            (catch #t
              (lambda _
                ((installer-init current-installer))

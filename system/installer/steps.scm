@@ -57,17 +57,18 @@ found in RESULTS."
                    ,(comment (G_ "\
 ;; Indicate which modules to import to access the variables
 ;; used in this configuration.\n"))
-                   ,@(if (target-hurd?)
-                         '((use-modules (gnu) (gnu system hurd))
-                           (use-package-modules hurd ssh))
-                         '((use-modules (gnu))
-                           ;; TODO: We should separate Libre linux from Linux here
-                           (use-modules (nongnu packages linux))
-                           (use-modules (nongnu system linux-initrd))))
+                   (use-modules (gnu)
+                                (nonguix transformations)
+                                (nongnu packages linux)
+                                (nongnu system linux-initrd))
                    (use-service-modules cups desktop networking ssh xorg))))
     `(,@modules
       ,(vertical-space 1)
-      (operating-system ,@configuration))))
+
+      ((compose (nonguix-transformation-guix #:guix-source? #t)
+                ;; FIXME: ‘microcode-initrd’ results in unbootable live system.
+                (nonguix-transformation-linux #:initrd base-initrd))
+       (operating-system ,@configuration)))))
 
 ;;; Local Variables:
 ;;; eval: (put 'with-server-socket 'scheme-indent-function 0)
