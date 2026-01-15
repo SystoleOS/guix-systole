@@ -76,13 +76,13 @@
   ;; modules are excluded here.
   (match-lambda
     (('guix 'config) #f)
-    (('installer 'transformations) #f)
     (('gnu 'installer _ ...) #t)
     (('gnu 'build _ ...) #t)
     (('guix 'build _ ...) #t)
     (('guix 'read-print) #t)
     (('installer _ ...) #t)
     (('systole) #t)
+    (('nongnu _ ...) #t)
     (_ #f)))
 
 (define not-config?
