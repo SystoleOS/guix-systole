@@ -171,11 +171,7 @@ or #f.  Return #t on success and #f on failure."
                                 read))
                             (const '())))
          (install-command (append `( "guix" "time-machine" "-C" "/etc/guix/channels.scm"
-                                     "--" "system" "init"
-                                     "--fallback"
-                                     ,@(if (target-hurd?)
-                                           '("--target=i586-pc-gnu")
-                                           '()))
+                                     "--" "system" "init" "--fallback")
                                   options
                                   (list (%installer-configuration-file)
                                         (%installer-target-dir))))

@@ -76,7 +76,6 @@
   ;; modules are excluded here.
   (match-lambda
     (('guix 'config) #f)
-    (('installer 'transformations) #f)
     (('gnu 'installer _ ...) #t)
     (('gnu 'build _ ...) #t)
     (('guix 'build _ ...) #t)

@@ -58,16 +58,16 @@ found in RESULTS."
 ;; Indicate which modules to import to access the variables
 ;; used in this configuration.\n"))
                    (use-modules (gnu)
-                                (nonguix transformations)
+                                (systole transformations)
                                 (nongnu packages linux)
                                 (nongnu system linux-initrd))
                    (use-service-modules cups desktop networking ssh xorg))))
     `(,@modules
       ,(vertical-space 1)
 
-      ((compose (nonguix-transformation-guix #:guix-source? #t)
+      ((compose (systole-transformation-guix #:guix-source? #t)
                 ;; FIXME: ‘microcode-initrd’ results in unbootable live system.
-                (nonguix-transformation-linux #:initrd base-initrd))
+                (systole-transformation-linux #:initrd base-initrd))
        (operating-system ,@configuration)))))
 
 ;;; Local Variables:
