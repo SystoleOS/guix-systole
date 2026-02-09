@@ -16,9 +16,35 @@
 ;;
 
 (define-module (systole)
- #:export (%systole-root)
-  )
+  #:use-module (ice-9 regex)
+  #:export (%systole-root %systole-version %systole-codename))
 
-(define %systole-root (string-append (getcwd) "/"))
+;; Determine the repository root directory robustly
+;; Priority:
+;;   1. SYSTOLE_ROOT environment variable (for testing/custom setups)
+;;   2. Search upward from getcwd() for .guix-channel file
+;;   3. getcwd() (fallback)
+(define %systole-root
+  (let ((env-root (getenv "SYSTOLE_ROOT")))
+    (cond
+     ;; Environment variable explicitly set
+     (env-root
+      (if (string-suffix? "/" env-root)
+          env-root
+          (string-append env-root "/")))
+     ;; Search for .guix-channel file starting from current directory
+     (else
+      (let loop ((dir (getcwd)))
+        (cond
+         ;; Found .guix-channel file - this is the root
+         ((file-exists? (string-append dir "/.guix-channel"))
+          (string-append dir "/"))
+         ;; Reached filesystem root
+         ((string=? dir "/")
+          (string-append (getcwd) "/"))
+         ;; Try parent directory
+         (else
+          (loop (dirname dir)))))))))
+
 (define %systole-version "1.0")
 (define %systole-codename "magnet")

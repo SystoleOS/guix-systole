@@ -136,7 +136,7 @@ Test runner for Guix-Systole
 CATEGORIES:
     all         Run all tests (default)
     packages    Run package tests
-    installer   Run installer tests
+    installer   Run installer tests (module loading only)
     lint        Run lint tests
     build       Run build tests (slow!)
 
@@ -150,6 +150,17 @@ EXAMPLES:
     $0 lint             # Run only lint tests
     $0 --skip-build     # Run all tests except builds
     $0 packages         # Run only package tests
+
+VM TESTS:
+    For comprehensive VM-based system tests (boots full VMs):
+        ./scripts/run-vm-tests.sh [basic|deploy-key|no-ssh|all]
+
+    VM tests verify:
+    - Installer boots successfully in QEMU
+    - Deploy key SSH configuration works correctly
+    - Services are running as expected
+
+    Note: VM tests are slower (2-5 minutes each) and require more resources.
 
 EOF
 }

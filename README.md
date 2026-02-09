@@ -51,18 +51,27 @@ This repository includes comprehensive testing infrastructure to ensure package 
 ### Quick Test
 
 ```bash
-# Run all tests
+# Run unit tests (fast)
 ./scripts/run-tests.sh
 
 # Run specific test categories
 ./scripts/run-tests.sh packages    # Test package definitions
 ./scripts/run-tests.sh installer   # Test installer modules
 ./scripts/run-tests.sh lint        # Run guix lint checks
+
+# Run VM tests (comprehensive, slower)
+./scripts/run-vm-tests.sh          # Boot full VMs to test installer
+./scripts/run-vm-tests.sh basic    # Test basic installer boot
+./scripts/run-vm-tests.sh deploy-key  # Test SSH deploy key feature
 ```
 
 ### Detailed Testing Guide
 
-For comprehensive testing instructions, see [README.testing.md](README.testing.md), which covers:
+For comprehensive testing instructions, see:
+- **[README.testing.md](README.testing.md)** - Unit tests, lint checks, and package tests
+- **[docs/VM-TESTING.md](docs/VM-TESTING.md)** - VM-based system tests using Marionette
+
+Topics covered:
 - How to run different types of tests
 - Understanding test output
 - Writing new tests
@@ -76,6 +85,8 @@ Current tests verify:
 - ✅ All 13 package definitions are accessible
 - ✅ All installer modules load correctly
 - ✅ Packages pass guix lint checks
+- ✅ Installer boots successfully in VM (Marionette tests)
+- ✅ SSH deploy key configuration works correctly
 - ⏳ Build tests (manual only - very slow)
 
 ## Development
@@ -160,6 +171,61 @@ This repository also provides:
 - **GRUB theme** - SystoleOS branding
 
 See the `system/` directory for system configuration examples.
+
+### Building Installer ISO with Deploy Key
+
+For remote deployment scenarios using `guix deploy`, you can build an installer ISO with SSH access enabled:
+
+```bash
+# Using a key file (recommended)
+./scripts/build-installer-with-deploy.sh --key-file ~/.ssh/id_ed25519.pub
+
+# Using a key string
+./scripts/build-installer-with-deploy.sh --key "ssh-ed25519 AAAAC3Nza... user@host"
+
+# Using environment variable
+SYSTOLE_DEPLOY_KEY="$(cat ~/.ssh/id_ed25519.pub)" ./scripts/build-installer-with-deploy.sh
+```
+
+This creates an installer ISO with:
+- SSH daemon enabled in the live installer environment
+- Your public key authorized for root user access
+- Key-based authentication only (password auth disabled)
+
+**Use cases:**
+- Remote installation in data centers or cloud environments
+- Automated deployment in CI/CD pipelines
+- Testing and development in virtualized environments
+
+**Workflow:**
+
+1. **Build ISO with your deploy key:**
+   ```bash
+   ./scripts/build-installer-with-deploy.sh --key-file ~/.ssh/id_ed25519.pub
+   ```
+
+2. **Boot the ISO on target machine** (via USB, network boot, or VM)
+
+3. **SSH to the installer:**
+   ```bash
+   ssh -i ~/.ssh/id_ed25519 root@<target-ip>
+   ```
+
+4. **Deploy your system remotely:**
+   ```bash
+   guix deploy deployment.scm
+   ```
+
+**Note:** The deploy key only authorizes access to the live installer environment. After installation, the target system uses its own SSH configuration.
+
+For advanced usage, you can also build directly with `guix system image`:
+
+```bash
+guix system image -t iso9660 -L . --expression \
+  '(use-modules (os install))
+   ((@ (os install) systole-os-installation-with-deploy-key)
+    #:deploy-key "ssh-ed25519 AAAAC3Nza... user@host")'
+```
 
 ## More Information
 
