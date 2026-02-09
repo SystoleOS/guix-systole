@@ -1,0 +1,56 @@
+name: "Installer Tests"
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'system/installer/**'
+      - 'tests/installer/**'
+      - '.github/workflows/installer-tests.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'system/installer/**'
+
+jobs:
+  installer-modules:
+    name: Test Installer Module Loading
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Guix
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y guix guile-library
+
+      - name: Test installer modules
+        run: |
+          ./tests/installer/test-dry-run.sh
+
+  # VM-based installer tests would go here
+  # These require more setup and longer runtime
+  # installer-vm:
+  #   name: Test Installer in VM
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Install QEMU and Guix
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y qemu-system-x86 guix
+  #
+  #     - name: Build installer ISO
+  #       run: |
+  #         guix system image --image-type=iso9660 system/os/install.scm
+  #
+  #     - name: Test installer in VM
+  #       run: |
+  #         # To be implemented
+  #         echo "VM testing not yet implemented"

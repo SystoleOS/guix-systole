@@ -1,0 +1,90 @@
+name: "Package Tests"
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'systole/systole/packages/**'
+      - 'tests/**'
+      - '.github/workflows/package-tests.yml'
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'systole/systole/packages/**'
+
+jobs:
+  module-loading:
+    name: Test Module Loading
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Guix
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y guix guile-library
+
+      - name: Test package modules load
+        run: |
+          ./tests/packages/test-modules-load.sh
+
+  package-definitions:
+    name: Test Package Definitions
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Guix
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y guix guile-library
+
+      - name: Test package definitions exist
+        run: |
+          ./tests/packages/test-package-definitions.sh
+
+  # Lint tests disabled in CI - require nonguix channel
+  # Run locally with: ./scripts/run-tests.sh lint
+  #
+  # lint-packages:
+  #   name: Lint Packages
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Note
+  #       run: |
+  #         echo "Package linting requires nonguix channel"
+  #         echo "Run locally: ./scripts/run-tests.sh lint"
+
+  # Note: Build tests are commented out as they take too long for CI
+  # Run them locally with: ./scripts/run-tests.sh build
+  # build-packages:
+  #   name: Build Packages
+  #   runs-on: ubuntu-24.04
+  #   strategy:
+  #     matrix:
+  #       package:
+  #         - vtk-slicer
+  #         - itk-slicer
+  #         - ctk
+  #     fail-fast: false
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Install Guix
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y guix guile-library
+  #
+  #     - name: Build ${{ matrix.package }}
+  #       run: |
+  #         guix build -L . ${{ matrix.package }}
+  #       timeout-minutes: 240
