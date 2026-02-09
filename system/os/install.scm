@@ -28,6 +28,7 @@
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
   #:use-module (gnu services)
+  #:use-module (gnu services ssh)
   #:use-module (gnu system)
   #:use-module (gnu system install)
   #:use-module (gnu system pam)
@@ -53,7 +54,8 @@
   #:use-module (systole transformations)
   #:use-module (installer installer)
   #:use-module (srfi srfi-1)
-  #:export (systole-os-installation))
+  #:export (systole-os-installation
+            systole-os-installation-with-deploy-key))
 
 (define %systole-installer (systole-installer-program))
 
@@ -92,6 +94,53 @@
                                             (inherit cfg)
                                             (login-program %systole-installer)))))
 
+
+    (packages
+     (append (list git curl vim lvm2 gptfdisk xfsprogs e2fsprogs guile-gcrypt guile-newt)
+             (operating-system-packages installation-os))))))
+
+(define* (systole-os-installation-with-deploy-key #:key (deploy-key #f))
+  "Return an operating-system for the Systole installer ISO.
+
+When DEPLOY-KEY is provided (as a string containing an SSH public key),
+the installer will have SSH access enabled for remote deployment via
+'guix deploy'. The key is authorized for the root user.
+
+Example:
+  (systole-os-installation-with-deploy-key
+    #:deploy-key \"ssh-ed25519 AAAAC3Nza... user@host\")"
+
+  ((compose (systole-transformation-deploy #:deploy-key deploy-key)
+            (systole-transformation-guix #:guix-source? #t)
+            (systole-transformation-linux #:initrd base-initrd))
+
+   (operating-system
+    (inherit installation-os)
+    (kernel linux)
+    (firmware (list linux-firmware))
+    (keyboard-layout (keyboard-layout "us" #:options '("ctrl:nocaps")))
+    (kernel-arguments '("quiet" "net.ifnames=0"))
+
+    (bootloader
+     (let ((base (operating-system-bootloader installation-os)))
+       (bootloader-configuration
+        (inherit base)
+        (targets "/dev/null")
+        (theme
+         (grub-theme
+          (resolution '(1280 . 1024))
+          (color-normal '((fg . light-gray) (bg . black)))
+          (color-highlight '((fg . black ) (bg . yellow)))
+          (image (local-file (string-append %systole-root "assets/grub-theme/systole.png"))))))))
+
+    (label "GNU Systole installation")
+
+    (services
+     (modify-services (operating-system-user-services installation-os)
+                      (kmscon-service-type cfg =>
+                                           (kmscon-configuration
+                                            (inherit cfg)
+                                            (login-program %systole-installer)))))
 
     (packages
      (append (list git curl vim lvm2 gptfdisk xfsprogs e2fsprogs guile-gcrypt guile-newt)

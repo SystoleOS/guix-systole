@@ -32,13 +32,15 @@
   #:use-module (nongnu system linux-initrd)
   #:use-module (gnu services)
   #:use-module (gnu services base)
+  #:use-module (gnu services ssh)
   #:use-module (nongnu services nvidia)
   #:use-module (gnu packages package-management)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu packages nvidia)
   #:export (systole-transformation-guix
             systole-transformation-linux
-            systole-transformation-nvidia)
+            systole-transformation-nvidia
+            systole-transformation-deploy)
   #:re-export (replace-mesa))
 
 (define* (systole-transformation-guix #:key (substitutes? #t)
@@ -173,3 +175,33 @@ TODO: Xorg configuration."
                 (package-name driver)))
           ,@(operating-system-user-services os))
         #:driver driver)))))
+
+(define* (systole-transformation-deploy #:key (deploy-key #f))
+  "Return a procedure that transforms an operating system, optionally adding
+SSH access for remote deployment via 'guix deploy'.
+
+DEPLOY-KEY (default: #f) should be either #f (disabled) or a string containing
+an SSH public key in standard format (e.g., 'ssh-ed25519 AAAA...').
+
+When provided, this transformation:
+- Adds openssh-service-type to enable SSH daemon
+- Configures the SSH key as authorized for root user
+- Enables key-based authentication for remote deployment"
+
+  (lambda (os)
+    (if (or (not deploy-key)
+            (string=? deploy-key ""))
+        ;; No deploy key - return OS unchanged
+        os
+        ;; Deploy key provided - configure SSH
+        (operating-system
+          (inherit os)
+          (services
+           (cons* (service openssh-service-type
+                           (openssh-configuration
+                            (permit-root-login 'prohibit-password)
+                            (password-authentication? #f)
+                            (authorized-keys
+                             `(("root" ,(plain-file "deploy-key.pub"
+                                                    deploy-key))))))
+                  (operating-system-user-services os)))))))
