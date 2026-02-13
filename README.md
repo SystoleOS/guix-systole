@@ -131,6 +131,8 @@ Tests run automatically in CI on every PR.
 - **[TESTING.md](TESTING.md)** - Comprehensive testing strategy
 - **[README.testing.md](README.testing.md)** - How to run tests
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
+- **[docs/CHANNEL-MANAGEMENT.md](docs/CHANNEL-MANAGEMENT.md)** - Channel versioning and reproducible builds
+- **[docs/REMOTE-DEPLOYMENT.md](docs/REMOTE-DEPLOYMENT.md)** - Complete remote deployment guide
 
 ## Guidelines for Modifications
 
@@ -177,7 +179,7 @@ See the `system/` directory for system configuration examples.
 For remote deployment scenarios using `guix deploy`, you can build an installer ISO with SSH access enabled:
 
 ```bash
-# Using a key file (recommended)
+# Standard build with locked channels (recommended)
 ./scripts/build-installer-with-deploy.sh --key-file ~/.ssh/id_ed25519.pub
 
 # Using a key string
@@ -191,6 +193,7 @@ This creates an installer ISO with:
 - SSH daemon enabled in the live installer environment
 - Your public key authorized for root user access
 - Key-based authentication only (password auth disabled)
+- **Reproducible channel versions** via `guix time-machine` and `channels-lock.scm`
 
 **Use cases:**
 - Remote installation in data centers or cloud environments
@@ -211,10 +214,16 @@ This creates an installer ISO with:
    ssh -i ~/.ssh/id_ed25519 root@<target-ip>
    ```
 
-4. **Deploy your system remotely:**
+4. **Deploy your system remotely** (with automatic channel sync):
    ```bash
-   guix deploy deployment.scm
+   ./scripts/sync-and-deploy.sh deployment.scm
    ```
+
+**Important:**
+- The installer build uses `guix time-machine` with `channels-lock.scm` for reproducibility
+- Use `sync-and-deploy.sh` instead of `guix deploy` directly to avoid channel mismatch errors
+- See **[docs/CHANNEL-MANAGEMENT.md](docs/CHANNEL-MANAGEMENT.md)** for details on channel management
+- See **[docs/REMOTE-DEPLOYMENT.md](docs/REMOTE-DEPLOYMENT.md)** for complete deployment guide
 
 **Note:** The deploy key only authorizes access to the live installer environment. After installation, the target system uses its own SSH configuration.
 
