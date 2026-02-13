@@ -176,32 +176,67 @@ TODO: Xorg configuration."
           ,@(operating-system-user-services os))
         #:driver driver)))))
 
-(define* (systole-transformation-deploy #:key (deploy-key #f))
+(define* (systole-transformation-deploy #:key (deploy-key #f) (channels-file #f))
   "Return a procedure that transforms an operating system, optionally adding
-SSH access for remote deployment via 'guix deploy'.
+SSH access and channel specifications for remote deployment via 'guix deploy'.
 
 DEPLOY-KEY (default: #f) should be either #f (disabled) or a string containing
 an SSH public key in standard format (e.g., 'ssh-ed25519 AAAA...').
 
-When provided, this transformation:
+CHANNELS-FILE (default: #f) should be either #f (disabled) or a path to a
+channels.scm file containing channel specifications to embed in the installed
+system configuration.
+
+When DEPLOY-KEY is provided, this transformation:
 - Adds openssh-service-type to enable SSH daemon
 - Configures the SSH key as authorized for root user
-- Enables key-based authentication for remote deployment"
+- Enables key-based authentication for remote deployment
+
+When CHANNELS-FILE is provided, the installer will:
+- Copy the channels file to /etc for access during installation
+- Embed channel specifications in the generated system configuration
+- Ensure reproducible deployments via guix-configuration"
 
   (lambda (os)
-    (if (or (not deploy-key)
-            (string=? deploy-key ""))
-        ;; No deploy key - return OS unchanged
-        os
-        ;; Deploy key provided - configure SSH
-        (operating-system
-          (inherit os)
-          (services
-           (cons* (service openssh-service-type
-                           (openssh-configuration
-                            (permit-root-login 'prohibit-password)
-                            (password-authentication? #f)
-                            (authorized-keys
-                             `(("root" ,(plain-file "deploy-key.pub"
-                                                    deploy-key))))))
-                  (operating-system-user-services os)))))))
+    (let* ((has-deploy-key? (and deploy-key (not (string=? deploy-key ""))))
+           (has-channels? (and channels-file (file-exists? channels-file)))
+           (etc-files (append
+                       (if has-deploy-key?
+                           (list `("systole-deploy-key.pub"
+                                   ,(plain-file "systole-deploy-key.pub" deploy-key)))
+                           '())
+                       (if has-channels?
+                           (list `("systole-channels.scm"
+                                   ,(local-file channels-file)))
+                           '()))))
+      (if (and (not has-deploy-key?) (not has-channels?))
+          ;; No deploy key and no channels - return OS unchanged
+          os
+          ;; Configure SSH and/or channels
+          (operating-system
+            (inherit os)
+            (services
+             (let ((base-services
+                    (if has-deploy-key?
+                        ;; Remove any existing SSH service, then add our configured one
+                        (cons (service openssh-service-type
+                                       (openssh-configuration
+                                        (permit-root-login 'prohibit-password)
+                                        (password-authentication? #f)
+                                        (authorized-keys
+                                         `(("root" ,(plain-file "deploy-key.pub"
+                                                                deploy-key))))))
+                              (remove (lambda (service)
+                                        (eq? (service-kind service)
+                                             openssh-service-type))
+                                      (operating-system-user-services os)))
+                        ;; No deploy key, keep services as-is
+                        (operating-system-user-services os))))
+               (if (null? etc-files)
+                   base-services
+                   ;; Add etc-service for deploy key and/or channels file
+                   (cons* (simple-service 'systole-deployment-files
+                                          etc-service-type
+                                          etc-files)
+                          base-services)))))))))
+

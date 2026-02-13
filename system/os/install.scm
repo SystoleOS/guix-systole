@@ -99,18 +99,24 @@
      (append (list git curl vim lvm2 gptfdisk xfsprogs e2fsprogs guile-gcrypt guile-newt)
              (operating-system-packages installation-os))))))
 
-(define* (systole-os-installation-with-deploy-key #:key (deploy-key #f))
+(define* (systole-os-installation-with-deploy-key #:key (deploy-key #f) (channels-file #f))
   "Return an operating-system for the Systole installer ISO.
 
 When DEPLOY-KEY is provided (as a string containing an SSH public key),
 the installer will have SSH access enabled for remote deployment via
-'guix deploy'. The key is authorized for the root user.
+'guix deploy'. The key is authorized for the root user AND automatically
+injected into the installed system configuration.
+
+When CHANNELS-FILE is provided (as a path to a channels.scm file), the
+installer will embed those channel specifications in the generated system
+configuration, ensuring reproducible deployments.
 
 Example:
   (systole-os-installation-with-deploy-key
-    #:deploy-key \"ssh-ed25519 AAAAC3Nza... user@host\")"
+    #:deploy-key \"ssh-ed25519 AAAAC3Nza... user@host\"
+    #:channels-file \"channels-lock.scm\")"
 
-  ((compose (systole-transformation-deploy #:deploy-key deploy-key)
+  ((compose (systole-transformation-deploy #:deploy-key deploy-key #:channels-file channels-file)
             (systole-transformation-guix #:guix-source? #t)
             (systole-transformation-linux #:initrd base-initrd))
 
@@ -136,6 +142,8 @@ Example:
     (label "GNU Systole installation")
 
     (services
+     ;; Just modify kmscon for custom installer
+     ;; Note: deploy key and channels are handled by systole-transformation-deploy
      (modify-services (operating-system-user-services installation-os)
                       (kmscon-service-type cfg =>
                                            (kmscon-configuration
