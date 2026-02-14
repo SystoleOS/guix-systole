@@ -1,27 +1,9 @@
-;; Locked channel versions for reproducible Systole installer builds
-;; Copyright © 2026 Rafael Palomar <rafael.palomar@ous-research.no>
-;; SPDX-License-Identifier: GPL-3.0-or-later
-;;
-;; This file pins specific channel commits to ensure:
-;; 1. Reproducible installer ISO builds
-;; 2. Consistent deployment target states
-;; 3. Known-good channel combinations
-;;
-;; To update these versions:
-;; 1. Test your local system with desired channel versions
-;; 2. Run: guix describe -f channels > channels-lock.scm
-;; 3. Edit to add this header and update commit message
-;; 4. Rebuild installer and test deployment
-;;
-;; Last updated: 2026-02-12
-;; Tested with: Guix System, nonguix kernel support, Systole packages
-
 (list (channel
         (name 'guix)
         (url "https://codeberg.org/guix/guix.git")
         (branch "master")
         (commit
-          "f75080db69716891c46d5795f5d29ad8cc54700e")
+          "46793f96cdfe55b695d996c0ba367e5fd37b81e4")
         (introduction
           (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
@@ -32,7 +14,7 @@
         (url "https://gitlab.com/nonguix/nonguix")
         (branch "master")
         (commit
-          "6c0ea215e0bd089bf3b2097e5c59dd726fbbe304")
+          "48a8706d44040cc7014f36873dbd834c048aadd3")
         (introduction
           (make-channel-introduction
             "897c1a470da759236cc11798f4e0a5f7d4d59fbc"

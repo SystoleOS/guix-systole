@@ -99,25 +99,60 @@
      (append (list git curl vim lvm2 gptfdisk xfsprogs e2fsprogs guile-gcrypt guile-newt)
              (operating-system-packages installation-os))))))
 
-(define* (systole-os-installation-with-deploy-key #:key (deploy-key #f) (channels-file #f))
+(define* (systole-os-installation-with-deploy-key
+          #:key
+          (ssh-deploy-key #f)
+          (deploy-key #f)          ; DEPRECATED: backward compatibility
+          (channels-file #f)
+          (signing-key #f)
+          (host-key-private #f)
+          (host-key-public #f))
   "Return an operating-system for the Systole installer ISO.
 
-When DEPLOY-KEY is provided (as a string containing an SSH public key),
+When SSH-DEPLOY-KEY is provided (as a string containing an SSH public key),
 the installer will have SSH access enabled for remote deployment via
 'guix deploy'. The key is authorized for the root user AND automatically
-injected into the installed system configuration.
+injected into the installed system configuration. DEPLOY-KEY is deprecated;
+use SSH-DEPLOY-KEY instead.
 
 When CHANNELS-FILE is provided (as a path to a channels.scm file), the
 installer will embed those channel specifications in the generated system
 configuration, ensuring reproducible deployments.
 
-Example:
-  (systole-os-installation-with-deploy-key
-    #:deploy-key \"ssh-ed25519 AAAAC3Nza... user@host\"
-    #:channels-file \"channels-lock.scm\")"
+When SIGNING-KEY is provided (as a string containing a Guix signing key),
+the installed system will authorize this key for guix deploy operations,
+enabling immediate remote deployment without manual authorization.
 
-  ((compose (systole-transformation-deploy #:deploy-key deploy-key #:channels-file channels-file)
-            (systole-transformation-guix #:guix-source? #t)
+When HOST-KEY-PRIVATE and HOST-KEY-PUBLIC are provided (as paths to SSH
+host key files), the installed system will use these keys instead of
+generating new ones, enabling predictable host key fingerprints.
+
+Examples:
+  (systole-os-installation-with-deploy-key
+    #:ssh-deploy-key \"ssh-ed25519 AAAAC3Nza... user@host\"
+    #:channels-file \"channels-lock.scm\")
+
+  (systole-os-installation-with-deploy-key
+    #:ssh-deploy-key \"ssh-ed25519 AAAAC3Nza...\"
+    #:channels-file \"channels-lock.scm\"
+    #:signing-key \"(public-key (ecc ...))\"
+    #:host-key-private \"ssh_host_ed25519_key\"
+    #:host-key-public \"ssh_host_ed25519_key.pub\")"
+
+  ((compose (systole-transformation-deploy
+             #:ssh-deploy-key (or ssh-deploy-key deploy-key)
+             #:channels-file channels-file
+             #:signing-key signing-key
+             #:host-key-private host-key-private
+             #:host-key-public host-key-public)
+            (systole-transformation-guix
+             #:guix-source? #t
+             #:channels (and channels-file
+                             (file-exists? channels-file)
+                             ;; Evaluate in the (guix channels) module context
+                             ;; so that 'channel', 'make-channel-introduction', etc. are bound
+                             (eval (call-with-input-file channels-file read)
+                                   (resolve-module '(guix channels)))))
             (systole-transformation-linux #:initrd base-initrd))
 
    (operating-system
