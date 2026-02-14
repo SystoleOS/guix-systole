@@ -45,14 +45,18 @@
 
 (define* (systole-transformation-guix #:key (substitutes? #t)
                                       (channel? #t)
-                                      (guix-source? #f))
+                                      (guix-source? #f)
+                                      (channels #f))
   "Return a procedure that transforms an operating system, setting up Nonguix
 signing key for the Guix daemon.
 
 Additionally, SUBSTITUTES? (default: #t) sets up the substitute server,
-CHANNEL? (default: #t) adds Nonguix channel specification into
-'/etc/guix/channels.scm' and GUIX-SOURCE? (default: #f) builds Nonguix channel
-into the default Guix.
+CHANNEL? (default: #t) adds Nonguix channel specification, GUIX-SOURCE?
+(default: #f) builds Nonguix channel into the default Guix, and CHANNELS
+(default: #f) allows specifying custom channel list (overrides default behavior).
+
+When CHANNELS is provided, it is used directly as the channel list. Otherwise,
+the default behavior is to append nonguix and guix-systole channels.
 
 FIXME: GUIX-SOURCE? is disabled by default due to performance issue."
 
@@ -89,15 +93,25 @@ FIXME: GUIX-SOURCE? is disabled by default due to performance issue."
           config => (guix-configuration
                      (inherit config)
                      (channels
-                      (let ((configured-channels
-                             (guix-configuration-channels config)))
-                        (if channel?
-                            (append (list %nonguix-channel %guix-systole-channel)
-                                     (or configured-channels %default-channels))
-                            configured-channels)))
+                      (cond
+                       ;; If explicit channels provided, use them directly
+                       (channels channels)
+                       ;; Otherwise, use default behavior: add nonguix + guix-systole
+                       (channel?
+                        (let ((configured-channels
+                               (guix-configuration-channels config)))
+                          (append (list %nonguix-channel %guix-systole-channel)
+                                  (or configured-channels %default-channels))))
+                       ;; channel? is #f, use configured channels as-is
+                       (else (guix-configuration-channels config))))
                      (guix
-                      (if guix-source?
-                          (guix-for-channels channels)
+                      ;; Don't build guix-for-channels when custom channels provided
+                      ;; (the channels themselves determine which Guix to use)
+                      (if (and guix-source? (not channels))
+                          (guix-for-channels
+                           (append (list %nonguix-channel %guix-systole-channel)
+                                   (or (guix-configuration-channels config)
+                                       %default-channels)))
                           (guix-configuration-guix config)))
                      (authorized-keys
                       (cons %nonguix-signing-key
@@ -176,67 +190,126 @@ TODO: Xorg configuration."
           ,@(operating-system-user-services os))
         #:driver driver)))))
 
-(define* (systole-transformation-deploy #:key (deploy-key #f) (channels-file #f))
+(define* (systole-transformation-deploy
+          #:key
+          (ssh-deploy-key #f)
+          (deploy-key #f)         ; DEPRECATED: backward compatibility
+          (channels-file #f)
+          (signing-key #f)
+          (host-key-private #f)
+          (host-key-public #f))
   "Return a procedure that transforms an operating system, optionally adding
-SSH access and channel specifications for remote deployment via 'guix deploy'.
+SSH access, channel specifications, signing keys, and host keys for remote
+deployment via 'guix deploy'.
 
-DEPLOY-KEY (default: #f) should be either #f (disabled) or a string containing
-an SSH public key in standard format (e.g., 'ssh-ed25519 AAAA...').
+SSH-DEPLOY-KEY (default: #f) should be either #f (disabled) or a string
+containing an SSH public key in standard format (e.g., 'ssh-ed25519 AAAA...').
+DEPLOY-KEY is deprecated; use SSH-DEPLOY-KEY instead.
 
 CHANNELS-FILE (default: #f) should be either #f (disabled) or a path to a
 channels.scm file containing channel specifications to embed in the installed
 system configuration.
 
-When DEPLOY-KEY is provided, this transformation:
-- Adds openssh-service-type to enable SSH daemon
+SIGNING-KEY (default: #f) should be either #f (disabled) or a string containing
+a Guix signing key in S-expression format: (public-key (ecc ...)).
+
+HOST-KEY-PRIVATE and HOST-KEY-PUBLIC (default: #f) should be paths to SSH host
+key files. When provided, the installed system will use these keys instead of
+generating new ones, enabling predictable host key fingerprints.
+
+When SSH-DEPLOY-KEY is provided, this transformation:
+- Adds openssh-service-type to enable SSH daemon in the installer
 - Configures the SSH key as authorized for root user
 - Enables key-based authentication for remote deployment
 
 When CHANNELS-FILE is provided, the installer will:
 - Copy the channels file to /etc for access during installation
 - Embed channel specifications in the generated system configuration
-- Ensure reproducible deployments via guix-configuration"
+
+When SIGNING-KEY is provided, the installed system will:
+- Authorize the signing key for guix daemon operations
+- Enable immediate guix deploy without manual authorization
+
+When HOST-KEY-PRIVATE and HOST-KEY-PUBLIC are provided, the installed system will:
+- Use the provided host keys instead of generating new ones
+- Enable predictable SSH host fingerprints across reinstalls"
 
   (lambda (os)
-    (let* ((has-deploy-key? (and deploy-key (not (string=? deploy-key ""))))
+    ;; Backward compatibility: prioritize ssh-deploy-key over deploy-key
+    (when (and deploy-key (not ssh-deploy-key))
+      (format (current-error-port)
+              "WARNING: 'deploy-key' parameter is deprecated. ~
+Use 'ssh-deploy-key' instead.~%"))
+
+    (let* ((ssh-key (or ssh-deploy-key deploy-key))
+           (has-ssh-deploy-key? (and ssh-key (not (string=? ssh-key ""))))
            (has-channels? (and channels-file (file-exists? channels-file)))
+           (has-signing-key? (and signing-key (not (string=? signing-key ""))))
+           (has-host-key? (and host-key-private
+                               (file-exists? host-key-private)
+                               host-key-public
+                               (file-exists? host-key-public)))
            (etc-files (append
-                       (if has-deploy-key?
-                           (list `("systole-deploy-key.pub"
-                                   ,(plain-file "systole-deploy-key.pub" deploy-key)))
+                       (if has-ssh-deploy-key?
+                           (list `("systole-ssh-deploy-key.pub"
+                                   ,(plain-file "systole-ssh-deploy-key.pub" ssh-key)))
                            '())
-                       (if has-channels?
-                           (list `("systole-channels.scm"
-                                   ,(local-file channels-file)))
-                           '()))))
-      (if (and (not has-deploy-key?) (not has-channels?))
-          ;; No deploy key and no channels - return OS unchanged
+                       ;; Note: channels are now set via guix-configuration in
+                       ;; systole-transformation-guix, not via etc-service
+                       (if has-signing-key?
+                           (list `("systole-signing-key.pub"
+                                   ,(plain-file "systole-signing-key.pub" signing-key)))
+                           '())
+                       (if has-host-key?
+                           (list `("systole-host-key"
+                                   ,(local-file host-key-private))
+                                 `("systole-host-key.pub"
+                                   ,(local-file host-key-public)))
+                           '())))
+           (host-key-activation
+            (if has-host-key?
+                (list (simple-service 'systole-host-key-permissions
+                                      activation-service-type
+                                      (with-imported-modules '((guix build utils))
+                                        #~(begin
+                                            (use-modules (guix build utils))
+                                            (when (file-exists? "/etc/systole-host-key")
+                                              (chmod "/etc/systole-host-key" #o600)
+                                              (chown "/etc/systole-host-key" 0 0))
+                                            (when (file-exists? "/etc/systole-host-key.pub")
+                                              (chmod "/etc/systole-host-key.pub" #o644)
+                                              (chown "/etc/systole-host-key.pub" 0 0))))))
+                '())))
+      (if (and (not has-ssh-deploy-key?)
+               (not has-channels?)
+               (not has-signing-key?)
+               (not has-host-key?))
+          ;; No configuration provided - return OS unchanged
           os
-          ;; Configure SSH and/or channels
+          ;; Configure SSH and/or channels and/or signing-key and/or host-key
           (operating-system
             (inherit os)
             (services
              (let ((base-services
-                    (if has-deploy-key?
+                    (if has-ssh-deploy-key?
                         ;; Remove any existing SSH service, then add our configured one
                         (cons (service openssh-service-type
                                        (openssh-configuration
                                         (permit-root-login 'prohibit-password)
                                         (password-authentication? #f)
                                         (authorized-keys
-                                         `(("root" ,(plain-file "deploy-key.pub"
-                                                                deploy-key))))))
+                                         `(("root" ,(plain-file "deploy-key.pub" ssh-key))))))
                               (remove (lambda (service)
                                         (eq? (service-kind service)
                                              openssh-service-type))
                                       (operating-system-user-services os)))
                         ;; No deploy key, keep services as-is
                         (operating-system-user-services os))))
-               (if (null? etc-files)
-                   base-services
-                   ;; Add etc-service for deploy key and/or channels file
-                   (cons* (simple-service 'systole-deployment-files
-                                          etc-service-type
-                                          etc-files)
-                          base-services)))))))))
+               (append (if (null? etc-files)
+                           '()
+                           (list (simple-service 'systole-deployment-files
+                                                 etc-service-type
+                                                 etc-files)))
+                       host-key-activation
+                       base-services))))))))
 

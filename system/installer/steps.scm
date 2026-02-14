@@ -53,13 +53,37 @@ found in RESULTS."
                    (conf-formatter result-step)
                    '())))
            steps))
-         ;; Check for deploy key
-         (deploy-key-file "/etc/systole-deploy-key.pub")
+         ;; Check for all deployment files
+         (deploy-key-file "/etc/systole-ssh-deploy-key.pub")
          (deploy-key
           (and (file-exists? deploy-key-file)
                (string-trim-right
                 (call-with-input-file deploy-key-file
                   get-string-all))))
+         (signing-key-file "/etc/systole-signing-key.pub")
+         (signing-key
+          (and (file-exists? signing-key-file)
+               (string-trim-right
+                (call-with-input-file signing-key-file
+                  get-string-all))))
+         (host-key-private-file "/etc/systole-host-key")
+         (host-key-public-file "/etc/systole-host-key.pub")
+         (has-host-key? (and (file-exists? host-key-private-file)
+                             (file-exists? host-key-public-file)))
+         (has-channels? (file-exists? "/etc/guix/channels.scm"))
+         ;; Helper to detect SSH key type from file content
+         (detect-ssh-key-type
+          (lambda (key-file)
+            (if (file-exists? key-file)
+                (let ((first-line (call-with-input-file key-file
+                                    (lambda (port) (get-line port)))))
+                  (cond
+                   ((string-contains first-line "RSA") "rsa")
+                   ((string-contains first-line "DSA") "dsa")
+                   ((string-contains first-line "ECDSA") "ecdsa")
+                   ((string-contains first-line "ED25519") "ed25519")
+                   (else "ed25519")))
+                "ed25519")))
          ;; Helper to check if services expression contains SSH service
          (ssh-service-exists?
           (lambda (services-expr)
@@ -84,11 +108,11 @@ found in RESULTS."
                                                        (match svc
                                                          (('service 'openssh-service-type)
                                                           `(service openssh-service-type
-                                                             (openssh-configuration
-                                                              (permit-root-login 'without-password)
-                                                              (authorized-keys
-                                                               `(("root" ,(plain-file "deploy-key.pub"
-                                                                                      ,deploy-key)))))))
+                                                                    (openssh-configuration
+                                                                     (permit-root-login 'prohibit-password)
+                                                                     (authorized-keys
+                                                                      `(("root" ,(plain-file "deploy-key.pub"
+                                                                                             ,deploy-key)))))))
                                                          (_ svc)))
                                                      services-list))
                                              ,@rest))
@@ -111,43 +135,88 @@ found in RESULTS."
                                  (nongnu system linux-initrd)
                                  (guix channels))
                     (use-service-modules cups desktop networking ssh xorg)))
-         ;; Load channels from /etc if provided by installer
+         ;; Embed channels directly from installer
          (channels-spec
-          (if (file-exists? "/etc/systole-channels.scm")
-              `(,(vertical-space 1)
-                ,(comment (G_ "\
+          (if has-channels?
+              (let ((channels-content
+                     (call-with-input-file "/etc/guix/channels.scm" read)))
+                `(,(vertical-space 1)
+                  ,(comment (G_ "\
 ;; Channel specifications for reproducible system updates.
-;; These channels are loaded from the installer and used by 'guix pull'
+;; These channels are embedded from the installer and used by 'guix pull'
 ;; and 'guix system reconfigure'.\n"))
-                (define %system-channels
-                  (load "/etc/systole-channels.scm")))
+                  (define %system-channels
+                    ,channels-content)))
               '()))
-         ;; Modify final configuration to include channels in guix-configuration if available
-         (final-config-with-channels
-          (if (file-exists? "/etc/systole-channels.scm")
-              ;; Add channels to guix-configuration
+         ;; Combine guix-service modifications (channels + signing-key)
+         (final-config-with-guix-mods
+          (if (or has-channels? signing-key)
               (map (lambda (field)
                      (match field
                        (('services services-expr)
-                        ;; Wrap services expression with modify-services to inject channels
                         `(services
                           (modify-services ,services-expr
-                            (guix-service-type config =>
-                              (guix-configuration
-                                (inherit config)
-                                (channels %system-channels))))))
+                                           (guix-service-type config =>
+                                                              (guix-configuration
+                                                               (inherit config)
+                                                               ,@(if has-channels?
+                                                                     `((channels %system-channels))
+                                                                     '())
+                                                               ,@(if signing-key
+                                                                     `((authorized-keys
+                                                                        (cons (plain-file "systole-signing-key.pub"
+                                                                                          ,signing-key)
+                                                                              (guix-configuration-authorized-keys config))))
+                                                                     '()))))))
                        (_ field)))
                    final-configuration)
-              ;; No channels file, use configuration as-is
-              final-configuration)))
+              final-configuration))
+         ;; Add host key installation via activation-service
+         (final-config-with-host-key
+          (if has-host-key?
+              (let ((key-type (detect-ssh-key-type host-key-private-file)))
+                (map (lambda (field)
+                       (match field
+                         (('services services-expr)
+                          `(services
+                            (cons (simple-service 'install-systole-host-keys
+                                                  activation-service-type
+                                                  (with-imported-modules '((guix build utils))
+                                                                         #~(begin
+                                                                             (use-modules (guix build utils))
+                                                                             (let ((target-dir "/etc/ssh")
+                                                                                   (key-type ,key-type))
+                                                                               (when (file-exists? "/etc/systole-host-key")
+                                                                                 (mkdir-p target-dir)
+                                                                                 (let ((target-private (string-append target-dir "/ssh_host_" key-type "_key"))
+                                                                                       (target-public (string-append target-dir "/ssh_host_" key-type "_key.pub")))
+                                                                                   (copy-file "/etc/systole-host-key" target-private)
+                                                                                   (chmod target-private #o600)
+                                                                                   (chown target-private 0 0)
+                                                                                   (copy-file "/etc/systole-host-key.pub" target-public)
+                                                                                   (chmod target-public #o644)
+                                                                                   (chown target-public 0 0)))))))
+                                  ,services-expr)))
+                         (_ field)))
+                     final-config-with-guix-mods))
+              final-config-with-guix-mods)))
     `(,@modules
       ,@channels-spec
       ,(vertical-space 1)
 
+      ,(comment (G_ "\
+;; Optional: Add Systole branding to GRUB bootloader.
+;; Uncomment the following lines and add (systole packages grub-themes) to use-modules:
+;; In bootloader-configuration, add:
+;;   (theme (grub-theme
+;;           (image (file-append systole-grub-theme
+;;                  \"/share/grub/themes/systole/systole.png\"))))
+"))
+
       ((compose (systole-transformation-guix #:guix-source? #t)
                 ;; FIXME: 'microcode-initrd' results in unbootable live system.
                 (systole-transformation-linux #:initrd base-initrd))
-       (operating-system ,@final-config-with-channels)))))
+       (operating-system ,@final-config-with-host-key)))))
 
 ;;; Local Variables:
 ;;; eval: (put 'with-server-socket 'scheme-indent-function 0)

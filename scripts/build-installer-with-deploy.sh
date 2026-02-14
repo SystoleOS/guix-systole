@@ -6,8 +6,12 @@
 set -euo pipefail
 
 # Default values
-DEPLOY_KEY=""
+SSH_DEPLOY_KEY=""
+DEPLOY_KEY=""          # DEPRECATED: backward compatibility
 CHANNELS_FILE=""
+SIGNING_KEY=""
+HOST_KEY_PRIVATE=""
+HOST_KEY_PUBLIC=""
 OUTPUT=""
 USE_TIME_MACHINE=true
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -23,47 +27,56 @@ usage() {
     cat <<EOF
 Usage: $0 [OPTIONS]
 
-Build a Systole installer ISO with SSH deploy key for remote deployment.
+Build a Systole installer ISO with deployment configuration for remote workflows.
 Uses channels-lock.scm for reproducible builds via guix time-machine.
 
 OPTIONS:
-    --key KEY              SSH public key string (e.g., "ssh-ed25519 AAAA...")
-    --key-file FILE        Path to SSH public key file
-    --channels-file FILE   Path to channels.scm file (default: channels-lock.scm)
-    --output FILE          Output ISO file path (default: auto-generated)
-    --no-time-machine      Skip guix time-machine (use current channels)
-    -h, --help            Show this help message
+    --ssh-deploy-key KEY           SSH public key string (e.g., "ssh-ed25519 AAAA...")
+    --ssh-deploy-key-file FILE     Path to SSH public key file
+    --key KEY                      DEPRECATED: Use --ssh-deploy-key
+    --key-file FILE                DEPRECATED: Use --ssh-deploy-key-file
+    --channels-file FILE           Path to channels.scm file (default: channels-lock.scm)
+    --signing-key-file FILE        Path to Guix signing key file (.pub)
+    --host-key-file FILE           Path to SSH host private key (expects .pub sibling)
+    --output FILE                  Output ISO file path (default: auto-generated)
+    --no-time-machine              Skip guix time-machine (use current channels)
+    -h, --help                     Show this help message
 
 ENVIRONMENT VARIABLES:
-    SYSTOLE_DEPLOY_KEY          SSH public key string
-    SYSTOLE_DEPLOY_KEY_FILE     Path to SSH public key file
-
-The SSH public key can be provided via:
-  1. --key command-line argument
-  2. --key-file command-line argument
-  3. SYSTOLE_DEPLOY_KEY environment variable
-  4. SYSTOLE_DEPLOY_KEY_FILE environment variable
+    SYSTOLE_SSH_DEPLOY_KEY          SSH public key string
+    SYSTOLE_SSH_DEPLOY_KEY_FILE     Path to SSH public key file
+    SYSTOLE_DEPLOY_KEY              DEPRECATED: Use SYSTOLE_SSH_DEPLOY_KEY
+    SYSTOLE_DEPLOY_KEY_FILE         DEPRECATED: Use SYSTOLE_SSH_DEPLOY_KEY_FILE
+    SYSTOLE_CHANNELS_FILE           Path to channels file
+    SYSTOLE_SIGNING_KEY_FILE        Path to Guix signing key file
+    SYSTOLE_HOST_KEY_FILE           Path to SSH host private key file
 
 Priority: command-line arguments take precedence over environment variables.
 
 EXAMPLES:
-    # Using key file
-    $0 --key-file ~/.ssh/id_ed25519.pub
+    # Full deployment setup (all flags)
+    $0 --ssh-deploy-key-file ~/.ssh/id_ed25519.pub \\
+       --channels-file channels-lock.scm \\
+       --signing-key-file /etc/guix/signing-key.pub \\
+       --host-key-file /etc/ssh/ssh_host_ed25519_key
 
-    # Using key string
-    $0 --key "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5... user@host"
+    # Just SSH access
+    $0 --ssh-deploy-key-file ~/.ssh/id_ed25519.pub
 
-    # Using environment variable
-    SYSTOLE_DEPLOY_KEY="\$(cat ~/.ssh/id_ed25519.pub)" $0
+    # SSH + signing key (enables immediate guix deploy)
+    $0 --ssh-deploy-key-file ~/.ssh/id_ed25519.pub \\
+       --signing-key-file /etc/guix/signing-key.pub
 
-    # Custom output path
-    $0 --key-file ~/.ssh/id_ed25519.pub --output /tmp/systole-deploy.iso
+    # Using environment variables
+    SYSTOLE_SSH_DEPLOY_KEY="\$(cat ~/.ssh/id_ed25519.pub)" \\
+    SYSTOLE_SIGNING_KEY_FILE="/etc/guix/signing-key.pub" \\
+      $0
 
 NOTES:
-    - The SSH key authorizes root user access in the installer environment only
-    - After installation, the target system uses its own configuration
-    - Only key-based authentication is enabled (password auth disabled)
-    - The installer ISO will have network support for SSH access
+    - ssh-deploy-key: Authorizes root SSH access in installer
+    - channels-file: Embeds channel specs for reproducible deployments
+    - signing-key: Authorizes Guix signing key (enables guix deploy without manual auth)
+    - host-key: Provides predictable SSH host fingerprints across reinstalls
 
 EOF
     exit 0
@@ -85,7 +98,25 @@ warn() {
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --ssh-deploy-key)
+            if [[ -z "${2:-}" ]]; then
+                error "No key specified after --ssh-deploy-key"
+            fi
+            SSH_DEPLOY_KEY="$2"
+            shift 2
+            ;;
+        --ssh-deploy-key-file)
+            if [[ -z "${2:-}" ]]; then
+                error "No key file specified after --ssh-deploy-key-file"
+            fi
+            if [[ ! -f "$2" ]]; then
+                error "Key file not found: $2"
+            fi
+            SSH_DEPLOY_KEY="$(cat "$2")"
+            shift 2
+            ;;
         --key)
+            warn "--key is deprecated, use --ssh-deploy-key instead"
             if [[ -z "${2:-}" ]]; then
                 error "No key specified after --key"
             fi
@@ -93,6 +124,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --key-file)
+            warn "--key-file is deprecated, use --ssh-deploy-key-file instead"
             if [[ -z "${2:-}" ]]; then
                 error "No key file specified after --key-file"
             fi
@@ -112,6 +144,30 @@ while [[ $# -gt 0 ]]; do
             CHANNELS_FILE="$2"
             shift 2
             ;;
+        --signing-key-file)
+            if [[ -z "${2:-}" ]]; then
+                error "No signing key file specified after --signing-key-file"
+            fi
+            if [[ ! -f "$2" ]]; then
+                error "Signing key file not found: $2"
+            fi
+            SIGNING_KEY="$(cat "$2")"
+            shift 2
+            ;;
+        --host-key-file)
+            if [[ -z "${2:-}" ]]; then
+                error "No host key file specified after --host-key-file"
+            fi
+            if [[ ! -f "$2" ]]; then
+                error "Host key private file not found: $2"
+            fi
+            if [[ ! -f "$2.pub" ]]; then
+                error "Host key public file not found: $2.pub"
+            fi
+            HOST_KEY_PRIVATE="$2"
+            HOST_KEY_PUBLIC="$2.pub"
+            shift 2
+            ;;
         --output)
             OUTPUT="$2"
             shift 2
@@ -129,34 +185,91 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Fall back to environment variables if no key provided
-if [[ -z "$DEPLOY_KEY" ]]; then
-    if [[ -n "${SYSTOLE_DEPLOY_KEY:-}" ]]; then
+# Fall back to environment variables if not provided via command line
+if [[ -z "$SSH_DEPLOY_KEY" && -z "$DEPLOY_KEY" ]]; then
+    if [[ -n "${SYSTOLE_SSH_DEPLOY_KEY:-}" ]]; then
+        SSH_DEPLOY_KEY="$SYSTOLE_SSH_DEPLOY_KEY"
+        info "Using SSH deploy key from SYSTOLE_SSH_DEPLOY_KEY environment variable"
+    elif [[ -n "${SYSTOLE_SSH_DEPLOY_KEY_FILE:-}" ]]; then
+        if [[ ! -f "$SYSTOLE_SSH_DEPLOY_KEY_FILE" ]]; then
+            error "Key file not found: $SYSTOLE_SSH_DEPLOY_KEY_FILE"
+        fi
+        SSH_DEPLOY_KEY="$(cat "$SYSTOLE_SSH_DEPLOY_KEY_FILE")"
+        info "Using SSH deploy key from file: $SYSTOLE_SSH_DEPLOY_KEY_FILE"
+    elif [[ -n "${SYSTOLE_DEPLOY_KEY:-}" ]]; then
+        warn "SYSTOLE_DEPLOY_KEY is deprecated, use SYSTOLE_SSH_DEPLOY_KEY instead"
         DEPLOY_KEY="$SYSTOLE_DEPLOY_KEY"
-        info "Using deploy key from SYSTOLE_DEPLOY_KEY environment variable"
     elif [[ -n "${SYSTOLE_DEPLOY_KEY_FILE:-}" ]]; then
+        warn "SYSTOLE_DEPLOY_KEY_FILE is deprecated, use SYSTOLE_SSH_DEPLOY_KEY_FILE instead"
         if [[ ! -f "$SYSTOLE_DEPLOY_KEY_FILE" ]]; then
             error "Key file not found: $SYSTOLE_DEPLOY_KEY_FILE"
         fi
         DEPLOY_KEY="$(cat "$SYSTOLE_DEPLOY_KEY_FILE")"
-        info "Using deploy key from file: $SYSTOLE_DEPLOY_KEY_FILE"
     fi
 fi
 
-# Validate that a deploy key was provided
-if [[ -z "$DEPLOY_KEY" ]]; then
-    error "No deploy key provided. Use --key, --key-file, or environment variables.\nSee --help for more information."
+if [[ -z "$CHANNELS_FILE" && -n "${SYSTOLE_CHANNELS_FILE:-}" ]]; then
+    CHANNELS_FILE="$SYSTOLE_CHANNELS_FILE"
+    info "Using channels file from SYSTOLE_CHANNELS_FILE: $CHANNELS_FILE"
 fi
 
-# Basic validation of key format
-if [[ ! "$DEPLOY_KEY" =~ ^ssh-(rsa|dsa|ecdsa|ed25519)[[:space:]] ]]; then
-    error "Invalid SSH key format. Expected key to start with ssh-rsa, ssh-dsa, ssh-ecdsa, or ssh-ed25519"
+if [[ -z "$SIGNING_KEY" && -n "${SYSTOLE_SIGNING_KEY_FILE:-}" ]]; then
+    if [[ ! -f "$SYSTOLE_SIGNING_KEY_FILE" ]]; then
+        error "Signing key file not found: $SYSTOLE_SIGNING_KEY_FILE"
+    fi
+    SIGNING_KEY="$(cat "$SYSTOLE_SIGNING_KEY_FILE")"
+    info "Using signing key from SYSTOLE_SIGNING_KEY_FILE: $SYSTOLE_SIGNING_KEY_FILE"
 fi
 
-# Extract key type for info message
-KEY_TYPE=$(echo "$DEPLOY_KEY" | awk '{print $1}')
-KEY_COMMENT=$(echo "$DEPLOY_KEY" | awk '{print $3}')
-info "Deploy key type: $KEY_TYPE${KEY_COMMENT:+ ($KEY_COMMENT)}"
+if [[ -z "$HOST_KEY_PRIVATE" && -n "${SYSTOLE_HOST_KEY_FILE:-}" ]]; then
+    if [[ ! -f "$SYSTOLE_HOST_KEY_FILE" ]]; then
+        error "Host key file not found: $SYSTOLE_HOST_KEY_FILE"
+    fi
+    if [[ ! -f "$SYSTOLE_HOST_KEY_FILE.pub" ]]; then
+        error "Host key public file not found: $SYSTOLE_HOST_KEY_FILE.pub"
+    fi
+    HOST_KEY_PRIVATE="$SYSTOLE_HOST_KEY_FILE"
+    HOST_KEY_PUBLIC="$SYSTOLE_HOST_KEY_FILE.pub"
+    info "Using host key from SYSTOLE_HOST_KEY_FILE: $SYSTOLE_HOST_KEY_FILE"
+fi
+
+# Prioritize ssh-deploy-key over deprecated deploy-key
+if [[ -n "$SSH_DEPLOY_KEY" ]]; then
+    FINAL_DEPLOY_KEY="$SSH_DEPLOY_KEY"
+elif [[ -n "$DEPLOY_KEY" ]]; then
+    warn "deploy-key parameter is deprecated, use ssh-deploy-key instead"
+    FINAL_DEPLOY_KEY="$DEPLOY_KEY"
+else
+    FINAL_DEPLOY_KEY=""
+fi
+
+# Validate SSH deploy key if provided
+if [[ -n "$FINAL_DEPLOY_KEY" ]]; then
+    if [[ ! "$FINAL_DEPLOY_KEY" =~ ^ssh-(rsa|dsa|ecdsa|ed25519)[[:space:]] ]]; then
+        error "Invalid SSH key format. Expected key to start with ssh-rsa, ssh-dsa, ssh-ecdsa, or ssh-ed25519"
+    fi
+    KEY_TYPE=$(echo "$FINAL_DEPLOY_KEY" | awk '{print $1}')
+    KEY_COMMENT=$(echo "$FINAL_DEPLOY_KEY" | awk '{print $3}')
+    info "SSH deploy key type: $KEY_TYPE${KEY_COMMENT:+ ($KEY_COMMENT)}"
+fi
+
+# Validate signing key format if provided
+if [[ -n "$SIGNING_KEY" ]]; then
+    if [[ ! "$SIGNING_KEY" =~ ^\(public-key ]]; then
+        error "Invalid signing key format. Expected S-expression starting with (public-key"
+    fi
+    info "Guix signing key provided"
+fi
+
+# Validate host key pair if provided
+if [[ -n "$HOST_KEY_PRIVATE" ]]; then
+    info "SSH host key pair provided: $HOST_KEY_PRIVATE"
+fi
+
+# Check if at least one configuration option is provided
+if [[ -z "$FINAL_DEPLOY_KEY" && -z "$CHANNELS_FILE" && -z "$SIGNING_KEY" && -z "$HOST_KEY_PRIVATE" ]]; then
+    error "No configuration provided. Specify at least one of:\n  --ssh-deploy-key-file, --channels-file, --signing-key-file, or --host-key-file\nSee --help for more information."
+fi
 
 # Set default channels file if not provided
 if [[ -z "$CHANNELS_FILE" ]]; then
@@ -177,26 +290,42 @@ if [[ -z "$OUTPUT" ]]; then
     OUTPUT="$REPO_DIR/systole-installer-deploy-$TIMESTAMP.iso"
 fi
 
-info "Building installer ISO with deploy key..."
+info "Building installer ISO with configuration..."
 info "Output: $OUTPUT"
-
-# Escape the deploy key for embedding in Scheme expression
-# Replace backslashes and quotes
-ESCAPED_KEY="${DEPLOY_KEY//\\/\\\\}"
-ESCAPED_KEY="${ESCAPED_KEY//\"/\\\"}"
 
 # Build the ISO using guix system image
 cd "$REPO_DIR"
 
-# Build expression as single line for proper passing to guix
-if [[ -n "$CHANNELS_FILE" && -f "$CHANNELS_FILE" ]]; then
-    # Escape the channels file path for embedding in Scheme expression
-    ESCAPED_CHANNELS_FILE="${CHANNELS_FILE//\\/\\\\}"
-    ESCAPED_CHANNELS_FILE="${ESCAPED_CHANNELS_FILE//\"/\\\"}"
-    EXPRESSION="(use-modules (os install)) ((@ (os install) systole-os-installation-with-deploy-key) #:deploy-key \"$ESCAPED_KEY\" #:channels-file \"$ESCAPED_CHANNELS_FILE\")"
-else
-    EXPRESSION="(use-modules (os install)) ((@ (os install) systole-os-installation-with-deploy-key) #:deploy-key \"$ESCAPED_KEY\")"
+# Build Scheme expression with all provided parameters
+EXPRESSION="(use-modules (os install)) ((@ (os install) systole-os-installation-with-deploy-key)"
+
+if [[ -n "$FINAL_DEPLOY_KEY" ]]; then
+    ESCAPED_KEY="${FINAL_DEPLOY_KEY//\\/\\\\}"
+    ESCAPED_KEY="${ESCAPED_KEY//\"/\\\"}"
+    EXPRESSION="$EXPRESSION #:ssh-deploy-key \"$ESCAPED_KEY\""
 fi
+
+if [[ -n "$CHANNELS_FILE" && -f "$CHANNELS_FILE" ]]; then
+    ESCAPED_CHANNELS="${CHANNELS_FILE//\\/\\\\}"
+    ESCAPED_CHANNELS="${ESCAPED_CHANNELS//\"/\\\"}"
+    EXPRESSION="$EXPRESSION #:channels-file \"$ESCAPED_CHANNELS\""
+fi
+
+if [[ -n "$SIGNING_KEY" ]]; then
+    ESCAPED_SIGNING="${SIGNING_KEY//\\/\\\\}"
+    ESCAPED_SIGNING="${ESCAPED_SIGNING//\"/\\\"}"
+    EXPRESSION="$EXPRESSION #:signing-key \"$ESCAPED_SIGNING\""
+fi
+
+if [[ -n "$HOST_KEY_PRIVATE" && -f "$HOST_KEY_PRIVATE" ]]; then
+    ESCAPED_PRIVATE="${HOST_KEY_PRIVATE//\\/\\\\}"
+    ESCAPED_PRIVATE="${ESCAPED_PRIVATE//\"/\\\"}"
+    ESCAPED_PUBLIC="${HOST_KEY_PUBLIC//\\/\\\\}"
+    ESCAPED_PUBLIC="${ESCAPED_PUBLIC//\"/\\\"}"
+    EXPRESSION="$EXPRESSION #:host-key-private \"$ESCAPED_PRIVATE\" #:host-key-public \"$ESCAPED_PUBLIC\""
+fi
+
+EXPRESSION="$EXPRESSION)"
 
 # Build with time-machine for reproducibility (uses channels-lock.scm)
 if [[ "$USE_TIME_MACHINE" == "true" ]]; then
