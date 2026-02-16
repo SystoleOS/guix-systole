@@ -38,6 +38,40 @@
   #:use-module (rnrs io ports)
   #:export (systole-format-configuration))
 
+;;;
+;;; Helper procedures for configuration generation
+;;;
+
+(define (read-file-if-exists file-path)
+  "Read and return the trimmed contents of FILE-PATH if it exists, otherwise #f."
+  (and (file-exists? file-path)
+       (string-trim-right
+        (call-with-input-file file-path get-string-all))))
+
+(define (detect-ssh-key-type key-file)
+  "Detect the SSH key type from KEY-FILE by examining its first line.
+Returns one of: rsa, dsa, ecdsa, or ed25519 (default)."
+  (if (file-exists? key-file)
+      (let ((first-line (call-with-input-file key-file
+                          (lambda (port) (get-line port)))))
+        (cond
+         ((string-contains first-line "RSA") "rsa")
+         ((string-contains first-line "DSA") "dsa")
+         ((string-contains first-line "ECDSA") "ecdsa")
+         ((string-contains first-line "ED25519") "ed25519")
+         (else "ed25519")))
+      "ed25519"))
+
+(define (ssh-service-selected? services-expr)
+  "Check if SERVICES-EXPR contains openssh-service-type.
+This indicates the user selected SSH during installation."
+  (let ((expr-str (format #f "~a" services-expr)))
+    (string-contains expr-str "openssh-service-type")))
+
+;;;
+;;; Main configuration formatter
+;;;
+
 (define (systole-format-configuration steps results)
   "Return the list resulting from the application of the procedure defined in
 CONFIGURATION-FORMATTER field of <installer-step> on the associated result
@@ -53,50 +87,22 @@ found in RESULTS."
                    (conf-formatter result-step)
                    '())))
            steps))
-         ;; Check for all deployment files
-         (deploy-key-file "/etc/systole-ssh-deploy-key.pub")
-         (deploy-key
-          (and (file-exists? deploy-key-file)
-               (string-trim-right
-                (call-with-input-file deploy-key-file
-                  get-string-all))))
-         (signing-key-file "/etc/systole-signing-key.pub")
-         (signing-key
-          (and (file-exists? signing-key-file)
-               (string-trim-right
-                (call-with-input-file signing-key-file
-                  get-string-all))))
+         ;; Read deployment configuration files from /etc if they exist
+         (ssh-deploy-key (read-file-if-exists "/etc/systole-ssh-deploy-key.pub"))
+         (signing-key (read-file-if-exists "/etc/systole-signing-key.pub"))
          (host-key-private-file "/etc/systole-host-key")
          (host-key-public-file "/etc/systole-host-key.pub")
          (has-host-key? (and (file-exists? host-key-private-file)
                              (file-exists? host-key-public-file)))
          (has-channels? (file-exists? "/etc/guix/channels.scm"))
-         ;; Helper to detect SSH key type from file content
-         (detect-ssh-key-type
-          (lambda (key-file)
-            (if (file-exists? key-file)
-                (let ((first-line (call-with-input-file key-file
-                                    (lambda (port) (get-line port)))))
-                  (cond
-                   ((string-contains first-line "RSA") "rsa")
-                   ((string-contains first-line "DSA") "dsa")
-                   ((string-contains first-line "ECDSA") "ecdsa")
-                   ((string-contains first-line "ED25519") "ed25519")
-                   (else "ed25519")))
-                "ed25519")))
-         ;; Helper to check if services expression contains SSH service
-         (ssh-service-exists?
-          (lambda (services-expr)
-            (let ((expr-str (format #f "~a" services-expr)))
-              (string-contains expr-str "openssh-service-type"))))
-         ;; If deploy key exists AND user selected SSH, inject authorized-keys
+         ;; If SSH deploy key exists AND user selected SSH, inject authorized-keys
          (final-configuration
-          (if deploy-key
+          (if ssh-deploy-key
               (map (lambda (field)
                      (match field
                        (('services services-expr)
                         ;; Only modify if SSH service was selected by user
-                        (if (ssh-service-exists? services-expr)
+                        (if (ssh-service-selected? services-expr)
                             ;; Replace bare SSH service with configured one
                             `(services
                               ,(let replace-ssh ((expr services-expr))
@@ -112,7 +118,7 @@ found in RESULTS."
                                                                      (permit-root-login 'prohibit-password)
                                                                      (authorized-keys
                                                                       `(("root" ,(plain-file "deploy-key.pub"
-                                                                                             ,deploy-key)))))))
+                                                                                             ,ssh-deploy-key)))))))
                                                          (_ svc)))
                                                      services-list))
                                              ,@rest))

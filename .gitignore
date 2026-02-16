@@ -1,1 +1,27 @@
 CLAUDE.md
+
+# Build artifacts
+*.iso
+*.log
+*.qcow2
+
+# Test keys (SSH/signing keys for testing)
+test-key
+test-key.pub
+test-deploy-key
+test-deploy-key.pub
+test-host-key
+test-host-key.pub
+
+# Guix build outputs
+result
+result-*
+
+# Editor backups
+*~
+*.swp
+*.swo
+.#*
+
+# Guile compiled files
+*.go

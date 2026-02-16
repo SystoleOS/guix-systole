@@ -170,7 +170,10 @@ or #f.  Return #t on success and #f on failure."
                                   "/tmp/installer-system-init-options"
                                 read))
                             (const '())))
-         (install-command (append `( "guix" "time-machine" "-C" "/etc/guix/channels.scm"
+         ;; Use time-machine to ensure channel modules are available for loading.
+         ;; Since the installer OS is built with guix-for-channels from these same
+         ;; channels, time-machine will be fast (no rebuild needed).
+         (install-command (append `("guix" "time-machine" "-C" "/etc/guix/channels.scm"
                                      "--" "system" "init" "--fallback")
                                   options
                                   (list (%installer-configuration-file)

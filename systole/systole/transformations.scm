@@ -105,13 +105,15 @@ FIXME: GUIX-SOURCE? is disabled by default due to performance issue."
                        ;; channel? is #f, use configured channels as-is
                        (else (guix-configuration-channels config))))
                      (guix
-                      ;; Don't build guix-for-channels when custom channels provided
-                      ;; (the channels themselves determine which Guix to use)
-                      (if (and guix-source? (not channels))
+                      ;; When guix-source? is true, build guix from the specified channels.
+                      ;; This ensures the OS uses the exact Guix version from those channels.
+                      (if guix-source?
                           (guix-for-channels
-                           (append (list %nonguix-channel %guix-systole-channel)
-                                   (or (guix-configuration-channels config)
-                                       %default-channels)))
+                           (or channels  ; Use provided channels if available
+                               ;; Otherwise use default: nonguix + guix-systole
+                               (append (list %nonguix-channel %guix-systole-channel)
+                                       (or (guix-configuration-channels config)
+                                           %default-channels))))
                           (guix-configuration-guix config)))
                      (authorized-keys
                       (cons %nonguix-signing-key
