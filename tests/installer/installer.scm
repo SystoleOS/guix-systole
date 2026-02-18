@@ -16,7 +16,7 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with GNU Systole.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (systole tests installer)
+(define-module (installer installer)
   #:use-module (gnu tests)
   #:use-module (gnu system)
   #:use-module (gnu system vm)
