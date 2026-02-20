@@ -50,6 +50,7 @@
   #:use-module (guix download)
   #:use-module (guix gexp)
   #:use-module (guix packages)
+  #:use-module (guix utils)
   #:use-module (systole packages ctk)
   #:use-module (systole packages itk)
   #:use-module (systole packages libarchive)
@@ -84,6 +85,7 @@
                  "0010-ENH-Fix-installation-of-development-files.patch"
                  "0011-ENH-Add-installation-of-Slicer-base-development-file.patch"
                  "0012-ENH-AppLauncher-add-SlicerModules-libdir.patch"
+                 "0013-ENH-Add-link-directories.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -334,3 +336,44 @@ visualization and medical image computing. It provides capabilities for:
 ;; modules are self-describing, emitting an XML description of its command line
 ;; arguments. Slicer uses this XML description to construct a GUI for the module.")
 ;;    (license license:bsd-2)))
+
+(define-public slicer-volumes-5.8
+  (package
+   (inherit slicer-5.8)
+   (name "slicer-volumes-5.8")
+   (source
+    (origin
+     (inherit (package-source slicer-5.8))
+     (patches (search-patches
+               "volumes/0001-ENH-Make-Volumes-a-separate-module.patch"))))
+
+   (arguments
+    (substitute-keyword-arguments (package-arguments slicer-5.8)
+                                  ((#:phases phases)
+                                   #~(modify-phases #$phases
+                                                    ;; Point cmake at the Volumes subdirectory instead of the Slicer root.
+                                                    (replace 'configure
+                                                             (lambda* (#:key inputs outputs configure-flags #:allow-other-keys)
+                                                               (let* ((source (getcwd))
+                                                                      (out (assoc-ref outputs "out")))
+                                                                 (apply invoke "cmake"
+                                                                        "-S" (string-append source "/Modules/Loadable/Volumes")
+                                                                        "-B" "build"
+                                                                        (string-append "-DCMAKE_INSTALL_PREFIX=" out)
+                                                                        configure-flags)
+                                                                 (chdir "build")
+                                                                 #t)))
+                                                    ;; The launcher wrapper and symlink are Slicer-app concerns,
+                                                    ;; not relevant for a standalone loadable module.
+                                                    (delete 'wrap)
+                                                    (delete 'set-cmake-paths)
+                                                    (delete 'symlink-slicer-applauncher)))))
+   (inputs (append (package-inputs slicer-5.8)
+                   (list slicer-5.8)))
+
+   (synopsis "3D Slicer Volumes loadable module")
+   (description
+    "The Volumes loadable module extracted from 3D Slicer.  It provides
+volume rendering and scalar-volume display capabilities and is built from the
+@file{Modules/Loadable/Volumes} subtree of the Slicer source tree.")
+   (license (package-license slicer-5.8))))

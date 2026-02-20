@@ -23,7 +23,8 @@
                 #:prefix license:)
   #:use-module (guix packages)
   #:use-module ((systole licenses)
-                #:prefix license:))
+                #:prefix license:)
+  #:use-module (systole packages))
 
 (define-public teem-slicer
   (package
@@ -36,8 +37,8 @@
         "https://github.com/Slicer/teem/archive/e4746083c0e1dc0c137124c41eca5d23adf73bfa.tar.gz")
        (sha256
         (base32 "0y8wwzkflj6v5nx0v8cgzryqlxii0px3mcgb3bff1nhyr5zf9yp1"))
-       (patches (list (local-file
-                       "patches/0005-BUG-packages-teem-fix-missing-teem-config-cmake.patch")))))
+       (patches (search-patches
+                 "0005-BUG-packages-teem-fix-missing-teem-config-cmake.patch"))))
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f

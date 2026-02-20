@@ -50,26 +50,17 @@
 (define systole-patches
    (string-append %systole-root-directory "/systole/packages/patches"))
 
-;; Get the original %patch-path value and extend it
-(define %original-patch-path
-  (map (lambda (directory)
-         (if (string=? directory
-                       (string-append (dirname (dirname (search-path
-                                                         %load-path
-                                                         "guix/packages.scm")))
-                                      "/gnu"))
-             (string-append directory "/packages/patches") directory))
-       %load-path))
-
 (define %patch-path
+  ;; Prepend each systole patch subdirectory to whatever (gnu packages)
+  ;; already provides.  We capture the original parameter's value via
+  ;; module-ref so we don't accidentally use our own replacement.
   (make-parameter (append
                    (list systole-patches
                          (string-append systole-patches "/ctk")
                          (string-append systole-patches "/qrestapi")
                          (string-append systole-patches "/slicer")
-                         (string-append systole-patches "/slicer-openigtlink")
-                         )
-                   %original-patch-path)))
+                         (string-append systole-patches "/slicer-openigtlink"))
+                   ((module-ref (resolve-module '(gnu packages)) '%patch-path)))))
 
 ;; Define search-patch functio
 (define (search-patch file-name)

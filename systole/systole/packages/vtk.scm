@@ -45,7 +45,8 @@
   #:use-module (gnu packages serialization)
   #:use-module (gnu packages tbb)
   #:use-module (gnu packages xiph)
-  #:use-module (systole packages maths))
+  #:use-module (systole packages maths)
+  #:use-module (systole packages))
 
 (define-public vtk-slicer
   (package
@@ -126,8 +127,8 @@
         "https://github.com/Slicer/vtkAddon/archive/b5aa0615a6486b6bdceeb13bd59c2fb9f89cce42.tar.gz")
        (sha256
         (base32 "0wazsirav972mxkawfaw0lpnkylxfr19xjrd5s03blr2kid50a91"))
-       (patches (list (local-file
-                       "patches/0007-ENH-packages-vtk-use-CMAKE-GNUInstallDirs.patch")))))
+       (patches (search-patches
+                 "0007-ENH-packages-vtk-use-CMAKE-GNUInstallDirs.patch"))))
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f
