@@ -1,7 +1,7 @@
 From 482b3d6f018b1ef63a533b66da583eaceb310bcc Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Fri, 20 Feb 2026 22:08:49 +0100
-Subject: [PATCH 2/2] COMP: Add VTK::RenderingAnnotation dependency to Colors
+Subject: [PATCH 2/3] COMP: Add VTK::RenderingAnnotation dependency to Colors
  VTKWidgets
 
 vtkSlicerScalarBarActor.h includes vtkScalarBarActor.h which lives in
