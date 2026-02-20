@@ -1,0 +1,137 @@
+From b6dff8d4f829b9e6bd837f67557951db3d723739 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 7 Feb 2023 18:59:45 +0100
+Subject: [PATCH] ENH: Make Volumes a separate module
+
+---
+ Modules/Loadable/Volumes/CMakeLists.txt          | 16 ++++++++++++++++
+ Modules/Loadable/Volumes/Logic/CMakeLists.txt    |  7 +++++++
+ .../SubjectHierarchyPlugins/CMakeLists.txt       | 15 +++++++++++++++
+ Modules/Loadable/Volumes/Widgets/CMakeLists.txt  |  2 ++
+ 4 files changed, 40 insertions(+)
+
+diff --git a/Modules/Loadable/Volumes/CMakeLists.txt b/Modules/Loadable/Volumes/CMakeLists.txt
+index 263dc76d76..4dcdfd2c6b 100644
+--- a/Modules/Loadable/Volumes/CMakeLists.txt
++++ b/Modules/Loadable/Volumes/CMakeLists.txt
+@@ -1,9 +1,21 @@
++#-----------------------------------------------------------------------------
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
++#-----------------------------------------------------------------------------
++project(Volumes)
+ 
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Volumes)
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++
++#-----------------------------------------------------------------------------
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ add_subdirectory(SubjectHierarchyPlugins)
+@@ -18,6 +30,10 @@ set(MODULE_INCLUDE_DIRECTORIES
+   ${CMAKE_CURRENT_BINARY_DIR}/Logic
+   ${CMAKE_CURRENT_SOURCE_DIR}/SubjectHierarchyPlugins
+   ${CMAKE_CURRENT_BINARY_DIR}/SubjectHierarchyPlugins
++  ${Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR}/qSlicerSubjectHierarchyModuleWidgets
++  ${Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR}/vtkSlicerColorsModuleLogic
++  ${Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR}/vtkSlicerColorsModuleMRML
++  ${Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR}/qSlicerColorsModuleWidgets
+   ${qSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS}
+   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets
+   ${CMAKE_CURRENT_BINARY_DIR}/Widgets
+diff --git a/Modules/Loadable/Volumes/Logic/CMakeLists.txt b/Modules/Loadable/Volumes/Logic/CMakeLists.txt
+index 8838979098..8dc1e2b008 100644
+--- a/Modules/Loadable/Volumes/Logic/CMakeLists.txt
++++ b/Modules/Loadable/Volumes/Logic/CMakeLists.txt
+@@ -17,6 +17,12 @@ set(${KIT}_TARGET_LIBRARIES
+   ${ITK_LIBRARIES}
+   )
+ 
++set(DISABLE_WRAP_PYTHON)
++if(NOT Slicer_USE_PYTHONQT)
++  set(DISABLE_WRAP_PYTHON DISABLE_WRAP_PYTHON)
++  list(APPEND ${KIT}_TARGET_LIBRARIES ${Pyhton3_LIBRARIES})
++endif()
++
+ #-----------------------------------------------------------------------------
+ SlicerMacroBuildModuleLogic(
+   NAME ${KIT}
+@@ -24,6 +30,7 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  ${DISABLE_WRAP_PYTHON}
+   )
+ 
+ #-----------------------------------------------------------------------------
+diff --git a/Modules/Loadable/Volumes/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/Volumes/SubjectHierarchyPlugins/CMakeLists.txt
+index 114b56879a..c39fb2ee90 100644
+--- a/Modules/Loadable/Volumes/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Volumes/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -7,12 +7,18 @@ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_${MODULE_NAME_UPPER}_SUBJECT_HIERARCHY_PLU
+ set(${KIT}_INCLUDE_DIRECTORIES
+   ${qSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS}
+   ${vtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS}
++  ${Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR}/qSlicerSubjectHierarchyModuleWidgets
++  ${Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR}/vtkSlicerColorsModuleLogic
++  ${Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR}/vtkSlicerColorsModuleMRML
+   ${qMRMLWidgets_INCLUDE_DIRS}
+   ${MRMLLogic_INCLUDE_DIRS}
+   ${MRMLCore_INCLUDE_DIRS}
+   ${vtkSlicerVolumesModuleLogic_INCLUDE_DIRS}
+   ${vtkSlicerColorsModuleLogic_INCLUDE_DIRS}
+   ${vtkSlicerColorsModuleMRML_INCLUDE_DIRS}
++  ${Slicer_Libs_INCLUDE_DIRS}
++  ${Slicer_Base_INCLUDE_DIRS}
++  ${vtkAddon_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+@@ -37,14 +43,23 @@ set(${KIT}_RESOURCES
+   Resources/${KIT}.qrc
+   )
+ 
++link_directories(${Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR})
++
+ #-----------------------------------------------------------------------------
+ set(${KIT}_TARGET_LIBRARIES
+   qSlicerSubjectHierarchyModuleWidgets
+   vtkSlicerSubjectHierarchyModuleLogic
+   vtkSlicerColorsModuleLogic
++  vtkSlicerVolumesModuleLogic
+   qMRMLWidgets
+   MRMLLogic
+   MRMLCore
++  Qt::Core
++  Qt::Gui
++  Qt::Xml
++  ${VTK_LIBRARIES}
++  ${CTK_LIBRARIES}
++  ${Slicer_Base_LIBRARIES}
+   )
+ 
+ #-----------------------------------------------------------------------------
+diff --git a/Modules/Loadable/Volumes/Widgets/CMakeLists.txt b/Modules/Loadable/Volumes/Widgets/CMakeLists.txt
+index d453d7ea6d..436b6acd7b 100644
+--- a/Modules/Loadable/Volumes/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/Volumes/Widgets/CMakeLists.txt
+@@ -45,6 +45,8 @@ set(${KIT}_RESOURCES
+ 
+ set(${KIT}_TARGET_LIBRARIES
+   vtkSlicerVolumesModuleLogic
++  ${Slicer_Base_LIBRARIES}
++  qMRMLWidgets
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+

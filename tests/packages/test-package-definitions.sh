@@ -44,6 +44,8 @@ test_package "(systole packages itk)" "itk-slicer"
 # Test Slicer packages
 test_package "(systole packages slicer)" "slicer-5.8"
 test_package "(systole packages slicer)" "slicer-volumes-5.8"
+test_package "(systole packages slicer)" "slicer-terminologies-5.8"
+test_package "(systole packages slicer)" "slicer-colors-5.8"
 
 # Test CTK
 test_package "(systole packages ctk)" "ctk"

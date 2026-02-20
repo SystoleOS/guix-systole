@@ -1,0 +1,29 @@
+From 482b3d6f018b1ef63a533b66da583eaceb310bcc Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 20 Feb 2026 22:08:49 +0100
+Subject: [PATCH 2/2] COMP: Add VTK::RenderingAnnotation dependency to Colors
+ VTKWidgets
+
+vtkSlicerScalarBarActor.h includes vtkScalarBarActor.h which lives in
+VTK::RenderingAnnotation.  In VTK 9.x include paths only propagate
+through CMake IMPORTED targets, so this dependency must be listed
+explicitly.
+---
+ Modules/Loadable/Colors/VTKWidgets/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/Loadable/Colors/VTKWidgets/CMakeLists.txt b/Modules/Loadable/Colors/VTKWidgets/CMakeLists.txt
+index 50b06726e3..9b760c8bbf 100644
+--- a/Modules/Loadable/Colors/VTKWidgets/CMakeLists.txt
++++ b/Modules/Loadable/Colors/VTKWidgets/CMakeLists.txt
+@@ -13,6 +13,7 @@ set(${KIT}_SRCS
+   )
+ 
+ set(${KIT}_TARGET_LIBRARIES
++  VTK::RenderingAnnotation
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+

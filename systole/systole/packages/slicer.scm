@@ -86,6 +86,12 @@
                  "0011-ENH-Add-installation-of-Slicer-base-development-file.patch"
                  "0012-ENH-AppLauncher-add-SlicerModules-libdir.patch"
                  "0013-ENH-Add-link-directories.patch"
+                 "0014-ENH-Add-link-libraries-to-SlicerMacroBuildModuleLogi.patch"
+                 "0015-ENH-add-Qt5-and-loadable-modules-includes-for-non-su.patch"
+                 "0016-ENH-improve-CMake-support-for-system-installed-Slice.patch"
+                 "0017-ENH-Fix-file-glob-pattern-for-header-installation.patch"
+                 "0018-ENH-Install-CMake-template-files-alongside-cmake-mod.patch"
+                 "0019-ENH-Add-LINK_DIRECTORIES-support-to-SlicerMacroBuild.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -121,7 +127,7 @@
               "-DSlicer_BUILD_QT_DESIGNER_PLUGINS:BOOL=OFF" ;Turn ON?
               "-DSlicer_USE_QtTesting:BOOL=OFF"
               "-DSlicer_USE_SlicerITK:BOOL=ON"
-              "-DSlicer_USE_CTKAPPLAUNCHER:BOOL=ON"
+              "-DSlicer_USE_CTKAPPLAUNCHER:BOOL=OFF"
               "-DSlicer_BUILD_WEBENGINE_SUPPORT:BOOL=OFF"
               (string-append "-DQt5_DIR:PATH="
                              #$(this-package-input "qtbase"))
@@ -190,17 +196,43 @@
                             (add-after 'install 'wrap
                                        (lambda* (#:key outputs #:allow-other-keys)
                                                 (let* ((out (assoc-ref outputs "out"))
-                                                       (slicer-launcher (string-append out "/Slicer"))
+                                                       (slicer-real (string-append out "/bin/SlicerApp-real"))
                                                        (slicer-wrapper (string-append out "/Slicer-wrapper")))
-                                                  ;; Create new wrapper that calls the original launcher with our additions
+                                                  ;; Replace the CTK app launcher with a plain shell
+                                                  ;; wrapper.  The CTK launcher's only job on Guix is to
+                                                  ;; set a handful of environment variables before
+                                                  ;; exec-ing bin/SlicerApp-real; we do that here instead.
                                                   (call-with-output-file slicer-wrapper
                                                                          (lambda (port)
-                                                                           ; (format port "#!/bin/bash
                                                                            (format port
-"export LD_LIBRARY_PATH=\"$HOME/.guix-profile/lib/Slicer-5.8/SlicerModules${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"
-exec ~a --additional-module-path \"$HOME/.guix-profile/lib/Slicer-5.8/SlicerModules\" \"$@\"~%"
-                                                                                   slicer-launcher)))
-                                                  ;; Make the new wrapper executable
+"#!/bin/sh
+# Guix wrapper for 3D Slicer – replaces the CTK application launcher.
+
+# Slicer uses SLICER_HOME to locate resources, modules, Python, etc.
+export SLICER_HOME=~a
+
+# SlicerApp-real's RUNPATH does not include lib/Slicer-5.8/ where the
+# core Slicer shared libraries live; add them explicitly.
+export LD_LIBRARY_PATH=~a/lib/Slicer-5.8:~a/lib/Slicer-5.8/qt-loadable-modules${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+# Required for QtWebEngine in environments without user namespaces.
+export QTWEBENGINE_DISABLE_SANDBOX=1
+
+# Translate SLICER_ADDITIONAL_MODULE_PATHS (colon-separated list set by
+# Guix when module packages share a profile) into --additional-module-path
+# arguments recognised by 3D Slicer.
+module_path_args=\"\"
+if [ -n \"${SLICER_ADDITIONAL_MODULE_PATHS}\" ]; then
+  old_IFS=\"$IFS\"
+  IFS=':'
+  for path in ${SLICER_ADDITIONAL_MODULE_PATHS}; do
+    [ -n \"$path\" ] && module_path_args=\"${module_path_args} --additional-module-path ${path}\"
+  done
+  IFS=\"${old_IFS}\"
+fi
+exec ~a ${module_path_args} \"$@\"~%"
+                                                                                   out out out
+                                                                                   slicer-real)))
                                                   (chmod slicer-wrapper #o755)
                                                   #t)))
                             (add-after 'wrap 'symlink-slicer-applauncher
@@ -261,6 +293,16 @@ exec ~a --additional-module-path \"$HOME/.guix-profile/lib/Slicer-5.8/SlicerModu
            ;;slicerexecutionmodel
            qrestapi))
     (native-inputs (list pkg-config))
+    ;; Each Slicer module package (e.g. slicer-volumes-5.8) installs its
+    ;; shared library under lib/Slicer-5.8/qt-loadable-modules/.  Guix
+    ;; collects those directories into SLICER_ADDITIONAL_MODULE_PATHS when
+    ;; module packages share a profile with slicer-5.8.  The wrapper script
+    ;; installed by the 'wrap phase translates this variable into
+    ;; --additional-module-path arguments for 3D Slicer.
+    (native-search-paths
+     (list (search-path-specification
+            (variable "SLICER_ADDITIONAL_MODULE_PATHS")
+            (files '("lib/Slicer-5.8/qt-loadable-modules")))))
     (synopsis "3D Slicer - Medical visualization and computing environment")
     (description
      "3D Slicer is a multi-platform, free and open source software package for
@@ -337,43 +379,121 @@ visualization and medical image computing. It provides capabilities for:
 ;; arguments. Slicer uses this XML description to construct a GUI for the module.")
 ;;    (license license:bsd-2)))
 
-(define-public slicer-volumes-5.8
+;;;
+;;; Factory for standalone Slicer loadable-module packages
+;;;
+
+;; Do NOT use (inherit slicer-5.8) in the packages produced here: Guix
+;; forbids listing a package as an input when it also appears in the
+;; inheritance chain.  We reuse only the source origin and build each
+;; sub-module as a fully independent package that depends on an installed
+;; slicer-5.8.
+;;
+;; We reference #$slicer-5.8 directly in gexps rather than using the
+;; this-package-input macro, which is only available syntactically inside
+;; a (package …) form.  Both resolve to the same store path.
+(define* (make-slicer-loadable-module
+          #:key
+          name            ; package name string, e.g. "slicer-volumes-5.8"
+          module-subdir   ; source sub-directory, e.g. "Volumes"
+          patches         ; list of patch filename strings
+          synopsis        ; one-line synopsis string
+          description     ; multi-line description string
+          ;; A gexp that evaluates to a (possibly empty) list of extra
+          ;; CMake -D flags.  Defaults to the empty list.
+          (extra-configure-flags #~'()))
   (package
-   (inherit slicer-5.8)
-   (name "slicer-volumes-5.8")
+   (name name)
+   (version (package-version slicer-5.8))
    (source
     (origin
      (inherit (package-source slicer-5.8))
-     (patches (search-patches
-               "volumes/0001-ENH-Make-Volumes-a-separate-module.patch"))))
-
+     (patches (map search-patch patches))))
+   (build-system cmake-build-system)
    (arguments
-    (substitute-keyword-arguments (package-arguments slicer-5.8)
-                                  ((#:phases phases)
-                                   #~(modify-phases #$phases
-                                                    ;; Point cmake at the Volumes subdirectory instead of the Slicer root.
-                                                    (replace 'configure
-                                                             (lambda* (#:key inputs outputs configure-flags #:allow-other-keys)
-                                                               (let* ((source (getcwd))
-                                                                      (out (assoc-ref outputs "out")))
-                                                                 (apply invoke "cmake"
-                                                                        "-S" (string-append source "/Modules/Loadable/Volumes")
-                                                                        "-B" "build"
-                                                                        (string-append "-DCMAKE_INSTALL_PREFIX=" out)
-                                                                        configure-flags)
-                                                                 (chdir "build")
-                                                                 #t)))
-                                                    ;; The launcher wrapper and symlink are Slicer-app concerns,
-                                                    ;; not relevant for a standalone loadable module.
-                                                    (delete 'wrap)
-                                                    (delete 'set-cmake-paths)
-                                                    (delete 'symlink-slicer-applauncher)))))
-   (inputs (append (package-inputs slicer-5.8)
-                   (list slicer-5.8)))
-
-   (synopsis "3D Slicer Volumes loadable module")
-   (description
-    "The Volumes loadable module extracted from 3D Slicer.  It provides
-volume rendering and scalar-volume display capabilities and is built from the
-@file{Modules/Loadable/Volumes} subtree of the Slicer source tree.")
+    (list #:tests? #f
+          #:validate-runpath? #f
+          #:out-of-source? #t
+          #:configure-flags
+          ;; Append any caller-supplied flags after the common base flags.
+          #~(append
+             (list "-DCMAKE_BUILD_TYPE:STRING=Release"
+                   "-DBUILD_TESTING:BOOL=OFF"
+                   ;; Point cmake directly at Slicer's config directory.
+                   ;; Avoids CMAKE_PREFIX_PATH list-separator ambiguity
+                   ;; (CMake -D variables use ";" while env vars use ":").
+                   (string-append "-DSlicer_DIR="
+                                  #$slicer-5.8
+                                  "/lib/Slicer-5.8"))
+             #$extra-configure-flags)
+          #:phases
+          ;; Build only the named sub-directory, not the Slicer root.
+          #~(modify-phases %standard-phases
+              (replace 'configure
+                (lambda* (#:key inputs outputs configure-flags #:allow-other-keys)
+                  (let* ((source (getcwd))
+                         (out (assoc-ref outputs "out")))
+                    (apply invoke "cmake"
+                           "-S" (string-append source "/Modules/Loadable/"
+                                               #$module-subdir)
+                           "-B" "build"
+                           (string-append "-DCMAKE_INSTALL_PREFIX=" out)
+                           configure-flags)
+                    (chdir "build")
+                    #t))))))
+   ;; UseSlicer.cmake transitively requires all of slicer-5.8's build-time
+   ;; libraries (Qt5, VTK, ITK, etc.) to be present in the build
+   ;; environment, not just slicer-5.8 itself.  We therefore start from
+   ;; slicer-5.8's input list and prepend slicer-5.8 so cmake can locate
+   ;; SlicerConfig.cmake.
+   (inputs (modify-inputs (package-inputs slicer-5.8)
+             (prepend slicer-5.8)))
+   (home-page (package-home-page slicer-5.8))
+   (synopsis synopsis)
+   (description description)
    (license (package-license slicer-5.8))))
+
+(define-public slicer-volumes-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-volumes-5.8"
+   #:module-subdir "Volumes"
+   #:patches (list "volumes/0001-ENH-Make-Volumes-a-separate-module.patch")
+   #:synopsis "3D Slicer Volumes loadable module"
+   #:description
+   "The Volumes loadable module extracted from 3D Slicer.  It provides
+volume rendering and scalar-volume display capabilities and is built from the
+@file{Modules/Loadable/Volumes} subtree of the Slicer source tree."))
+
+(define-public slicer-terminologies-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-terminologies-5.8"
+   #:module-subdir "Terminologies"
+   #:patches (list "terminologies/0001-ENH-Add-missing-dependencies-for-standalone-build-of.patch"
+                   "terminologies/0002-COMP-Restore-Slicer_INSTALL_QTLOADABLEMODULES_LIB_DI.patch")
+   #:synopsis "3D Slicer Terminologies loadable module"
+   #:description
+   "The Terminologies loadable module extracted from 3D Slicer.  It provides
+DICOM-based anatomical and segmentation terminology support (category, type,
+modifier look-ups backed by JSON terminology files) and is built from the
+@file{Modules/Loadable/Terminologies} subtree of the Slicer source tree."
+   ;; RapidJSON is used by the Terminologies Logic but is not re-exported
+   ;; by Slicer, so point cmake at its config directory explicitly.
+   ;; rapidjson is already in slicer-5.8's inputs so it is present in the
+   ;; build environment; we only need to tell cmake where to find it.
+   #:extra-configure-flags
+   #~(list (string-append "-DRapidJSON_DIR="
+                          #$rapidjson
+                          "/lib/cmake/RapidJSON"))))
+
+(define-public slicer-colors-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-colors-5.8"
+   #:module-subdir "Colors"
+   #:patches (list "colors/0001-ENH-Add-standalone-build-support-for-Colors-module.patch"
+                   "colors/0002-COMP-Add-VTK-RenderingAnnotation-dependency-to-Color.patch")
+   #:synopsis "3D Slicer Colors loadable module"
+   #:description
+   "The Colors loadable module extracted from 3D Slicer.  It provides color
+table management, color legend display nodes and widgets (including a scalar
+bar actor), and a subject hierarchy plugin for color legends.  Built from the
+@file{Modules/Loadable/Colors} subtree of the Slicer source tree."))
