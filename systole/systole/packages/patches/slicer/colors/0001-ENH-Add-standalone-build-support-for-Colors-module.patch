@@ -1,0 +1,44 @@
+From e7f5961e29dc205bb74d567aee51311aadd3fdee Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 20 Feb 2026 21:29:49 +0100
+Subject: [PATCH 1/2] ENH: Add standalone build support for Colors module
+
+---
+ Modules/Loadable/Colors/CMakeLists.txt | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/Modules/Loadable/Colors/CMakeLists.txt b/Modules/Loadable/Colors/CMakeLists.txt
+index 19e100d51d..630e982000 100644
+--- a/Modules/Loadable/Colors/CMakeLists.txt
++++ b/Modules/Loadable/Colors/CMakeLists.txt
+@@ -1,8 +1,27 @@
++cmake_minimum_required(VERSION 3.31)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Colors)
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++#-----------------------------------------------------------------------------
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++# UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR to empty
++# when Slicer_QTLOADABLEMODULES_SHARE_DIR is unset (standalone builds).
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++# Same issue for LIB_DIR.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(MRML)
+ add_subdirectory(VTKWidgets)
+-- 
+2.52.0
+

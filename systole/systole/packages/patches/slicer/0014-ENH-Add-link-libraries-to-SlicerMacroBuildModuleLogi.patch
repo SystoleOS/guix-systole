@@ -1,0 +1,33 @@
+From a5c68d115a8e3a6641904988d5f8501b0914f316 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 20 Feb 2026 15:04:18 +0100
+Subject: [PATCH 2/3] ENH: Add link libraries to SlicerMacroBuildModuleLogic
+
+---
+ CMake/SlicerMacroBuildModuleLogic.cmake | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/CMake/SlicerMacroBuildModuleLogic.cmake b/CMake/SlicerMacroBuildModuleLogic.cmake
+index 8ed3151c52..d1c1f1e2f4 100644
+--- a/CMake/SlicerMacroBuildModuleLogic.cmake
++++ b/CMake/SlicerMacroBuildModuleLogic.cmake
+@@ -63,6 +63,16 @@ macro(SlicerMacroBuildModuleLogic)
+       )
+   endif()
+ 
++  # Every module logic inherits from vtkSlicerModuleLogic -> vtkMRMLAbstractLogic
++  # (MRMLLogic), and routinely uses VTK addon utilities (vtkAddon). In superbuild
++  # mode these come transitively from SlicerBaseLogic, but in a system install
++  # transitive dependencies may not propagate, so we list them explicitly here.
++  list(APPEND MODULELOGIC_TARGET_LIBRARIES
++    MRMLCore
++    MRMLLogic
++    vtkAddon
++    )
++
+   if(Slicer_BUILD_CLI_SUPPORT)
+     # Third-party library
+     find_package(SlicerExecutionModel REQUIRED ModuleDescriptionParser)
+-- 
+2.52.0
+

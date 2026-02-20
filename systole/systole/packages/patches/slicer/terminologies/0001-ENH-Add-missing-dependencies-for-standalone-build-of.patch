@@ -1,0 +1,82 @@
+From 2ae170f213f3bf2c8708b3494f8a3122271db609 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 20 Feb 2026 19:56:53 +0100
+Subject: [PATCH] ENH: Add missing dependencies for standalone build of
+ terminologies
+
+- Set C++17 standard and include Slicer configuration
+- Restore Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR after UseSlicer.cmake
+- Add explicit library dependencies for Logic (VTK::CommonCore, vtkSegmentationCore)
+- Add explicit library dependencies for Widgets (CTKWidgets, qSlicerBaseQTCore, qMRMLWidgets)
+---
+ Modules/Loadable/Terminologies/CMakeLists.txt    | 23 +++++++++++++++++++++++
+ .../Loadable/Terminologies/Logic/CMakeLists.txt  |  2 ++
+ .../Terminologies/Widgets/CMakeLists.txt         |  3 +++
+ 3 files changed, 28 insertions(+)
+
+diff --git a/Modules/Loadable/Terminologies/CMakeLists.txt b/Modules/Loadable/Terminologies/CMakeLists.txt
+index 6d3e2117cf..81f51b2673 100644
+--- a/Modules/Loadable/Terminologies/CMakeLists.txt
++++ b/Modules/Loadable/Terminologies/CMakeLists.txt
+@@ -1,8 +1,31 @@
++cmake_minimum_required(VERSION 3.31)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME "Terminologies")
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++
++#-----------------------------------------------------------------------------
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++
++# UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR to empty
++# when Slicer_QTLOADABLEMODULES_SHARE_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
++# UseSlicer.cmake also resets Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR to empty
++# when Slicer_QTLOADABLEMODULES_LIB_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ add_subdirectory(Widgets)
+diff --git a/Modules/Loadable/Terminologies/Logic/CMakeLists.txt b/Modules/Loadable/Terminologies/Logic/CMakeLists.txt
+index 2c87302ff9..63d798ad78 100644
+--- a/Modules/Loadable/Terminologies/Logic/CMakeLists.txt
++++ b/Modules/Loadable/Terminologies/Logic/CMakeLists.txt
+@@ -22,6 +22,8 @@ set(${KIT}_SRCS
+   )
+ 
+ set(${KIT}_TARGET_LIBRARIES
++  VTK::CommonCore
++  vtkSegmentationCore
+   )
+ 
+ #-----------------------------------------------------------------------------
+diff --git a/Modules/Loadable/Terminologies/Widgets/CMakeLists.txt b/Modules/Loadable/Terminologies/Widgets/CMakeLists.txt
+index 0e2909a2b1..bb7a422ab0 100644
+--- a/Modules/Loadable/Terminologies/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/Terminologies/Widgets/CMakeLists.txt
+@@ -36,6 +36,9 @@ set(${KIT}_RESOURCES
+ 
+ set(${KIT}_TARGET_LIBRARIES
+   vtkSlicerTerminologiesModuleLogic
++  CTKWidgets
++  qSlicerBaseQTCore
++  qMRMLWidgets
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+

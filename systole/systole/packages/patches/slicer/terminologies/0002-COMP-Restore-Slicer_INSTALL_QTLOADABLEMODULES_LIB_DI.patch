@@ -1,0 +1,38 @@
+From fe3ba861b88ccdea23ff7492aec5e8f7dcc389b1 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 20 Feb 2026 20:15:08 +0100
+Subject: [PATCH] COMP: Restore Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR after
+ UseSlicer.cmake
+
+UseSlicer.cmake line 359 resets Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR to
+"" when Slicer_QTLOADABLEMODULES_LIB_DIR is unset in standalone/system-install
+builds. This caused loadable module .so files to install to bare lib/ instead
+of lib/Slicer-5.8/qt-loadable-modules/, making them invisible to Slicer's
+module discovery mechanism (SLICER_ADDITIONAL_MODULE_PATHS).
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+---
+ Modules/Loadable/Terminologies/CMakeLists.txt | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/Modules/Loadable/Terminologies/CMakeLists.txt b/Modules/Loadable/Terminologies/CMakeLists.txt
+index 81f51b2673..acbdfbbd44 100644
+--- a/Modules/Loadable/Terminologies/CMakeLists.txt
++++ b/Modules/Loadable/Terminologies/CMakeLists.txt
+@@ -19,6 +19,13 @@ if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
+     "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
+ endif()
+ 
++# UseSlicer.cmake also resets Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR to empty
++# when Slicer_QTLOADABLEMODULES_LIB_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ add_subdirectory(Widgets)
+-- 
+2.52.0
+
