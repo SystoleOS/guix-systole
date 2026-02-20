@@ -92,6 +92,9 @@
                  "0017-ENH-Fix-file-glob-pattern-for-header-installation.patch"
                  "0018-ENH-Install-CMake-template-files-alongside-cmake-mod.patch"
                  "0019-ENH-Add-LINK_DIRECTORIES-support-to-SlicerMacroBuild.patch"
+                 "0020-ENH-Add-Slicer_Libs_INCLUDE_DIRS-to-SlicerMacroBuil.patch"
+                 "0021-COMP-Add-Qt5-Xml-to-SlicerMacroBuildModuleQtLibrary.patch"
+                 "0022-COMP-Add-CTKVisualizationVTKWidgets-to-SlicerMacroB.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -490,7 +493,8 @@ modifier look-ups backed by JSON terminology files) and is built from the
    #:name "slicer-colors-5.8"
    #:module-subdir "Colors"
    #:patches (list "colors/0001-ENH-Add-standalone-build-support-for-Colors-module.patch"
-                   "colors/0002-COMP-Add-VTK-RenderingAnnotation-dependency-to-Color.patch")
+                   "colors/0002-COMP-Add-VTK-RenderingAnnotation-dependency-to-Color.patch"
+                   "colors/0003-COMP-Set-SubjectHierarchy-include-dirs-for-standalon.patch")
    #:synopsis "3D Slicer Colors loadable module"
    #:description
    "The Colors loadable module extracted from 3D Slicer.  It provides color

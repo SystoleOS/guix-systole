@@ -1,0 +1,32 @@
+From c19353f8b9139db52f172fd6c256ecc583264d14 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 20 Feb 2026 22:32:21 +0100
+Subject: [PATCH] ENH: Add Slicer_Libs_INCLUDE_DIRS to
+ SlicerMacroBuildModuleQtLibrary
+
+SlicerMacroBuildModuleWidgets already prepends Slicer_Libs_INCLUDE_DIRS
+and Slicer_Base_INCLUDE_DIRS to its include list, but
+SlicerMacroBuildModuleQtLibrary did not.  This meant that headers from
+vtkAddon (e.g. vtkLoggingMacros.h required by vtkMRMLNode.h) and other
+Slicer core libs were missing when building SubjectHierarchyPlugin
+sub-modules via this macro in system-install builds.
+---
+ CMake/SlicerMacroBuildModuleQtLibrary.cmake | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/CMake/SlicerMacroBuildModuleQtLibrary.cmake b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+index 258518c86e..68d4f7c6ab 100644
+--- a/CMake/SlicerMacroBuildModuleQtLibrary.cmake
++++ b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+@@ -109,6 +109,8 @@ macro(SlicerMacroBuildModuleQtLibrary)
+     ${${MODULEQTLIBRARY_NAME}_INCLUDE_DIRS}
+     ${CMAKE_CURRENT_SOURCE_DIR}
+     ${CMAKE_CURRENT_BINARY_DIR}
++    ${Slicer_Libs_INCLUDE_DIRS}
++    ${Slicer_Base_INCLUDE_DIRS}
+     )
+   # Since module developer may have already set the variable to some
+   # specific values in the module CMakeLists.txt, we make sure to
+-- 
+2.52.0
+
