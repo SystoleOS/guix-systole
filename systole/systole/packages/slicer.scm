@@ -127,7 +127,7 @@
               "-DSlicer_BUILD_CLI_SUPPORT:BOOL=OFF"
 
               ;; QT
-              "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=ON"
+              "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=OFF"
               "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"
               "-DSlicer_BUILD_QT_DESIGNER_PLUGINS:BOOL=OFF" ;Turn ON?
               "-DSlicer_USE_QtTesting:BOOL=OFF"
@@ -404,6 +404,10 @@ visualization and medical image computing. It provides capabilities for:
           patches         ; list of patch filename strings
           synopsis        ; one-line synopsis string
           description     ; multi-line description string
+          ;; Extra packages added to inputs *before* slicer-5.8's own inputs.
+          ;; Use this to declare inter-module build-time dependencies
+          ;; (e.g. slicer-terminologies-5.8 for SubjectHierarchy).
+          (extra-inputs '())
           ;; A gexp that evaluates to a (possibly empty) list of extra
           ;; CMake -D flags.  Defaults to the empty list.
           (extra-configure-flags #~'()))
@@ -424,6 +428,9 @@ visualization and medical image computing. It provides capabilities for:
           #~(append
              (list "-DCMAKE_BUILD_TYPE:STRING=Release"
                    "-DBUILD_TESTING:BOOL=OFF"
+                   ;; Install headers so downstream modules can use this one
+                   ;; as a build input.
+                   "-DSlicer_INSTALL_DEVELOPMENT:BOOL=ON"
                    ;; Point cmake directly at Slicer's config directory.
                    ;; Avoids CMAKE_PREFIX_PATH list-separator ambiguity
                    ;; (CMake -D variables use ";" while env vars use ":").
@@ -450,9 +457,13 @@ visualization and medical image computing. It provides capabilities for:
    ;; libraries (Qt5, VTK, ITK, etc.) to be present in the build
    ;; environment, not just slicer-5.8 itself.  We therefore start from
    ;; slicer-5.8's input list and prepend slicer-5.8 so cmake can locate
-   ;; SlicerConfig.cmake.
-   (inputs (modify-inputs (package-inputs slicer-5.8)
-             (prepend slicer-5.8)))
+   ;; SlicerConfig.cmake.  Any extra-inputs (other standalone modules this
+   ;; module depends on) are also prepended so cmake can link against them.
+   (inputs (fold (lambda (pkg acc)
+                   (modify-inputs acc (prepend pkg)))
+                 (modify-inputs (package-inputs slicer-5.8)
+                   (prepend slicer-5.8))
+                 extra-inputs))
    (home-page (package-home-page slicer-5.8))
    (synopsis synopsis)
    (description description)
@@ -490,19 +501,74 @@ modifier look-ups backed by JSON terminology files) and is built from the
                           #$rapidjson
                           "/lib/cmake/RapidJSON"))))
 
+(define-public slicer-subjecthierarchy-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-subjecthierarchy-5.8"
+   #:module-subdir "SubjectHierarchy"
+   #:patches (list "subjecthierarchy/0001-ENH-Add-standalone-build-support-for-SubjectHierarch.patch"
+                   "subjecthierarchy/0002-COMP-Add-vtkSlicerTerminologiesModuleLogic-include-d.patch")
+   #:synopsis "3D Slicer SubjectHierarchy loadable module"
+   #:description
+   "The SubjectHierarchy loadable module extracted from 3D Slicer.  It provides
+a hierarchical data model for MRML scene items together with a subject
+hierarchy tree view, plugin infrastructure for per-node context menus, and
+default plugins for cloning, folding, opacity, visibility, and registration
+actions.  Built from the @file{Modules/Loadable/SubjectHierarchy} subtree of
+the Slicer source tree."
+   ;; SubjectHierarchy Widgets link against Terminologies and Volumes modules.
+   #:extra-inputs (list slicer-terminologies-5.8 slicer-volumes-5.8)
+   #:extra-configure-flags
+   #~(list
+      ;; Include dirs for qSlicerTerminologyItemDelegate.h and friends.
+      (string-append
+       "-DqSlicerTerminologiesModuleWidgets_INCLUDE_DIRS="
+       #$slicer-terminologies-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerTerminologiesModuleWidgets")
+      ;; Include dirs for vtkSlicerTerminologiesModuleLogic.h and
+      ;; vtkSlicerTerminologyEntry.h (used directly by Widgets source files).
+      (string-append
+       "-DvtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS="
+       #$slicer-terminologies-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerTerminologiesModuleLogic")
+      ;; Link directories for the Terminologies and Volumes module libraries.
+      (string-append
+       "-DCMAKE_SHARED_LINKER_FLAGS=-L"
+       #$slicer-terminologies-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules -L"
+       #$slicer-volumes-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules"))))
+
 (define-public slicer-colors-5.8
   (make-slicer-loadable-module
    #:name "slicer-colors-5.8"
    #:module-subdir "Colors"
    #:patches (list "colors/0001-ENH-Add-standalone-build-support-for-Colors-module.patch"
-                   "colors/0002-COMP-Add-VTK-RenderingAnnotation-dependency-to-Color.patch"
-                   "colors/0003-COMP-Set-SubjectHierarchy-include-dirs-for-standalon.patch")
+                   "colors/0002-COMP-Add-VTK-RenderingAnnotation-dependency-to-Color.patch")
    #:synopsis "3D Slicer Colors loadable module"
    #:description
    "The Colors loadable module extracted from 3D Slicer.  It provides color
 table management, color legend display nodes and widgets (including a scalar
 bar actor), and a subject hierarchy plugin for color legends.  Built from the
-@file{Modules/Loadable/Colors} subtree of the Slicer source tree."))
+@file{Modules/Loadable/Colors} subtree of the Slicer source tree."
+   ;; Colors SubjectHierarchyPlugins link against SubjectHierarchy.
+   #:extra-inputs (list slicer-subjecthierarchy-5.8)
+   #:extra-configure-flags
+   #~(list
+      ;; Include dirs for qSlicerSubjectHierarchyAbstractPlugin.h and friends.
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      ;; Include dirs for vtkSlicerSubjectHierarchyModuleLogic.h.
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      ;; Link directory for the SubjectHierarchy module libraries.
+      (string-append
+       "-DCMAKE_SHARED_LINKER_FLAGS=-L"
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules")))
 
 (define-public slicer-units-5.8
   (make-slicer-loadable-module
@@ -520,14 +586,32 @@ a settings panel for configuring display precision.  Built from the
   (make-slicer-loadable-module
    #:name "slicer-tables-5.8"
    #:module-subdir "Tables"
-   #:patches (list "tables/0001-ENH-Add-standalone-build-support-for-Tables-module.patch"
-                   "tables/0002-COMP-Set-SubjectHierarchy-include-dirs-for-standalon.patch")
+   #:patches (list "tables/0001-ENH-Add-standalone-build-support-for-Tables-module.patch")
    #:synopsis "3D Slicer Tables loadable module"
    #:description
    "The Tables loadable module extracted from 3D Slicer.  It provides
 spreadsheet-style display and editing of MRML table nodes, including support
 for adding, removing, and renaming columns of various types.  Built from the
-@file{Modules/Loadable/Tables} subtree of the Slicer source tree."))
+@file{Modules/Loadable/Tables} subtree of the Slicer source tree."
+   ;; Tables SubjectHierarchyPlugins link against SubjectHierarchy.
+   #:extra-inputs (list slicer-subjecthierarchy-5.8)
+   #:extra-configure-flags
+   #~(list
+      ;; Include dirs for qSlicerSubjectHierarchyAbstractPlugin.h and friends.
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      ;; Include dirs for vtkSlicerSubjectHierarchyModuleLogic.h.
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      ;; Link directory for the SubjectHierarchy module libraries.
+      (string-append
+       "-DCMAKE_SHARED_LINKER_FLAGS=-L"
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules")))
 
 (define-public slicer-cameras-5.8
   (make-slicer-loadable-module
