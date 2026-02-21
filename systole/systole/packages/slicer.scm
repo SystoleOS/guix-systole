@@ -501,3 +501,15 @@ modifier look-ups backed by JSON terminology files) and is built from the
 table management, color legend display nodes and widgets (including a scalar
 bar actor), and a subject hierarchy plugin for color legends.  Built from the
 @file{Modules/Loadable/Colors} subtree of the Slicer source tree."))
+
+(define-public slicer-tables-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-tables-5.8"
+   #:module-subdir "Tables"
+   #:patches (list)
+   #:synopsis "3D Slicer Tables loadable module"
+   #:description
+   "The Tables loadable module extracted from 3D Slicer.  It provides
+spreadsheet-style display and editing of MRML table nodes, including support
+for adding, removing, and renaming columns of various types.  Built from the
+@file{Modules/Loadable/Tables} subtree of the Slicer source tree."))
