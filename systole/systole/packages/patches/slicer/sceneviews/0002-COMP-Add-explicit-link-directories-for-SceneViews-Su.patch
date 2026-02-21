@@ -1,0 +1,39 @@
+From 02a6aa3204b38c360b94b5553a6229227532d718 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 23:24:09 +0100
+Subject: [PATCH] COMP: Add explicit link directories for SceneViews
+ SubjectHierarchyPlugins
+
+Set LINK_DIRECTORIES to include Slicer_LIB_DIR for proper library
+linking in the SceneViews SubjectHierarchyPlugins module build
+configuration.
+---
+ .../SceneViews/SubjectHierarchyPlugins/CMakeLists.txt      | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/Modules/Loadable/SceneViews/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/SceneViews/SubjectHierarchyPlugins/CMakeLists.txt
+index 0ec7d66e7c..4cd190729e 100644
+--- a/Modules/Loadable/SceneViews/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Loadable/SceneViews/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -31,7 +31,11 @@ set(${KIT}_TARGET_LIBRARIES
+   vtkSlicerSubjectHierarchyModuleLogic
+   qSlicerSubjectHierarchyModuleWidgets
+   ${QT_LIBRARIES}
+-  )
++)
++
++set(${KIT}_LINK_DIRECTORIES
++  ${Slicer_LIB_DIR}
++)
+ 
+ #-----------------------------------------------------------------------------
+ SlicerMacroBuildModuleQtLibrary(
+@@ -45,4 +49,5 @@ SlicerMacroBuildModuleQtLibrary(
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   RESOURCES ${${KIT}_RESOURCES}
+   WRAP_PYTHONQT
++  LINK_DIRECTORIES ${${KIT}_LINK_DIRECTORIES}
+   )
+-- 
+2.52.0
+
