@@ -1,23 +1,15 @@
-From 8b9f3a0d9ec2a3cd1c920a4c02d3d0515bee7411 Mon Sep 17 00:00:00 2001
+From 50e977c6f7d2afa2339c6312e603979e5e6ddb7b Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
-Date: Sat, 21 Feb 2026 13:12:23 +0100
+Date: Sat, 21 Feb 2026 14:14:58 +0100
 Subject: [PATCH 2/3] COMP: Add vtkSlicerTerminologiesModuleLogic include dir
  to SubjectHierarchy Widgets
 
-Source files in SubjectHierarchy Widgets directly include
-vtkSlicerTerminologiesModuleLogic.h and vtkSlicerTerminologyEntry.h, but
-vtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS was missing from the
-INCLUDE_DIRECTORIES list.  In superbuild mode these headers happen to be
-found via Slicer_ModuleLogic_INCLUDE_DIRS, but standalone builds must
-list every external include path explicitly.
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ---
  Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt | 1 +
  1 file changed, 1 insertion(+)
 
 diff --git a/Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt b/Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt
-index 7ca048bc14..5e6d1602da 100644
+index c1f038b99f..6ec09a7a71 100644
 --- a/Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt
 +++ b/Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt
 @@ -7,6 +7,7 @@ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_MODULE_${MODULE_NAME_UPPER}_WIDGETS_EXPORT
@@ -26,8 +18,8 @@ index 7ca048bc14..5e6d1602da 100644
    ${qSlicerTerminologiesModuleWidgets_INCLUDE_DIRS}
 +  ${vtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS}
    ${MRMLCore_INCLUDE_DIRS}
-   ${MRMLCLI_INCLUDE_DIRS}
    )
+ if(Slicer_BUILD_CLI_SUPPORT)
 -- 
 2.52.0
 
