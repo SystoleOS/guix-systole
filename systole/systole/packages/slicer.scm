@@ -100,6 +100,7 @@
                  "0024-COMP-Add-Qt5-Widgets-Xml-CTK-to-SlicerMacroBuildLoad.patch"
                  "0025-COMP-Fix-empty-Slicer_INSTALL_QTLOADABLEMODULES_INCL.patch"
                  "0026-COMP-Add-qSlicerBaseQTCore-to-standalone-module-widg.patch"
+                 "0027-COMP-Add-EXTRA_MODULE_LIB_DIRS-to-module-build-macro.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -526,7 +527,7 @@ the Slicer source tree."
        "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerTerminologiesModuleLogic")
       ;; Link directory for the Terminologies module libraries.
       (string-append
-       "-DCMAKE_SHARED_LINKER_FLAGS=-L"
+       "-DEXTRA_MODULE_LIB_DIRS="
        #$slicer-terminologies-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
@@ -558,7 +559,7 @@ bar actor), and a subject hierarchy plugin for color legends.  Built from the
        "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
       ;; Link directory for the SubjectHierarchy module libraries.
       (string-append
-       "-DCMAKE_SHARED_LINKER_FLAGS=-L"
+       "-DEXTRA_MODULE_LIB_DIRS="
        #$slicer-subjecthierarchy-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
@@ -597,10 +598,11 @@ volume rendering and scalar-volume display capabilities and is built from the
        #$slicer-colors-5.8
        "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerColorsModuleMRML")
       ;; Link directories for the SubjectHierarchy and Colors module libraries.
+      ;; CMake list separator (;) allows passing multiple paths.
       (string-append
-       "-DCMAKE_SHARED_LINKER_FLAGS=-L"
+       "-DEXTRA_MODULE_LIB_DIRS="
        #$slicer-subjecthierarchy-5.8
-       "/lib/Slicer-5.8/qt-loadable-modules -L"
+       "/lib/Slicer-5.8/qt-loadable-modules;"
        #$slicer-colors-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
@@ -643,7 +645,7 @@ for adding, removing, and renaming columns of various types.  Built from the
        "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
       ;; Link directory for the SubjectHierarchy module libraries.
       (string-append
-       "-DCMAKE_SHARED_LINKER_FLAGS=-L"
+       "-DEXTRA_MODULE_LIB_DIRS="
        #$slicer-subjecthierarchy-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
