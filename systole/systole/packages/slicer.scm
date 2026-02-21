@@ -506,7 +506,8 @@ bar actor), and a subject hierarchy plugin for color legends.  Built from the
   (make-slicer-loadable-module
    #:name "slicer-units-5.8"
    #:module-subdir "Units"
-   #:patches (list "units/0001-ENH-Add-standalone-build-support-for-Units-module.patch")
+   #:patches (list "units/0001-ENH-Add-standalone-build-support-for-Units-module.patch"
+                   "units/0002-COMP-Add-VTK-CommonCore-dependency-to-Units-Logic.patch")
    #:synopsis "3D Slicer Units loadable module"
    #:description
    "The Units loadable module extracted from 3D Slicer.  It provides
