@@ -1,0 +1,28 @@
+From c15d0af9e1a16ca5ca03278e6482d80989fec278 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 22:18:15 +0100
+Subject: [PATCH] COMP: Guard DesignerPlugins subdirectory with
+ Slicer_BUILD_QT_DESIGNER_PLUGINS
+
+---
+ Modules/Loadable/Sequences/Widgets/CMakeLists.txt | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/Modules/Loadable/Sequences/Widgets/CMakeLists.txt b/Modules/Loadable/Sequences/Widgets/CMakeLists.txt
+index 48499005d4..f263bd3719 100644
+--- a/Modules/Loadable/Sequences/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/Sequences/Widgets/CMakeLists.txt
+@@ -56,7 +56,9 @@ SlicerMacroBuildModuleWidgets(
+   )
+ 
+ #-----------------------------------------------------------------------------
+-add_subdirectory(DesignerPlugins)
++if(Slicer_BUILD_QT_DESIGNER_PLUGINS)
++  add_subdirectory(DesignerPlugins)
++endif()
+ 
+ # Testing
+ if(BUILD_TESTING)
+-- 
+2.52.0
+
