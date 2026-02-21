@@ -95,6 +95,8 @@
                  "0020-ENH-Add-Slicer_Libs_INCLUDE_DIRS-to-SlicerMacroBuil.patch"
                  "0021-COMP-Add-Qt5-Xml-to-SlicerMacroBuildModuleQtLibrary.patch"
                  "0022-COMP-Add-CTKVisualizationVTKWidgets-to-SlicerMacroB.patch"
+                 "0023-COMP-Add-VTK-CommonCore-to-SlicerMacroBuildModuleLog.patch"
+                 "0024-COMP-Add-Qt5-Widgets-Xml-CTK-to-SlicerMacroBuildLoad.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -506,8 +508,7 @@ bar actor), and a subject hierarchy plugin for color legends.  Built from the
   (make-slicer-loadable-module
    #:name "slicer-units-5.8"
    #:module-subdir "Units"
-   #:patches (list "units/0001-ENH-Add-standalone-build-support-for-Units-module.patch"
-                   "units/0002-COMP-Add-VTK-CommonCore-dependency-to-Units-Logic.patch")
+   #:patches (list "units/0001-ENH-Add-standalone-build-support-for-Units-module.patch")
    #:synopsis "3D Slicer Units loadable module"
    #:description
    "The Units loadable module extracted from 3D Slicer.  It provides
@@ -532,9 +533,7 @@ for adding, removing, and renaming columns of various types.  Built from the
   (make-slicer-loadable-module
    #:name "slicer-cameras-5.8"
    #:module-subdir "Cameras"
-   #:patches (list "cameras/0001-ENH-Add-standalone-build-support-for-Cameras-module.patch"
-                   "cameras/0002-COMP-Add-VTK-CommonCore-dependency-to-Cameras-Logic.patch"
-                   "cameras/0003-COMP-Add-Qt5-Widgets-and-Qt5-Xml-to-Cameras-module.patch")
+   #:patches (list "cameras/0001-ENH-Add-standalone-build-support-for-Cameras-module.patch")
    #:synopsis "3D Slicer Cameras loadable module"
    #:description
    "The Cameras loadable module extracted from 3D Slicer.  It manages camera

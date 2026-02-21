@@ -1,0 +1,50 @@
+From 5f1397d2b5a900debad50dc1be98ad1edb4cfe9a Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 11:35:43 +0100
+Subject: [PATCH 24/24] COMP: Add Qt5::Widgets/Xml/CTK to
+ SlicerMacroBuildLoadableModule
+
+Loadable modules that have no Widgets sublibrary receive no Qt5 include
+dirs transitively, because SlicerMacroBuildLoadableModule never added Qt5
+targets.  SlicerMacroBuildModuleQtLibrary already has this block with a
+comment noting it is needed by SlicerMacroBuildLoadableModule for the same
+reason; this commit applies the same fix.
+
+Qt5::Xml is required because CTK headers (e.g. ctkPimpl.h) include Qt
+headers such as <QtGlobal>.  CTKVisualizationVTKWidgets is added for the
+same reason it was added to SlicerMacroBuildModuleQtLibrary.  The block
+is guarded by NOT Slicer_SUPERBUILD so it only activates for standalone
+builds against an installed Slicer.
+---
+ CMake/SlicerMacroBuildLoadableModule.cmake | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/CMake/SlicerMacroBuildLoadableModule.cmake b/CMake/SlicerMacroBuildLoadableModule.cmake
+index 52ecb10adc..08aea66f65 100644
+--- a/CMake/SlicerMacroBuildLoadableModule.cmake
++++ b/CMake/SlicerMacroBuildLoadableModule.cmake
+@@ -225,6 +225,21 @@ macro(slicerMacroBuildLoadableModule)
+     set(_slicer_gui_lib qSlicerBaseQTGUI)
+   endif()
+ 
++  # Loadable modules are Qt-based and always need Qt5::Widgets, Qt5::Xml, and
++  # CTKVisualizationVTKWidgets when building against an installed (non-superbuild)
++  # Slicer where Qt5 and CTK headers may not be transitively available.
++  # Qt5::Xml is required because CTK headers (e.g. ctkPimpl.h) include <QtGlobal>
++  # and similar Qt headers.  This mirrors the same block in
++  # SlicerMacroBuildModuleQtLibrary, which has an explicit note that
++  # SlicerMacroBuildLoadableModule needs them for the same reason.
++  if(NOT Slicer_SUPERBUILD)
++    list(APPEND LOADABLEMODULE_TARGET_LIBRARIES
++      Qt5::Widgets
++      Qt5::Xml
++      CTKVisualizationVTKWidgets
++      )
++  endif()
++
+   target_link_libraries(${lib_name}
+     # The two PUBLIC keywords are not a duplication, they allow developers to
+     # include PRIVATE/INTERFACE keywords in their library list
+-- 
+2.52.0
+
