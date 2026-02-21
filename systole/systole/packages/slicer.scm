@@ -570,7 +570,8 @@ bar actor), and a subject hierarchy plugin for color legends.  Built from the
   (make-slicer-loadable-module
    #:name "slicer-markups-5.8"
    #:module-subdir "Markups"
-   #:patches (list "markups/0001-ENH-Add-standalone-build-support-for-Markups-module.patch")
+   #:patches (list "markups/0001-ENH-Add-standalone-build-support-for-Markups-module.patch"
+                   "markups/0002-COMP-Add-vtkAddon-and-ITKCommon-to-Markups-MRML-link.patch")
    #:synopsis "3D Slicer Markups loadable module"
    #:description
    "The Markups loadable module extracted from 3D Slicer.  It provides
