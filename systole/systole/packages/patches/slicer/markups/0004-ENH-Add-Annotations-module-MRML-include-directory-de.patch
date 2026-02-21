@@ -1,0 +1,26 @@
+From 9e90e6f34280a402b443e5635238b15c7e6bb837 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 19:53:22 +0100
+Subject: [PATCH] ENH: Add Annotations module MRML include directory dependency
+
+Add vtkSlicerAnnotationsModuleMRML include directories to Markups
+Logic module to enable cross-module MRML class access.
+---
+ Modules/Loadable/Markups/Logic/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/Loadable/Markups/Logic/CMakeLists.txt b/Modules/Loadable/Markups/Logic/CMakeLists.txt
+index f6be59b4e2..14f12700f8 100644
+--- a/Modules/Loadable/Markups/Logic/CMakeLists.txt
++++ b/Modules/Loadable/Markups/Logic/CMakeLists.txt
+@@ -5,6 +5,7 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_LOGIC_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
++  ${vtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+-- 
+2.52.0
+

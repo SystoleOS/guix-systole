@@ -1,0 +1,24 @@
+From f5d5fbb5db889496040ea818ac17c684f660f864 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 20:00:03 +0100
+Subject: [PATCH] ENH: Add LINK_DIRECTORIES to module logic build
+
+Add LINK_DIRECTORIES configuration using EXTRA_MODULE_LIB_DIRS to the
+Markups logic module build to  support external library linking.
+---
+ Modules/Loadable/Markups/Logic/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/Loadable/Markups/Logic/CMakeLists.txt b/Modules/Loadable/Markups/Logic/CMakeLists.txt
+index 14f12700f8..2c2e171405 100644
+--- a/Modules/Loadable/Markups/Logic/CMakeLists.txt
++++ b/Modules/Loadable/Markups/Logic/CMakeLists.txt
+@@ -26,4 +26,5 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+-- 
+2.52.0
+

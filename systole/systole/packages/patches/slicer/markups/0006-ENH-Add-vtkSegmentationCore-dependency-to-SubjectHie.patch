@@ -1,0 +1,27 @@
+From 546851b142c9bb4e5224099170fc4bc5d17cd445 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 20:05:18 +0100
+Subject: [PATCH] ENH: Add vtkSegmentationCore dependency to
+ SubjectHierarchyPlugins
+
+Add vtkSegmentationCore library to target libraries for the Markups
+SubjectHierarchyPlugins module.
+---
+ Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt
+index 81a876f5b6..064ea0eb96 100644
+--- a/Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -43,6 +43,7 @@ set(${KIT}_TARGET_LIBRARIES
+   MRMLLogic
+   MRMLCore
+   MRMLDisplayableManager
++  vtkSegmentationCore
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+

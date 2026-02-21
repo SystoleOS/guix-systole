@@ -1,0 +1,26 @@
+From c1fe31c52bb0aaece3c5e5d57791df7b00c528e3 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 20:11:18 +0100
+Subject: [PATCH] ENH: Add vtkSlicerTerminologiesModuleLogic dependency
+
+Add missing vtkSlicerTerminologiesModuleLogic library to
+SubjectHierarchyPlugins target libraries.
+---
+ Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt
+index 064ea0eb96..b33ae85bc5 100644
+--- a/Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -39,6 +39,7 @@ set(${KIT}_TARGET_LIBRARIES
+   qSlicerSubjectHierarchyModuleWidgets
+   vtkSlicerSubjectHierarchyModuleLogic
+   qSlicerTerminologiesModuleWidgets
++  vtkSlicerTerminologiesModuleLogic
+   qMRMLWidgets
+   MRMLLogic
+   MRMLCore
+-- 
+2.52.0
+

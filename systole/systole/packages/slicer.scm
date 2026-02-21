@@ -622,6 +622,7 @@ the Slicer source tree."
    ;; SubjectHierarchyPlugins depend on SubjectHierarchy, Terminologies and
    ;; Colors; the top-level module also links against Colors.
    #:extra-inputs (list slicer-subjecthierarchy-5.8
+                        slicer-annotations-5.8
                         slicer-terminologies-5.8
                         slicer-colors-5.8)
    #:extra-configure-flags
@@ -661,6 +662,15 @@ the Slicer source tree."
        "-DqSlicerColorsModuleWidgets_INCLUDE_DIRS="
        #$slicer-colors-5.8
        "/include/Slicer-5.8/qt-loadable-modules/qSlicerColorsModuleWidgets")
+      ;; Include dirs for Annotations (top-level module).
+      (string-append
+       "-DvtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS="
+       #$slicer-annotations-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML")
+      (string-append
+       "-DvtkSlicerAnnotationsModuleLogic_INCLUDE_DIRS="
+       #$slicer-annotations-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerAnnotationsModuleLogic")
       ;; Library search paths for all three external modules.
       (string-append
        "-DEXTRA_MODULE_LIB_DIRS="
@@ -669,6 +679,8 @@ the Slicer source tree."
        #$slicer-terminologies-5.8
        "/lib/Slicer-5.8/qt-loadable-modules;"
        #$slicer-colors-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-annotations-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
 (define-public slicer-volumes-5.8
