@@ -59,6 +59,7 @@
   #:use-module (systole packages teem)
   #:use-module (systole packages vtk)
   #:use-module (systole packages)
+  #:use-module (srfi srfi-1)
   )
 
 (define-public slicer-5.8
@@ -97,6 +98,7 @@
                  "0022-COMP-Add-CTKVisualizationVTKWidgets-to-SlicerMacroB.patch"
                  "0023-COMP-Add-VTK-CommonCore-to-SlicerMacroBuildModuleLog.patch"
                  "0024-COMP-Add-Qt5-Widgets-Xml-CTK-to-SlicerMacroBuildLoad.patch"
+                 "0025-COMP-Fix-empty-Slicer_INSTALL_QTLOADABLEMODULES_INCL.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -568,7 +570,7 @@ bar actor), and a subject hierarchy plugin for color legends.  Built from the
       (string-append
        "-DCMAKE_SHARED_LINKER_FLAGS=-L"
        #$slicer-subjecthierarchy-5.8
-       "/lib/Slicer-5.8/qt-loadable-modules")))
+       "/lib/Slicer-5.8/qt-loadable-modules"))))
 
 (define-public slicer-units-5.8
   (make-slicer-loadable-module
@@ -611,7 +613,7 @@ for adding, removing, and renaming columns of various types.  Built from the
       (string-append
        "-DCMAKE_SHARED_LINKER_FLAGS=-L"
        #$slicer-subjecthierarchy-5.8
-       "/lib/Slicer-5.8/qt-loadable-modules")))
+       "/lib/Slicer-5.8/qt-loadable-modules"))))
 
 (define-public slicer-cameras-5.8
   (make-slicer-loadable-module

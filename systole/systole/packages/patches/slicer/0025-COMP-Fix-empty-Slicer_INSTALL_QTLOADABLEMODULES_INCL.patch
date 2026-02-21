@@ -1,0 +1,63 @@
+From 5c6a4f171b5f2fbec33fd14f680811f29dfcccdc Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 13:23:26 +0100
+Subject: [PATCH] COMP: Fix empty Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR
+ in standalone builds
+
+UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR to
+an empty string when Slicer_QTLOADABLEMODULES_INCLUDE_DIR is not set
+(system-install / standalone module builds).  When Slicer_INSTALL_DEVELOPMENT
+is ON the install(FILES ...) call then resolves the destination to
+/<LibraryName>, causing a cmake error trying to write to the filesystem root.
+
+Add the same guard that already exists for SHARE_DIR and LIB_DIR directly
+inside the install-headers block of both SlicerMacroBuildModuleVTKLibrary
+and SlicerMacroBuildModuleQtLibrary.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+---
+ CMake/SlicerMacroBuildModuleQtLibrary.cmake  | 8 ++++++++
+ CMake/SlicerMacroBuildModuleVTKLibrary.cmake | 8 ++++++++
+ 2 files changed, 16 insertions(+)
+
+diff --git a/CMake/SlicerMacroBuildModuleQtLibrary.cmake b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+index ed4d7b4e2e..cfcb4e40bc 100644
+--- a/CMake/SlicerMacroBuildModuleQtLibrary.cmake
++++ b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+@@ -259,6 +259,14 @@ macro(SlicerMacroBuildModuleQtLibrary)
+   endif()
+ 
+   if(NOT MODULEQTLIBRARY_NO_INSTALL AND ${MODULEQTLIBRARY_NAME}_DEVELOPMENT_INSTALL)
++    # UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR to
++    # empty when Slicer_QTLOADABLEMODULES_INCLUDE_DIR is unset (standalone
++    # builds).  Restore the conventional relative path so headers install
++    # under <prefix>/include/... rather than to the filesystem root.
++    if(NOT Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR)
++      set(Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR
++        "./include/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++    endif()
+     # Install headers
+     file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+     install(FILES
+diff --git a/CMake/SlicerMacroBuildModuleVTKLibrary.cmake b/CMake/SlicerMacroBuildModuleVTKLibrary.cmake
+index 7e150949d4..376355b527 100644
+--- a/CMake/SlicerMacroBuildModuleVTKLibrary.cmake
++++ b/CMake/SlicerMacroBuildModuleVTKLibrary.cmake
+@@ -173,6 +173,14 @@ macro(SlicerMacroBuildModuleVTKLibrary)
+   endif()
+ 
+   if(NOT MY_NO_INSTALL AND ${MODULEVTKLIBRARY_NAME}_DEVELOPMENT_INSTALL)
++    # UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR to
++    # empty when Slicer_QTLOADABLEMODULES_INCLUDE_DIR is unset (standalone
++    # builds).  Restore the conventional relative path so headers install
++    # under <prefix>/include/... rather than to the filesystem root.
++    if(NOT Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR)
++      set(Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR
++        "./include/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++    endif()
+     file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+     install(FILES
+       ${headers}
+-- 
+2.52.0
+
