@@ -103,6 +103,7 @@
                  "0027-COMP-Add-EXTRA_MODULE_LIB_DIRS-to-module-build-macro.patch"
                  "0028-COMP-Add-qMRMLWidgets-to-standalone-module-widgets-l.patch"
                  "0029-COMP-Add-Slicer_GUI_LIBRARY-fallback-to-SlicerMacroB.patch"
+                 "0030-COMP-Add-Slicer-root-include-dir-to-SlicerMacroBuild.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
