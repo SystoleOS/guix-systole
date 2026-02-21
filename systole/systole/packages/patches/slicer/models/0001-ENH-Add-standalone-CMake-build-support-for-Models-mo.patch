@@ -1,0 +1,58 @@
+From 16b996e398f672f1293532f5cb0da3dce5888a9c Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 20:48:20 +0100
+Subject: [PATCH] ENH: Add standalone CMake build support for Models module
+
+Add cmake_minimum_required, project(), find_package(Slicer), and
+UseSlicer.cmake include so the Models loadable module can be built
+independently against an installed slicer-5.8.
+
+Also restore Slicer_INSTALL_QTLOADABLEMODULES_{LIB,SHARE}_DIR after
+UseSlicer.cmake clears them in standalone (non-superbuild) mode.
+---
+ Modules/Loadable/Models/CMakeLists.txt | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/Modules/Loadable/Models/CMakeLists.txt b/Modules/Loadable/Models/CMakeLists.txt
+index c02c3a8d51..1ba1bc4d16 100644
+--- a/Modules/Loadable/Models/CMakeLists.txt
++++ b/Modules/Loadable/Models/CMakeLists.txt
+@@ -1,9 +1,35 @@
+ 
++#-----------------------------------------------------------------------------
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
++#-----------------------------------------------------------------------------
++project(Models)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Models)
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++
++#-----------------------------------------------------------------------------
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++
++# UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR to empty
++# when Slicer_QTLOADABLEMODULES_SHARE_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++# UseSlicer.cmake also resets Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR to empty
++# when Slicer_QTLOADABLEMODULES_LIB_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ add_subdirectory(SubjectHierarchyPlugins)
+-- 
+2.52.0
+

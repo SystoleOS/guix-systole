@@ -786,3 +786,61 @@ for adding, removing, and renaming columns of various types.  Built from the
 nodes in the MRML scene, allowing persistent camera positions across sessions
 and multiple synchronized views.  Built from the
 @file{Modules/Loadable/Cameras} subtree of the Slicer source tree."))
+
+(define-public slicer-models-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-models-5.8"
+   #:module-subdir "Models"
+   #:patches (list "models/0001-ENH-Add-standalone-CMake-build-support-for-Models-mo.patch")
+   #:synopsis "3D Slicer Models loadable module"
+   #:description
+   "The Models loadable module extracted from 3D Slicer.  It provides
+loading, display, and manipulation of 3D surface mesh models (VTK
+polydata), including per-scalar colorization and subject hierarchy
+integration.  Built from the @file{Modules/Loadable/Models} subtree
+of the Slicer source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.8
+                        slicer-terminologies-5.8
+                        slicer-colors-5.8)
+   #:extra-configure-flags
+   #~(list
+      ;; SubjectHierarchy includes (top-level module + SubjectHierarchyPlugins)
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      ;; Terminologies includes (SubjectHierarchyPlugins)
+      (string-append
+       "-DqSlicerTerminologiesModuleWidgets_INCLUDE_DIRS="
+       #$slicer-terminologies-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerTerminologiesModuleWidgets")
+      (string-append
+       "-DvtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS="
+       #$slicer-terminologies-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerTerminologiesModuleLogic")
+      ;; Colors includes (top-level module)
+      (string-append
+       "-DqSlicerColorsModuleWidgets_INCLUDE_DIRS="
+       #$slicer-colors-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerColorsModuleWidgets")
+      (string-append
+       "-DvtkSlicerColorsModuleLogic_INCLUDE_DIRS="
+       #$slicer-colors-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerColorsModuleLogic")
+      (string-append
+       "-DvtkSlicerColorsModuleMRML_INCLUDE_DIRS="
+       #$slicer-colors-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerColorsModuleMRML")
+      ;; Link directories for all three external modules
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-terminologies-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-colors-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules"))))
