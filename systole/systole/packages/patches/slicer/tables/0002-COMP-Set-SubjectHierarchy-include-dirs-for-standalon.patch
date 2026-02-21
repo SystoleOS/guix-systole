@@ -1,0 +1,51 @@
+From 76ca19497bef7cacdb6a5eb7c66f41cfac53dba2 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 11:09:27 +0100
+Subject: [PATCH] COMP: Set SubjectHierarchy include dirs for standalone Tables
+ build
+
+---
+ Modules/Loadable/Tables/CMakeLists.txt | 27 ++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
+
+diff --git a/Modules/Loadable/Tables/CMakeLists.txt b/Modules/Loadable/Tables/CMakeLists.txt
+index 7394c19cde..b20d81a4ff 100644
+--- a/Modules/Loadable/Tables/CMakeLists.txt
++++ b/Modules/Loadable/Tables/CMakeLists.txt
+@@ -21,6 +21,33 @@ if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
+   set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
+     "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
+ endif()
++# SubjectHierarchy include directories are not exported by UseSlicer.cmake in
++# system-install builds; SlicerConfig.cmake only records Slicer_Libs_INCLUDE_DIRS
++# (which covers MRMLCore/MRMLLogic/qMRMLWidgets) but not the qt-loadable-module
++# headers.  Set them from the known install-tree layout.
++# MRMLCore/MRMLLogic/qMRMLWidgets must also be set explicitly because
++# SlicerMacroBuildModuleQtLibrary (used by SubjectHierarchyPlugins) does not
++# add Slicer_Libs_INCLUDE_DIRS automatically; the sub-module lists them as
++# individual *_INCLUDE_DIRS variables.
++if(NOT Slicer_SUPERBUILD)
++  if(NOT qSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS)
++    set(qSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS
++      "${Slicer_HOME}/include/Slicer-${Slicer_VERSION}/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
++  endif()
++  if(NOT vtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS)
++    set(vtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS
++      "${Slicer_HOME}/include/Slicer-${Slicer_VERSION}/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
++  endif()
++  if(NOT MRMLCore_INCLUDE_DIRS)
++    set(MRMLCore_INCLUDE_DIRS "${Slicer_HOME}/include/MRMLCore")
++  endif()
++  if(NOT MRMLLogic_INCLUDE_DIRS)
++    set(MRMLLogic_INCLUDE_DIRS "${Slicer_HOME}/include/MRMLLogic")
++  endif()
++  if(NOT qMRMLWidgets_INCLUDE_DIRS)
++    set(qMRMLWidgets_INCLUDE_DIRS "${Slicer_HOME}/include/qMRMLWidgets")
++  endif()
++endif()
+ 
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+-- 
+2.52.0
+
