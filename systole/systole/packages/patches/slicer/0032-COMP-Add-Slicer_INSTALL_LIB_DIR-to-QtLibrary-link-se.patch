@@ -1,0 +1,25 @@
+From 2d39fdc345a3cab5dcaa9f201d08c23a19999ef2 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 23:33:37 +0100
+Subject: [PATCH] COMP: Add Slicer_INSTALL_LIB_DIR to QtLibrary link search
+ paths
+
+---
+ CMake/SlicerMacroBuildModuleQtLibrary.cmake | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/CMake/SlicerMacroBuildModuleQtLibrary.cmake b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+index f164f82b3b..f9fb6fd941 100644
+--- a/CMake/SlicerMacroBuildModuleQtLibrary.cmake
++++ b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+@@ -122,6 +122,7 @@ macro(SlicerMacroBuildModuleQtLibrary)
+       ${_qt_loadable_subdirs}
+       )
+     list(APPEND MODULEQTLIBRARY_LINK_DIRECTORIES
++      "${Slicer_HOME}/${Slicer_INSTALL_LIB_DIR}"
+       "${Slicer_HOME}/${Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR}"
+       )
+     unset(_qt_inc_root)
+-- 
+2.52.0
+

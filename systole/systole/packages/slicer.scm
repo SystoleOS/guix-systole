@@ -105,6 +105,7 @@
                  "0029-COMP-Add-Slicer-root-include-dir-to-SlicerMacroBuild.patch"
                  "0030-COMP-Add-qSlicerBaseQTCore-to-standalone-loadable-mo.patch"
                  "0031-ENH-Install-generated-UI-headers-from-qMRMLWidgets-f.patch"
+                 "0032-COMP-Add-Slicer_INSTALL_LIB_DIR-to-QtLibrary-link-se.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -946,7 +947,8 @@ the Slicer source tree."
   (make-slicer-loadable-module
    #:name "slicer-sceneviews-5.8"
    #:module-subdir "SceneViews"
-   #:patches (list "sceneviews/0001-ENH-Add-standalone-CMake-build-support-for-SceneView.patch")
+   #:patches (list "sceneviews/0001-ENH-Add-standalone-CMake-build-support-for-SceneView.patch"
+                   "sceneviews/0002-COMP-Add-explicit-link-directories-for-SceneViews-Su.patch")
    #:synopsis "3D Slicer SceneViews loadable module"
    #:description
    "The SceneViews loadable module extracted from 3D Slicer.  It provides
