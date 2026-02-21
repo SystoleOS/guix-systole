@@ -499,7 +499,8 @@ modifier look-ups backed by JSON terminology files) and is built from the
    #:module-subdir "SubjectHierarchy"
    #:patches (list "subjecthierarchy/0001-ENH-Add-standalone-build-support-for-SubjectHierarch.patch"
                    "subjecthierarchy/0002-COMP-Add-vtkSlicerTerminologiesModuleLogic-include-d.patch"
-                   "subjecthierarchy/0003-COMP-Remove-vtkSlicerVolumesModuleLogic-dep-from-sta.patch")
+                   "subjecthierarchy/0003-COMP-Remove-vtkSlicerVolumesModuleLogic-dep-from-sta.patch"
+                   "subjecthierarchy/0004-COMP-Add-vtkSlicerTerminologiesModuleLogic-to-Subjec.patch")
    #:synopsis "3D Slicer SubjectHierarchy loadable module"
    #:description
    "The SubjectHierarchy loadable module extracted from 3D Slicer.  It provides
