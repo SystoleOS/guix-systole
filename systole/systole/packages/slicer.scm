@@ -904,7 +904,8 @@ tree."))
   (make-slicer-loadable-module
    #:name "slicer-reformat-5.8"
    #:module-subdir "Reformat"
-   #:patches (list "reformat/0001-ENH-Add-standalone-CMake-build-support-for-Reformat-.patch")
+   #:patches (list "reformat/0001-ENH-Add-standalone-CMake-build-support-for-Reformat-.patch"
+                   "reformat/0002-ENH-Add-qMRMLWidgets-library-dependency.patch")
    #:synopsis "3D Slicer Reformat loadable module"
    #:description
    "The Reformat loadable module extracted from 3D Slicer.  It provides
