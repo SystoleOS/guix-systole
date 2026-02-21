@@ -1,0 +1,38 @@
+From 786369d6cc7c6bba142a84c93cd09b4638da816c Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 21:25:19 +0100
+Subject: [PATCH] ENH: Add missing vtkSegmentationCore dependency and link
+ directories
+
+Add vtkSegmentationCore to target libraries and configure link
+directories for SubjectHierarchyPlugins to resolve linking issues.
+---
+ .../Loadable/Models/SubjectHierarchyPlugins/CMakeLists.txt | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/Modules/Loadable/Models/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/Models/SubjectHierarchyPlugins/CMakeLists.txt
+index db8ed399f3..caf54585f0 100644
+--- a/Modules/Loadable/Models/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Models/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -39,6 +39,12 @@ set(${KIT}_TARGET_LIBRARIES
+   qMRMLWidgets
+   MRMLLogic
+   MRMLCore
++  vtkSegmentationCore
++  )
++
++set(${KIT}_LINK_DIRECTORIES
++  ${Slicer_Libs_LIBRARY_DIRS}
++  ${Slicer_Base_LIBRARY_DIRS}
+   )
+ 
+ #-----------------------------------------------------------------------------
+@@ -53,4 +59,5 @@ SlicerMacroBuildModuleQtLibrary(
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   RESOURCES ${${KIT}_RESOURCES}
+   WRAP_PYTHONQT
++  LINK_DIRECTORIES ${${KIT}_LINK_DIRECTORIES}
+   )
+-- 
+2.52.0
+
