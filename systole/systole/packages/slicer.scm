@@ -847,3 +847,99 @@ of the Slicer source tree."
        "/lib/Slicer-5.8/qt-loadable-modules;"
        #$slicer-colors-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
+
+(define-public slicer-sequences-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-sequences-5.8"
+   #:module-subdir "Sequences"
+   #:patches (list "sequences/0001-ENH-Add-standalone-CMake-build-support-for-Sequences.patch")
+   #:synopsis "3D Slicer Sequences loadable module"
+   #:description
+   "The Sequences loadable module extracted from 3D Slicer.  It provides
+support for storing and replaying time-sequences of MRML nodes (e.g.
+4D image series, tracked tool trajectories), including a browser widget
+for navigating sequence items.  Built from the
+@file{Modules/Loadable/Sequences} subtree of the Slicer source tree."))
+
+(define-public slicer-viewcontrollers-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-viewcontrollers-5.8"
+   #:module-subdir "ViewControllers"
+   #:patches (list "viewcontrollers/0001-ENH-Add-standalone-CMake-build-support-for-ViewContr.patch")
+   #:synopsis "3D Slicer ViewControllers loadable module"
+   #:description
+   "The ViewControllers loadable module extracted from 3D Slicer.  It
+provides the collapsible slice and 3D view controller bars that appear
+at the top of each viewer panel, exposing orientation, slice offset,
+link/unlink, and camera controls.  Built from the
+@file{Modules/Loadable/ViewControllers} subtree of the Slicer source
+tree."))
+
+(define-public slicer-reformat-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-reformat-5.8"
+   #:module-subdir "Reformat"
+   #:patches (list "reformat/0001-ENH-Add-standalone-CMake-build-support-for-Reformat-.patch")
+   #:synopsis "3D Slicer Reformat loadable module"
+   #:description
+   "The Reformat loadable module extracted from 3D Slicer.  It provides
+interactive repositioning and reorientation of slice planes (axial,
+coronal, sagittal, or oblique) with rotation and translation handles
+directly in the 3D viewer.  Built from the
+@file{Modules/Loadable/Reformat} subtree of the Slicer source tree."))
+
+(define-public slicer-plots-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-plots-5.8"
+   #:module-subdir "Plots"
+   #:patches (list "plots/0001-ENH-Add-standalone-CMake-build-support-for-Plots-mod.patch")
+   #:synopsis "3D Slicer Plots loadable module"
+   #:description
+   "The Plots loadable module extracted from 3D Slicer.  It provides
+2D chart and plot display backed by VTK charts, supporting line, bar,
+and scatter plots tied to MRML table nodes, with subject hierarchy
+integration.  Built from the @file{Modules/Loadable/Plots} subtree of
+the Slicer source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules"))))
+
+(define-public slicer-sceneviews-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-sceneviews-5.8"
+   #:module-subdir "SceneViews"
+   #:patches (list "sceneviews/0001-ENH-Add-standalone-CMake-build-support-for-SceneView.patch")
+   #:synopsis "3D Slicer SceneViews loadable module"
+   #:description
+   "The SceneViews loadable module extracted from 3D Slicer.  It provides
+named scene snapshots that capture the full MRML scene state (layout,
+display properties, camera positions) so users can save and restore
+multiple views of the same data set.  Built from the
+@file{Modules/Loadable/SceneViews} subtree of the Slicer source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules"))))
