@@ -1,0 +1,43 @@
+From 55b167b5d7e4d4ede53eea3df0bcb32cf3d54dd2 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 11:35:43 +0100
+Subject: [PATCH 23/24] COMP: Add VTK::CommonCore to
+ SlicerMacroBuildModuleLogic
+
+VTK 9.x sets VTK_INCLUDE_DIRS to empty; headers only propagate through
+CMake IMPORTED targets.  MRMLCore does not re-export VTK::CommonCore in
+its installed CMake config, so every module logic that transitively
+includes vtkObject.h (via vtkMRMLAbstractLogic.h -> vtkObserverManager.h)
+fails to compile in standalone (non-superbuild) builds.
+
+Add VTK::CommonCore to the default MODULELOGIC_TARGET_LIBRARIES alongside
+the existing MRMLCore/MRMLLogic/vtkAddon entries so all module logics
+pick up VTK headers automatically.
+---
+ CMake/SlicerMacroBuildModuleLogic.cmake | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/CMake/SlicerMacroBuildModuleLogic.cmake b/CMake/SlicerMacroBuildModuleLogic.cmake
+index 6f6d3f62e0..a25ece4a42 100644
+--- a/CMake/SlicerMacroBuildModuleLogic.cmake
++++ b/CMake/SlicerMacroBuildModuleLogic.cmake
+@@ -72,10 +72,16 @@ macro(SlicerMacroBuildModuleLogic)
+   # (MRMLLogic), and routinely uses VTK addon utilities (vtkAddon). In superbuild
+   # mode these come transitively from SlicerBaseLogic, but in a system install
+   # transitive dependencies may not propagate, so we list them explicitly here.
++  # VTK::CommonCore is also required: VTK 9.x has empty VTK_INCLUDE_DIRS and
++  # headers only propagate through CMake IMPORTED targets.  MRMLCore does not
++  # re-export VTK::CommonCore in its installed config, so every module logic
++  # that includes vtkMRMLAbstractLogic.h (-> vtkObserverManager.h -> vtkObject.h)
++  # needs it listed explicitly.
+   list(APPEND MODULELOGIC_TARGET_LIBRARIES
+     MRMLCore
+     MRMLLogic
+     vtkAddon
++    VTK::CommonCore
+     )
+ 
+   if(Slicer_BUILD_CLI_SUPPORT)
+-- 
+2.52.0
+
