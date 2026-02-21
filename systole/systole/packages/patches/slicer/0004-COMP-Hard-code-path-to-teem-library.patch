@@ -1,7 +1,7 @@
 From a9f016e35698b28f7d8cf3caf651e2c4bf1a9056 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 6 May 2025 10:13:19 +0200
-Subject: [PATCH 04/11] COMP: Hard-code path to teem library
+Subject: [PATCH] COMP: Hard-code path to teem library
 
 Co-authored-by: Khai Duong <duongkhai@gmail.com>
 ---
@@ -23,5 +23,5 @@ index a30ea518b3..7c745b54d2 100644
  # Configure headers
  # --------------------------------------------------------------------------
 -- 
-2.49.0
+2.52.0
 

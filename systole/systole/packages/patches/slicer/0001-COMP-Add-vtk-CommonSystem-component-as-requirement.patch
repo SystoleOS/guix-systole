@@ -1,7 +1,7 @@
 From 223dd2e2c11d13c1f2944eb0a3cdb93491cf301e Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 24 Jan 2023 09:51:51 +0100
-Subject: [PATCH 01/11] COMP: Add vtk CommonSystem component as requirement
+Subject: [PATCH] COMP: Add vtk CommonSystem component as requirement
 
 ---
  CMakeLists.txt | 1 +
@@ -20,5 +20,5 @@ index 3a79d34c98..af57fdfbf3 100644
    FiltersFlowPaths
    FiltersGeometry
 -- 
-2.49.0
+2.52.0
 

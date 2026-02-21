@@ -1,7 +1,7 @@
 From 5f1397d2b5a900debad50dc1be98ad1edb4cfe9a Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 11:35:43 +0100
-Subject: [PATCH 24/24] COMP: Add Qt5::Widgets/Xml/CTK to
+Subject: [PATCH] COMP: Add Qt5::Widgets/Xml/CTK to
  SlicerMacroBuildLoadableModule
 
 Loadable modules that have no Widgets sublibrary receive no Qt5 include

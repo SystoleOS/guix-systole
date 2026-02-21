@@ -1,4 +1,4 @@
-From a46282ba1a77a15e30ae7324b87f8d4915155f5f Mon Sep 17 00:00:00 2001
+From 4754e64ff65f70df8c764717d5df99b12387f316 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 15:28:15 +0100
 Subject: [PATCH] COMP: Add Slicer_GUI_LIBRARY fallback to

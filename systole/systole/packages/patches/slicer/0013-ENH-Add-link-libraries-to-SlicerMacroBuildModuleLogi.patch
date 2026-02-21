@@ -1,7 +1,7 @@
 From a5c68d115a8e3a6641904988d5f8501b0914f316 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Fri, 20 Feb 2026 15:04:18 +0100
-Subject: [PATCH 2/3] ENH: Add link libraries to SlicerMacroBuildModuleLogic
+Subject: [PATCH] ENH: Add link libraries to SlicerMacroBuildModuleLogic
 
 ---
  CMake/SlicerMacroBuildModuleLogic.cmake | 10 ++++++++++

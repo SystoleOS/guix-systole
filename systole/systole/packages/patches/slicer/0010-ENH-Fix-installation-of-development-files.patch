@@ -1,7 +1,7 @@
 From 719973dfa60441d8e62e7ae20cddfeb804a63b73 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Fri, 9 May 2025 23:04:34 +0200
-Subject: [PATCH 10/11] ENH: Fix installation of development files
+Subject: [PATCH] ENH: Fix installation of development files
 
 ---
  CMake/SlicerInstallConfig.cmake.in           | 15 ++++++++++++++-
@@ -75,5 +75,5 @@ index a08ebefbd5..9e7246a936 100644
    else()
      if(NOT DEFINED ${MODULEVTKLIBRARY_NAME}_DEVELOPMENT_INSTALL)
 -- 
-2.49.0
+2.52.0
 

@@ -1,7 +1,7 @@
 From 13b8b2f6b1f00a4b77facce50b2896a6c924db21 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 6 May 2025 10:15:52 +0200
-Subject: [PATCH 07/11] COMP: Scope CPack blocks
+Subject: [PATCH] COMP: Scope CPack blocks
 
 Co-authored-by: Khai Duong <duongkhai@gmail.com>
 ---
@@ -253,5 +253,5 @@ index 507852cbf1..699d96cedd 100644
  # Install Slicer
  set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${Slicer_BINARY_DIR};Slicer;RuntimeLibraries;/")
 -- 
-2.49.0
+2.52.0
 

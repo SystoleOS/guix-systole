@@ -1,4 +1,4 @@
-From 6f95b742277e778071b7aa774ac01b7b708af281 Mon Sep 17 00:00:00 2001
+From 577aa02a0ce6e8552bc4213ec48f045cec4184ce Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 15:08:48 +0100
 Subject: [PATCH] COMP: Add qMRMLWidgets to standalone module widgets link deps

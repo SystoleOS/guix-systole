@@ -99,11 +99,12 @@
                  "0023-COMP-Add-VTK-CommonCore-to-SlicerMacroBuildModuleLog.patch"
                  "0024-COMP-Add-Qt5-Widgets-Xml-CTK-to-SlicerMacroBuildLoad.patch"
                  "0025-COMP-Fix-empty-Slicer_INSTALL_QTLOADABLEMODULES_INCL.patch"
-                 "0026-COMP-Add-qSlicerBaseQTCore-to-standalone-module-widg.patch"
-                 "0027-COMP-Add-EXTRA_MODULE_LIB_DIRS-to-module-build-macro.patch"
-                 "0028-COMP-Add-qMRMLWidgets-to-standalone-module-widgets-l.patch"
-                 "0029-COMP-Add-Slicer_GUI_LIBRARY-fallback-to-SlicerMacroB.patch"
-                 "0030-COMP-Add-Slicer-root-include-dir-to-SlicerMacroBuild.patch"
+                 "0025-COMP-Add-qSlicerBaseQTCore-to-standalone-module-widg.patch"
+                 "0026-COMP-Add-EXTRA_MODULE_LIB_DIRS-to-module-build-macro.patch"
+                 "0027-COMP-Add-qMRMLWidgets-to-standalone-module-widgets-l.patch"
+                 "0028-COMP-Add-Slicer_GUI_LIBRARY-fallback-to-SlicerMacroB.patch"
+                 "0029-COMP-Add-Slicer-root-include-dir-to-SlicerMacroBuild.patch"
+                 "0030-COMP-Add-qSlicerBaseQTCore-to-standalone-loadable-mo.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
