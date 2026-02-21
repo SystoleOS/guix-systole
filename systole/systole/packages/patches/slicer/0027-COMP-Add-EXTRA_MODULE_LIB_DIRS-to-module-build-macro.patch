@@ -1,0 +1,50 @@
+From 96189a3ffd828a121dc070def44e1f48b2b6c279 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 14:43:49 +0100
+Subject: [PATCH] COMP: Add EXTRA_MODULE_LIB_DIRS to module build macros for
+ inter-module deps
+
+Allow callers to inject extra library search paths via EXTRA_MODULE_LIB_DIRS
+cmake variable. This feeds into target_link_directories(PUBLIC ...) which is
+correctly positioned relative to -l flags in Ninja link commands, unlike
+CMAKE_SHARED_LINKER_FLAGS=-L... which is not reliably ordered.
+---
+ CMake/SlicerMacroBuildModuleQtLibrary.cmake | 5 +++++
+ CMake/SlicerMacroBuildModuleWidgets.cmake   | 5 +++++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/CMake/SlicerMacroBuildModuleQtLibrary.cmake b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+index cfcb4e40bc..eb87342268 100644
+--- a/CMake/SlicerMacroBuildModuleQtLibrary.cmake
++++ b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+@@ -110,6 +110,11 @@ macro(SlicerMacroBuildModuleQtLibrary)
+     unset(_qt_inc_root)
+     unset(_qt_loadable_subdirs)
+   endif()
++  # Allow callers to inject extra library search paths for inter-module deps
++  # (e.g. when one standalone module depends on another module's libraries).
++  if(DEFINED EXTRA_MODULE_LIB_DIRS)
++    list(APPEND MODULEQTLIBRARY_LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS})
++  endif()
+ 
+   # --------------------------------------------------------------------------
+   # Set <MODULEQTLIBRARY_NAME>_INCLUDE_DIRS
+diff --git a/CMake/SlicerMacroBuildModuleWidgets.cmake b/CMake/SlicerMacroBuildModuleWidgets.cmake
+index a9b46ac4f0..a502dea620 100644
+--- a/CMake/SlicerMacroBuildModuleWidgets.cmake
++++ b/CMake/SlicerMacroBuildModuleWidgets.cmake
+@@ -89,6 +89,11 @@ macro(SlicerMacroBuildModuleWidgets)
+         "${Slicer_HOME}/${Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR}"
+         )
+     endif()
++    # Allow callers to inject extra library search paths for inter-module deps
++    # (e.g. when one standalone module depends on another module's libraries).
++    if(DEFINED EXTRA_MODULE_LIB_DIRS)
++      list(APPEND MODULEWIDGETS_LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS})
++    endif()
+   endif()
+ 
+   if(NOT DEFINED MODULEWIDGETS_FOLDER AND DEFINED MODULE_NAME)
+-- 
+2.52.0
+
