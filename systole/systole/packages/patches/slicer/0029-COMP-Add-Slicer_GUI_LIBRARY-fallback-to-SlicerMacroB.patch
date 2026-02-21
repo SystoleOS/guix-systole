@@ -1,0 +1,46 @@
+From a46282ba1a77a15e30ae7324b87f8d4915155f5f Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 15:28:15 +0100
+Subject: [PATCH] COMP: Add Slicer_GUI_LIBRARY fallback to
+ SlicerMacroBuildModuleQtLibrary
+
+In a system install Slicer_GUI_LIBRARY is empty; add qSlicerBaseQTCore,
+qSlicerBaseQTGUI, qMRMLWidgets and CTKVisualizationVTKCore explicitly.
+Without this, SubjectHierarchyPlugins libraries (which use
+SlicerMacroBuildModuleQtLibrary) fail to link against qSlicerApplication
+and qSlicerCoreApplication symbols when --as-needed is active.
+---
+ CMake/SlicerMacroBuildModuleQtLibrary.cmake | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/CMake/SlicerMacroBuildModuleQtLibrary.cmake b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+index eb87342268..f164f82b3b 100644
+--- a/CMake/SlicerMacroBuildModuleQtLibrary.cmake
++++ b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+@@ -84,6 +84,23 @@ macro(SlicerMacroBuildModuleQtLibrary)
+     CTKVisualizationVTKWidgets
+     )
+ 
++  # In the superbuild Slicer_GUI_LIBRARY (e.g. qSlicerBaseQTApp) carries
++  # qSlicerBaseQTCore and qSlicerBaseQTGUI transitively.  In a system install
++  # it is empty; list them explicitly so that --as-needed does not drop them.
++  # qMRMLWidgets is also needed explicitly for the same reason.
++  if(Slicer_GUI_LIBRARY)
++    list(APPEND MODULEQTLIBRARY_TARGET_LIBRARIES
++      ${Slicer_GUI_LIBRARY}
++      )
++  else()
++    list(APPEND MODULEQTLIBRARY_TARGET_LIBRARIES
++      qSlicerBaseQTCore
++      qSlicerBaseQTGUI
++      qMRMLWidgets
++      CTKVisualizationVTKCore
++      )
++  endif()
++
+   # When building against an installed (non-superbuild) Slicer, headers and
+   # libraries from installed qt-loadable modules (SubjectHierarchy, Colors,
+   # etc.) are not covered by any Slicer_*_INCLUDE_DIRS / _LIBRARY_DIRS
+-- 
+2.52.0
+
