@@ -101,6 +101,7 @@
                  "0025-COMP-Fix-empty-Slicer_INSTALL_QTLOADABLEMODULES_INCL.patch"
                  "0026-COMP-Add-qSlicerBaseQTCore-to-standalone-module-widg.patch"
                  "0027-COMP-Add-EXTRA_MODULE_LIB_DIRS-to-module-build-macro.patch"
+                 "0028-COMP-Add-qMRMLWidgets-to-standalone-module-widgets-l.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
