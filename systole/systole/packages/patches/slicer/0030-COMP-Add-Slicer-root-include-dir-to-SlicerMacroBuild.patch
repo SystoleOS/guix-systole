@@ -1,0 +1,31 @@
+From 7af31c0bcbd7754375b40998dcdf6fba0144ed41 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 16:35:23 +0100
+Subject: [PATCH] COMP: Add Slicer root include dir to
+ SlicerMacroBuildModuleMRML
+
+vtkSlicerVersionConfigureMinimal.h lives in include/Slicer-X.Y/ which
+is not covered by Slicer_Libs_INCLUDE_DIRS (per-subdirectory paths).
+Add the root include directory so all MRML libraries can find top-level
+Slicer headers without per-module workarounds.
+---
+ CMake/SlicerMacroBuildModuleMRML.cmake | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/CMake/SlicerMacroBuildModuleMRML.cmake b/CMake/SlicerMacroBuildModuleMRML.cmake
+index 3377567916..5bd84d1291 100644
+--- a/CMake/SlicerMacroBuildModuleMRML.cmake
++++ b/CMake/SlicerMacroBuildModuleMRML.cmake
+@@ -52,6 +52,9 @@ macro(SlicerMacroBuildModuleMRML)
+   list(APPEND MODULEMRML_INCLUDE_DIRECTORIES
+     ${Slicer_Libs_INCLUDE_DIRS}
+     ${Slicer_ModuleMRML_INCLUDE_DIRS}
++    # Root Slicer include dir – provides vtkSlicerVersionConfigureMinimal.h
++    # and other top-level Slicer headers that are not under a sub-directory.
++    "${Slicer_HOME}/include/Slicer-${Slicer_VERSION_MAJOR}.${Slicer_VERSION_MINOR}"
+     )
+ 
+   if(NOT Slicer_SUPERBUILD)
+-- 
+2.52.0
+
