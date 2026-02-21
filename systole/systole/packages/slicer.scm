@@ -887,7 +887,9 @@ for navigating sequence items.  Built from the
   (make-slicer-loadable-module
    #:name "slicer-viewcontrollers-5.8"
    #:module-subdir "ViewControllers"
-   #:patches (list "viewcontrollers/0001-ENH-Add-standalone-CMake-build-support-for-ViewContr.patch")
+   #:patches (list "viewcontrollers/0001-ENH-Add-standalone-CMake-build-support-for-ViewContr.patch"
+                   "viewcontrollers/0002-ENH-Add-qMRMLWidgets-to-target-libraries.patch"
+                   )
    #:synopsis "3D Slicer ViewControllers loadable module"
    #:description
    "The ViewControllers loadable module extracted from 3D Slicer.  It

@@ -1,0 +1,26 @@
+From 0ff59461505eb779c60b2fd3485576d7d3b81a00 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 22:51:09 +0100
+Subject: [PATCH] ENH: Add qMRMLWidgets to target libraries
+
+This commit adds the qMRMLWidgets library as a dependency for the
+ViewControllers loadable module.
+---
+ Modules/Loadable/ViewControllers/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/Loadable/ViewControllers/CMakeLists.txt b/Modules/Loadable/ViewControllers/CMakeLists.txt
+index bde5d7acc1..f540ca77fe 100644
+--- a/Modules/Loadable/ViewControllers/CMakeLists.txt
++++ b/Modules/Loadable/ViewControllers/CMakeLists.txt
+@@ -60,6 +60,7 @@ set(MODULE_UI_SRCS
+ 
+ set(MODULE_TARGET_LIBRARIES
+   vtkSlicer${MODULE_NAME}ModuleLogic
++  qMRMLWidgets
+   )
+ 
+ set(MODULE_RESOURCES
+-- 
+2.52.0
+
