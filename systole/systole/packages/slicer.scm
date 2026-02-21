@@ -566,12 +566,52 @@ bar actor), and a subject hierarchy plugin for color legends.  Built from the
        #$slicer-subjecthierarchy-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
+(define-public slicer-annotations-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-annotations-5.8"
+   #:module-subdir "Annotations"
+   #:patches (list "annotations/0001-ENH-Add-standalone-CMake-build-support.patch")
+   #:synopsis "3D Slicer Annotations loadable module"
+   #:description
+   "The Annotations loadable module extracted from 3D Slicer.  It provides
+legacy annotation support for fiducials, rulers, and ROIs with backward
+compatibility for older Slicer scenes.  This module has been largely superseded
+by the Markups module but remains available for loading legacy annotation data.
+Built from the @file{Modules/Loadable/Annotations} subtree of the Slicer
+source tree."
+   ;; Annotations likely depends on SubjectHierarchy for plugins
+   #:extra-inputs (list slicer-subjecthierarchy-5.8)
+   #:extra-configure-flags
+   #~(list
+      ;; Include dirs for qSlicerSubjectHierarchyAbstractPlugin.h and friends.
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      ;; Include dirs for vtkSlicerSubjectHierarchyModuleLogic.h.
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      ;; Link directory for the SubjectHierarchy module libraries.
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules"))))
+
 (define-public slicer-markups-5.8
   (make-slicer-loadable-module
    #:name "slicer-markups-5.8"
    #:module-subdir "Markups"
    #:patches (list "markups/0001-ENH-Add-standalone-build-support-for-Markups-module.patch"
-                   "markups/0002-COMP-Add-vtkAddon-and-ITKCommon-to-Markups-MRML-link.patch")
+                   "markups/0002-COMP-Add-vtkAddon-and-ITKCommon-to-Markups-MRML-link.patch"
+                   "markups/0003-COMP-Add-Annotations-module-MRML-include-directory.patch"
+                   "markups/0004-ENH-Add-Annotations-module-MRML-include-directory-de.patch"
+                   "markups/0005-ENH-Add-LINK_DIRECTORIES-to-module-logic-build.patch"
+                   "markups/0006-ENH-Add-vtkSegmentationCore-dependency-to-SubjectHie.patch"
+                   "markups/0007-ENH-Add-vtkSlicerTerminologiesModuleLogic-dependency.patch"
+                   "markups/0008-ENH-Add-Annotations-module-logic-include-directory.patch"
+                   )
    #:synopsis "3D Slicer Markups loadable module"
    #:description
    "The Markups loadable module extracted from 3D Slicer.  It provides
