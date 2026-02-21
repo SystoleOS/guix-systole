@@ -1,0 +1,33 @@
+From ef6ab14ace68857de4cc7c0279c055cbbefda30b Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 13:51:26 +0100
+Subject: [PATCH 3/3] COMP: Remove vtkSlicerVolumesModuleLogic dep from
+ standalone SubjectHierarchy build
+
+---
+ Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt b/Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt
+index 5e6d1602da..23757c364b 100644
+--- a/Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt
+@@ -70,9 +70,14 @@ set(${KIT}_TARGET_LIBRARIES
+   vtkSlicer${MODULE_NAME}ModuleLogic
+   qSlicerTerminologiesModuleWidgets
+   MRMLCore
+-  vtkSlicerVolumesModuleLogic
+   MRMLCLI
+   )
++# vtkSlicerVolumesModuleLogic is only needed at runtime (Volumes plugin loaded
++# dynamically); no SubjectHierarchy Widgets source includes Volumes headers.
++# In standalone builds Volumes is not yet available, so skip the link dep.
++if(Slicer_SUPERBUILD)
++  list(APPEND ${KIT}_TARGET_LIBRARIES vtkSlicerVolumesModuleLogic)
++endif()
+ 
+ #-----------------------------------------------------------------------------
+ SlicerMacroBuildModuleWidgets(
+-- 
+2.52.0
+

@@ -1,0 +1,33 @@
+From 20327a8eaaa59eb956eac257ac69339d54520556 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 13:53:01 +0100
+Subject: [PATCH] COMP: Add qSlicerBaseQTCore to standalone module widgets link
+ deps
+
+---
+ CMake/SlicerMacroBuildModuleWidgets.cmake | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/CMake/SlicerMacroBuildModuleWidgets.cmake b/CMake/SlicerMacroBuildModuleWidgets.cmake
+index a1c84c39cb..a9b46ac4f0 100644
+--- a/CMake/SlicerMacroBuildModuleWidgets.cmake
++++ b/CMake/SlicerMacroBuildModuleWidgets.cmake
+@@ -64,12 +64,15 @@ macro(SlicerMacroBuildModuleWidgets)
+   # carries CTK transitively. In a system install it is empty; fall back to
+   # the actual provider of qSlicerWidget and add CTKVisualizationVTKCore
+   # explicitly since the transitive chain is broken.
++  # qSlicerBaseQTCore must also be listed explicitly: --as-needed prevents
++  # resolving qSlicerObject symbols transitively through qSlicerBaseQTGUI.
+   if(Slicer_GUI_LIBRARY)
+     list(APPEND MODULEWIDGETS_TARGET_LIBRARIES
+       ${Slicer_GUI_LIBRARY}
+       )
+   else()
+     list(APPEND MODULEWIDGETS_TARGET_LIBRARIES
++      qSlicerBaseQTCore
+       qSlicerBaseQTGUI
+       CTKVisualizationVTKCore
+       )
+-- 
+2.52.0
+
