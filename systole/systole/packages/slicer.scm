@@ -599,6 +599,12 @@ volume rendering and scalar-volume display capabilities and is built from the
        "-DvtkSlicerColorsModuleMRML_INCLUDE_DIRS="
        #$slicer-colors-5.8
        "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerColorsModuleMRML")
+      ;; Include dirs for qMRMLColorLegendDisplayNodeWidget.h (used by
+      ;; qSlicerVolumesModuleWidget.ui → ui_qSlicerVolumesModuleWidget.h).
+      (string-append
+       "-DqSlicerColorsModuleWidgets_INCLUDE_DIRS="
+       #$slicer-colors-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerColorsModuleWidgets")
       ;; Link directories for the SubjectHierarchy and Colors module libraries.
       ;; CMake list separator (;) allows passing multiple paths.
       (string-append
