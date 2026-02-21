@@ -1,0 +1,32 @@
+From a1f7881e966179fc4037097474d7f72606b31957 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 22:58:54 +0100
+Subject: [PATCH] ENH: Install generated UI headers from qMRMLWidgets for
+ standalone module builds
+
+---
+ Libs/MRML/Widgets/CMakeLists.txt | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/Libs/MRML/Widgets/CMakeLists.txt b/Libs/MRML/Widgets/CMakeLists.txt
+index ab4ec99daa..e0e37d33d7 100644
+--- a/Libs/MRML/Widgets/CMakeLists.txt
++++ b/Libs/MRML/Widgets/CMakeLists.txt
+@@ -441,6 +441,14 @@ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+   install(
+     FILES ${headers}
+     DESTINATION include/${PROJECT_NAME} COMPONENT Development)
++  # Also install generated UI headers: private _p.h headers include them and
++  # standalone modules that use those private headers need them at build time.
++  foreach(_ui_src ${MRMLWidgets_UI_SRCS})
++    get_filename_component(_ui_name "${_ui_src}" NAME_WE)
++    install(FILES
++      "${CMAKE_CURRENT_BINARY_DIR}/ui_${_ui_name}.h"
++      DESTINATION include/${PROJECT_NAME} COMPONENT Development)
++  endforeach()
+ endif()
+ 
+   # --------------------------------------------------------------------------
+-- 
+2.52.0
+
