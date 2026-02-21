@@ -1,0 +1,46 @@
+From 662f75c9257ce44429dfb3673492b04a29db4ec1 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 11:15:55 +0100
+Subject: [PATCH] ENH: Add standalone build support for Units module
+
+---
+ Modules/Loadable/Units/CMakeLists.txt | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/Modules/Loadable/Units/CMakeLists.txt b/Modules/Loadable/Units/CMakeLists.txt
+index aa90d14847..3812b28602 100644
+--- a/Modules/Loadable/Units/CMakeLists.txt
++++ b/Modules/Loadable/Units/CMakeLists.txt
+@@ -18,11 +18,29 @@
+ #
+ ################################################################################
+ 
++cmake_minimum_required(VERSION 3.31)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Units)
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++# UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR to empty
++# when Slicer_QTLOADABLEMODULES_SHARE_DIR is unset (standalone builds).
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++# Same issue for LIB_DIR.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ add_subdirectory(Widgets)
+-- 
+2.52.0
+

@@ -502,6 +502,18 @@ table management, color legend display nodes and widgets (including a scalar
 bar actor), and a subject hierarchy plugin for color legends.  Built from the
 @file{Modules/Loadable/Colors} subtree of the Slicer source tree."))
 
+(define-public slicer-units-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-units-5.8"
+   #:module-subdir "Units"
+   #:patches (list "units/0001-ENH-Add-standalone-build-support-for-Units-module.patch")
+   #:synopsis "3D Slicer Units loadable module"
+   #:description
+   "The Units loadable module extracted from 3D Slicer.  It provides
+measurement unit management (length, time, frequency, velocity, etc.) and
+a settings panel for configuring display precision.  Built from the
+@file{Modules/Loadable/Units} subtree of the Slicer source tree."))
+
 (define-public slicer-tables-5.8
   (make-slicer-loadable-module
    #:name "slicer-tables-5.8"
