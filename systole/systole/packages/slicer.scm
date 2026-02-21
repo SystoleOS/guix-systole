@@ -791,7 +791,10 @@ and multiple synchronized views.  Built from the
   (make-slicer-loadable-module
    #:name "slicer-models-5.8"
    #:module-subdir "Models"
-   #:patches (list "models/0001-ENH-Add-standalone-CMake-build-support-for-Models-mo.patch")
+   #:patches (list "models/0001-ENH-Add-standalone-CMake-build-support-for-Models-mo.patch"
+                   "models/0002-ENH-Add-MRMLCore-dependency-to-Widgets-target-librar.patch"
+                   "models/0003-ENH-Add-missing-vtkSegmentationCore-dependency-and-l.patch"
+                   )
    #:synopsis "3D Slicer Models loadable module"
    #:description
    "The Models loadable module extracted from 3D Slicer.  It provides
