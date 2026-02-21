@@ -1,7 +1,7 @@
 From 251d91ea23ad9dea17802471a1acd1b35f03349b Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Mon, 12 May 2025 11:23:55 +0200
-Subject: [PATCH 11/11] ENH: Add installation of Slicer base development files
+Subject: [PATCH] ENH: Add installation of Slicer base development files
 
 ---
  Base/CMakeLists.txt                | 40 +++++++++++++++++++++++++-----
@@ -191,5 +191,5 @@ index 19eeef67cf..d2df6b945a 100644
    "${Slicer_HOME}/include/Slicer-5.8/qSlicerBaseQTGUI"
    "${Slicer_HOME}/include/Slicer-5.8/qSlicerBaseQTCore"
 -- 
-2.49.0
+2.52.0
 

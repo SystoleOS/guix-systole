@@ -1,7 +1,7 @@
 From 02ddeaff44292c3c9118f78bf227802f37f6aaec Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 6 May 2025 19:01:32 +0200
-Subject: [PATCH 09/11] COMP: Fix path for SlicerConfig.cmake and
+Subject: [PATCH] COMP: Fix path for SlicerConfig.cmake and
  SlicerConfigVersion.cmake
 
 ---
@@ -347,5 +347,5 @@ index 375f490983..f7a1aca06c 100644
    unset(VTK_DIR CACHE)
    unset(VTK_SOURCE_DIR CACHE)
 -- 
-2.49.0
+2.52.0
 
