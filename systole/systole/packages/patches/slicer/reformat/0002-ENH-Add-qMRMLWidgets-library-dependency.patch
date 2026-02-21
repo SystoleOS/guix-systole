@@ -1,0 +1,24 @@
+From 68c98cabdd5668bd7990ea7493cdbe77c72f1ec8 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 23:13:59 +0100
+Subject: [PATCH] ENH: Add qMRMLWidgets library dependency
+
+---
+ Modules/Loadable/Reformat/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/Loadable/Reformat/CMakeLists.txt b/Modules/Loadable/Reformat/CMakeLists.txt
+index ebc37e6d7c..0a99cee243 100644
+--- a/Modules/Loadable/Reformat/CMakeLists.txt
++++ b/Modules/Loadable/Reformat/CMakeLists.txt
+@@ -62,6 +62,7 @@ set(MODULE_UI_SRCS
+ 
+ set(MODULE_TARGET_LIBRARIES
+   vtkSlicer${MODULE_NAME}ModuleLogic
++  qMRMLWidgets
+   )
+ 
+ set(MODULE_RESOURCES
+-- 
+2.52.0
+
