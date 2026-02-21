@@ -506,7 +506,7 @@ bar actor), and a subject hierarchy plugin for color legends.  Built from the
   (make-slicer-loadable-module
    #:name "slicer-tables-5.8"
    #:module-subdir "Tables"
-   #:patches (list)
+   #:patches (list "tables/0001-ENH-Add-standalone-build-support-for-Tables-module.patch")
    #:synopsis "3D Slicer Tables loadable module"
    #:description
    "The Tables loadable module extracted from 3D Slicer.  It provides
