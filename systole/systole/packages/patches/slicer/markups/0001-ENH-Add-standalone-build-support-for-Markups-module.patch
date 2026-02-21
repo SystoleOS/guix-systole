@@ -1,0 +1,51 @@
+From 98bfee30109f8ec6182c8fb25e7070fa3e1c7785 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 16:03:25 +0100
+Subject: [PATCH] ENH: Add standalone build support for Markups module
+
+---
+ Modules/Loadable/Markups/CMakeLists.txt | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/Modules/Loadable/Markups/CMakeLists.txt b/Modules/Loadable/Markups/CMakeLists.txt
+index f9d02636a8..beff1b4bab 100644
+--- a/Modules/Loadable/Markups/CMakeLists.txt
++++ b/Modules/Loadable/Markups/CMakeLists.txt
+@@ -1,9 +1,34 @@
++#-----------------------------------------------------------------------------
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
++#-----------------------------------------------------------------------------
++project(Markups)
+ 
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME "Markups")
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++
++#-----------------------------------------------------------------------------
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++
++# UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR to empty
++# when Slicer_QTLOADABLEMODULES_SHARE_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++# UseSlicer.cmake also resets Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR to empty
++# when Slicer_QTLOADABLEMODULES_LIB_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(MRML)
+ add_subdirectory(VTKWidgets)
+-- 
+2.52.0
+

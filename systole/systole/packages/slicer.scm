@@ -565,6 +565,70 @@ bar actor), and a subject hierarchy plugin for color legends.  Built from the
        #$slicer-subjecthierarchy-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
+(define-public slicer-markups-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-markups-5.8"
+   #:module-subdir "Markups"
+   #:patches (list "markups/0001-ENH-Add-standalone-build-support-for-Markups-module.patch")
+   #:synopsis "3D Slicer Markups loadable module"
+   #:description
+   "The Markups loadable module extracted from 3D Slicer.  It provides
+annotation and markup support including fiducials, lines, angles, curves,
+planes, and ROIs, along with a subject hierarchy plugin and legacy Annotations
+format reader.  Built from the @file{Modules/Loadable/Markups} subtree of
+the Slicer source tree."
+   ;; SubjectHierarchyPlugins depend on SubjectHierarchy, Terminologies and
+   ;; Colors; the top-level module also links against Colors.
+   #:extra-inputs (list slicer-subjecthierarchy-5.8
+                        slicer-terminologies-5.8
+                        slicer-colors-5.8)
+   #:extra-configure-flags
+   #~(list
+      ;; RapidJSON is used by Markups/MRML but not re-exported by Slicer.
+      (string-append "-DRapidJSON_DIR="
+                     #$rapidjson
+                     "/lib/cmake/RapidJSON")
+      ;; Include dirs for SubjectHierarchy (SubjectHierarchyPlugins + top-level).
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      ;; Include dirs for Terminologies (SubjectHierarchyPlugins).
+      (string-append
+       "-DqSlicerTerminologiesModuleWidgets_INCLUDE_DIRS="
+       #$slicer-terminologies-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerTerminologiesModuleWidgets")
+      (string-append
+       "-DvtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS="
+       #$slicer-terminologies-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerTerminologiesModuleLogic")
+      ;; Include dirs for Colors (top-level module).
+      (string-append
+       "-DvtkSlicerColorsModuleLogic_INCLUDE_DIRS="
+       #$slicer-colors-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerColorsModuleLogic")
+      (string-append
+       "-DvtkSlicerColorsModuleMRML_INCLUDE_DIRS="
+       #$slicer-colors-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerColorsModuleMRML")
+      (string-append
+       "-DqSlicerColorsModuleWidgets_INCLUDE_DIRS="
+       #$slicer-colors-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerColorsModuleWidgets")
+      ;; Library search paths for all three external modules.
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-terminologies-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-colors-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules"))))
+
 (define-public slicer-volumes-5.8
   (make-slicer-loadable-module
    #:name "slicer-volumes-5.8"
