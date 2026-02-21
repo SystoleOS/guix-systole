@@ -104,6 +104,7 @@
                  "0028-COMP-Add-Slicer_GUI_LIBRARY-fallback-to-SlicerMacroB.patch"
                  "0029-COMP-Add-Slicer-root-include-dir-to-SlicerMacroBuild.patch"
                  "0030-COMP-Add-qSlicerBaseQTCore-to-standalone-loadable-mo.patch"
+                 "0031-ENH-Install-generated-UI-headers-from-qMRMLWidgets-f.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
