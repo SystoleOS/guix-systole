@@ -1,0 +1,44 @@
+From 7288000c7ca1b57d6f33c6a5a81cd78d68a691c1 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 19:38:29 +0100
+Subject: [PATCH] ENH: Add standalone CMake build support
+
+Add CMake configuration to enable building Annotations module independently outside of the main Slicer build. This includes setting minimum CMake version, finding Slicer package, and handling install directory variables that get reset in standalone builds.
+---
+ Modules/Loadable/Annotations/CMakeLists.txt | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/Modules/Loadable/Annotations/CMakeLists.txt b/Modules/Loadable/Annotations/CMakeLists.txt
+index fff9aa0212..e4ff969854 100644
+--- a/Modules/Loadable/Annotations/CMakeLists.txt
++++ b/Modules/Loadable/Annotations/CMakeLists.txt
+@@ -1,8 +1,26 @@
++cmake_minimum_required(VERSION 3.31)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME "Annotations")
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++# UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR to empty
++# when Slicer_QTLOADABLEMODULES_SHARE_DIR is unset (standalone builds).
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++# Same issue for LIB_DIR.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(MRML)
+ add_subdirectory(Logic)
+-- 
+2.52.0
+
