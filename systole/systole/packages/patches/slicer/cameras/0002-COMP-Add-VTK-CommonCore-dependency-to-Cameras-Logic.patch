@@ -1,0 +1,28 @@
+From 2735487400825dc02714317ce2fbe3ced757d42f Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 11:27:39 +0100
+Subject: [PATCH 2/3] COMP: Add VTK::CommonCore dependency to Cameras Logic
+
+VTK 9.x has empty VTK_INCLUDE_DIRS; headers only propagate through CMake
+IMPORTED targets.  The Logic library had an empty TARGET_LIBRARIES list so
+nothing brought vtkObject.h into the include path.  Adding VTK::CommonCore
+fixes the missing vtkObject.h error in standalone builds.
+---
+ Modules/Loadable/Cameras/Logic/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/Loadable/Cameras/Logic/CMakeLists.txt b/Modules/Loadable/Cameras/Logic/CMakeLists.txt
+index acfdf3b744..373928fa50 100644
+--- a/Modules/Loadable/Cameras/Logic/CMakeLists.txt
++++ b/Modules/Loadable/Cameras/Logic/CMakeLists.txt
+@@ -13,6 +13,7 @@ set(${KIT}_SRCS
+   )
+ 
+ set(${KIT}_TARGET_LIBRARIES
++  VTK::CommonCore
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+

@@ -48,6 +48,7 @@ test_package "(systole packages slicer)" "slicer-terminologies-5.8"
 test_package "(systole packages slicer)" "slicer-colors-5.8"
 test_package "(systole packages slicer)" "slicer-units-5.8"
 test_package "(systole packages slicer)" "slicer-tables-5.8"
+test_package "(systole packages slicer)" "slicer-cameras-5.8"
 
 # Test CTK
 test_package "(systole packages ctk)" "ctk"
