@@ -1,7 +1,7 @@
 From f311611aa6b98b66bbb0600afe1044f92cd15b7b Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 6 May 2025 10:14:00 +0200
-Subject: [PATCH 05/11] COMP: Add vtk dependency to MRMLWidgets
+Subject: [PATCH] COMP: Add vtk dependency to MRMLWidgets
 
 Co-authored-by: Khai Duong <duongkhai@gmail.com>
 ---
@@ -21,5 +21,5 @@ index 7df4a7b653..ab4ec99daa 100644
    MRMLDisplayableManager
    VTK::RenderingQt
 -- 
-2.49.0
+2.52.0
 

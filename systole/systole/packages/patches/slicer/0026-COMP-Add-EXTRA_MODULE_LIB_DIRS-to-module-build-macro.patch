@@ -1,4 +1,4 @@
-From 96189a3ffd828a121dc070def44e1f48b2b6c279 Mon Sep 17 00:00:00 2001
+From 23328670048cf47fd0faad6ba78beaa1581dcd98 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 14:43:49 +0100
 Subject: [PATCH] COMP: Add EXTRA_MODULE_LIB_DIRS to module build macros for

@@ -1,15 +1,23 @@
-commit be7ac24975e648ab466a389f2a2a26dff844bf64
-Author: Rafael Palomar <rafael.palomar@ous-research.no>
-Date:   Fri Feb 20 17:45:13 2026 +0100
+From be7ac24975e648ab466a389f2a2a26dff844bf64 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 20 Feb 2026 17:45:13 +0100
+Subject: [PATCH] [ENH] improve CMake support for system-installed Slicer
+ builds
 
-    [ENH] improve CMake support for system-installed Slicer builds
-    
-    - Add qt-loadable-modules lib directories to link paths for external builds
-    - Fallback to qSlicerBaseQTGUI when Slicer_GUI_LIBRARY is unset
-    - Add CTK library dirs and explicit CTKVisualizationVTKCore linking
-    - Include per-module subdirectories in qt-loadable include paths
-    - Make Terminologies module buildable standalone with proper Slicer find_package
-    - Skip Python wrapping when Slicer_USE_PYTHONQT is disabled
+- Add qt-loadable-modules lib directories to link paths for external builds
+- Fallback to qSlicerBaseQTGUI when Slicer_GUI_LIBRARY is unset
+- Add CTK library dirs and explicit CTKVisualizationVTKCore linking
+- Include per-module subdirectories in qt-loadable include paths
+- Make Terminologies module buildable standalone with proper Slicer find_package
+- Skip Python wrapping when Slicer_USE_PYTHONQT is disabled
+---
+ CMake/SlicerMacroBuildLoadableModule.cmake    | 16 ++++++++++-
+ CMake/SlicerMacroBuildModuleLogic.cmake       |  5 ++++
+ CMake/SlicerMacroBuildModuleQtLibrary.cmake   | 27 ++++++++++++++-----
+ CMake/SlicerMacroBuildModuleWidgets.cmake     | 23 +++++++++++++---
+ Modules/Loadable/Terminologies/CMakeLists.txt | 13 +++++++++
+ .../Terminologies/Logic/CMakeLists.txt        |  6 +++++
+ 6 files changed, 80 insertions(+), 10 deletions(-)
 
 diff --git a/CMake/SlicerMacroBuildLoadableModule.cmake b/CMake/SlicerMacroBuildLoadableModule.cmake
 index c2d5d1b129..52ecb10adc 100644
@@ -150,3 +158,56 @@ index e358b38bd0..a1c84c39cb 100644
    endif()
  
    if(NOT DEFINED MODULEWIDGETS_FOLDER AND DEFINED MODULE_NAME)
+diff --git a/Modules/Loadable/Terminologies/CMakeLists.txt b/Modules/Loadable/Terminologies/CMakeLists.txt
+index 6d3e2117cf..df5a8b2edf 100644
+--- a/Modules/Loadable/Terminologies/CMakeLists.txt
++++ b/Modules/Loadable/Terminologies/CMakeLists.txt
+@@ -1,8 +1,21 @@
++#-----------------------------------------------------------------------------
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
++#-----------------------------------------------------------------------------
++project(Terminologies)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME "Terminologies")
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++
++#-----------------------------------------------------------------------------
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ add_subdirectory(Widgets)
+diff --git a/Modules/Loadable/Terminologies/Logic/CMakeLists.txt b/Modules/Loadable/Terminologies/Logic/CMakeLists.txt
+index 2c87302ff9..c620e49615 100644
+--- a/Modules/Loadable/Terminologies/Logic/CMakeLists.txt
++++ b/Modules/Loadable/Terminologies/Logic/CMakeLists.txt
+@@ -24,6 +24,11 @@ set(${KIT}_SRCS
+ set(${KIT}_TARGET_LIBRARIES
+   )
+ 
++set(DISABLE_WRAP_PYTHON)
++if(NOT Slicer_USE_PYTHONQT)
++  set(DISABLE_WRAP_PYTHON DISABLE_WRAP_PYTHON)
++endif()
++
+ #-----------------------------------------------------------------------------
+ SlicerMacroBuildModuleLogic(
+   NAME ${KIT}
+@@ -31,6 +36,7 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  ${DISABLE_WRAP_PYTHON}
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+
