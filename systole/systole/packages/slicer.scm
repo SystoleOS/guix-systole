@@ -852,14 +852,36 @@ of the Slicer source tree."
   (make-slicer-loadable-module
    #:name "slicer-sequences-5.8"
    #:module-subdir "Sequences"
-   #:patches (list "sequences/0001-ENH-Add-standalone-CMake-build-support-for-Sequences.patch")
+   #:patches (list "sequences/0001-ENH-Add-standalone-CMake-build-support-for-Sequences.patch"
+                   "sequences/0002-ENH-Add-Markups-MRML-include-directories-to-Logic.patch"
+                   "sequences/0003-COMP-Guard-DesignerPlugins-subdirectory-with-Slicer_.patch")
    #:synopsis "3D Slicer Sequences loadable module"
    #:description
    "The Sequences loadable module extracted from 3D Slicer.  It provides
 support for storing and replaying time-sequences of MRML nodes (e.g.
 4D image series, tracked tool trajectories), including a browser widget
 for navigating sequence items.  Built from the
-@file{Modules/Loadable/Sequences} subtree of the Slicer source tree."))
+@file{Modules/Loadable/Sequences} subtree of the Slicer source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.8
+                        slicer-terminologies-5.8
+                        slicer-colors-5.8)
+   #:extra-configure-flags
+   #~(list
+      ;; Markups includes (top-level module)
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      ;; Link directories for all three external modules
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-terminologies-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-colors-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules"))
+   ))
 
 (define-public slicer-viewcontrollers-5.8
   (make-slicer-loadable-module
