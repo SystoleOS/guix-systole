@@ -1,0 +1,45 @@
+From 33f6ebfa43d7d642b9711226740a10d85c3ffe4d Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 13:12:03 +0100
+Subject: [PATCH 1/2] ENH: Add standalone build support for SubjectHierarchy
+ module
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+---
+ .../Loadable/SubjectHierarchy/CMakeLists.txt   | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/Modules/Loadable/SubjectHierarchy/CMakeLists.txt b/Modules/Loadable/SubjectHierarchy/CMakeLists.txt
+index d085446f6f..d9bbd0fa33 100644
+--- a/Modules/Loadable/SubjectHierarchy/CMakeLists.txt
++++ b/Modules/Loadable/SubjectHierarchy/CMakeLists.txt
+@@ -1,8 +1,26 @@
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME "SubjectHierarchy")
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++# UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR to empty
++# when Slicer_QTLOADABLEMODULES_SHARE_DIR is unset (standalone builds).
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++# Same issue for LIB_DIR.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ add_subdirectory(Widgets)
+-- 
+2.52.0
+
