@@ -527,3 +527,17 @@ a settings panel for configuring display precision.  Built from the
 spreadsheet-style display and editing of MRML table nodes, including support
 for adding, removing, and renaming columns of various types.  Built from the
 @file{Modules/Loadable/Tables} subtree of the Slicer source tree."))
+
+(define-public slicer-cameras-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-cameras-5.8"
+   #:module-subdir "Cameras"
+   #:patches (list "cameras/0001-ENH-Add-standalone-build-support-for-Cameras-module.patch"
+                   "cameras/0002-COMP-Add-VTK-CommonCore-dependency-to-Cameras-Logic.patch"
+                   "cameras/0003-COMP-Add-Qt5-Widgets-and-Qt5-Xml-to-Cameras-module.patch")
+   #:synopsis "3D Slicer Cameras loadable module"
+   #:description
+   "The Cameras loadable module extracted from 3D Slicer.  It manages camera
+nodes in the MRML scene, allowing persistent camera positions across sessions
+and multiple synchronized views.  Built from the
+@file{Modules/Loadable/Cameras} subtree of the Slicer source tree."))

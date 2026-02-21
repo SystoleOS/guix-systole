@@ -1,0 +1,30 @@
+From 7cc6aa0ede8810450800a343e0214962096134cd Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 11:31:03 +0100
+Subject: [PATCH 3/3] COMP: Add Qt5::Widgets and Qt5::Xml to Cameras module
+
+Cameras has no Widgets sublibrary, so Qt5 include dirs do not propagate
+transitively through MODULE_TARGET_LIBRARIES.  SlicerMacroBuildLoadableModule
+does not auto-add Qt5 targets, so CTK headers (e.g. ctkPimpl.h) that
+include <QtGlobal> fail to compile.  Add Qt5::Widgets and Qt5::Xml
+explicitly, matching the pattern used in SlicerMacroBuildModuleQtLibrary.
+---
+ Modules/Loadable/Cameras/CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Modules/Loadable/Cameras/CMakeLists.txt b/Modules/Loadable/Cameras/CMakeLists.txt
+index 3ad4fd857a..8fc8d24792 100644
+--- a/Modules/Loadable/Cameras/CMakeLists.txt
++++ b/Modules/Loadable/Cameras/CMakeLists.txt
+@@ -45,6 +45,8 @@ set(MODULE_UI_SRCS
+ 
+ set(MODULE_TARGET_LIBRARIES
+   vtkSlicer${MODULE_NAME}ModuleLogic
++  Qt5::Widgets
++  Qt5::Xml
+   )
+ 
+ set(MODULE_RESOURCES
+-- 
+2.52.0
+
