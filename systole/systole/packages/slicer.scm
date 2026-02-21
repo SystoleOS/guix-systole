@@ -99,6 +99,7 @@
                  "0023-COMP-Add-VTK-CommonCore-to-SlicerMacroBuildModuleLog.patch"
                  "0024-COMP-Add-Qt5-Widgets-Xml-CTK-to-SlicerMacroBuildLoad.patch"
                  "0025-COMP-Fix-empty-Slicer_INSTALL_QTLOADABLEMODULES_INCL.patch"
+                 "0026-COMP-Add-qSlicerBaseQTCore-to-standalone-module-widg.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -471,17 +472,6 @@ visualization and medical image computing. It provides capabilities for:
    (description description)
    (license (package-license slicer-5.8))))
 
-(define-public slicer-volumes-5.8
-  (make-slicer-loadable-module
-   #:name "slicer-volumes-5.8"
-   #:module-subdir "Volumes"
-   #:patches (list "volumes/0001-ENH-Make-Volumes-a-separate-module.patch")
-   #:synopsis "3D Slicer Volumes loadable module"
-   #:description
-   "The Volumes loadable module extracted from 3D Slicer.  It provides
-volume rendering and scalar-volume display capabilities and is built from the
-@file{Modules/Loadable/Volumes} subtree of the Slicer source tree."))
-
 (define-public slicer-terminologies-5.8
   (make-slicer-loadable-module
    #:name "slicer-terminologies-5.8"
@@ -508,7 +498,8 @@ modifier look-ups backed by JSON terminology files) and is built from the
    #:name "slicer-subjecthierarchy-5.8"
    #:module-subdir "SubjectHierarchy"
    #:patches (list "subjecthierarchy/0001-ENH-Add-standalone-build-support-for-SubjectHierarch.patch"
-                   "subjecthierarchy/0002-COMP-Add-vtkSlicerTerminologiesModuleLogic-include-d.patch")
+                   "subjecthierarchy/0002-COMP-Add-vtkSlicerTerminologiesModuleLogic-include-d.patch"
+                   "subjecthierarchy/0003-COMP-Remove-vtkSlicerVolumesModuleLogic-dep-from-sta.patch")
    #:synopsis "3D Slicer SubjectHierarchy loadable module"
    #:description
    "The SubjectHierarchy loadable module extracted from 3D Slicer.  It provides
@@ -517,8 +508,8 @@ hierarchy tree view, plugin infrastructure for per-node context menus, and
 default plugins for cloning, folding, opacity, visibility, and registration
 actions.  Built from the @file{Modules/Loadable/SubjectHierarchy} subtree of
 the Slicer source tree."
-   ;; SubjectHierarchy Widgets link against Terminologies and Volumes modules.
-   #:extra-inputs (list slicer-terminologies-5.8 slicer-volumes-5.8)
+   ;; SubjectHierarchy Widgets link against Terminologies module.
+   #:extra-inputs (list slicer-terminologies-5.8)
    #:extra-configure-flags
    #~(list
       ;; Include dirs for qSlicerTerminologyItemDelegate.h and friends.
@@ -532,12 +523,10 @@ the Slicer source tree."
        "-DvtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS="
        #$slicer-terminologies-5.8
        "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerTerminologiesModuleLogic")
-      ;; Link directories for the Terminologies and Volumes module libraries.
+      ;; Link directory for the Terminologies module libraries.
       (string-append
        "-DCMAKE_SHARED_LINKER_FLAGS=-L"
        #$slicer-terminologies-5.8
-       "/lib/Slicer-5.8/qt-loadable-modules -L"
-       #$slicer-volumes-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
 (define-public slicer-colors-5.8
@@ -570,6 +559,48 @@ bar actor), and a subject hierarchy plugin for color legends.  Built from the
       (string-append
        "-DCMAKE_SHARED_LINKER_FLAGS=-L"
        #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules"))))
+
+(define-public slicer-volumes-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-volumes-5.8"
+   #:module-subdir "Volumes"
+   #:patches (list "volumes/0001-ENH-Make-Volumes-a-separate-module.patch")
+   #:synopsis "3D Slicer Volumes loadable module"
+   #:description
+   "The Volumes loadable module extracted from 3D Slicer.  It provides
+volume rendering and scalar-volume display capabilities and is built from the
+@file{Modules/Loadable/Volumes} subtree of the Slicer source tree."
+   ;; Volumes SubjectHierarchyPlugins link against SubjectHierarchy and Colors.
+   #:extra-inputs (list slicer-subjecthierarchy-5.8 slicer-colors-5.8)
+   #:extra-configure-flags
+   #~(list
+      ;; Include dirs for qSlicerSubjectHierarchyAbstractPlugin.h and friends.
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      ;; Include dirs for vtkSlicerSubjectHierarchyModuleLogic.h.
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      ;; Include dirs for vtkSlicerColorLogic.h.
+      (string-append
+       "-DvtkSlicerColorsModuleLogic_INCLUDE_DIRS="
+       #$slicer-colors-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerColorsModuleLogic")
+      ;; Include dirs for vtkMRMLColorLegendDisplayNode.h.
+      (string-append
+       "-DvtkSlicerColorsModuleMRML_INCLUDE_DIRS="
+       #$slicer-colors-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerColorsModuleMRML")
+      ;; Link directories for the SubjectHierarchy and Colors module libraries.
+      (string-append
+       "-DCMAKE_SHARED_LINKER_FLAGS=-L"
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules -L"
+       #$slicer-colors-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
 (define-public slicer-units-5.8
