@@ -1,0 +1,48 @@
+From ff509a4762df2bf2691e0744cf26649fe3901a8b Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 21 Feb 2026 21:38:48 +0100
+Subject: [PATCH] ENH: Add standalone CMake build support for ViewControllers
+ module
+
+---
+ .../Loadable/ViewControllers/CMakeLists.txt   | 26 +++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/Modules/Loadable/ViewControllers/CMakeLists.txt b/Modules/Loadable/ViewControllers/CMakeLists.txt
+index 49989a9c9d..bde5d7acc1 100644
+--- a/Modules/Loadable/ViewControllers/CMakeLists.txt
++++ b/Modules/Loadable/ViewControllers/CMakeLists.txt
+@@ -1,4 +1,30 @@
+ 
++#-----------------------------------------------------------------------------
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
++#-----------------------------------------------------------------------------
++project(ViewControllers)
++
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++
++#-----------------------------------------------------------------------------
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++
++# UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR to empty
++# when Slicer_QTLOADABLEMODULES_SHARE_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++# UseSlicer.cmake also resets Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR to empty
++# when Slicer_QTLOADABLEMODULES_LIB_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME ViewControllers)
+ 
+-- 
+2.52.0
+
