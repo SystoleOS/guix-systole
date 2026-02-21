@@ -102,6 +102,7 @@
                  "0026-COMP-Add-qSlicerBaseQTCore-to-standalone-module-widg.patch"
                  "0027-COMP-Add-EXTRA_MODULE_LIB_DIRS-to-module-build-macro.patch"
                  "0028-COMP-Add-qMRMLWidgets-to-standalone-module-widgets-l.patch"
+                 "0029-COMP-Add-Slicer_GUI_LIBRARY-fallback-to-SlicerMacroB.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
