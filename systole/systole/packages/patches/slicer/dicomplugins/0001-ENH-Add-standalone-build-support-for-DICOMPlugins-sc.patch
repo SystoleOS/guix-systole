@@ -1,0 +1,47 @@
+From acb2633c192829bb94b743f4212b765163eb3aee Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 18:20:07 +0100
+Subject: [PATCH] ENH: Add standalone build support for DICOMPlugins scripted
+ module
+
+---
+ Modules/Scripted/DICOMPlugins/CMakeLists.txt | 21 +++++++++++++++++++-
+ 1 file changed, 20 insertions(+), 1 deletion(-)
+
+diff --git a/Modules/Scripted/DICOMPlugins/CMakeLists.txt b/Modules/Scripted/DICOMPlugins/CMakeLists.txt
+index d0aa8b33b9..69f2d0440d 100644
+--- a/Modules/Scripted/DICOMPlugins/CMakeLists.txt
++++ b/Modules/Scripted/DICOMPlugins/CMakeLists.txt
+@@ -1,3 +1,22 @@
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++project(DICOMPlugins)
++
++set(CMAKE_CXX_STANDARD "17")
++
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++
++# Slicer_QTSCRIPTEDMODULES_LIB_DIR and Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR
++# are only populated when Slicer is built with Slicer_BUILD_QTSCRIPTEDMODULES=ON.
++if(NOT Slicer_QTSCRIPTEDMODULES_LIB_DIR)
++  set(Slicer_QTSCRIPTEDMODULES_LIB_DIR
++      "lib/Slicer-${Slicer_VERSION}/qt-scripted-modules")
++endif()
++if(NOT Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR
++      "lib/Slicer-${Slicer_VERSION}/qt-scripted-modules")
++endif()
++
+ 
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME DICOMPlugins)
+@@ -20,4 +39,4 @@ slicerMacroBuildScriptedModule(
+   NAME ${MODULE_NAME}
+   SCRIPTS ${MODULE_PYTHON_SCRIPTS}
+   RESOURCES ${MODULE_PYTHON_RESOURCES}
+-  )
++  )
+\ No newline at end of file
+-- 
+2.52.0
+
