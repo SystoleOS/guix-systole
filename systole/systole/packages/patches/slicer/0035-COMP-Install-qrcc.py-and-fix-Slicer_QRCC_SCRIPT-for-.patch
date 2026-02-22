@@ -1,4 +1,4 @@
-From 4de37a76fe1a12f74916da18c0f7709401bccc5a Mon Sep 17 00:00:00 2001
+From 77371d8ad9527db33745b75b295f5049dbd89c95 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sun, 22 Feb 2026 18:28:59 +0100
 Subject: [PATCH] COMP: Install qrcc.py and fix Slicer_QRCC_SCRIPT for
@@ -13,9 +13,10 @@ Install qrcc.py to ${Slicer_INSTALL_SHARE_DIR}/Scripts/ and update
 SlicerConfig.cmake.in to compute Slicer_QRCC_SCRIPT relative to Slicer_HOME
 and Slicer_INSTALL_SHARE_DIR so the path is always valid in the install tree.
 ---
- CMake/SlicerConfig.cmake.in | 3 ++-
- CMakeLists.txt              | 4 ++++
- 2 files changed, 6 insertions(+), 1 deletion(-)
+ CMake/SlicerConfig.cmake.in        | 3 ++-
+ CMake/SlicerInstallConfig.cmake.in | 1 +
+ CMakeLists.txt                     | 4 ++++
+ 3 files changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/CMake/SlicerConfig.cmake.in b/CMake/SlicerConfig.cmake.in
 index f85e432ccc..28c91e1c8a 100644
@@ -31,6 +32,18 @@ index f85e432ccc..28c91e1c8a 100644
  # Test templates directory
  set(Slicer_CXX_MODULE_TEST_TEMPLATES_DIR "@Slicer_CXX_MODULE_TEST_TEMPLATES_DIR_CONFIG@")
 @@ -345,6 +345,7 @@ set(Slicer_INSTALL_BIN_DIR "@Slicer_INSTALL_BIN_DIR@")
+ set(Slicer_INSTALL_LIB_DIR "@Slicer_INSTALL_LIB_DIR@")
+ set(Slicer_INSTALL_INCLUDE_DIR "@Slicer_INSTALL_INCLUDE_DIR@")
+ set(Slicer_INSTALL_SHARE_DIR "@Slicer_INSTALL_SHARE_DIR@")
++set(Slicer_QRCC_SCRIPT "${Slicer_HOME}/${Slicer_INSTALL_SHARE_DIR}/Scripts/qrcc.py")
+ set(Slicer_INSTALL_ITKFACTORIES_DIR "@Slicer_INSTALL_ITKFACTORIES_DIR@")
+ 
+ set(Slicer_INSTALL_CLIMODULES_BIN_DIR "@Slicer_INSTALL_CLIMODULES_BIN_DIR@")
+diff --git a/CMake/SlicerInstallConfig.cmake.in b/CMake/SlicerInstallConfig.cmake.in
+index d2df6b945a..4d26388e22 100644
+--- a/CMake/SlicerInstallConfig.cmake.in
++++ b/CMake/SlicerInstallConfig.cmake.in
+@@ -149,6 +149,7 @@ set(Slicer_INSTALL_BIN_DIR "@Slicer_INSTALL_BIN_DIR@")
  set(Slicer_INSTALL_LIB_DIR "@Slicer_INSTALL_LIB_DIR@")
  set(Slicer_INSTALL_INCLUDE_DIR "@Slicer_INSTALL_INCLUDE_DIR@")
  set(Slicer_INSTALL_SHARE_DIR "@Slicer_INSTALL_SHARE_DIR@")
