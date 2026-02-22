@@ -1620,3 +1620,70 @@ applies the same crop-volume ROI to every item in a sequence node, enabling
 batch cropping of 4D image series to a user-defined region of interest.  Built
 from the @file{Modules/Scripted/CropVolumeSequence} subtree of the Slicer
 source tree."))
+
+(define-public slicer-webserver-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-webserver-5.8"
+   #:module-subdir "WebServer"
+   #:patches (list "webserver/0001-ENH-Add-standalone-build-support-for-WebServer-scrip.patch")
+   #:synopsis "3D Slicer WebServer scripted module"
+   #:description
+   "The WebServer scripted module extracted from 3D Slicer.  It embeds a
+lightweight HTTP server inside Slicer that exposes REST endpoints for scene
+inspection, DICOM browsing, and remote rendering, together with a built-in
+web client served from the module's docroot.  Built from the
+@file{Modules/Scripted/WebServer} subtree of the Slicer source tree."))
+
+(define-public slicer-dicompatcher-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-dicompatcher-5.8"
+   #:module-subdir "DICOMPatcher"
+   #:patches (list "dicompatcher/0001-ENH-Add-standalone-build-support-for-DICOMPatcher-sc.patch")
+   #:synopsis "3D Slicer DICOMPatcher scripted module"
+   #:description
+   "The DICOMPatcher scripted module extracted from 3D Slicer.  It provides a
+graphical interface for fixing common DICOM conformance issues in series
+imported into the Slicer DICOM database, including missing or malformed tags,
+incorrect transfer syntax, and multi-frame conversion.  Built from the
+@file{Modules/Scripted/DICOMPatcher} subtree of the Slicer source tree."))
+
+(define-public slicer-dicomplugins-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-dicomplugins-5.8"
+   #:module-subdir "DICOMPlugins"
+   #:patches (list "dicomplugins/0001-ENH-Add-standalone-build-support-for-DICOMPlugins-sc.patch")
+   #:synopsis "3D Slicer DICOMPlugins scripted module"
+   #:description
+   "The DICOMPlugins scripted module extracted from 3D Slicer.  It provides the
+core set of DICOM import plugins used by the Slicer DICOM browser, including
+scalar volume, enhanced ultrasound volume, image sequence, volume sequence,
+GEABUS, and Slicer data bundle readers.  Built from the
+@file{Modules/Scripted/DICOMPlugins} subtree of the Slicer source tree."))
+
+(define-public slicer-segmenteditor-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-segmenteditor-5.8"
+   #:module-subdir "SegmentEditor"
+   #:patches (list "segmenteditor/0001-ENH-Add-standalone-build-support-for-SegmentEditor-s.patch")
+   #:synopsis "3D Slicer SegmentEditor scripted module"
+   #:description
+   "The SegmentEditor scripted module extracted from 3D Slicer.  It provides an
+interactive segmentation editor supporting multiple effect plugins (paint,
+draw, erase, threshold, grow from seeds, fill between slices, etc.) and
+operates on segmentation nodes backed by the MRML Segmentations framework.
+Built from the @file{Modules/Scripted/SegmentEditor} subtree of the Slicer
+source tree."))
+
+(define-public slicer-segmentstatistics-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-segmentstatistics-5.8"
+   #:module-subdir "SegmentStatistics"
+   #:patches (list "segmentstatistics/0001-ENH-Add-standalone-build-support-for-SegmentStatisti.patch")
+   #:synopsis "3D Slicer SegmentStatistics scripted module"
+   #:description
+   "The SegmentStatistics scripted module extracted from 3D Slicer.  It computes
+quantitative statistics (volume, surface area, mean intensity, etc.) for each
+segment in a segmentation node using a plugin-based architecture that supports
+labelmap, scalar volume, and closed-surface measurement backends.  Built from
+the @file{Modules/Scripted/SegmentStatistics} subtree of the Slicer source
+tree."))
