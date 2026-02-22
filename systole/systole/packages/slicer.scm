@@ -27,6 +27,7 @@
   #:use-module (gnu packages gl)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages image)
+  #:use-module (gnu packages image-processing)  ; for dcmtk
   #:use-module (gnu packages libffi)
   #:use-module (gnu packages maths)
   #:use-module (gnu packages mpi)
@@ -697,7 +698,10 @@ the Slicer source tree."
 volume rendering and scalar-volume display capabilities and is built from the
 @file{Modules/Loadable/Volumes} subtree of the Slicer source tree."
    ;; Volumes SubjectHierarchyPlugins link against SubjectHierarchy and Colors.
-   #:extra-inputs (list slicer-subjecthierarchy-5.8 slicer-colors-5.8)
+   ;; dcmtk is needed at runtime: libqSlicerVolumesModule.so directly links
+   ;; against libi2d.so.19 and other DCMTK libraries (via CTK DICOM widgets).
+   ;; Adding it as a direct input ensures its lib path ends up in the RUNPATH.
+   #:extra-inputs (list slicer-subjecthierarchy-5.8 slicer-colors-5.8 dcmtk)
    #:extra-configure-flags
    #~(list
       ;; Include dirs for qSlicerSubjectHierarchyAbstractPlugin.h and friends.
@@ -1120,9 +1124,13 @@ provides CPU and GPU ray-cast volume rendering of scalar and multi-volume
 data sets, including transfer-function presets, shader-property MRML nodes,
 and a subject-hierarchy plugin.  Built from the
 @file{Modules/Loadable/VolumeRendering} subtree of the Slicer source tree."
+   ;; dcmtk is needed at runtime: libqSlicerVolumeRenderingModule.so directly
+   ;; links against DCMTK libraries (via CTK DICOM widgets).  Adding it as a
+   ;; direct input ensures its lib path ends up in the RUNPATH.
    #:extra-inputs (list slicer-subjecthierarchy-5.8
                         slicer-markups-5.8
-                        slicer-volumes-5.8)
+                        slicer-volumes-5.8
+                        dcmtk)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -1159,8 +1167,7 @@ and a subject-hierarchy plugin.  Built from the
    #:name "slicer-transforms-5.8"
    #:module-subdir "Transforms"
    #:patches (list "transforms/0001-ENH-Add-standalone-CMake-build-support-for-Transform.patch"
-                   "transforms/0002-COMP-add-missing-CMake-dependencies.patch"
-                   "transforms/0003-COMP-Add-Markups-module-MRML-include-directory.patch")
+                   "transforms/0002-COMP-add-missing-CMake-dependencies.patch")
    #:synopsis "3D Slicer Transforms loadable module"
    #:description
    "The Transforms loadable module extracted from 3D Slicer.  It provides
