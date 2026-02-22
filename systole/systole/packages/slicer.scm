@@ -1105,6 +1105,42 @@ representations, and subject-hierarchy integration.  Built from the
        #$slicer-markups-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
+(define-public slicer-transforms-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-transforms-5.8"
+   #:module-subdir "Transforms"
+   #:patches (list "transforms/0001-ENH-Add-standalone-CMake-build-support-for-Transform.patch"
+                   "transforms/0002-COMP-add-missing-CMake-dependencies.patch")
+   #:synopsis "3D Slicer Transforms loadable module"
+   #:description
+   "The Transforms loadable module extracted from 3D Slicer.  It provides
+interactive display and editing of spatial transformation nodes (linear,
+B-spline, and grid transforms) in 2D and 3D views, together with a
+subject-hierarchy plugin for managing transform hierarchies.  Built from
+the @file{Modules/Loadable/Transforms} subtree of the Slicer source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.8
+                        slicer-markups-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-markups-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules"))))
+
 (define-public slicer-texts-5.8
   (make-slicer-loadable-module
    #:name "slicer-texts-5.8"
@@ -1176,6 +1212,7 @@ tree."))
         slicer-reformat-5.8
         slicer-plots-5.8
         slicer-sceneviews-5.8
+        slicer-transforms-5.8
         slicer-texts-5.8
         slicer-slicerwelcome-5.8
         slicer-segmentations-5.8))
@@ -1194,7 +1231,7 @@ tree."))
      "Meta-package that installs 3D Slicer 5.8 together with all its
 standalone loadable modules (Terminologies, SubjectHierarchy, Colors,
 Volumes, Units, Tables, Cameras, Data, Annotations, Markups, Models,
-Sequences, ViewControllers, Reformat, Plots, SceneViews, Segmentations,
+Sequences, ViewControllers, Reformat, Plots, SceneViews, Transforms,
 Texts, and Welcome).")
     (home-page (package-home-page slicer-5.8))
     (license (package-license slicer-5.8))))

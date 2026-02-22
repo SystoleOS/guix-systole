@@ -1,0 +1,108 @@
+From 76ff4b8f75dc21ab23e977f67a5b8a6151fbf091 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 10:16:42 +0100
+Subject: [PATCH] ENH: Add standalone CMake build support for Transforms module
+
+---
+ Modules/Loadable/Transforms/CMakeLists.txt    | 25 +++++++++++++++++++
+ .../Loadable/Transforms/Logic/CMakeLists.txt  |  1 +
+ .../Loadable/Transforms/MRMLDM/CMakeLists.txt |  5 +---
+ .../SubjectHierarchyPlugins/CMakeLists.txt    |  1 +
+ .../Transforms/Widgets/CMakeLists.txt         |  3 +--
+ 5 files changed, 29 insertions(+), 6 deletions(-)
+
+diff --git a/Modules/Loadable/Transforms/CMakeLists.txt b/Modules/Loadable/Transforms/CMakeLists.txt
+index f9e6d5fd18..388ef79f83 100644
+--- a/Modules/Loadable/Transforms/CMakeLists.txt
++++ b/Modules/Loadable/Transforms/CMakeLists.txt
+@@ -1,3 +1,27 @@
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
++#-----------------------------------------------------------------------------
++project(Transforms)
++
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++
++#-----------------------------------------------------------------------------
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++
++# UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR to empty
++# when Slicer_QTLOADABLEMODULES_SHARE_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++# UseSlicer.cmake also resets Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR to empty
++# when Slicer_QTLOADABLEMODULES_LIB_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
+ 
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Transforms)
+@@ -65,6 +89,7 @@ slicerMacroBuildLoadableModule(
+   TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
+   RESOURCES ${MODULE_RESOURCES}
+   WITH_GENERIC_TESTS
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+ 
+ #-----------------------------------------------------------------------------
+diff --git a/Modules/Loadable/Transforms/Logic/CMakeLists.txt b/Modules/Loadable/Transforms/Logic/CMakeLists.txt
+index affa5e4966..b9718da8b6 100644
+--- a/Modules/Loadable/Transforms/Logic/CMakeLists.txt
++++ b/Modules/Loadable/Transforms/Logic/CMakeLists.txt
+@@ -25,6 +25,7 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+ 
+ if(BUILD_TESTING)
+diff --git a/Modules/Loadable/Transforms/MRMLDM/CMakeLists.txt b/Modules/Loadable/Transforms/MRMLDM/CMakeLists.txt
+index 4e86d93fea..647e7d0aad 100644
+--- a/Modules/Loadable/Transforms/MRMLDM/CMakeLists.txt
++++ b/Modules/Loadable/Transforms/MRMLDM/CMakeLists.txt
+@@ -5,10 +5,7 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+-  ${vtkSlicer${MODULE_NAME}ModuleLogic_SOURCE_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleLogic_BINARY_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleMRML_SOURCE_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleMRML_BINARY_DIR}
++  ${vtkSlicer${MODULE_NAME}ModuleLogic_INCLUDE_DIRS}
+   ${CMAKE_CURRENT_BINARY_DIR}
+   )
+ 
+diff --git a/Modules/Loadable/Transforms/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/Transforms/SubjectHierarchyPlugins/CMakeLists.txt
+index afdfee5b78..7ad84af747 100644
+--- a/Modules/Loadable/Transforms/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Transforms/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -52,4 +52,5 @@ SlicerMacroBuildModuleQtLibrary(
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   RESOURCES ${${KIT}_RESOURCES}
+   WRAP_PYTHONQT
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+diff --git a/Modules/Loadable/Transforms/Widgets/CMakeLists.txt b/Modules/Loadable/Transforms/Widgets/CMakeLists.txt
+index 1fe36ecd89..60d5ebfb1f 100644
+--- a/Modules/Loadable/Transforms/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/Transforms/Widgets/CMakeLists.txt
+@@ -5,8 +5,7 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_MODULE_${MODULE_NAME_UPPER}_WIDGETS_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+-  ${vtkSlicer${MODULE_NAME}ModuleLogic_SOURCE_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleLogic_BINARY_DIR}
++  ${vtkSlicer${MODULE_NAME}ModuleLogic_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+-- 
+2.52.0
+
