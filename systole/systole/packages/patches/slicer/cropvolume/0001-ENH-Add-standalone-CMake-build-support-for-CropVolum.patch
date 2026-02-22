@@ -1,0 +1,72 @@
+From 28e1eb91a01e413e966c224256a36363619279c0 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 09:04:56 +0100
+Subject: [PATCH] ENH: Add standalone CMake build support for CropVolume module
+
+Add the standard standalone build preamble (cmake_minimum_required,
+project, find_package(Slicer), include(UseSlicer),
+Slicer_INSTALL_QTLOADABLEMODULES_* guards).  Replace
+vtkSlicerVolumesModuleLogic_SOURCE_DIR / _BINARY_DIR with a single
+vtkSlicerVolumesModuleLogic_INCLUDE_DIRS variable so the installed
+Volumes logic headers can be provided via a CMake configure flag.
+Also add LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS} to the loadable
+module target for external library resolution.
+---
+ Modules/Loadable/CropVolume/CMakeLists.txt | 29 ++++++++++++++++++++--
+ 1 file changed, 27 insertions(+), 2 deletions(-)
+
+diff --git a/Modules/Loadable/CropVolume/CMakeLists.txt b/Modules/Loadable/CropVolume/CMakeLists.txt
+index 269e9a0ac5..0bd81bedff 100644
+--- a/Modules/Loadable/CropVolume/CMakeLists.txt
++++ b/Modules/Loadable/CropVolume/CMakeLists.txt
+@@ -1,4 +1,29 @@
+ 
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
++#-----------------------------------------------------------------------------
++project(CropVolume)
++
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++
++#-----------------------------------------------------------------------------
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++
++# UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR to empty
++# when Slicer_QTLOADABLEMODULES_SHARE_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++# UseSlicer.cmake also resets Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR to empty
++# when Slicer_QTLOADABLEMODULES_LIB_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME CropVolume)
+ 
+@@ -15,8 +40,7 @@ set(MODULE_EXPORT_DIRECTIVE "Q_SLICER_QTMODULES_${MODULE_NAME_UPPER}_EXPORT")
+ set(MODULE_INCLUDE_DIRECTORIES
+   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets
+   ${CMAKE_CURRENT_BINARY_DIR}/Widgets
+-  ${vtkSlicerVolumesModuleLogic_SOURCE_DIR}
+-  ${vtkSlicerVolumesModuleLogic_BINARY_DIR}
++  ${vtkSlicerVolumesModuleLogic_INCLUDE_DIRS}
+   )
+ 
+ set(MODULE_SRCS
+@@ -56,6 +80,7 @@ slicerMacroBuildLoadableModule(
+   TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
+   RESOURCES ${MODULE_RESOURCES}
+   WITH_GENERIC_TESTS
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+
