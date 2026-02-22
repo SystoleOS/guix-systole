@@ -1105,6 +1105,19 @@ representations, and subject-hierarchy integration.  Built from the
        #$slicer-markups-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
+(define-public slicer-slicerwelcome-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-slicerwelcome-5.8"
+   #:module-subdir "SlicerWelcome"
+   #:patches (list "slicerwelcome/0001-ENH-Add-standalone-CMake-build-support-for-SlicerWel.patch")
+   #:synopsis "3D Slicer Welcome loadable module"
+   #:description
+   "The Welcome loadable module extracted from 3D Slicer.  It provides the
+Welcome screen shown to new users, with quick-access buttons for loading
+data, accessing recent files, and linking to online resources.  Built from
+the @file{Modules/Loadable/SlicerWelcome} subtree of the Slicer source
+tree."))
+
 ;;;
 ;;; Meta-package
 ;;;
@@ -1127,6 +1140,7 @@ representations, and subject-hierarchy integration.  Built from the
         slicer-reformat-5.8
         slicer-plots-5.8
         slicer-sceneviews-5.8
+        slicer-slicerwelcome-5.8
         slicer-segmentations-5.8))
 
 (define-public slicer-all-5.8
@@ -1143,7 +1157,7 @@ representations, and subject-hierarchy integration.  Built from the
      "Meta-package that installs 3D Slicer 5.8 together with all its
 standalone loadable modules (Terminologies, SubjectHierarchy, Colors,
 Volumes, Units, Tables, Cameras, Data, Annotations, Markups, Models,
-Sequences, ViewControllers, Reformat, Plots, SceneViews, and
-Segmentations).")
+Sequences, ViewControllers, Reformat, Plots, SceneViews, Segmentations,
+and Welcome).")
     (home-page (package-home-page slicer-5.8))
     (license (package-license slicer-5.8))))
