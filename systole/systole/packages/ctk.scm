@@ -247,8 +247,11 @@ Plugin Framework.")
                              "/lib/cmake/dcmtk"))))
     (inputs
      (modify-inputs (package-inputs ctk)
-       ;; Use the Python-enabled VTK so CTKConfig.cmake references vtk-slicer-python,
-       ;; preventing a duplicate-VTK cmake target conflict in slicer-python-5.8.
+       ;; Use Python-enabled VTK and ITK so their cmake configs reference
+       ;; vtk-slicer-python.  itk-slicer hard-codes VTK_DIR in ITKVtkGlue.cmake;
+       ;; using itk-slicer-python ensures find_package(VTK) resolves to
+       ;; vtk-slicer-python throughout the build.
        (replace "vtk-slicer" vtk-slicer-python)
+       (replace "itk-slicer" itk-slicer-python)
        (prepend pythonqt-commontk
                 qtmultimedia-5)))))
