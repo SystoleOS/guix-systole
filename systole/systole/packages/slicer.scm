@@ -1715,3 +1715,36 @@ an interactive wizard for creating new Slicer extensions and module templates,
 managing template search paths, and editing extension metadata.  Built from
 the @file{Modules/Scripted/ExtensionWizard} subtree of the Slicer source
 tree."))
+
+(define-public slicer-dicomlib-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-dicomlib-5.8"
+   #:module-subdir "DICOMLib"
+   #:patches (list "dicomlib/0001-ENH-Add-standalone-build-support-for-DICOMLib-script.patch")
+   #:synopsis "3D Slicer DICOMLib scripted module"
+   #:description
+   "The DICOMLib scripted module extracted from 3D Slicer.  It provides the
+core DICOM infrastructure: C++ logic for loadable and exportable series
+descriptors, Qt widgets for DICOM export dialogs and tag editing, a
+subject-hierarchy DICOM plugin, and Python utilities for DICOM database
+management, series import, and export.  Built from the
+@file{Modules/Scripted/DICOMLib} subtree of the Slicer source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-python-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-python-5.8
+       "/lib/Slicer-5.8"))))
