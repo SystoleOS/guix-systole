@@ -1378,13 +1378,16 @@ export SLICER_HOME=~a
 # core Slicer shared libraries live; add them explicitly.
 export LD_LIBRARY_PATH=~a/lib/Slicer-5.8:~a/lib/Slicer-5.8/qt-loadable-modules${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
-# Slicer Python packages (slicer, mrml, vtkITK, …) live in bin/Python.
-# Python C extension modules (MRMLCorePython.so, SlicerBaseLogicPython.so,
-# qMRMLWidgetsPythonQt.so, etc.) are installed to lib/Slicer-5.8/.
-# CTK Python bindings (ctk, qt) live in ctk-python/bin/Python.
-# vtkAddonPython.so is in vtkaddon-python/lib/ (no python3.11 subdir).
-# VTK wrapper modules live in vtk-slicer-python/lib/python3.11/site-packages.
-export PYTHONPATH=~a/bin/Python:~a/lib/Slicer-5.8:~a/bin/Python:~a/lib:~a/lib/python3.11/site-packages:~a/lib/python3.11/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+# Python module locations:
+#   slicer/bin/Python          — .py wrappers (mrml.py, vtkAddon.py, slicer/, …)
+#   slicer/lib/Slicer-5.8     — C extension .so (MRMLCorePython, SlicerBaseLogicPython,
+#                                 qMRMLWidgetsPythonQt, qSlicerBaseQT*PythonQt, …)
+#   ctk-python/bin/Python      — ctk/ and qt/ Python packages (ctk/__init__.py, …)
+#   ctk-python/lib             — CTK PythonQt extension .so (CTKWidgetsPythonQt, …)
+#   vtkaddon-python/lib        — vtkAddonPython.so (no python3.11 subdir)
+#   vtk-slicer-python/lib/…    — VTK Python modules (vtkmodules/)
+#   vtkaddon-python/lib/…      — vtkAddon Python module
+export PYTHONPATH=~a/bin/Python:~a/lib/Slicer-5.8:~a/bin/Python:~a/lib:~a/lib:~a/lib/python3.11/site-packages:~a/lib/python3.11/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 # Required for QtWebEngine in environments without user namespaces.
 export QTWEBENGINE_DISABLE_SANDBOX=1
@@ -1406,6 +1409,7 @@ exec ~a ${module_path_args} \"$@\"~%"
                              out          ; PYTHONPATH: slicer bin/Python
                              out          ; PYTHONPATH: slicer lib/Slicer-5.8 (Python .so)
                              #$ctk-python ; PYTHONPATH: ctk-python bin/Python
+                             #$ctk-python ; PYTHONPATH: ctk-python lib (CTK*PythonQt.so)
                              #$vtkaddon-python ; PYTHONPATH: vtkaddon-python lib (vtkAddonPython.so)
                              #$vtk-slicer-python
                              #$vtkaddon-python
