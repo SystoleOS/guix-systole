@@ -1,0 +1,111 @@
+From 0000000000000000000000000000000000000002 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 22 Feb 2025 00:00:00 +0100
+Subject: [PATCH] ENH: Install missing Python-wrapping cmake support files
+
+CTK uses find_package(PythonQt) in ctkMacroWrapPythonQt.cmake, but does
+not install a FindPythonQt.cmake module.  Downstream consumers such as
+3D Slicer add CTK_CMAKE_DIR to CMAKE_MODULE_PATH and then call
+find_package(PythonQt REQUIRED) themselves; without this module the call
+fails even when PYTHONQT_INSTALL_DIR is set.
+
+Additionally, ctkMacroWrapPythonQt.cmake calls configure_file() on
+ctkMacroWrapPythonQtModuleInit.cpp.in and invokes ctkWrapPythonQt.py
+at build time.  Both files must be installed alongside the cmake modules
+or downstream builds fail when Python wrapping is enabled.
+
+Changes:
+- Add CMake/FindPythonQt.cmake: standard find module that locates PythonQt
+  via the PYTHONQT_INSTALL_DIR hint and exports PYTHONQT_FOUND,
+  PYTHONQT_INCLUDE_DIR, and PYTHONQT_LIBRARIES.
+- Install CMake/ctkMacroWrapPythonQtModuleInit.cpp.in: C++ module init
+  template consumed by ctkMacroWrapPythonQt at build time.
+- Install CMake/ctkWrapPythonQt.py: Python wrapper generator script also
+  consumed by ctkMacroWrapPythonQt at build time.
+---
+ CMake/FindPythonQt.cmake | 63 ++++++++++++++++++++++++++++++++++++++++
+ CMakeLists.txt           |  3 +
+ 2 files changed, 66 insertions(+)
+ create mode 100644 CMake/FindPythonQt.cmake
+
+diff --git a/CMake/FindPythonQt.cmake b/CMake/FindPythonQt.cmake
+new file mode 100644
+--- /dev/null
++++ b/CMake/FindPythonQt.cmake
+@@ -0,0 +1,63 @@
++# FindPythonQt
++# ------------
++#
++# Find PythonQt, a dynamic Python binding for the Qt framework.
++#
++# This module uses ``PYTHONQT_INSTALL_DIR`` as the primary hint.
++#
++# Result variables
++# ^^^^^^^^^^^^^^^^
++#
++# This module will set the following variables in your project:
++#
++# ``PYTHONQT_FOUND``
++#   True if PythonQt was found.
++#
++# ``PYTHONQT_INCLUDE_DIR``
++#   The directory containing PythonQt header files (e.g. PythonQt.h).
++#
++# ``PYTHONQT_LIBRARIES``
++#   List of libraries required to link against PythonQt.
++#
++# ``PYTHONQT_INSTALL_DIR``
++#   The PythonQt installation prefix.  Provide this on input as a hint;
++#   the module sets it on output to the detected prefix when it was not
++#   already defined.
++#
++# Hint variables
++# ^^^^^^^^^^^^^^
++#
++# ``PYTHONQT_INSTALL_DIR``
++#   Preferred installation prefix for PythonQt.
++#
++
++include(FindPackageHandleStandardArgs)
++
++find_path(PYTHONQT_INCLUDE_DIR PythonQt.h
++  HINTS
++    "${PYTHONQT_INSTALL_DIR}"
++  PATH_SUFFIXES
++    include/PythonQt
++    include
++  )
++
++find_library(PYTHONQT_LIBRARY
++  NAMES PythonQt
++  HINTS
++    "${PYTHONQT_INSTALL_DIR}"
++  PATH_SUFFIXES
++    lib
++  )
++
++find_package_handle_standard_args(PythonQt
++  REQUIRED_VARS PYTHONQT_INCLUDE_DIR PYTHONQT_LIBRARY
++  )
++
++if(PYTHONQT_FOUND)
++  set(PYTHONQT_LIBRARIES "${PYTHONQT_LIBRARY}")
++  if(NOT PYTHONQT_INSTALL_DIR)
++    get_filename_component(PYTHONQT_INSTALL_DIR "${PYTHONQT_INCLUDE_DIR}/../.." ABSOLUTE)
++  endif()
++endif()
++
++mark_as_advanced(PYTHONQT_INCLUDE_DIR PYTHONQT_LIBRARY)
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -204,6 +204,9 @@ foreach(file
+   Libs/ctkExport.h.in
+   CMake/ctkLinkerAsNeededFlagCheck.cmake
+   CMake/ctk_compile_python_scripts.cmake.in
++  CMake/ctkMacroWrapPythonQtModuleInit.cpp.in
++  CMake/ctkWrapPythonQt.py
++  CMake/FindPythonQt.cmake
+   )
+   install(FILES ${file} DESTINATION ${CTK_INSTALL_CMAKE_DIR} COMPONENT Development)
+ endforeach()

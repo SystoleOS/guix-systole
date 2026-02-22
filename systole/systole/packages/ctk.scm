@@ -1,19 +1,19 @@
-;; 
+;;
 ;; Copyright @ 2025 Oslo University Hospital
 ;;
 ;; This file is part of SystoleOS.
 ;;
-;; SystoleOS is free software: you can redistribute it and/or modify it under the 
-;; terms of the GNU General Public License as published by the Free Software 
+;; SystoleOS is free software: you can redistribute it and/or modify it under the
+;; terms of the GNU General Public License as published by the Free Software
 ;; Foundation, either version 3 of the License, or (at your option) any later version.
 ;;
-;; SystoleOS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-;; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+;; SystoleOS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+;; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
 ;; PURPOSE. See the GNU General Public License for more details.
 ;;
-;; You should have received a copy of the GNU General Public License along 
+;; You should have received a copy of the GNU General Public License along
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
-;; 
+;;
 
 (define-module (systole packages ctk)
   #:use-module (gnu packages algebra)           ; Eigen3
@@ -41,6 +41,7 @@
   #:use-module (guix packages)
   #:use-module (systole packages itk)
   #:use-module (systole packages maths)
+  #:use-module (systole packages pythonqt)
   #:use-module (systole packages vtk)
   #:use-module (systole packages))
 
@@ -57,7 +58,9 @@
      (sha256
       (base32 "1g2jv4hjimf4baqbmpmc29ara2f8gk8604g1v8k243x882f0ls9z"))
      (patches (search-patches
-               "0001-ENH-Fix-locating-DCMTK-when-using-CTK.patch"))
+               "0001-ENH-Fix-locating-DCMTK-when-using-CTK.patch"
+               "0002-ENH-Add-FindPythonQt.cmake-to-installed-cmake-modules.patch"
+               "0003-COMP-Fix-VTK-include-dirs-missing-when-PYTHONQT-USE-VTK.patch"))
      ))
    (build-system cmake-build-system)
    (arguments
@@ -176,3 +179,76 @@ Plugin Framework.")
    (description
     "Simple and small program allowing to set the environment of any executable.")
    (license license:asl2.0)))
+
+;; Python-enabled CTK variant.  Uses pythonqt-commontk for PythonQt bindings
+;; and enables all Qt-module wrappings except QtWebKit (absent in Qt 5.6+).
+;; The VTK PythonQt bridge (PYTHONQT_USE_VTK) is ON so that
+;; ctkVTKPythonQtWrapperFactory is compiled into libCTKVisualizationVTKCore —
+;; Slicer's qSlicerCorePythonManager unconditionally references this symbol.
+(define-public ctk-python
+  (package
+    (inherit ctk)
+    (name "ctk-python")
+    (arguments
+     (list #:tests? #f
+           #:parallel-build? #t
+           #:configure-flags
+           #~(list
+              ;; --------------------------- Build Flags ---------------------------
+              "-DCTK_USE_GIT_PROTOCOL:BOOL=OFF"
+              "-DCTK_SUPERBUILD:BOOL=OFF"
+              "-DBUILD_TESTING:BOOL=OFF"
+              "-DCTK_INSTALL_LIB_DIR=lib"
+              "-DCTK_BUILD_QTDESIGNER_PLUGINS:BOOL=ON"
+              ;; -------------------------- CTKdata flags --------------------------
+              "-DCTK_ENABLE_CTKDATA:BOOL=OFF"
+              ;; ---------------------------- VTK flags ----------------------------
+              "-DCTK_USE_SYSTEM_VTK:BOOL=ON"
+              ;; ---------------------------- ITK flags ----------------------------
+              "-DCTK_USE_SYSTEM_ITK:BOOL=ON"
+              ;; --------------------------- DICOM Flags ---------------------------
+              "-DCTK_USE_SYSTEM_DCMTK:BOOL=ON"
+              "-DCTK_APP_ctkDICOM:BOOL=ON"
+              "-DCTK_LIB_DICOM/Core:BOOL=ON"
+              "-DCTK_LIB_DICOM/Widgets:BOOL=ON"
+              ;; ------------------------ CTK Widgets Flags-------------------------
+              "-DCTK_LIB_Widgets:BOOL=ON"
+              "-DCTK_LIB_Visualization/VTK/Widgets:BOOL=ON"
+              "-DCTK_LIB_Visualization/VTK/Widgets_USE_TRANSFER_FUNCTION_CHARTS:BOOL=ON"
+              "-DCTK_LIB_ImageProcessing/ITK/Core:BOOL=ON"
+              "-DCTK_LIB_PluginFramework:BOOL=OFF"
+              "-DCTK_PLUGIN_org.commontk.eventbus:BOOL=OFF"
+              ;; ---------------------- PythonQt wrapping — ON ---------------------
+              "-DCTK_LIB_Scripting/Python/Core:BOOL=ON"
+              ;; VTK bridge ON: ctkVTKPythonQtWrapperFactory is required by Slicer
+              "-DCTK_LIB_Scripting/Python/Core_PYTHONQT_USE_VTK:BOOL=ON"
+              "-DCTK_LIB_Scripting/Python/Core_PYTHONQT_WRAP_QTCORE:BOOL=ON"
+              "-DCTK_LIB_Scripting/Python/Core_PYTHONQT_WRAP_QTGUI:BOOL=ON"
+              "-DCTK_LIB_Scripting/Python/Core_PYTHONQT_WRAP_QTUITOOLS:BOOL=ON"
+              "-DCTK_LIB_Scripting/Python/Core_PYTHONQT_WRAP_QTNETWORK:BOOL=ON"
+              "-DCTK_LIB_Scripting/Python/Core_PYTHONQT_WRAP_QTMULTIMEDIA:BOOL=ON"
+              ;; QtWebKit absent in Qt 5.6+ → OFF
+              "-DCTK_LIB_Scripting/Python/Core_PYTHONQT_WRAP_QTWEBKIT:BOOL=OFF"
+              "-DCTK_LIB_Scripting/Python/Widgets:BOOL=ON"
+              "-DCTK_ENABLE_Python_Wrapping:BOOL=ON"
+              ;; PythonQt location (CTK uses PYTHONQT_INSTALL_DIR, not PythonQt_DIR)
+              (string-append "-DPYTHONQT_INSTALL_DIR="
+                             #$(this-package-input "pythonqt-commontk"))
+              ;; Guix Python 3.11
+              (string-append "-DPython3_EXECUTABLE="
+                             #$(this-package-input "python") "/bin/python3")
+              (string-append "-DPython3_INCLUDE_DIR="
+                             #$(this-package-input "python") "/include/python3.11")
+              (string-append "-DPython3_LIBRARY="
+                             #$(this-package-input "python") "/lib/libpython3.11.so")
+              ;; DCMTK (same as ctk)
+              (string-append "-DDCMTK_DIR:PATH="
+                             #$(this-package-input "dcmtk")
+                             "/lib/cmake/dcmtk"))))
+    (inputs
+     (modify-inputs (package-inputs ctk)
+       ;; Use the Python-enabled VTK so CTKConfig.cmake references vtk-slicer-python,
+       ;; preventing a duplicate-VTK cmake target conflict in slicer-python-5.8.
+       (replace "vtk-slicer" vtk-slicer-python)
+       (prepend pythonqt-commontk
+                qtmultimedia-5)))))

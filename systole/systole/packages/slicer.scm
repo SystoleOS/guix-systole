@@ -57,6 +57,7 @@
   #:use-module (systole packages itk)
   #:use-module (systole packages libarchive)
   #:use-module (systole packages maths)
+  #:use-module (systole packages pythonqt)
   #:use-module (systole packages qrestapi)
   #:use-module (systole packages teem)
   #:use-module (systole packages vtk)
@@ -1293,3 +1294,120 @@ Sequences, ViewControllers, Reformat, Plots, SceneViews, Transforms,
 Texts, and Welcome).")
     (home-page (package-home-page slicer-5.8))
     (license (package-license slicer-5.8))))
+
+;;;
+;;; Python-enabled Slicer variant
+;;;
+
+;; slicer-python-5.8 is an (inherit slicer-5.8) variant that enables the full
+;; Python stack: PythonQt (via CTK), VTK Python wrappers, and Qt-scripted
+;; modules.  It uses the *-python variants of CTK, VTK, and vtkAddon.
+;;
+;; The existing slicer-5.8 and all slicer-*-5.8 loadable modules are NOT
+;; modified — they continue to use the non-Python stack.  C++ loadable modules
+;; do not need Python wrappers at build time; they access the Python layer at
+;; runtime through slicer-python-5.8's bindings.
+;;
+;; ITK Python wrapping (Slicer_BUILD_ITKPython) remains OFF until
+;; python-pygccxml is packaged in Guix.  See itk.scm for the TODO.
+(define-public slicer-python-5.8
+  (package
+    (inherit slicer-5.8)
+    (name "slicer-python-5.8")
+    (arguments
+     (substitute-keyword-arguments (package-arguments slicer-5.8)
+       ((#:configure-flags flags)
+        #~(append
+           (list
+            ;; Python — Guix Python 3.11
+            (string-append "-DPython3_EXECUTABLE="
+                           #$(this-package-input "python") "/bin/python3")
+            (string-append "-DPython3_INCLUDE_DIR="
+                           #$(this-package-input "python") "/include/python3.11")
+            (string-append "-DPython3_LIBRARY="
+                           #$(this-package-input "python") "/lib/libpython3.11.so")
+            "-DVTK_WRAP_PYTHON:BOOL=ON"
+            "-DSlicer_USE_PYTHONQT:BOOL=ON"
+            "-DSlicer_USE_SYSTEM_python:BOOL=ON"
+            "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=ON"
+            ;; PythonQt location (CTK's FindPythonQt uses PYTHONQT_INSTALL_DIR)
+            (string-append "-DPYTHONQT_INSTALL_DIR="
+                           #$(this-package-input "pythonqt-commontk"))
+            ;; vtkAddon_CMAKE_DIR is used at the top of Slicer's CMakeLists.txt
+            ;; (line ~803) before any find_package(vtkAddon) runs, so it must be
+            ;; pre-set as a cache variable.
+            (string-append "-DvtkAddon_CMAKE_DIR="
+                           #$(this-package-input "vtkaddon") "/lib/cmake"))
+           (filter (lambda (f)
+                     (not (member f '("-DVTK_WRAP_PYTHON:BOOL=OFF"
+                                      "-DSlicer_USE_PYTHONQT:BOOL=OFF"
+                                      "-DSlicer_USE_SYSTEM_python:BOOL=OFF"
+                                      "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"))))
+                   #$flags)))
+       ((#:phases phases)
+        #~(modify-phases #$phases
+            ;; Extend CMAKE_PREFIX_PATH to include pythonqt-commontk.
+            (replace 'set-cmake-paths
+              (lambda* (#:key inputs #:allow-other-keys)
+                (setenv "CMAKE_PREFIX_PATH"
+                        (string-append
+                         (assoc-ref inputs "pythonqt-commontk") "/lib/cmake:"
+                         (assoc-ref inputs "vtkaddon") "/lib/cmake:"
+                         (or (getenv "CMAKE_PREFIX_PATH") "")))
+                #t))
+            ;; Replace the wrapper to add PYTHONPATH for VTK and vtkAddon
+            ;; Python modules so `import vtk` and `import vtkAddon` work.
+            (replace 'wrap
+              (lambda* (#:key outputs #:allow-other-keys)
+                (let* ((out (assoc-ref outputs "out"))
+                       (slicer-real (string-append out "/bin/SlicerApp-real"))
+                       (slicer-wrapper (string-append out "/Slicer-wrapper")))
+                  (call-with-output-file slicer-wrapper
+                    (lambda (port)
+                      (format port
+"#!/bin/sh
+# Guix wrapper for 3D Slicer (Python-enabled variant) – replaces the CTK launcher.
+
+# Slicer uses SLICER_HOME to locate resources, modules, Python, etc.
+export SLICER_HOME=~a
+
+# SlicerApp-real's RUNPATH does not include lib/Slicer-5.8/ where the
+# core Slicer shared libraries live; add them explicitly.
+export LD_LIBRARY_PATH=~a/lib/Slicer-5.8:~a/lib/Slicer-5.8/qt-loadable-modules${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+# VTK and vtkAddon Python wrappers.
+export PYTHONPATH=~a/lib/python3.11/site-packages:~a/lib/python3.11/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+
+# Required for QtWebEngine in environments without user namespaces.
+export QTWEBENGINE_DISABLE_SANDBOX=1
+
+# Translate SLICER_ADDITIONAL_MODULE_PATHS (colon-separated list set by
+# Guix when module packages share a profile) into --additional-module-path
+# arguments recognised by 3D Slicer.
+module_path_args=\"\"
+if [ -n \"${SLICER_ADDITIONAL_MODULE_PATHS}\" ]; then
+  old_IFS=\"$IFS\"
+  IFS=':'
+  for path in ${SLICER_ADDITIONAL_MODULE_PATHS}; do
+    [ -n \"$path\" ] && module_path_args=\"${module_path_args} --additional-module-path ${path}\"
+  done
+  IFS=\"${old_IFS}\"
+fi
+exec ~a ${module_path_args} \"$@\"~%"
+                             out out out
+                             #$vtk-slicer-python
+                             #$vtkaddon-python
+                             slicer-real)))
+                  (chmod slicer-wrapper #o755)
+                  #t)))))))
+    (inputs
+     (modify-inputs (package-inputs slicer-5.8)
+       ;; Replace the entire VTK-dependent chain with Python-enabled variants so
+       ;; that all cmake configs (CTKConfig, ITKConfig, VTK-targets) reference the
+       ;; same vtk-slicer-python, preventing duplicate cmake target conflicts.
+       (replace "ctk" ctk-python)
+       (replace "vtk-slicer" vtk-slicer-python)
+       (replace "vtkaddon" vtkaddon-python)
+       (replace "itk-slicer" itk-slicer-python)
+       ;; Add python and pythonqt-commontk explicitly for CMake find modules.
+       (prepend python pythonqt-commontk)))))
