@@ -47,6 +47,7 @@
   #:use-module (gnu packages)
   #:use-module (guix build-system cmake)
   #:use-module (guix build-system qt)
+  #:use-module (guix build-system trivial)
   #:use-module (guix download)
   #:use-module (guix gexp)
   #:use-module (guix packages)
@@ -971,3 +972,43 @@ multiple views of the same data set.  Built from the
        "-DEXTRA_MODULE_LIB_DIRS="
        #$slicer-subjecthierarchy-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
+
+;;;
+;;; Meta-package
+;;;
+
+(define %slicer-5.8-loadable-modules
+  ;; All standalone loadable modules for slicer-5.8, in dependency order.
+  (list slicer-terminologies-5.8
+        slicer-subjecthierarchy-5.8
+        slicer-colors-5.8
+        slicer-volumes-5.8
+        slicer-units-5.8
+        slicer-tables-5.8
+        slicer-cameras-5.8
+        slicer-annotations-5.8
+        slicer-markups-5.8
+        slicer-models-5.8
+        slicer-sequences-5.8
+        slicer-viewcontrollers-5.8
+        slicer-reformat-5.8
+        slicer-plots-5.8
+        slicer-sceneviews-5.8))
+
+(define-public slicer-all-5.8
+  (package
+    (name "slicer-all-5.8")
+    (version (package-version slicer-5.8))
+    (source #f)
+    (build-system trivial-build-system)
+    (arguments (list #:builder #~(mkdir #$output)))
+    (propagated-inputs
+     (cons slicer-5.8 %slicer-5.8-loadable-modules))
+    (synopsis "3D Slicer 5.8 with all loadable modules")
+    (description
+     "Meta-package that installs 3D Slicer 5.8 together with all its
+standalone loadable modules (Terminologies, SubjectHierarchy, Colors,
+Volumes, Units, Tables, Cameras, Annotations, Markups, Models, Sequences,
+ViewControllers, Reformat, Plots, and SceneViews).")
+    (home-page (package-home-page slicer-5.8))
+    (license (package-license slicer-5.8))))
