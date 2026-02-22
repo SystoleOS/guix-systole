@@ -1379,9 +1379,12 @@ export SLICER_HOME=~a
 export LD_LIBRARY_PATH=~a/lib/Slicer-5.8:~a/lib/Slicer-5.8/qt-loadable-modules${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
 # Slicer Python packages (slicer, mrml, vtkITK, …) live in bin/Python.
+# Python C extension modules (MRMLCorePython.so, SlicerBaseLogicPython.so,
+# qMRMLWidgetsPythonQt.so, etc.) are installed to lib/Slicer-5.8/.
 # CTK Python bindings (ctk, qt) live in ctk-python/bin/Python.
-# VTK and vtkAddon wrappers live in lib/python3.11/site-packages.
-export PYTHONPATH=~a/bin/Python:~a/bin/Python:~a/lib/python3.11/site-packages:~a/lib/python3.11/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+# vtkAddonPython.so is in vtkaddon-python/lib/ (no python3.11 subdir).
+# VTK wrapper modules live in vtk-slicer-python/lib/python3.11/site-packages.
+export PYTHONPATH=~a/bin/Python:~a/lib/Slicer-5.8:~a/bin/Python:~a/lib:~a/lib/python3.11/site-packages:~a/lib/python3.11/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 # Required for QtWebEngine in environments without user namespaces.
 export QTWEBENGINE_DISABLE_SANDBOX=1
@@ -1401,7 +1404,9 @@ fi
 exec ~a ${module_path_args} \"$@\"~%"
                              out out out
                              out          ; PYTHONPATH: slicer bin/Python
+                             out          ; PYTHONPATH: slicer lib/Slicer-5.8 (Python .so)
                              #$ctk-python ; PYTHONPATH: ctk-python bin/Python
+                             #$vtkaddon-python ; PYTHONPATH: vtkaddon-python lib (vtkAddonPython.so)
                              #$vtk-slicer-python
                              #$vtkaddon-python
                              slicer-real)))
