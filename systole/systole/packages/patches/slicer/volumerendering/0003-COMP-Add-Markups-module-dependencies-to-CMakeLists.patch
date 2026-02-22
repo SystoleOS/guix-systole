@@ -1,0 +1,39 @@
+From 866506963f01866c5f44f46f9946998aa194961f Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 11:09:59 +0100
+Subject: [PATCH] COMP: Add Markups module dependencies to CMakeLists
+
+Add Markups MRML and Widgets include directories to VolumeRendering
+Logic and Widgets CMakeLists files to support integration between modules.
+---
+ Modules/Loadable/VolumeRendering/Logic/CMakeLists.txt   | 1 +
+ Modules/Loadable/VolumeRendering/Widgets/CMakeLists.txt | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/Modules/Loadable/VolumeRendering/Logic/CMakeLists.txt b/Modules/Loadable/VolumeRendering/Logic/CMakeLists.txt
+index 7ffdadf5ef..7de1177873 100644
+--- a/Modules/Loadable/VolumeRendering/Logic/CMakeLists.txt
++++ b/Modules/Loadable/VolumeRendering/Logic/CMakeLists.txt
+@@ -6,6 +6,7 @@ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_LOGIC_EXPORT
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+   ${vtkSlicer${MODULE_NAME}ModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+diff --git a/Modules/Loadable/VolumeRendering/Widgets/CMakeLists.txt b/Modules/Loadable/VolumeRendering/Widgets/CMakeLists.txt
+index a299ee672d..22b659aefc 100644
+--- a/Modules/Loadable/VolumeRendering/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/VolumeRendering/Widgets/CMakeLists.txt
+@@ -6,6 +6,7 @@ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_MODULE_${MODULE_NAME_UPPER}_WIDGETS_EXPORT
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+   ${vtkSlicer${MODULE_NAME}ModuleMRML_INCLUDE_DIRS}
++  ${qSlicerMarkupsModuleWidgets_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+-- 
+2.52.0
+

@@ -1,0 +1,38 @@
+From 2e6e31e6991619013413e80b3be59d62b2ec5748 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 11:15:42 +0100
+Subject: [PATCH] COMP: Add vtkSlicerMarkupsModuleMRML include dirs to MRMLDM
+ and Widgets
+
+---
+ Modules/Loadable/VolumeRendering/MRMLDM/CMakeLists.txt  | 1 +
+ Modules/Loadable/VolumeRendering/Widgets/CMakeLists.txt | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/Modules/Loadable/VolumeRendering/MRMLDM/CMakeLists.txt b/Modules/Loadable/VolumeRendering/MRMLDM/CMakeLists.txt
+index f22aeb1b75..be50d2d837 100644
+--- a/Modules/Loadable/VolumeRendering/MRMLDM/CMakeLists.txt
++++ b/Modules/Loadable/VolumeRendering/MRMLDM/CMakeLists.txt
+@@ -7,6 +7,7 @@ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_MRMLDISPLAYA
+ set(${KIT}_INCLUDE_DIRECTORIES
+   ${vtkSlicer${MODULE_NAME}ModuleLogic_INCLUDE_DIRS}
+   ${vtkSlicer${MODULE_NAME}ModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(displayable_manager_SRCS
+diff --git a/Modules/Loadable/VolumeRendering/Widgets/CMakeLists.txt b/Modules/Loadable/VolumeRendering/Widgets/CMakeLists.txt
+index 22b659aefc..e3d8d0b676 100644
+--- a/Modules/Loadable/VolumeRendering/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/VolumeRendering/Widgets/CMakeLists.txt
+@@ -6,6 +6,7 @@ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_MODULE_${MODULE_NAME_UPPER}_WIDGETS_EXPORT
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+   ${vtkSlicer${MODULE_NAME}ModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   ${qSlicerMarkupsModuleWidgets_INCLUDE_DIRS}
+   )
+ 
+-- 
+2.52.0
+
