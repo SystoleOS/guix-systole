@@ -1330,7 +1330,8 @@ Texts, and Welcome).")
             "-DVTK_WRAP_PYTHON:BOOL=ON"
             "-DSlicer_USE_PYTHONQT:BOOL=ON"
             "-DSlicer_USE_SYSTEM_python:BOOL=ON"
-            "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=ON"
+            ;; Disable Qt-scripted modules since they can be installed as separate packages
+            "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"
             ;; PythonQt location (CTK's FindPythonQt uses PYTHONQT_INSTALL_DIR)
             (string-append "-DPYTHONQT_INSTALL_DIR="
                            #$(this-package-input "pythonqt-commontk"))
@@ -1415,4 +1416,97 @@ exec ~a ${module_path_args} \"$@\"~%"
        (replace "vtkaddon" vtkaddon-python)
        (replace "itk-slicer" itk-slicer-python)
        ;; Add python and pythonqt-commontk explicitly for CMake find modules.
-       (prepend python pythonqt-commontk)))))
+       (prepend python pythonqt-commontk)))
+    ;; Extend the base search-path to include qt-scripted-modules so that
+    ;; standalone scripted-module packages (installed to that subdirectory)
+    ;; are discovered when sharing a profile with slicer-python-5.8.
+    (native-search-paths
+     (list (search-path-specification
+            (variable "SLICER_ADDITIONAL_MODULE_PATHS")
+            (files '("lib/Slicer-5.8/qt-loadable-modules"
+                     "lib/Slicer-5.8/qt-scripted-modules")))))))
+
+;;;
+;;; Factory for standalone Slicer scripted-module packages
+;;;
+
+;; Analogous to make-slicer-loadable-module but for Python scripted modules.
+;; These require slicer-python-5.8 (Slicer_USE_PYTHONQT=ON) and install
+;; Python scripts to lib/Slicer-5.8/qt-scripted-modules/.
+;;
+;; Each scripted-module source branch is named
+;;   guix-systole-<modulename>-scripted-module-5.8.1
+;; in ~/src/Slicer/Slicer-Systole, following the same convention as the
+;; loadable-module branches.  Patches are generated with git format-patch and
+;; stored under systole/packages/patches/slicer/<modulename>/.
+(define* (make-slicer-scripted-module
+          #:key
+          name            ; package name string, e.g. "slicer-sampledata-5.8"
+          module-subdir   ; source sub-directory, e.g. "SampleData"
+          patches         ; list of patch filename strings
+          synopsis        ; one-line synopsis string
+          description     ; multi-line description string
+          ;; Extra packages added to inputs *before* slicer-python-5.8's own inputs.
+          (extra-inputs '())
+          ;; A gexp that evaluates to a (possibly empty) list of extra CMake -D flags.
+          (extra-configure-flags #~'()))
+  (package
+   (name name)
+   (version (package-version slicer-python-5.8))
+   (source
+    (origin
+     (inherit (package-source slicer-5.8))
+     (patches (map search-patch patches))))
+   (build-system cmake-build-system)
+   (arguments
+    (list #:tests? #f
+          #:validate-runpath? #f
+          #:out-of-source? #t
+          #:configure-flags
+          #~(append
+             (list "-DCMAKE_BUILD_TYPE:STRING=Release"
+                   "-DBUILD_TESTING:BOOL=OFF"
+                   ;; Point cmake at the Python-enabled Slicer config directory.
+                   (string-append "-DSlicer_DIR="
+                                  #$slicer-python-5.8
+                                  "/lib/Slicer-5.8"))
+             #$extra-configure-flags)
+          #:phases
+          ;; Build only the named scripted-module sub-directory.
+          #~(modify-phases %standard-phases
+              (replace 'configure
+                (lambda* (#:key inputs outputs configure-flags #:allow-other-keys)
+                  (let* ((source (getcwd))
+                         (out (assoc-ref outputs "out")))
+                    (apply invoke "cmake"
+                           "-S" (string-append source "/Modules/Scripted/"
+                                               #$module-subdir)
+                           "-B" "build"
+                           (string-append "-DCMAKE_INSTALL_PREFIX=" out)
+                           configure-flags)
+                    (chdir "build")
+                    #t))))))
+   ;; UseSlicer.cmake requires the full Python-enabled dependency tree.
+   ;; We start from slicer-python-5.8's inputs and prepend slicer-python-5.8
+   ;; itself so cmake can locate SlicerConfig.cmake.
+   (inputs (fold (lambda (pkg acc)
+                   (modify-inputs acc (prepend pkg)))
+                 (modify-inputs (package-inputs slicer-python-5.8)
+                   (prepend slicer-python-5.8))
+                 extra-inputs))
+   (home-page (package-home-page slicer-5.8))
+   (synopsis synopsis)
+   (description description)
+   (license (package-license slicer-5.8))))
+
+(define-public slicer-sampledata-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-sampledata-5.8"
+   #:module-subdir "SampleData"
+   #:patches (list "sampledata/0001-ENH-Add-standalone-build-support-for-SampleData-scri.patch")
+   #:synopsis "3D Slicer SampleData scripted module"
+   #:description
+   "The SampleData scripted module extracted from 3D Slicer.  It provides a
+catalog of sample medical data sets (MR brain, CT chest, DTI, etc.) that can
+be downloaded and loaded directly from within Slicer.  Built from the
+@file{Modules/Scripted/SampleData} subtree of the Slicer source tree."))
