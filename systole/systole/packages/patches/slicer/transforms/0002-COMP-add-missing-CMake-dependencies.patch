@@ -1,0 +1,61 @@
+From aedd7c6f29fb7c88ca1fd91731dcc09943f345de Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 10:37:06 +0100
+Subject: [PATCH] COMP: add missing CMake dependencies
+
+- Add ITK include directories and libraries to Logic module
+- Add MarkupsModuleMRML includes to MRMLDM module
+- Add MRMLCore library to Widgets module
+---
+ Modules/Loadable/Transforms/Logic/CMakeLists.txt   | 2 ++
+ Modules/Loadable/Transforms/MRMLDM/CMakeLists.txt  | 1 +
+ Modules/Loadable/Transforms/Widgets/CMakeLists.txt | 1 +
+ 3 files changed, 4 insertions(+)
+
+diff --git a/Modules/Loadable/Transforms/Logic/CMakeLists.txt b/Modules/Loadable/Transforms/Logic/CMakeLists.txt
+index b9718da8b6..a52a234e73 100644
+--- a/Modules/Loadable/Transforms/Logic/CMakeLists.txt
++++ b/Modules/Loadable/Transforms/Logic/CMakeLists.txt
+@@ -6,6 +6,7 @@ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_LOGIC_EXPORT
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+   ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
++  ${ITK_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+@@ -16,6 +17,7 @@ set(${KIT}_SRCS
+ set(${KIT}_TARGET_LIBRARIES
+   MRMLCore
+   vtkSlicerMarkupsModuleMRML
++  ${ITK_LIBRARIES}
+   )
+ 
+ #-----------------------------------------------------------------------------
+diff --git a/Modules/Loadable/Transforms/MRMLDM/CMakeLists.txt b/Modules/Loadable/Transforms/MRMLDM/CMakeLists.txt
+index 647e7d0aad..cae359eed5 100644
+--- a/Modules/Loadable/Transforms/MRMLDM/CMakeLists.txt
++++ b/Modules/Loadable/Transforms/MRMLDM/CMakeLists.txt
+@@ -7,6 +7,7 @@ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_MRMLDISPLAYA
+ set(${KIT}_INCLUDE_DIRECTORIES
+   ${vtkSlicer${MODULE_NAME}ModuleLogic_INCLUDE_DIRS}
+   ${CMAKE_CURRENT_BINARY_DIR}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(displayable_manager_SRCS
+diff --git a/Modules/Loadable/Transforms/Widgets/CMakeLists.txt b/Modules/Loadable/Transforms/Widgets/CMakeLists.txt
+index 60d5ebfb1f..f680562be1 100644
+--- a/Modules/Loadable/Transforms/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/Transforms/Widgets/CMakeLists.txt
+@@ -30,6 +30,7 @@ set(${KIT}_RESOURCES
+   )
+ 
+ set(${KIT}_TARGET_LIBRARIES
++  MRMLCore
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+
