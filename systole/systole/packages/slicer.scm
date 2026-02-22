@@ -735,38 +735,53 @@ volume rendering and scalar-volume display capabilities and is built from the
        #$slicer-colors-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
-(define-public slicer-cropvolume-5.8
-  (make-slicer-loadable-module
-   #:name "slicer-cropvolume-5.8"
-   #:module-subdir "CropVolume"
-   #:patches (list "cropvolume/0001-ENH-Add-standalone-CMake-build-support-for-CropVolum.patch"
-                   "cropvolume/0002-ENH-Add-Markups-MRML-and-Volumes-Logic-include-dirs-.patch")
-   #:synopsis "3D Slicer CropVolume loadable module"
-   #:description
-   "The CropVolume loadable module extracted from 3D Slicer.  It allows
-cropping a volume to a region of interest (ROI) node, with optional
-resampling (interpolated or voxel-based).  Built from the
-@file{Modules/Loadable/CropVolume} subtree of the Slicer source tree."
-   #:extra-inputs (list slicer-volumes-5.8 slicer-markups-5.8)
-   #:extra-configure-flags
-   #~(list
-      ;; Volumes Logic headers (vtkSlicerVolumesLogic.h).
-      (string-append
-       "-DvtkSlicerVolumesModuleLogic_INCLUDE_DIRS="
-       #$slicer-volumes-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerVolumesModuleLogic")
-      ;; Markups MRML headers (vtkMRMLMarkupsFiducialNode.h, vtkMRMLMarkupsROINode.h).
-      (string-append
-       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
-       #$slicer-markups-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
-      ;; Link directories for Volumes and Markups libraries.
-      (string-append
-       "-DEXTRA_MODULE_LIB_DIRS="
-       #$slicer-volumes-5.8
-       "/lib/Slicer-5.8/qt-loadable-modules;"
-       #$slicer-markups-5.8
-       "/lib/Slicer-5.8/qt-loadable-modules"))))
+;; TODO: slicer-cropvolume-5.8 is blocked by a missing CLI dependency.
+;;
+;; CropVolume's Logic (vtkSlicerCropVolumeLogic.cxx) includes
+;; <vtkSlicerCLIModuleLogic.h> from Base/QTCLI and calls
+;;   vtkSlicerCLIModuleLogic::SafeDownCast(this->GetModuleLogic("ResampleScalarVectorDWIVolume"))
+;; for its interpolated-crop path.  Our slicer-5.8 build has
+;;   -DSlicer_BUILD_CLI:BOOL=OFF
+;;   -DSlicer_BUILD_CLI_SUPPORT:BOOL=OFF
+;; so qSlicerBaseQTCLI is never built and vtkSlicerCLIModuleLogic.h is not
+;; installed.  Resolution options:
+;;   a) Enable CLI support in slicer-5.8 (large change, new dependencies).
+;;   b) Patch vtkSlicerCropVolumeLogic.cxx to guard the CLI include and
+;;      CropInterpolated body with #ifdef Slicer_BUILD_CLI_SUPPORT, making
+;;      interpolated crop a no-op when CLI is absent.
+;;
+;; (define-public slicer-cropvolume-5.8
+;;   (make-slicer-loadable-module
+;;    #:name "slicer-cropvolume-5.8"
+;;    #:module-subdir "CropVolume"
+;;    #:patches (list "cropvolume/0001-ENH-Add-standalone-CMake-build-support-for-CropVolum.patch"
+;;                    "cropvolume/0002-COMP-Add-missing-include-directories-to-Logic-module.patch")
+;;    #:synopsis "3D Slicer CropVolume loadable module"
+;;    #:description
+;;    "The CropVolume loadable module extracted from 3D Slicer.  It allows
+;; cropping a volume to a region of interest (ROI) node, with optional
+;; resampling (interpolated or voxel-based).  Built from the
+;; @file{Modules/Loadable/CropVolume} subtree of the Slicer source tree."
+;;    #:extra-inputs (list slicer-volumes-5.8 slicer-markups-5.8)
+;;    #:extra-configure-flags
+;;    #~(list
+;;       ;; Volumes Logic headers (vtkSlicerVolumesLogic.h).
+;;       (string-append
+;;        "-DvtkSlicerVolumesModuleLogic_INCLUDE_DIRS="
+;;        #$slicer-volumes-5.8
+;;        "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerVolumesModuleLogic")
+;;       ;; Markups MRML headers (vtkMRMLMarkupsFiducialNode.h, vtkMRMLMarkupsROINode.h).
+;;       (string-append
+;;        "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+;;        #$slicer-markups-5.8
+;;        "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+;;       ;; Link directories for Volumes and Markups libraries.
+;;       (string-append
+;;        "-DEXTRA_MODULE_LIB_DIRS="
+;;        #$slicer-volumes-5.8
+;;        "/lib/Slicer-5.8/qt-loadable-modules;"
+;;        #$slicer-markups-5.8
+;;        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
 (define-public slicer-units-5.8
   (make-slicer-loadable-module
@@ -1057,7 +1072,6 @@ multiple views of the same data set.  Built from the
         slicer-data-5.8
         slicer-annotations-5.8
         slicer-markups-5.8
-        slicer-cropvolume-5.8
         slicer-models-5.8
         slicer-sequences-5.8
         slicer-viewcontrollers-5.8
