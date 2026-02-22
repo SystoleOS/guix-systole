@@ -1520,3 +1520,103 @@ exec ~a ${module_path_args} \"$@\"~%"
 catalog of sample medical data sets (MR brain, CT chest, DTI, etc.) that can
 be downloaded and loaded directly from within Slicer.  Built from the
 @file{Modules/Scripted/SampleData} subtree of the Slicer source tree."))
+
+(define-public slicer-endoscopy-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-endoscopy-5.8"
+   #:module-subdir "Endoscopy"
+   #:patches (list "endoscopy/0001-ENH-Add-standalone-build-support-for-Endoscopy-scrip.patch")
+   #:synopsis "3D Slicer Endoscopy scripted module"
+   #:description
+   "The Endoscopy scripted module extracted from 3D Slicer.  It provides
+virtual endoscopy visualization by flying a camera through tubular structures
+(e.g. the colon) along a path defined by a curve markup node.  Built from the
+@file{Modules/Scripted/Endoscopy} subtree of the Slicer source tree."))
+
+(define-public slicer-importitksnaplabel-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-importitksnaplabel-5.8"
+   #:module-subdir "ImportItkSnapLabel"
+   #:patches (list "importitksnaplabel/0001-ENH-Add-standalone-build-support-for-ImportItkSnapLa.patch")
+   #:synopsis "3D Slicer ImportItkSnapLabel scripted module"
+   #:description
+   "The ImportItkSnapLabel scripted module extracted from 3D Slicer.  It
+imports ITK-SNAP label description files (.label) and creates a Slicer color
+table node from the label definitions.  Built from the
+@file{Modules/Scripted/ImportItkSnapLabel} subtree of the Slicer source tree."))
+
+(define-public slicer-performancetests-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-performancetests-5.8"
+   #:module-subdir "PerformanceTests"
+   #:patches (list "performancetests/0001-ENH-Add-standalone-build-support-for-PerformanceTest.patch")
+   #:synopsis "3D Slicer PerformanceTests scripted module"
+   #:description
+   "The PerformanceTests scripted module extracted from 3D Slicer.  It runs a
+suite of rendering and scene-management benchmarks to measure Slicer
+performance across different hardware configurations.  Built from the
+@file{Modules/Scripted/PerformanceTests} subtree of the Slicer source tree."))
+
+(define-public slicer-selftests-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-selftests-5.8"
+   #:module-subdir "SelfTests"
+   #:patches (list "selftests/0001-ENH-Add-standalone-build-support-for-SelfTests-scrip.patch")
+   #:synopsis "3D Slicer SelfTests scripted module"
+   #:description
+   "The SelfTests scripted module extracted from 3D Slicer.  It provides a
+graphical interface for running Slicer's built-in Python unit tests directly
+from the application.  Built from the
+@file{Modules/Scripted/SelfTests} subtree of the Slicer source tree."))
+
+(define-public slicer-screencapture-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-screencapture-5.8"
+   #:module-subdir "ScreenCapture"
+   #:patches (list "screencapture/0001-ENH-Add-standalone-build-support-for-ScreenCapture-s.patch")
+   #:synopsis "3D Slicer ScreenCapture scripted module"
+   #:description
+   "The ScreenCapture scripted module extracted from 3D Slicer.  It captures
+still images and animated sequences (video, animated GIF) from any combination
+of 2D and 3D views, with optional watermarking and rotation sweep.  Built from
+the @file{Modules/Scripted/ScreenCapture} subtree of the Slicer source tree."))
+
+(define-public slicer-vectortoscalarvolume-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-vectortoscalarvolume-5.8"
+   #:module-subdir "VectorToScalarVolume"
+   #:patches (list "vectortoscalarvolume/0001-ENH-Add-standalone-build-support-for-VectorToScalarV.patch")
+   #:synopsis "3D Slicer VectorToScalarVolume scripted module"
+   #:description
+   "The VectorToScalarVolume scripted module extracted from 3D Slicer.  It
+converts a vector-valued volume (e.g. RGB or multi-component images) to a
+scalar volume by extracting a single component or computing a luminance or
+magnitude measure.  Built from the
+@file{Modules/Scripted/VectorToScalarVolume} subtree of the Slicer source
+tree."))
+
+(define-public slicer-dataprobe-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-dataprobe-5.8"
+   #:module-subdir "DataProbe"
+   #:patches (list "dataprobe/0001-ENH-Add-standalone-build-support-for-DataProbe-scrip.patch")
+   #:synopsis "3D Slicer DataProbe scripted module"
+   #:description
+   "The DataProbe scripted module extracted from 3D Slicer.  It displays
+voxel-level annotation overlays in slice views showing the current cursor
+position in RAS coordinates, IJK voxel indices, and interpolated scalar
+values for all visible volumes.  Built from the
+@file{Modules/Scripted/DataProbe} subtree of the Slicer source tree."))
+
+(define-public slicer-cropvolumesequence-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-cropvolumesequence-5.8"
+   #:module-subdir "CropVolumeSequence"
+   #:patches (list "cropvolumesequence/0001-ENH-Add-standalone-build-support-for-CropVolumeSeque.patch")
+   #:synopsis "3D Slicer CropVolumeSequence scripted module"
+   #:description
+   "The CropVolumeSequence scripted module extracted from 3D Slicer.  It
+applies the same crop-volume ROI to every item in a sequence node, enabling
+batch cropping of 4D image series to a user-defined region of interest.  Built
+from the @file{Modules/Scripted/CropVolumeSequence} subtree of the Slicer
+source tree."))
