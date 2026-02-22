@@ -109,6 +109,7 @@
                  "0030-COMP-Add-qSlicerBaseQTCore-to-standalone-loadable-mo.patch"
                  "0031-ENH-Install-generated-UI-headers-from-qMRMLWidgets-f.patch"
                  "0032-COMP-Add-Slicer_INSTALL_LIB_DIR-to-QtLibrary-link-se.patch"
+                 "0033-COMP-Fix-install-path-for-qSlicerModuleGenericTest.py.in.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
