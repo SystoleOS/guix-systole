@@ -1,0 +1,60 @@
+From 99355aadddf5b8f613b3ba9f3bd8a92c5f77e018 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 08:48:33 +0100
+Subject: [PATCH] ENH: Add standalone CMake build support for Data module
+
+Replace vtkSlicerCamerasModuleLogic_SOURCE_DIR and _BINARY_DIR with
+vtkSlicerCamerasModuleLogic_INCLUDE_DIRS so the installed Cameras
+logic headers can be pointed to via a CMake configure flag in
+standalone (out-of-Slicer) builds.
+---
+ Modules/Loadable/Data/CMakeLists.txt | 28 ++++++++++++++++++++++++++--
+ 1 file changed, 26 insertions(+), 2 deletions(-)
+
+diff --git a/Modules/Loadable/Data/CMakeLists.txt b/Modules/Loadable/Data/CMakeLists.txt
+index 37239662f6..3fd2b54613 100644
+--- a/Modules/Loadable/Data/CMakeLists.txt
++++ b/Modules/Loadable/Data/CMakeLists.txt
+@@ -1,4 +1,29 @@
+ 
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
++#-----------------------------------------------------------------------------
++project(Data)
++
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++
++#-----------------------------------------------------------------------------
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++
++# UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR to empty
++# when Slicer_QTLOADABLEMODULES_SHARE_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++# UseSlicer.cmake also resets Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR to empty
++# when Slicer_QTLOADABLEMODULES_LIB_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Data)
+ 
+@@ -14,8 +39,7 @@ set(MODULE_EXPORT_DIRECTIVE "Q_SLICER_QTMODULES_${MODULE_NAME_UPPER}_EXPORT")
+ set(MODULE_INCLUDE_DIRECTORIES
+   ${CMAKE_CURRENT_SOURCE_DIR}/Logic
+   ${CMAKE_CURRENT_BINARY_DIR}/Logic
+-  ${vtkSlicerCamerasModuleLogic_SOURCE_DIR}
+-  ${vtkSlicerCamerasModuleLogic_BINARY_DIR}
++  ${vtkSlicerCamerasModuleLogic_INCLUDE_DIRS}
+   ${qSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS}
+   ${qMRMLWidgets_INCLUDE_DIRS}
+   )
+-- 
+2.52.0
+
