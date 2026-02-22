@@ -1,0 +1,27 @@
+From d75d801c35ecfce0c343ed90d38d422079112652 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 08:52:51 +0100
+Subject: [PATCH] COMP: Add LINK_DIRECTORIES for external module libraries
+
+Add LINK_DIRECTORIES parameter with EXTRA_MODULE_LIB_DIR to support
+linking external module libraries in the Data loadable module build
+configuration.
+---
+ Modules/Loadable/Data/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/Loadable/Data/CMakeLists.txt b/Modules/Loadable/Data/CMakeLists.txt
+index 3fd2b54613..676964dcc7 100644
+--- a/Modules/Loadable/Data/CMakeLists.txt
++++ b/Modules/Loadable/Data/CMakeLists.txt
+@@ -92,6 +92,7 @@ slicerMacroBuildLoadableModule(
+   TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
+   RESOURCES ${MODULE_RESOURCES}
+   WITH_GENERIC_TESTS
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+ 
+ if(BUILD_TESTING)
+-- 
+2.52.0
+

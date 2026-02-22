@@ -790,6 +790,41 @@ nodes in the MRML scene, allowing persistent camera positions across sessions
 and multiple synchronized views.  Built from the
 @file{Modules/Loadable/Cameras} subtree of the Slicer source tree."))
 
+(define-public slicer-data-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-data-5.8"
+   #:module-subdir "Data"
+   #:patches (list "data/0001-ENH-Add-standalone-CMake-build-support-for-Data-modu.patch"
+                   "data/0002-COMP-Add-LINK_DIRECTORIES-for-external-module-librar.patch")
+   #:synopsis "3D Slicer Data loadable module"
+   #:description
+   "The Data loadable module extracted from 3D Slicer.  It provides the
+main data panel for managing MRML scene nodes including loading and saving
+scenes, and integrates with the SubjectHierarchy tree for data organization.
+It also provides scene reader/writer support via the Cameras module logic for
+camera state persistence.  Built from the @file{Modules/Loadable/Data}
+subtree of the Slicer source tree."
+   #:extra-inputs (list slicer-cameras-5.8 slicer-subjecthierarchy-5.8)
+   #:extra-configure-flags
+   #~(list
+      ;; Cameras Logic include directory: replaces _SOURCE_DIR + _BINARY_DIR.
+      (string-append
+       "-DvtkSlicerCamerasModuleLogic_INCLUDE_DIRS="
+       #$slicer-cameras-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerCamerasModuleLogic")
+      ;; SubjectHierarchy includes.
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      ;; Link directories for Cameras and SubjectHierarchy libraries.
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-cameras-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules"))))
+
 (define-public slicer-models-5.8
   (make-slicer-loadable-module
    #:name "slicer-models-5.8"
@@ -986,6 +1021,7 @@ multiple views of the same data set.  Built from the
         slicer-units-5.8
         slicer-tables-5.8
         slicer-cameras-5.8
+        slicer-data-5.8
         slicer-annotations-5.8
         slicer-markups-5.8
         slicer-models-5.8
