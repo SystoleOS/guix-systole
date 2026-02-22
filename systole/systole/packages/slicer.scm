@@ -1716,6 +1716,30 @@ managing template search paths, and editing extension metadata.  Built from
 the @file{Modules/Scripted/ExtensionWizard} subtree of the Slicer source
 tree."))
 
+;;;
+;;; Scripted module list and Python meta-package
+;;;
+
+(define %slicer-5.8-scripted-modules
+  ;; All standalone scripted modules for slicer-python-5.8, in load order.
+  (list slicer-sampledata-5.8
+        slicer-endoscopy-5.8
+        slicer-importitksnaplabel-5.8
+        slicer-performancetests-5.8
+        slicer-selftests-5.8
+        slicer-screencapture-5.8
+        slicer-vectortoscalarvolume-5.8
+        slicer-dataprobe-5.8
+        slicer-cropvolumesequence-5.8
+        slicer-webserver-5.8
+        slicer-dicompatcher-5.8
+        slicer-dicomplugins-5.8
+        slicer-segmenteditor-5.8
+        slicer-segmentstatistics-5.8
+        slicer-dicom-5.8
+        slicer-extensionwizard-5.8
+        slicer-dicomlib-5.8))
+
 (define-public slicer-dicomlib-5.8
   (make-slicer-scripted-module
    #:name "slicer-dicomlib-5.8"
@@ -1748,3 +1772,28 @@ management, series import, and export.  Built from the
        "/lib/Slicer-5.8/qt-loadable-modules;"
        #$slicer-python-5.8
        "/lib/Slicer-5.8"))))
+
+(define-public slicer-python-all-5.8
+  (package
+    (name "slicer-python-all-5.8")
+    (version (package-version slicer-python-5.8))
+    (source #f)
+    (build-system trivial-build-system)
+    (arguments (list #:builder #~(mkdir #$output)))
+    (propagated-inputs
+     (append (list slicer-python-5.8)
+             %slicer-5.8-loadable-modules
+             %slicer-5.8-scripted-modules))
+    (synopsis "3D Slicer 5.8 (Python) with all loadable and scripted modules")
+    (description
+     "Meta-package that installs Python-enabled 3D Slicer 5.8 together with
+all its standalone loadable modules (Terminologies, SubjectHierarchy, Colors,
+Volumes, VolumeRendering, Units, Tables, Cameras, Data, Annotations, Markups,
+Models, Sequences, ViewControllers, Reformat, Plots, SceneViews, Transforms,
+Texts, SlicerWelcome, Segmentations) and all Python scripted modules
+(SampleData, Endoscopy, ImportItkSnapLabel, PerformanceTests, SelfTests,
+ScreenCapture, VectorToScalarVolume, DataProbe, CropVolumeSequence,
+WebServer, DICOMPatcher, DICOMPlugins, SegmentEditor, SegmentStatistics,
+DICOM, ExtensionWizard, DICOMLib).")
+    (home-page (package-home-page slicer-python-5.8))
+    (license (package-license slicer-python-5.8))))
