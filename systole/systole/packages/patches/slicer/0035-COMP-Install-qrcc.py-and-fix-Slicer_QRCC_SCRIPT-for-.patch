@@ -1,4 +1,4 @@
-From 0f2f9584270525fd24feeb0cbe6920d63cf98e37 Mon Sep 17 00:00:00 2001
+From 51cc4255a14729ba734f9e772ae3b5d337f675bf Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sun, 22 Feb 2026 18:28:59 +0100
 Subject: [PATCH] COMP: Install qrcc.py and fix Slicer_QRCC_SCRIPT for
@@ -15,8 +15,8 @@ and Slicer_INSTALL_SHARE_DIR so the path is always valid in the install tree.
 ---
  CMake/SlicerConfig.cmake.in        | 3 ++-
  CMake/SlicerInstallConfig.cmake.in | 1 +
- CMakeLists.txt                     | 4 ++++
- 3 files changed, 7 insertions(+), 1 deletion(-)
+ CMakeLists.txt                     | 5 +++++
+ 3 files changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/CMake/SlicerConfig.cmake.in b/CMake/SlicerConfig.cmake.in
 index f85e432ccc..28c91e1c8a 100644
@@ -52,16 +52,17 @@ index d2df6b945a..4d26388e22 100644
  
  set(Slicer_INSTALL_CLIMODULES_BIN_DIR "@Slicer_INSTALL_CLIMODULES_BIN_DIR@")
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c5d290776f..7b3e115b3e 100644
+index c5d290776f..960ba3dcca 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -541,6 +541,10 @@ include(SlicerBlockCXXRequiredFlags)
+@@ -541,6 +541,11 @@ include(SlicerBlockCXXRequiredFlags)
  # Slicer directories
  #-----------------------------------------------------------------------------
  include(SlicerDirectories)
 +install(FILES
 +  "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/Scripts/qrcc.py"
 +  DESTINATION "${Slicer_SHARE_DIR}/Scripts"
++  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 +  COMPONENT Development)
  
  # SlicerExecutionModel output directories
