@@ -1,0 +1,33 @@
+From 6235c66cdf562e5400393b3d71eca6d14bebc358 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 10:48:52 +0100
+Subject: [PATCH] COMP: Use VTK::RenderingVolumeOpenGL2 directly in MRMLDM for
+ VTK 9.x
+
+---
+ Modules/Loadable/VolumeRendering/MRMLDM/CMakeLists.txt | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/Modules/Loadable/VolumeRendering/MRMLDM/CMakeLists.txt b/Modules/Loadable/VolumeRendering/MRMLDM/CMakeLists.txt
+index ba9a9804ab..f22aeb1b75 100644
+--- a/Modules/Loadable/VolumeRendering/MRMLDM/CMakeLists.txt
++++ b/Modules/Loadable/VolumeRendering/MRMLDM/CMakeLists.txt
+@@ -28,8 +28,14 @@ set(${KIT}_SRCS
+ 
+ set(${KIT}_VTK_LIBRARIES
+   VTK::RenderingVolume
+-  VTK::RenderingVolume${VTK_RENDERING_BACKEND}
+   )
++# VTK 9.x uses OpenGL2 backend exclusively; prefer the explicit target over the
++# VTK_RENDERING_BACKEND variable which may not be set in standalone builds.
++if(TARGET VTK::RenderingVolumeOpenGL2)
++  list(APPEND ${KIT}_VTK_LIBRARIES VTK::RenderingVolumeOpenGL2)
++elseif(DEFINED VTK_RENDERING_BACKEND AND VTK_RENDERING_BACKEND)
++  list(APPEND ${KIT}_VTK_LIBRARIES VTK::RenderingVolume${VTK_RENDERING_BACKEND})
++endif()
+ 
+ set(${KIT}_TARGET_LIBRARIES
+   vtkSlicer${MODULE_NAME}ModuleLogic
+-- 
+2.52.0
+

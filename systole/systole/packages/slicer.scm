@@ -1105,12 +1105,62 @@ representations, and subject-hierarchy integration.  Built from the
        #$slicer-markups-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
+(define-public slicer-volumerendering-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-volumerendering-5.8"
+   #:module-subdir "VolumeRendering"
+   #:patches (list "volumerendering/0001-ENH-Add-standalone-CMake-build-support-for-VolumeRen.patch"
+                   "volumerendering/0002-COMP-Use-VTK-RenderingVolumeOpenGL2-directly-in-MRML.patch"
+                   "volumerendering/0003-COMP-Add-Markups-module-dependencies-to-CMakeLists.patch"
+                   "volumerendering/0004-COMP-Add-vtkSlicerMarkupsModuleMRML-include-dirs-to-.patch")
+   #:synopsis "3D Slicer VolumeRendering loadable module"
+   #:description
+   "The VolumeRendering loadable module extracted from 3D Slicer.  It
+provides CPU and GPU ray-cast volume rendering of scalar and multi-volume
+data sets, including transfer-function presets, shader-property MRML nodes,
+and a subject-hierarchy plugin.  Built from the
+@file{Modules/Loadable/VolumeRendering} subtree of the Slicer source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.8
+                        slicer-markups-5.8
+                        slicer-volumes-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
+       "-DqSlicerMarkupsModuleWidgets_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerMarkupsModuleWidgets")
+      (string-append
+       "-DqSlicerVolumesSubjectHierarchyPlugins_INCLUDE_DIRS="
+       #$slicer-volumes-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerVolumesSubjectHierarchyPlugins")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-markups-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-volumes-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules"))))
+
 (define-public slicer-transforms-5.8
   (make-slicer-loadable-module
    #:name "slicer-transforms-5.8"
    #:module-subdir "Transforms"
    #:patches (list "transforms/0001-ENH-Add-standalone-CMake-build-support-for-Transform.patch"
-                   "transforms/0002-COMP-add-missing-CMake-dependencies.patch")
+                   "transforms/0002-COMP-add-missing-CMake-dependencies.patch"
+                   "transforms/0003-COMP-Add-Markups-module-MRML-include-directory.patch")
    #:synopsis "3D Slicer Transforms loadable module"
    #:description
    "The Transforms loadable module extracted from 3D Slicer.  It provides
@@ -1200,6 +1250,7 @@ tree."))
         slicer-subjecthierarchy-5.8
         slicer-colors-5.8
         slicer-volumes-5.8
+        slicer-volumerendering-5.8
         slicer-units-5.8
         slicer-tables-5.8
         slicer-cameras-5.8
@@ -1230,7 +1281,7 @@ tree."))
     (description
      "Meta-package that installs 3D Slicer 5.8 together with all its
 standalone loadable modules (Terminologies, SubjectHierarchy, Colors,
-Volumes, Units, Tables, Cameras, Data, Annotations, Markups, Models,
+Volumes, VolumeRendering, Units, Tables, Cameras, Data, Annotations, Markups, Models,
 Sequences, ViewControllers, Reformat, Plots, SceneViews, Transforms,
 Texts, and Welcome).")
     (home-page (package-home-page slicer-5.8))
