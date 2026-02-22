@@ -111,6 +111,7 @@
                  "0032-COMP-Add-Slicer_INSTALL_LIB_DIR-to-QtLibrary-link-se.patch"
                  "0033-COMP-Fix-install-path-for-qSlicerModuleGenericTest.p.patch"
                  "0034-COMP-Guard-MRMLCLIPython-import-when-CLI-support-is-.patch"
+                 "0035-COMP-Install-qrcc.py-and-fix-Slicer_QRCC_SCRIPT-for-.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -1686,4 +1687,31 @@ quantitative statistics (volume, surface area, mean intensity, etc.) for each
 segment in a segmentation node using a plugin-based architecture that supports
 labelmap, scalar volume, and closed-surface measurement backends.  Built from
 the @file{Modules/Scripted/SegmentStatistics} subtree of the Slicer source
+tree."))
+
+(define-public slicer-dicom-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-dicom-5.8"
+   #:module-subdir "DICOM"
+   #:patches (list "dicom/0001-ENH-Add-standalone-build-support-for-DICOM-scripted-.patch")
+   #:synopsis "3D Slicer DICOM scripted module"
+   #:description
+   "The DICOM scripted module extracted from 3D Slicer.  It provides the main
+DICOM browser panel for importing DICOM studies into the Slicer scene,
+browsing the local DICOM database, and invoking loadable-series plugins
+for import and export.  Depends on @code{slicer-dicomplugins-5.8} and
+@code{slicer-dicomlib-5.8} at runtime.  Built from the
+@file{Modules/Scripted/DICOM} subtree of the Slicer source tree."))
+
+(define-public slicer-extensionwizard-5.8
+  (make-slicer-scripted-module
+   #:name "slicer-extensionwizard-5.8"
+   #:module-subdir "ExtensionWizard"
+   #:patches (list "extensionwizard/0001-ENH-Add-standalone-build-support-for-ExtensionWizard.patch")
+   #:synopsis "3D Slicer ExtensionWizard scripted module"
+   #:description
+   "The ExtensionWizard scripted module extracted from 3D Slicer.  It provides
+an interactive wizard for creating new Slicer extensions and module templates,
+managing template search paths, and editing extension metadata.  Built from
+the @file{Modules/Scripted/ExtensionWizard} subtree of the Slicer source
 tree."))

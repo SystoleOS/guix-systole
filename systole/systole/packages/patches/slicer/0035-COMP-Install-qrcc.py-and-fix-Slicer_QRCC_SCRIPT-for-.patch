@@ -1,0 +1,58 @@
+From 45971d332c60dd69a5cc153ed146677090d8f324 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 18:28:59 +0100
+Subject: [PATCH] COMP: Install qrcc.py and fix Slicer_QRCC_SCRIPT for
+ standalone builds
+
+qrcc.py was referenced from the source tree via Slicer_QRCC_SCRIPT but was
+never installed.  Standalone modules using slicerFunctionAddPythonQtResources
+(e.g. ExtensionWizard) fail at configure time because the script is missing
+in the install tree.
+
+Install qrcc.py to ${Slicer_INSTALL_SHARE_DIR}/Scripts/ and update
+SlicerConfig.cmake.in to compute Slicer_QRCC_SCRIPT relative to Slicer_HOME
+and Slicer_INSTALL_SHARE_DIR so the path is always valid in the install tree.
+---
+ CMake/SlicerConfig.cmake.in | 3 ++-
+ CMakeLists.txt              | 4 ++++
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/CMake/SlicerConfig.cmake.in b/CMake/SlicerConfig.cmake.in
+index f85e432ccc..28c91e1c8a 100644
+--- a/CMake/SlicerConfig.cmake.in
++++ b/CMake/SlicerConfig.cmake.in
+@@ -173,7 +173,7 @@ set(Slicer_LICENSE_FILE "@Slicer_LICENSE_FILE_CONFIG@")
+ set(Slicer_README_FILE "@Slicer_README_FILE_CONFIG@")
+ 
+ # Path to qrcc.py script used in slicerFunctionAddPythonQtResources  CMake function
+-set(Slicer_QRCC_SCRIPT "@Slicer_QRCC_SCRIPT@")
++# Computed relative to Slicer_HOME after install directories are set (see below).
+ 
+ # Test templates directory
+ set(Slicer_CXX_MODULE_TEST_TEMPLATES_DIR "@Slicer_CXX_MODULE_TEST_TEMPLATES_DIR_CONFIG@")
+@@ -345,6 +345,7 @@ set(Slicer_INSTALL_BIN_DIR "@Slicer_INSTALL_BIN_DIR@")
+ set(Slicer_INSTALL_LIB_DIR "@Slicer_INSTALL_LIB_DIR@")
+ set(Slicer_INSTALL_INCLUDE_DIR "@Slicer_INSTALL_INCLUDE_DIR@")
+ set(Slicer_INSTALL_SHARE_DIR "@Slicer_INSTALL_SHARE_DIR@")
++set(Slicer_QRCC_SCRIPT "${Slicer_HOME}/${Slicer_INSTALL_SHARE_DIR}/Scripts/qrcc.py")
+ set(Slicer_INSTALL_ITKFACTORIES_DIR "@Slicer_INSTALL_ITKFACTORIES_DIR@")
+ 
+ set(Slicer_INSTALL_CLIMODULES_BIN_DIR "@Slicer_INSTALL_CLIMODULES_BIN_DIR@")
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c5d290776f..745553c760 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -519,6 +519,10 @@ include(SlicerFunctionInstallLibrary)
+ include(SlicerFunctionAddPythonQtResources)
+ 
+ set(Slicer_QRCC_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/Scripts/qrcc.py" CACHE INTERNAL "Path to qrcc.py script used in slicerFunctionAddPythonQtResources() CMake function")
++install(FILES
++  "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/Scripts/qrcc.py"
++  DESTINATION "${Slicer_INSTALL_SHARE_DIR}/Scripts"
++  COMPONENT Development)
+ 
+ #-----------------------------------------------------------------------------
+ # Internationalization
+-- 
+2.52.0
+
