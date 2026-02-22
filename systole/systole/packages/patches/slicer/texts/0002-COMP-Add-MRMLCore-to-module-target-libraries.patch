@@ -1,0 +1,26 @@
+From 7a63cdf29245db266f88afe4489996dbf6680b5e Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 10:01:00 +0100
+Subject: [PATCH] COMP: Add MRMLCore to module target libraries
+
+Add MRMLCore as an explicit dependency for the Texts loadable module
+to ensure proper linking.
+---
+ Modules/Loadable/Texts/Widgets/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/Loadable/Texts/Widgets/CMakeLists.txt b/Modules/Loadable/Texts/Widgets/CMakeLists.txt
+index b5e0600dc7..01bd9ae55d 100644
+--- a/Modules/Loadable/Texts/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/Texts/Widgets/CMakeLists.txt
+@@ -25,6 +25,7 @@ set(${KIT}_RESOURCES
+   )
+ 
+ set(${KIT}_TARGET_LIBRARIES
++  MRMLCore
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+

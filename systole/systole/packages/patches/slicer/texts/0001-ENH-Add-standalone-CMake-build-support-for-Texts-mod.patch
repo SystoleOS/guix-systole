@@ -1,0 +1,89 @@
+From 9233f86ae5b0b552b571d60271dd7eb1f72db94d Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 09:56:36 +0100
+Subject: [PATCH] ENH: Add standalone CMake build support for Texts module
+
+---
+ Modules/Loadable/Texts/CMakeLists.txt         | 25 +++++++++++++++++++
+ Modules/Loadable/Texts/Logic/CMakeLists.txt   |  1 +
+ .../SubjectHierarchyPlugins/CMakeLists.txt    |  1 +
+ Modules/Loadable/Texts/Widgets/CMakeLists.txt |  3 +--
+ 4 files changed, 28 insertions(+), 2 deletions(-)
+
+diff --git a/Modules/Loadable/Texts/CMakeLists.txt b/Modules/Loadable/Texts/CMakeLists.txt
+index 35a0b880b8..b0aecf6169 100644
+--- a/Modules/Loadable/Texts/CMakeLists.txt
++++ b/Modules/Loadable/Texts/CMakeLists.txt
+@@ -1,3 +1,27 @@
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
++#-----------------------------------------------------------------------------
++project(Texts)
++
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++
++#-----------------------------------------------------------------------------
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++
++# UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR to empty
++# when Slicer_QTLOADABLEMODULES_SHARE_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++# UseSlicer.cmake also resets Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR to empty
++# when Slicer_QTLOADABLEMODULES_LIB_DIR is unset (standalone build). Restore.
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
+ 
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Texts)
+@@ -64,4 +88,5 @@ slicerMacroBuildLoadableModule(
+   TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
+   RESOURCES ${MODULE_RESOURCES}
+   WITH_GENERIC_TESTS
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+diff --git a/Modules/Loadable/Texts/Logic/CMakeLists.txt b/Modules/Loadable/Texts/Logic/CMakeLists.txt
+index 7b9920b176..2cec6152a9 100644
+--- a/Modules/Loadable/Texts/Logic/CMakeLists.txt
++++ b/Modules/Loadable/Texts/Logic/CMakeLists.txt
+@@ -25,6 +25,7 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+ 
+ # if(BUILD_TESTING)
+diff --git a/Modules/Loadable/Texts/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/Texts/SubjectHierarchyPlugins/CMakeLists.txt
+index 975ea22fe0..8427f34aed 100644
+--- a/Modules/Loadable/Texts/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Texts/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -50,4 +50,5 @@ SlicerMacroBuildModuleQtLibrary(
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   RESOURCES ${${KIT}_RESOURCES}
+   WRAP_PYTHONQT
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+diff --git a/Modules/Loadable/Texts/Widgets/CMakeLists.txt b/Modules/Loadable/Texts/Widgets/CMakeLists.txt
+index bdca2da14e..b5e0600dc7 100644
+--- a/Modules/Loadable/Texts/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/Texts/Widgets/CMakeLists.txt
+@@ -5,8 +5,7 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_MODULE_${MODULE_NAME_UPPER}_WIDGETS_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+-  ${vtkSlicer${MODULE_NAME}ModuleLogic_SOURCE_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleLogic_BINARY_DIR}
++  ${vtkSlicer${MODULE_NAME}ModuleLogic_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+-- 
+2.52.0
+
