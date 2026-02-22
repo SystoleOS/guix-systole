@@ -1,0 +1,31 @@
+From a1d9c3a5171d8f69f468d3e993a45f19034ba44a Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 09:05:01 +0100
+Subject: [PATCH] ENH: Add Markups MRML and Volumes Logic include dirs to
+ CropVolume Logic
+
+CropVolume Logic includes vtkMRMLMarkupsFiducialNode.h,
+vtkMRMLMarkupsROINode.h, and vtkSlicerVolumesLogic.h directly.
+These come from standalone module packages and are not part of
+Slicer_ModuleMRML_INCLUDE_DIRS / Slicer_ModuleLogic_INCLUDE_DIRS
+in an out-of-Slicer build, so they must be listed explicitly.
+---
+ Modules/Loadable/CropVolume/Logic/CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Modules/Loadable/CropVolume/Logic/CMakeLists.txt b/Modules/Loadable/CropVolume/Logic/CMakeLists.txt
+index 8f8322bd56..7fd4de1fa8 100644
+--- a/Modules/Loadable/CropVolume/Logic/CMakeLists.txt
++++ b/Modules/Loadable/CropVolume/Logic/CMakeLists.txt
+@@ -5,6 +5,8 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_LOGIC_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerVolumesModuleLogic_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+-- 
+2.52.0
+
