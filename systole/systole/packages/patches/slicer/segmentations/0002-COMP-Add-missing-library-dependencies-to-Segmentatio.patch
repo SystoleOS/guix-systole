@@ -1,0 +1,77 @@
+From 4f8d1afb164583e2eb1c61ad878a778a907f4773 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 09:46:37 +0100
+Subject: [PATCH] COMP: Add missing library dependencies to Segmentations
+ module
+
+- Add vtkITK target library to Logic component
+- Add vtkSlicerTerminologiesModuleLogic include directory to Widgets
+- Add LINK_DIRECTORIES for EXTRA_MODULE_LIB_DIRS across all components
+---
+ Modules/Loadable/Segmentations/Logic/CMakeLists.txt             | 2 ++
+ Modules/Loadable/Segmentations/MRML/CMakeLists.txt              | 1 +
+ .../Segmentations/SubjectHierarchyPlugins/CMakeLists.txt        | 1 +
+ Modules/Loadable/Segmentations/Widgets/CMakeLists.txt           | 2 ++
+ 4 files changed, 6 insertions(+)
+
+diff --git a/Modules/Loadable/Segmentations/Logic/CMakeLists.txt b/Modules/Loadable/Segmentations/Logic/CMakeLists.txt
+index d3dda18186..c8942fcfa5 100644
+--- a/Modules/Loadable/Segmentations/Logic/CMakeLists.txt
++++ b/Modules/Loadable/Segmentations/Logic/CMakeLists.txt
+@@ -24,6 +24,7 @@ set(${KIT}_TARGET_LIBRARIES
+   vtkSlicer${MODULE_NAME}ModuleMRML
+   vtkSlicerTerminologiesModuleLogic
+   vtkSlicerMarkupsModuleMRML
++  vtkITK
+   )
+ 
+ #-----------------------------------------------------------------------------
+@@ -33,4 +34,5 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+diff --git a/Modules/Loadable/Segmentations/MRML/CMakeLists.txt b/Modules/Loadable/Segmentations/MRML/CMakeLists.txt
+index c93f448fa3..dc12364a60 100644
+--- a/Modules/Loadable/Segmentations/MRML/CMakeLists.txt
++++ b/Modules/Loadable/Segmentations/MRML/CMakeLists.txt
+@@ -30,4 +30,5 @@ SlicerMacroBuildModuleMRML(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+diff --git a/Modules/Loadable/Segmentations/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/Segmentations/SubjectHierarchyPlugins/CMakeLists.txt
+index 327791ec43..76d3130b0a 100644
+--- a/Modules/Loadable/Segmentations/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Segmentations/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -58,4 +58,5 @@ SlicerMacroBuildModuleQtLibrary(
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   RESOURCES ${${KIT}_RESOURCES}
+   WRAP_PYTHONQT
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+diff --git a/Modules/Loadable/Segmentations/Widgets/CMakeLists.txt b/Modules/Loadable/Segmentations/Widgets/CMakeLists.txt
+index 99389d32fc..ff5586cde4 100644
+--- a/Modules/Loadable/Segmentations/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/Segmentations/Widgets/CMakeLists.txt
+@@ -9,6 +9,7 @@ set(${KIT}_INCLUDE_DIRECTORIES
+   ${vtkSlicerSegmentationsModuleLogic_INCLUDE_DIRS}
+   ${qSlicerSegmentationsEditorEffects_INCLUDE_DIRS}
+   ${qSlicerTerminologiesModuleWidgets_INCLUDE_DIRS}
++  ${vtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+@@ -86,6 +87,7 @@ SlicerMacroBuildModuleWidgets(
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   RESOURCES ${${KIT}_RESOURCES}
+   WRAP_PYTHONQT
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+

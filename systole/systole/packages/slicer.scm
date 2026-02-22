@@ -1056,6 +1056,55 @@ multiple views of the same data set.  Built from the
        #$slicer-subjecthierarchy-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
+(define-public slicer-segmentations-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-segmentations-5.8"
+   #:module-subdir "Segmentations"
+   #:patches (list "segmentations/0001-ENH-Add-standalone-CMake-build-support-for-Segmentat.patch"
+                   "segmentations/0002-COMP-Add-missing-library-dependencies-to-Segmentatio.patch")
+   #:synopsis "3D Slicer Segmentations loadable module"
+   #:description
+   "The Segmentations loadable module extracted from 3D Slicer.  It provides
+MRML node types, display managers, editor effects, and widgets for working
+with segmentation objects—multi-label volumetric masks that represent
+anatomical structures.  The module includes the full segmentation editor
+(qMRMLSegmentEditorWidget), binary label-map and closed-surface
+representations, and subject-hierarchy integration.  Built from the
+@file{Modules/Loadable/Segmentations} subtree of the Slicer source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.8
+                        slicer-terminologies-5.8
+                        slicer-markups-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DqSlicerTerminologiesModuleWidgets_INCLUDE_DIRS="
+       #$slicer-terminologies-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerTerminologiesModuleWidgets")
+      (string-append
+       "-DvtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS="
+       #$slicer-terminologies-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerTerminologiesModuleLogic")
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-terminologies-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-markups-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules"))))
+
 ;;;
 ;;; Meta-package
 ;;;
@@ -1077,7 +1126,8 @@ multiple views of the same data set.  Built from the
         slicer-viewcontrollers-5.8
         slicer-reformat-5.8
         slicer-plots-5.8
-        slicer-sceneviews-5.8))
+        slicer-sceneviews-5.8
+        slicer-segmentations-5.8))
 
 (define-public slicer-all-5.8
   (package
@@ -1092,7 +1142,8 @@ multiple views of the same data set.  Built from the
     (description
      "Meta-package that installs 3D Slicer 5.8 together with all its
 standalone loadable modules (Terminologies, SubjectHierarchy, Colors,
-Volumes, Units, Tables, Cameras, Annotations, Markups, Models, Sequences,
-ViewControllers, Reformat, Plots, and SceneViews).")
+Volumes, Units, Tables, Cameras, Data, Annotations, Markups, Models,
+Sequences, ViewControllers, Reformat, Plots, SceneViews, and
+Segmentations).")
     (home-page (package-home-page slicer-5.8))
     (license (package-license slicer-5.8))))
