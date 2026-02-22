@@ -1,0 +1,39 @@
+From 812a86aa286f1040ed311acfb237e8253a1cd7a9 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 15:45:16 +0100
+Subject: [PATCH] COMP: Fix install path for qSlicerModuleGenericTest.py.in
+ template
+
+The install(FILES ...) rule referenced ${CMAKE_CURRENT_BINARY_DIR}/
+qSlicerModuleGenericTest.py.in, but this file is a plain source template
+that is never copied to the binary directory when BUILD_TESTING=OFF.
+When Slicer is built with Slicer_USE_PYTHONQT=ON (which activates
+Base/QTCore/Testing/Python/ unconditionally via CMakeLists.txt), the
+cmake --install step fails because the file is not found.
+
+Switch the install source to CMAKE_CURRENT_SOURCE_DIR so the template
+is installed directly from the source tree regardless of BUILD_TESTING.
+---
+ Base/QTCore/Testing/Python/CMakeLists.txt | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/Base/QTCore/Testing/Python/CMakeLists.txt b/Base/QTCore/Testing/Python/CMakeLists.txt
+index 97f6442fc6..bb3057365c 100644
+--- a/Base/QTCore/Testing/Python/CMakeLists.txt
++++ b/Base/QTCore/Testing/Python/CMakeLists.txt
+@@ -12,9 +12,11 @@ set(Slicer_PYTHON_MODULE_TEST_TEMPLATES_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+   CACHE INTERNAL "Path to python test templates directory.")
+ 
+ # Install the file so that project building against the 'installed tree' can reference it.
++# Note: use CMAKE_CURRENT_SOURCE_DIR — the template is a source file and is never
++# copied to CMAKE_CURRENT_BINARY_DIR when BUILD_TESTING is OFF.
+ if(NOT Slicer_INSTALL_NO_DEVELOPMENT)
+   install(FILES
+-    ${CMAKE_CURRENT_BINARY_DIR}/qSlicerModuleGenericTest.py.in
++    ${CMAKE_CURRENT_SOURCE_DIR}/qSlicerModuleGenericTest.py.in
+     DESTINATION ${Slicer_INSTALL_SHARE_DIR}/test-templates COMPONENT Development
+     )
+ endif()
+-- 
+2.52.0
+
