@@ -1,0 +1,32 @@
+From e364dbbda80bddef6ca7a409039f28bc25cc5535 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 17:10:05 +0100
+Subject: [PATCH] COMP: Guard MRMLCLIPython import when CLI support is disabled
+
+MRMLCLIPython is only built when Slicer_BUILD_CLI=ON.  Without this guard,
+importing the mrml Python module fails with ModuleNotFoundError and the MRML
+Python type registry is never populated, causing slicer.mrmlScene to be
+returned as a plain vtkObject rather than vtkMRMLScene.
+---
+ Base/Python/mrml.py | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/Base/Python/mrml.py b/Base/Python/mrml.py
+index a534214f24..3051dc1fba 100644
+--- a/Base/Python/mrml.py
++++ b/Base/Python/mrml.py
+@@ -7,7 +7,10 @@ namespace.
+ # and the "Slicer Python Console" environments. For more details, see Base/Python/slicer/__init__.py
+ import vtk  # noqa: F401
+ 
+-from MRMLCLIPython import *
++try:
++    from MRMLCLIPython import *
++except ImportError:
++    pass  # MRMLCLIPython is only built when Slicer_BUILD_CLI=ON
+ from MRMLCorePython import *
+ from MRMLDisplayableManagerPython import *
+ from MRMLLogicPython import *
+-- 
+2.52.0
+
