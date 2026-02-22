@@ -1105,6 +1105,42 @@ representations, and subject-hierarchy integration.  Built from the
        #$slicer-markups-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
+(define-public slicer-texts-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-texts-5.8"
+   #:module-subdir "Texts"
+   #:patches (list "texts/0001-ENH-Add-standalone-CMake-build-support-for-Texts-mod.patch"
+                   "texts/0002-COMP-Add-MRMLCore-to-module-target-libraries.patch")
+   #:synopsis "3D Slicer Texts loadable module"
+   #:description
+   "The Texts loadable module extracted from 3D Slicer.  It provides MRML
+support for storing, displaying, and editing plain-text or rich-text
+annotations attached to MRML scene nodes.  Includes a subject-hierarchy
+plugin for managing text nodes.  Built from the
+@file{Modules/Loadable/Texts} subtree of the Slicer source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.8
+                        slicer-markups-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-markups-5.8
+       "/lib/Slicer-5.8/qt-loadable-modules"))))
+
 (define-public slicer-slicerwelcome-5.8
   (make-slicer-loadable-module
    #:name "slicer-slicerwelcome-5.8"
@@ -1140,6 +1176,7 @@ tree."))
         slicer-reformat-5.8
         slicer-plots-5.8
         slicer-sceneviews-5.8
+        slicer-texts-5.8
         slicer-slicerwelcome-5.8
         slicer-segmentations-5.8))
 
@@ -1158,6 +1195,6 @@ tree."))
 standalone loadable modules (Terminologies, SubjectHierarchy, Colors,
 Volumes, Units, Tables, Cameras, Data, Annotations, Markups, Models,
 Sequences, ViewControllers, Reformat, Plots, SceneViews, Segmentations,
-and Welcome).")
+Texts, and Welcome).")
     (home-page (package-home-page slicer-5.8))
     (license (package-license slicer-5.8))))
