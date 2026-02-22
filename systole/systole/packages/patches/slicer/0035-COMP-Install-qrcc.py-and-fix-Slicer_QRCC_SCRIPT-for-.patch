@@ -1,4 +1,4 @@
-From 45971d332c60dd69a5cc153ed146677090d8f324 Mon Sep 17 00:00:00 2001
+From 4de37a76fe1a12f74916da18c0f7709401bccc5a Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sun, 22 Feb 2026 18:28:59 +0100
 Subject: [PATCH] COMP: Install qrcc.py and fix Slicer_QRCC_SCRIPT for
@@ -39,7 +39,7 @@ index f85e432ccc..28c91e1c8a 100644
  
  set(Slicer_INSTALL_CLIMODULES_BIN_DIR "@Slicer_INSTALL_CLIMODULES_BIN_DIR@")
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c5d290776f..745553c760 100644
+index c5d290776f..05766e2d27 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -519,6 +519,10 @@ include(SlicerFunctionInstallLibrary)
@@ -48,7 +48,7 @@ index c5d290776f..745553c760 100644
  set(Slicer_QRCC_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/Scripts/qrcc.py" CACHE INTERNAL "Path to qrcc.py script used in slicerFunctionAddPythonQtResources() CMake function")
 +install(FILES
 +  "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/Scripts/qrcc.py"
-+  DESTINATION "${Slicer_INSTALL_SHARE_DIR}/Scripts"
++  DESTINATION "${Slicer_SHARE_DIR}/Scripts"
 +  COMPONENT Development)
  
  #-----------------------------------------------------------------------------
