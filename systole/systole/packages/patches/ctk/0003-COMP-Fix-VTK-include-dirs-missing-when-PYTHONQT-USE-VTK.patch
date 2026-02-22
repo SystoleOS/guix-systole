@@ -1,0 +1,67 @@
+From af04c4af28331bbdbed6eaf5b8b36d51cc5bbff0 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 15:04:23 +0100
+Subject: [PATCH] COMP: Fix VTK include dirs missing when PYTHONQT_USE_VTK=ON
+
+When CTK is built with CTK_LIB_Scripting/Python/Core_PYTHONQT_USE_VTK=ON,
+find_package(VTK COMPONENTS ... WrappingPythonCore) is called in
+Libs/Visualization/VTK/Core/CMakeLists.txt.  In VTK 9.x vtk-config.cmake
+resets VTK_LIBRARIES on every find_package(VTK) call, repopulating it only
+when VTK_FOUND is not yet defined (first call).  CTK's top-level
+CMakeLists.txt calls find_package(VTK REQUIRED) first, setting VTK_FOUND;
+the per-library call then clears VTK_LIBRARIES without refilling it.
+CTKVisualizationVTKCore ends up linked to no VTK targets, VTK include
+directories are absent from compile commands, and headers such as
+vtkChartXY.h cannot be found.
+
+Also switch ${PYTHON_INCLUDE_DIRS} to ${Python3_INCLUDE_DIRS} to match
+the modern CMake FindPython3 variable name.
+---
+ Libs/Visualization/VTK/Core/CMakeLists.txt | 25 ++++++++++++++++++++--
+ 1 file changed, 23 insertions(+), 2 deletions(-)
+
+diff --git a/Libs/Visualization/VTK/Core/CMakeLists.txt b/Libs/Visualization/VTK/Core/CMakeLists.txt
+index 317ce55f..b22d6388 100644
+--- a/Libs/Visualization/VTK/Core/CMakeLists.txt
++++ b/Libs/Visualization/VTK/Core/CMakeLists.txt
+@@ -104,14 +104,35 @@ endif()
+ 
+ if(CTK_LIB_Scripting/Python/Core AND CTK_LIB_Scripting/Python/Core_PYTHONQT_USE_VTK)
+   include_directories(
+-    ${PYTHON_INCLUDE_DIRS}
++    ${Python3_INCLUDE_DIRS}
+     ${PYTHONQT_INCLUDE_DIR}
+     )
+ endif()
+ 
+ # Set VTK_LIBRARIES variable
+ if(${VTK_VERSION} VERSION_EQUAL 8.90 OR ${VTK_VERSION} VERSION_GREATER 8.90 )
+-  # VTK_LIBRARIES is automatically set based on selected components
++  # Rebuild VTK_LIBRARIES from IMPORTED component targets.  vtk-config.cmake
++  # resets VTK_LIBRARIES on every find_package(VTK) call, repopulating it only
++  # when VTK_FOUND is not yet defined (the first call).  CTK's top-level
++  # CMakeLists.txt already calls find_package(VTK REQUIRED) before this
++  # subdirectory is processed, so VTK_FOUND is already set and the per-library
++  # find_package(VTK COMPONENTS ...) call above clears VTK_LIBRARIES without
++  # refilling it.  Rebuild it explicitly so ctkMacroBuildLib receives the
++  # correct TARGET_LIBRARIES and VTK include dirs propagate to the target.
++  set(VTK_LIBRARIES)
++  foreach(_comp
++      ChartsCore CommonCore CommonDataModel FiltersCore FiltersGeneral
++      FiltersModeling FiltersSources FiltersStatistics IOLegacy IOXML
++      InfovisCore InfovisLayout InteractionStyle RenderingAnnotation
++      RenderingCore RenderingFreeType RenderingOpenGL2 ViewsCore
++      ViewsInfovis ViewsContext2D
++      ${_python_components}
++      ${_test_components})
++    if(TARGET "VTK::${_comp}")
++      list(APPEND VTK_LIBRARIES "VTK::${_comp}")
++    endif()
++  endforeach()
++  unset(_comp)
+ elseif(${VTK_VERSION_MAJOR} GREATER 5)
+   set(VTK_LIBRARIES
+     # a few of these have to be specified explicitly to workaround
+-- 
+2.52.0
+

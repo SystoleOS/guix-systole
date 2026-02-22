@@ -1,19 +1,19 @@
-;; 
+;;
 ;; Copyright @ 2025 Oslo University Hospital
 ;;
 ;; This file is part of SystoleOS.
 ;;
-;; SystoleOS is free software: you can redistribute it and/or modify it under the 
-;; terms of the GNU General Public License as published by the Free Software 
+;; SystoleOS is free software: you can redistribute it and/or modify it under the
+;; terms of the GNU General Public License as published by the Free Software
 ;; Foundation, either version 3 of the License, or (at your option) any later version.
 ;;
-;; SystoleOS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-;; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+;; SystoleOS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+;; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
 ;; PURPOSE. See the GNU General Public License for more details.
 ;;
-;; You should have received a copy of the GNU General Public License along 
+;; You should have received a copy of the GNU General Public License along
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
-;; 
+;;
 
 (define-module (systole packages vtk)
   #:use-module ((guix licenses)
@@ -22,10 +22,12 @@
   #:use-module (gnu packages algebra)
   #:use-module (gnu packages)
   #:use-module (gnu packages base)
+  #:use-module (gnu packages python)
   #:use-module (gnu packages xml)
   #:use-module (guix download)
   #:use-module (guix build-system cmake)
   #:use-module (guix gexp)
+  #:use-module (guix utils)
   #:use-module (gnu packages qt)
   #:use-module (gnu packages mpi)
   #:use-module (gnu packages tbb)
@@ -165,3 +167,35 @@
     (description
      "General-purpose features that may be integrated into VTK library in the future.")
     (license license:bsd-3)))
+
+;; Python-enabled VTK variant for use by slicer-python-5.8.
+;; Adds VTK Python wrappers (vtkmodules/*.so) and the Guix python package.
+;; CMake's FindPython3 auto-detects the interpreter from PATH when python is in inputs.
+(define-public vtk-slicer-python
+  (package
+    (inherit vtk-slicer)
+    (name "vtk-slicer-python")
+    (arguments
+     (substitute-keyword-arguments (package-arguments vtk-slicer)
+       ((#:configure-flags flags)
+        `(cons "-DVTK_WRAP_PYTHON:BOOL=ON"
+               (delete "-DVTK_WRAP_PYTHON:BOOL=OFF" ,flags)))))
+    (inputs
+     (modify-inputs (package-inputs vtk-slicer)
+       (prepend python)))))
+
+;; Python-enabled vtkAddon variant.  Links against vtk-slicer-python so the
+;; generated Python wrappers are consistent with the Python-enabled VTK build.
+(define-public vtkaddon-python
+  (package
+    (inherit vtkaddon)
+    (name "vtkaddon-python")
+    (arguments
+     (substitute-keyword-arguments (package-arguments vtkaddon)
+       ((#:configure-flags flags)
+        `(cons "-DvtkAddon_WRAP_PYTHON:BOOL=ON"
+               (delete "-DvtkAddon_WRAP_PYTHON:BOOL=OFF" ,flags)))))
+    (inputs
+     (modify-inputs (package-inputs vtkaddon)
+       (replace "vtk-slicer" vtk-slicer-python)
+       (prepend python)))))
