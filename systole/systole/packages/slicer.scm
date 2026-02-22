@@ -1376,8 +1376,10 @@ export SLICER_HOME=~a
 # core Slicer shared libraries live; add them explicitly.
 export LD_LIBRARY_PATH=~a/lib/Slicer-5.8:~a/lib/Slicer-5.8/qt-loadable-modules${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
-# VTK and vtkAddon Python wrappers.
-export PYTHONPATH=~a/lib/python3.11/site-packages:~a/lib/python3.11/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+# Slicer Python packages (slicer, mrml, vtkITK, …) live in bin/Python.
+# CTK Python bindings (ctk, qt) live in ctk-python/bin/Python.
+# VTK and vtkAddon wrappers live in lib/python3.11/site-packages.
+export PYTHONPATH=~a/bin/Python:~a/bin/Python:~a/lib/python3.11/site-packages:~a/lib/python3.11/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 # Required for QtWebEngine in environments without user namespaces.
 export QTWEBENGINE_DISABLE_SANDBOX=1
@@ -1396,6 +1398,8 @@ if [ -n \"${SLICER_ADDITIONAL_MODULE_PATHS}\" ]; then
 fi
 exec ~a ${module_path_args} \"$@\"~%"
                              out out out
+                             out          ; PYTHONPATH: slicer bin/Python
+                             #$ctk-python ; PYTHONPATH: ctk-python bin/Python
                              #$vtk-slicer-python
                              #$vtkaddon-python
                              slicer-real)))
