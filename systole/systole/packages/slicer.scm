@@ -1716,30 +1716,6 @@ managing template search paths, and editing extension metadata.  Built from
 the @file{Modules/Scripted/ExtensionWizard} subtree of the Slicer source
 tree."))
 
-;;;
-;;; Scripted module list and Python meta-package
-;;;
-
-(define %slicer-5.8-scripted-modules
-  ;; All standalone scripted modules for slicer-python-5.8, in load order.
-  (list slicer-sampledata-5.8
-        slicer-endoscopy-5.8
-        slicer-importitksnaplabel-5.8
-        slicer-performancetests-5.8
-        slicer-selftests-5.8
-        slicer-screencapture-5.8
-        slicer-vectortoscalarvolume-5.8
-        slicer-dataprobe-5.8
-        slicer-cropvolumesequence-5.8
-        slicer-webserver-5.8
-        slicer-dicompatcher-5.8
-        slicer-dicomplugins-5.8
-        slicer-segmenteditor-5.8
-        slicer-segmentstatistics-5.8
-        slicer-dicom-5.8
-        slicer-extensionwizard-5.8
-        slicer-dicomlib-5.8))
-
 (define-public slicer-dicomlib-5.8
   (make-slicer-scripted-module
    #:name "slicer-dicomlib-5.8"
@@ -1772,6 +1748,30 @@ management, series import, and export.  Built from the
        "/lib/Slicer-5.8/qt-loadable-modules;"
        #$slicer-python-5.8
        "/lib/Slicer-5.8"))))
+
+;;;
+;;; Scripted module list and Python meta-package
+;;;
+
+(define %slicer-5.8-scripted-modules
+  ;; All standalone scripted modules for slicer-python-5.8, in load order.
+  (list slicer-sampledata-5.8
+        slicer-endoscopy-5.8
+        slicer-importitksnaplabel-5.8
+        slicer-performancetests-5.8
+        slicer-selftests-5.8
+        slicer-screencapture-5.8
+        slicer-vectortoscalarvolume-5.8
+        slicer-dataprobe-5.8
+        slicer-cropvolumesequence-5.8
+        slicer-webserver-5.8
+        slicer-dicompatcher-5.8
+        slicer-dicomplugins-5.8
+        slicer-segmenteditor-5.8
+        slicer-segmentstatistics-5.8
+        slicer-dicom-5.8
+        slicer-extensionwizard-5.8
+        slicer-dicomlib-5.8))
 
 (define-public slicer-python-all-5.8
   (package
