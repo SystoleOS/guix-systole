@@ -59,6 +59,7 @@ test_package "(systole packages slicer)" "slicer-viewcontrollers-5.8"
 test_package "(systole packages slicer)" "slicer-reformat-5.8"
 test_package "(systole packages slicer)" "slicer-plots-5.8"
 test_package "(systole packages slicer)" "slicer-sceneviews-5.8"
+test_package "(systole packages slicer)" "slicer-segmentations-5.8"
 test_package "(systole packages slicer)" "slicer-all-5.8"
 
 # Test CTK

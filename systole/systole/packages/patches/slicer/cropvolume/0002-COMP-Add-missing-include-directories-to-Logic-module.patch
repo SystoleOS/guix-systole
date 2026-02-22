@@ -1,0 +1,29 @@
+From fd6bf60db06d1571087e5d044b484856b5879729 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 09:10:31 +0100
+Subject: [PATCH] COMP: Add missing include directories to Logic module
+
+Add vtkSlicerMarkupsModuleMRML, vtkSlicerVolumesModuleLogic, and MRML
+include directories to fix potential build issues in CropVolume Logic
+module.
+---
+ Modules/Loadable/CropVolume/Logic/CMakeLists.txt | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/Modules/Loadable/CropVolume/Logic/CMakeLists.txt b/Modules/Loadable/CropVolume/Logic/CMakeLists.txt
+index 8f8322bd56..53e4286116 100644
+--- a/Modules/Loadable/CropVolume/Logic/CMakeLists.txt
++++ b/Modules/Loadable/CropVolume/Logic/CMakeLists.txt
+@@ -5,6 +5,9 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_LOGIC_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerVolumesModuleLogic_INCLUDE_DIRS}
++  ${MRMLCore_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+-- 
+2.52.0
+
