@@ -36,6 +36,9 @@
   #:use-module (gnu packages perl)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
+  #:use-module (gnu packages python-science)
+  #:use-module (gnu packages python-web)
+  #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages qt)
   #:use-module (gnu packages serialization)
   #:use-module (gnu packages tbb)
@@ -1783,7 +1786,14 @@ management, series import, and export.  Built from the
     (build-system trivial-build-system)
     (arguments (list #:builder #~(mkdir #$output)))
     (propagated-inputs
-     (append (list slicer-python-5.8)
+     (append (list slicer-python-5.8
+                   ;; Python packages required by scripted modules at runtime.
+                   ;; These are propagated so 'guix shell' sets PYTHONPATH to
+                   ;; include their site-packages directories; the Slicer
+                   ;; wrapper appends ${PYTHONPATH} so they are visible.
+                   python-numpy
+                   python-requests
+                   python-pydicom)
              %slicer-5.8-loadable-modules
              %slicer-5.8-scripted-modules))
     (synopsis "3D Slicer 5.8 (Python) with all loadable and scripted modules")
