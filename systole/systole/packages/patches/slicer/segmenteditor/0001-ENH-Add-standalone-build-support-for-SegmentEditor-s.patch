@@ -1,4 +1,4 @@
-From c3bd3aa93096a25d1627589c4c018c00f42c2cd5 Mon Sep 17 00:00:00 2001
+From f9f0990a29c7375b8001bf99ad754825a09df8f7 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sun, 22 Feb 2026 18:20:23 +0100
 Subject: [PATCH] ENH: Add standalone build support for SegmentEditor scripted
@@ -6,7 +6,8 @@ Subject: [PATCH] ENH: Add standalone build support for SegmentEditor scripted
 
 ---
  Modules/Scripted/SegmentEditor/CMakeLists.txt | 21 ++++++++++++++++++-
- 1 file changed, 20 insertions(+), 1 deletion(-)
+ .../SubjectHierarchyPlugins/CMakeLists.txt    |  2 +-
+ 2 files changed, 21 insertions(+), 2 deletions(-)
 
 diff --git a/Modules/Scripted/SegmentEditor/CMakeLists.txt b/Modules/Scripted/SegmentEditor/CMakeLists.txt
 index ffd2d5c92e..67e4bbc4fe 100644
@@ -42,6 +43,19 @@ index ffd2d5c92e..67e4bbc4fe 100644
 -  )
 +  )
 \ No newline at end of file
+diff --git a/Modules/Scripted/SegmentEditor/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Scripted/SegmentEditor/SubjectHierarchyPlugins/CMakeLists.txt
+index 832a2e1835..6fb310326e 100644
+--- a/Modules/Scripted/SegmentEditor/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Scripted/SegmentEditor/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -9,7 +9,7 @@ ctkMacroCompilePythonScript(
+   TARGET_NAME ${MODULE_NAME}SubjectHierarchyPlugins
+   SCRIPTS "${${MODULE_NAME}SubjectHierarchyPlugins_PYTHON_SCRIPTS}"
+   RESOURCES "${${MODULE_NAME}SubjectHierarchyPlugins_PYTHON_RESOURCES}"
+-  DESTINATION_DIR ${Slicer_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins
++  DESTINATION_DIR ${CMAKE_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins
+   INSTALL_DIR ${Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins
+   NO_INSTALL_SUBDIR
+   )
 -- 
 2.52.0
 
