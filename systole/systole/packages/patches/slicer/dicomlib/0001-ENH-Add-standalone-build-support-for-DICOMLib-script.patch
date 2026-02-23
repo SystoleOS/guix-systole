@@ -1,4 +1,4 @@
-From f160c6ed74858a4f9d54c2f34ff786589e312842 Mon Sep 17 00:00:00 2001
+From 9ea3e620ceb849ad16ba1f073b028c42fb9e6bf7 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sun, 22 Feb 2026 18:40:20 +0100
 Subject: [PATCH] ENH: Add standalone build support for DICOMLib scripted
@@ -13,8 +13,8 @@ four C++ build macro calls.
  Modules/Scripted/DICOMLib/CMakeLists.txt      | 44 +++++++++++++++++++
  .../Scripted/DICOMLib/Logic/CMakeLists.txt    |  1 +
  .../SubjectHierarchyPlugins/CMakeLists.txt    |  1 +
- .../Scripted/DICOMLib/Widgets/CMakeLists.txt  |  3 ++
- 4 files changed, 49 insertions(+)
+ .../Scripted/DICOMLib/Widgets/CMakeLists.txt  |  5 +++
+ 4 files changed, 51 insertions(+)
 
 diff --git a/Modules/Scripted/DICOMLib/CMakeLists.txt b/Modules/Scripted/DICOMLib/CMakeLists.txt
 index 549269a952..7a3ec4edab 100644
@@ -89,7 +89,7 @@ index 453f4bce1c..d99138553a 100644
 +  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
    )
 diff --git a/Modules/Scripted/DICOMLib/Widgets/CMakeLists.txt b/Modules/Scripted/DICOMLib/Widgets/CMakeLists.txt
-index bf25739d7f..f279746a15 100644
+index bf25739d7f..71bb6514c7 100644
 --- a/Modules/Scripted/DICOMLib/Widgets/CMakeLists.txt
 +++ b/Modules/Scripted/DICOMLib/Widgets/CMakeLists.txt
 @@ -7,6 +7,8 @@ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_MODULE_${MODULE_NAME_UPPER}_WIDGETS_EXPORT
@@ -101,7 +101,17 @@ index bf25739d7f..f279746a15 100644
    )
  
  set(${KIT}_SRCS
-@@ -55,6 +57,7 @@ SlicerMacroBuildModuleWidgets(
+@@ -38,7 +40,9 @@ set(${KIT}_RESOURCES
+ #-----------------------------------------------------------------------------
+ set(${KIT}_TARGET_LIBRARIES
+   qSlicerSubjectHierarchyModuleWidgets
++  vtkSlicerSubjectHierarchyModuleLogic
+   vtkSlicerDICOMLibModuleLogic
++  CTKDICOMCore
+   MRMLCore
+   MRMLLogic
+   ${QT_LIBRARIES}
+@@ -55,6 +59,7 @@ SlicerMacroBuildModuleWidgets(
    TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
    RESOURCES ${${KIT}_RESOURCES}
    WRAP_PYTHONQT
