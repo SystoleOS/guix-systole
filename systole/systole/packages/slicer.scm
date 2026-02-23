@@ -112,6 +112,7 @@
                  "0033-COMP-Fix-install-path-for-qSlicerModuleGenericTest.p.patch"
                  "0034-COMP-Guard-MRMLCLIPython-import-when-CLI-support-is-.patch"
                  "0035-COMP-Install-qrcc.py-and-fix-Slicer_QRCC_SCRIPT-for-.patch"
+                 "0036-COMP-Ensure-PYTHON_EXECUTABLE-is-set-in-slicerFuncti.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
