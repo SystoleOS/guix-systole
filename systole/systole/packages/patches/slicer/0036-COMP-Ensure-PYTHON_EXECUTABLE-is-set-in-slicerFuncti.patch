@@ -1,0 +1,39 @@
+From 8504865d90ec9e88fa6371fa0edcf6db28259a8e Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 22 Feb 2026 23:59:42 +0100
+Subject: [PATCH] COMP: Ensure PYTHON_EXECUTABLE is set in
+ slicerFunctionAddPythonQtResources
+
+In standalone module builds, PYTHON_EXECUTABLE may not be set before
+slicerFunctionAddPythonQtResources is called (neither SlicerConfig.cmake
+nor UseSlicer.cmake set it). Add a fallback that resolves it from
+Python3_EXECUTABLE or calls find_package(Python3) if needed.
+---
+ CMake/SlicerFunctionAddPythonQtResources.cmake | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/CMake/SlicerFunctionAddPythonQtResources.cmake b/CMake/SlicerFunctionAddPythonQtResources.cmake
+index d81ca55570..a5fe0bea9c 100644
+--- a/CMake/SlicerFunctionAddPythonQtResources.cmake
++++ b/CMake/SlicerFunctionAddPythonQtResources.cmake
+@@ -49,6 +49,17 @@ function(slicerFunctionAddPythonQtResources RESOURCE_NAMES)
+       message(FATAL_ERROR "Slicer_QRCC_SCRIPT set to ${Slicer_QRCC_SCRIPT} corresponds to an nonexistent file.")
+     endif()
+ 
++    # Ensure PYTHON_EXECUTABLE is set; in standalone builds it may not have been
++    # set before this function is called.
++    if(NOT DEFINED PYTHON_EXECUTABLE OR PYTHON_EXECUTABLE STREQUAL "")
++      if(DEFINED Python3_EXECUTABLE AND NOT Python3_EXECUTABLE STREQUAL "")
++        set(PYTHON_EXECUTABLE "${Python3_EXECUTABLE}")
++      else()
++        find_package(Python3 REQUIRED COMPONENTS Interpreter)
++        set(PYTHON_EXECUTABLE "${Python3_EXECUTABLE}")
++      endif()
++    endif()
++
+     # Create command to generate the compiled resource script
+     add_custom_command(
+       OUTPUT ${out_path}
+-- 
+2.52.0
+
