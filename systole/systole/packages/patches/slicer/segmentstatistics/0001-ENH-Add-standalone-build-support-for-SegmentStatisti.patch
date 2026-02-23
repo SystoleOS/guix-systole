@@ -1,4 +1,4 @@
-From 0e6bf120c3713e7e3b0ea8b10f8086c4899be1b3 Mon Sep 17 00:00:00 2001
+From 613ffc8994e44e4bb53abc69106fa48d6fe8878e Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sun, 22 Feb 2026 18:20:39 +0100
 Subject: [PATCH] ENH: Add standalone build support for SegmentStatistics
@@ -6,7 +6,9 @@ Subject: [PATCH] ENH: Add standalone build support for SegmentStatistics
 
 ---
  .../Scripted/SegmentStatistics/CMakeLists.txt | 21 ++++++++++++++++++-
- 1 file changed, 20 insertions(+), 1 deletion(-)
+ .../SegmentStatisticsPlugins/CMakeLists.txt   |  2 +-
+ .../SubjectHierarchyPlugins/CMakeLists.txt    |  2 +-
+ 3 files changed, 22 insertions(+), 3 deletions(-)
 
 diff --git a/Modules/Scripted/SegmentStatistics/CMakeLists.txt b/Modules/Scripted/SegmentStatistics/CMakeLists.txt
 index b75ae9c219..6dc225039f 100644
@@ -42,6 +44,32 @@ index b75ae9c219..6dc225039f 100644
 -endif()
 +endif()
 \ No newline at end of file
+diff --git a/Modules/Scripted/SegmentStatistics/SegmentStatisticsPlugins/CMakeLists.txt b/Modules/Scripted/SegmentStatistics/SegmentStatisticsPlugins/CMakeLists.txt
+index d6d81dfbbd..dc9bb9aad6 100644
+--- a/Modules/Scripted/SegmentStatistics/SegmentStatisticsPlugins/CMakeLists.txt
++++ b/Modules/Scripted/SegmentStatistics/SegmentStatisticsPlugins/CMakeLists.txt
+@@ -13,7 +13,7 @@ ctkMacroCompilePythonScript(
+   TARGET_NAME SegmentStatisticsPlugins
+   SCRIPTS "${SegmentStatisticsPlugins_PYTHON_SCRIPTS}"
+   RESOURCES "${SegmentStatisticsPlugins_PYTHON_RESOURCES}"
+-  DESTINATION_DIR ${Slicer_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SegmentStatisticsPlugins
++  DESTINATION_DIR ${CMAKE_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SegmentStatisticsPlugins
+   INSTALL_DIR ${Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR}/SegmentStatisticsPlugins
+   NO_INSTALL_SUBDIR
+   )
+diff --git a/Modules/Scripted/SegmentStatistics/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Scripted/SegmentStatistics/SubjectHierarchyPlugins/CMakeLists.txt
+index 832a2e1835..6fb310326e 100644
+--- a/Modules/Scripted/SegmentStatistics/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Scripted/SegmentStatistics/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -9,7 +9,7 @@ ctkMacroCompilePythonScript(
+   TARGET_NAME ${MODULE_NAME}SubjectHierarchyPlugins
+   SCRIPTS "${${MODULE_NAME}SubjectHierarchyPlugins_PYTHON_SCRIPTS}"
+   RESOURCES "${${MODULE_NAME}SubjectHierarchyPlugins_PYTHON_RESOURCES}"
+-  DESTINATION_DIR ${Slicer_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins
++  DESTINATION_DIR ${CMAKE_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins
+   INSTALL_DIR ${Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins
+   NO_INSTALL_SUBDIR
+   )
 -- 
 2.52.0
 
