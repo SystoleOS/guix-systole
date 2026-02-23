@@ -72,6 +72,7 @@
 
                           ;; Modules
                           ;; "-DModule_ITKReview:BOOL=ON"
+                          "-DModule_ITKIODCMTK:BOOL=ON"
                           "-DModule_MGHIO:BOOL=ON"
                           ;; "-DModule_ITKIOMINC:BOOL=ON"
                           "-DModule_IOScanco:BOOL=ON"
@@ -116,6 +117,7 @@
     (inputs (modify-inputs (package-inputs insight-toolkit)
                            (replace "hdf5" hdf5-1.10)
               (append ;vtk
+                      dcmtk
                       double-conversion
                       freetype
                       gl2ps

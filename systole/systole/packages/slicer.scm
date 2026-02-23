@@ -167,7 +167,7 @@
               ;; "-DjqPlot_DIR:STRING=/usr/share/jqPlot"
               ;; "-DSlicer_VTK_WRAP_HIERARCHY_DIR:STRING=#{$\x7b;BUILD_DIR\x7d;}#"
               ;; "-DSlicer_USE_SimpleITK:BOOL=OFF"
-              "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=OFF" ;Disabled as we do not have IODCMTK support yet
+              "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=ON"
 
               ;; Python
               ;; "-DPython3_INCLUDE_DIR:FILEPATH="
@@ -266,6 +266,7 @@ exec ~a ${module_path_args} \"$@\"~%"
                                                 #t)))))
     (inputs
      (list libxt
+           dcmtk
            eigen
            expat
            openssl-3.0
