@@ -1,4 +1,4 @@
-From 9814dfdcd7a7c42aa2740db46d0962c36a3c83ef Mon Sep 17 00:00:00 2001
+From af11d16b18e7dd13a6a9e17b3d8ae49c6f36f276 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sun, 22 Feb 2026 18:40:20 +0100
 Subject: [PATCH] ENH: Add standalone build support for DICOMLib scripted
@@ -14,7 +14,8 @@ four C++ build macro calls.
  .../Scripted/DICOMLib/Logic/CMakeLists.txt    |  1 +
  .../SubjectHierarchyPlugins/CMakeLists.txt    |  1 +
  .../Scripted/DICOMLib/Widgets/CMakeLists.txt  |  3 ++
- 4 files changed, 49 insertions(+)
+ .../Widgets/qSlicerDICOMExportDialog.cxx      | 11 ++++-
+ 5 files changed, 58 insertions(+), 2 deletions(-)
 
 diff --git a/Modules/Scripted/DICOMLib/CMakeLists.txt b/Modules/Scripted/DICOMLib/CMakeLists.txt
 index 549269a952..7a3ec4edab 100644
@@ -109,6 +110,35 @@ index bf25739d7f..f279746a15 100644
    )
  
  #-----------------------------------------------------------------------------
+diff --git a/Modules/Scripted/DICOMLib/Widgets/qSlicerDICOMExportDialog.cxx b/Modules/Scripted/DICOMLib/Widgets/qSlicerDICOMExportDialog.cxx
+index 563daf78b2..2b8ba3a6e8 100644
+--- a/Modules/Scripted/DICOMLib/Widgets/qSlicerDICOMExportDialog.cxx
++++ b/Modules/Scripted/DICOMLib/Widgets/qSlicerDICOMExportDialog.cxx
+@@ -433,7 +433,10 @@ void qSlicerDICOMExportDialog::onExport()
+     // Add exported files to DICOM database
+     if (exportSuccess)
+     {
+-      ctkDICOMDatabase* dicomDatabase = qSlicerApplication::application()->dicomDatabase();
++      ctkDICOMDatabase* dicomDatabase = nullptr;
++#ifdef Slicer_BUILD_DICOM_SUPPORT
++      dicomDatabase = qSlicerApplication::application()->dicomDatabase();
++#endif
+       if (!dicomDatabase)
+       {
+         d->ErrorLabel->setText("No DICOM database is set, so the data (that was successfully exported) cannot be imported back");
+@@ -503,7 +506,11 @@ void qSlicerDICOMExportDialog::onExportToFolderCheckBoxToggled(bool on)
+ //-----------------------------------------------------------------------------
+ void qSlicerDICOMExportDialog::showUpdatedDICOMBrowser()
+ {
+-  if (!qSlicerApplication::application()->dicomDatabase())
++  bool hasDicomDatabase = false;
++#ifdef Slicer_BUILD_DICOM_SUPPORT
++  hasDicomDatabase = (qSlicerApplication::application()->dicomDatabase() != nullptr);
++#endif
++  if (!hasDicomDatabase)
+   {
+     qCritical() << Q_FUNC_INFO << ": No DICOM database is set";
+     return;
 -- 
 2.52.0
 
