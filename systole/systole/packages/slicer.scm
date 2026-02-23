@@ -1393,7 +1393,10 @@ export LD_LIBRARY_PATH=~a/lib/Slicer-5.8:~a/lib/Slicer-5.8/qt-loadable-modules${
 #   vtkaddon-python/lib        — vtkAddonPython.so (no python3.11 subdir)
 #   vtk-slicer-python/lib/…    — VTK Python modules (vtkmodules/)
 #   vtkaddon-python/lib/…      — vtkAddon Python module
-export PYTHONPATH=~a/bin/Python:~a/lib/Slicer-5.8:~a/bin/Python:~a/lib:~a/lib:~a/lib/python3.11/site-packages:~a/lib/python3.11/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+#   python-numpy/lib/…         — numpy (required by Endoscopy, DICOM plugins, …)
+#   python-requests/lib/…      — requests (required by DICOMProcesses, …)
+#   python-pydicom/lib/…       — pydicom (required by WebServer, DICOM plugins, …)
+export PYTHONPATH=~a/bin/Python:~a/lib/Slicer-5.8:~a/bin/Python:~a/lib:~a/lib:~a/lib/python3.11/site-packages:~a/lib/python3.11/site-packages:~a/lib/python3.11/site-packages:~a/lib/python3.11/site-packages:~a/lib/python3.11/site-packages${PYTHONPATH:+:${PYTHONPATH}}
 
 # Required for QtWebEngine in environments without user namespaces.
 export QTWEBENGINE_DISABLE_SANDBOX=1
@@ -1419,6 +1422,9 @@ exec ~a ${module_path_args} \"$@\"~%"
                              #$vtkaddon-python ; PYTHONPATH: vtkaddon-python lib (vtkAddonPython.so)
                              #$vtk-slicer-python
                              #$vtkaddon-python
+                             #$(this-package-input "python-numpy")
+                             #$(this-package-input "python-requests")
+                             #$(this-package-input "python-pydicom")
                              slicer-real)))
                   (chmod slicer-wrapper #o755)
                   #t)))))))
@@ -1432,7 +1438,10 @@ exec ~a ${module_path_args} \"$@\"~%"
        (replace "vtkaddon" vtkaddon-python)
        (replace "itk-slicer" itk-slicer-python)
        ;; Add python and pythonqt-commontk explicitly for CMake find modules.
-       (prepend python pythonqt-commontk)))
+       ;; Add numpy/requests/pydicom so the wrapper can hard-wire their
+       ;; lib/python3.11/site-packages paths into PYTHONPATH at build time.
+       (prepend python pythonqt-commontk
+                python-numpy python-requests python-pydicom)))
     ;; Extend the base search-path to include qt-scripted-modules so that
     ;; standalone scripted-module packages (installed to that subdirectory)
     ;; are discovered when sharing a profile with slicer-python-5.8.
@@ -1786,14 +1795,7 @@ management, series import, and export.  Built from the
     (build-system trivial-build-system)
     (arguments (list #:builder #~(mkdir #$output)))
     (propagated-inputs
-     (append (list slicer-python-5.8
-                   ;; Python packages required by scripted modules at runtime.
-                   ;; These are propagated so 'guix shell' sets PYTHONPATH to
-                   ;; include their site-packages directories; the Slicer
-                   ;; wrapper appends ${PYTHONPATH} so they are visible.
-                   python-numpy
-                   python-requests
-                   python-pydicom)
+     (append (list slicer-python-5.8)
              %slicer-5.8-loadable-modules
              %slicer-5.8-scripted-modules))
     (synopsis "3D Slicer 5.8 (Python) with all loadable and scripted modules")
