@@ -1,4 +1,4 @@
-From e1b6239e305d164803f3fcaed34a101f5c82ddef Mon Sep 17 00:00:00 2001
+From c4219a0b308ccbf04d3537bbf8e62a968b7e799a Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 24 Feb 2026 13:29:44 +0100
 Subject: [PATCH] COMP: Fix Slicer_BINARY_DIR in SegmentEditorEffects for

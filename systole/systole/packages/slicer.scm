@@ -767,7 +767,8 @@ the Slicer source tree."
    #:name "slicer-colors-5.8"
    #:module-subdir "Colors"
    #:patches (list "colors/0001-ENH-Add-standalone-build-support-for-Colors-module.patch"
-                   "colors/0002-COMP-Add-VTK-RenderingAnnotation-dependency-to-Color.patch")
+                   "colors/0002-COMP-Add-VTK-RenderingAnnotation-dependency-to-Color.patch"
+                   "colors/0003-COMP-Set-SubjectHierarchy-include-dirs-for-standalon.patch")
    #:synopsis "3D Slicer Colors loadable module"
    #:description
    "The Colors loadable module extracted from 3D Slicer.  It provides color
@@ -1027,7 +1028,8 @@ a settings panel for configuring display precision.  Built from the
   (make-slicer-loadable-module
    #:name "slicer-tables-5.8"
    #:module-subdir "Tables"
-   #:patches (list "tables/0001-ENH-Add-standalone-build-support-for-Tables-module.patch")
+   #:patches (list "tables/0001-ENH-Add-standalone-build-support-for-Tables-module.patch"
+                   "tables/0002-COMP-Set-SubjectHierarchy-include-dirs-for-standalon.patch")
    #:synopsis "3D Slicer Tables loadable module"
    #:description
    "The Tables loadable module extracted from 3D Slicer.  It provides

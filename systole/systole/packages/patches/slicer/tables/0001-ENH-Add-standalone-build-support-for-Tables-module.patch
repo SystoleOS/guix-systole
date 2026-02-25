@@ -1,4 +1,4 @@
-From 8330491231b5bffb22c4b8e87d7a8f68983807c5 Mon Sep 17 00:00:00 2001
+From f9987e05f10bc7ebe2cd029a520fccca8c480dfd Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 11:07:21 +0100
 Subject: [PATCH] ENH: Add standalone build support for Tables module
