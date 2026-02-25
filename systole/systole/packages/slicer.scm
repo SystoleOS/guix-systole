@@ -121,6 +121,7 @@
                  "0039-COMP-Fix-Slicer_BINARY_DIR-usage-and-expose-QTSCRIPT.patch"
                  "0040-COMP-Add-PythonQt-include-dir-to-global-include-path.patch"
                  "0041-COMP-Use-abspath-instead-of-realpath-in-SubjectHiera.patch"
+                 "0042-COMP-Skip-launcher-settings-read-when-file-is-absent.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments

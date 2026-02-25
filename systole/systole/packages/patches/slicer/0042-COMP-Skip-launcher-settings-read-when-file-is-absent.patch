@@ -1,0 +1,45 @@
+From ef3579cd1ebaa6bbff95f3c4fc9b4f53114556ef Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 25 Feb 2026 08:18:43 +0100
+Subject: [PATCH] COMP: Skip launcher settings read when file is absent
+
+When Slicer is deployed without the CTK app launcher (e.g. using a
+plain shell wrapper that sets all required environment variables
+directly), SlicerLauncherSettings.ini will not be present.  In that
+case silently skip the read instead of printing a spurious warning.
+The file is still read and its contents applied whenever it does exist,
+so setups that rely on it are unaffected.
+---
+ Base/QTCore/qSlicerCoreApplication.cxx | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/Base/QTCore/qSlicerCoreApplication.cxx b/Base/QTCore/qSlicerCoreApplication.cxx
+index 2a58bb27b2..81f06086af 100644
+--- a/Base/QTCore/qSlicerCoreApplication.cxx
++++ b/Base/QTCore/qSlicerCoreApplication.cxx
+@@ -308,10 +308,18 @@ void qSlicerCoreApplicationPrivate::init()
+   ctkAppLauncherSettings appLauncherSettings;
+   appLauncherSettings.setLauncherName(q->applicationName());
+   appLauncherSettings.setLauncherDir(this->SlicerHome);
+-  if (!appLauncherSettings.readSettings(q->launcherSettingsFilePath()))
+-  {
+-    q->showConsoleMessage(QString("Failed to read launcher settings %1").arg(q->launcherSettingsFilePath()));
+-  }
++  // Only attempt to read the launcher settings if the file actually exists.
++  // When Slicer is deployed without the CTK app launcher (e.g. using a plain
++  // shell wrapper that sets all required environment variables directly), the
++  // file will not be present and no warning should be emitted.
++  if (QFile::exists(q->launcherSettingsFilePath()))
++    {
++    if (!appLauncherSettings.readSettings(q->launcherSettingsFilePath()))
++      {
++      q->showConsoleMessage(QString("Failed to read launcher settings %1")
++                            .arg(q->launcherSettingsFilePath()));
++      }
++    }
+ 
+   // Regular environment variables
+   QHash<QString, QString> envVars = appLauncherSettings.envVars();
+-- 
+2.52.0
+
