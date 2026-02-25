@@ -124,6 +124,7 @@
                  "0041-COMP-Use-abspath-instead-of-realpath-in-SubjectHiera.patch"
                  "0042-COMP-Skip-launcher-settings-read-when-file-is-absent.patch"
                  "0043-COMP-Bake-SlicerExecutionModel_DIR-into-install-tree.patch"
+                 "0044-COMP-Expose-MRMLCLI_INCLUDE_DIRS-in-install-tree-Sli.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
