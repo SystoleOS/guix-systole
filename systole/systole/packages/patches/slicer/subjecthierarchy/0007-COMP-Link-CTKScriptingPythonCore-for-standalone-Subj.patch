@@ -1,4 +1,4 @@
-From fe7976be3680bf147e1d19f2c85044e3686e2b52 Mon Sep 17 00:00:00 2001
+From 04e33522237ac6452bf025c94c24eceaee502ac8 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 24 Feb 2026 12:33:54 +0100
 Subject: [PATCH] COMP: Link CTKScriptingPythonCore for standalone
@@ -19,10 +19,10 @@ Slicer_USE_PYTHONQT is ON so the symbol is available in all build contexts.
  1 file changed, 6 insertions(+)
 
 diff --git a/Modules/Loadable/SubjectHierarchy/CMakeLists.txt b/Modules/Loadable/SubjectHierarchy/CMakeLists.txt
-index 515da8e3b8..275e3e9f0e 100644
+index 39c94048ce..abb3d4bc8d 100644
 --- a/Modules/Loadable/SubjectHierarchy/CMakeLists.txt
 +++ b/Modules/Loadable/SubjectHierarchy/CMakeLists.txt
-@@ -65,6 +65,12 @@ set(MODULE_TARGET_LIBRARIES
+@@ -57,6 +57,12 @@ set(MODULE_TARGET_LIBRARIES
    vtkSlicer${MODULE_NAME}ModuleLogic
    qSlicer${MODULE_NAME}ModuleWidgets
    )

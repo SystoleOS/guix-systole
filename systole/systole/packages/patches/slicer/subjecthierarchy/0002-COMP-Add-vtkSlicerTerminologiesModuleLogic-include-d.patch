@@ -1,8 +1,8 @@
 From 50e977c6f7d2afa2339c6312e603979e5e6ddb7b Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 14:14:58 +0100
-Subject: [PATCH 2/4] COMP: Add vtkSlicerTerminologiesModuleLogic include dir
- to SubjectHierarchy Widgets
+Subject: [PATCH] COMP: Add vtkSlicerTerminologiesModuleLogic include dir to
+ SubjectHierarchy Widgets
 
 ---
  Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt | 1 +

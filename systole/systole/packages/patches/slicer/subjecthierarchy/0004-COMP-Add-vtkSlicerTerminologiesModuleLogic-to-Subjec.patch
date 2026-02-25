@@ -1,7 +1,7 @@
 From 9697f34f61b35bd2be59759ca808ae7557c171e2 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 14:33:21 +0100
-Subject: [PATCH 4/4] COMP: Add vtkSlicerTerminologiesModuleLogic to
+Subject: [PATCH] COMP: Add vtkSlicerTerminologiesModuleLogic to
  SubjectHierarchy Widgets link deps
 
 ---

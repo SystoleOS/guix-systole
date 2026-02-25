@@ -1,8 +1,7 @@
 From d3dc1ada9fa6a8f9e04a2ab3af2d0c05a2972b28 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 13:12:03 +0100
-Subject: [PATCH 1/4] ENH: Add standalone build support for SubjectHierarchy
- module
+Subject: [PATCH] ENH: Add standalone build support for SubjectHierarchy module
 
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ---
