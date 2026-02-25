@@ -1,0 +1,68 @@
+From aa53381f7b58b8c2f492169912456d4d5b8ce616 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 24 Feb 2026 09:49:25 +0100
+Subject: [PATCH] COMP: Fix Slicer_BINARY_DIR usage and expose
+ QTSCRIPTEDMODULES paths for standalone builds
+
+SubjectHierarchyPlugins/CMakeLists.txt used ${Slicer_BINARY_DIR} as the
+base for its ctkMacroCompilePythonScript DESTINATION_DIR.  In an install-
+tree standalone build, Slicer_BINARY_DIR is empty (it is Slicer's own build
+directory, not available outside a Slicer superbuild), so the destination
+collapsed to "//SubjectHierarchyPlugins/__init__.py" and CMake refused to
+write to the root filesystem in the Guix sandbox.
+
+Replace ${Slicer_BINARY_DIR}/ with ${CMAKE_BINARY_DIR}/ so the compiled
+Python scripts are placed under the current project's binary tree instead
+of Slicer's.  When building inside a Slicer superbuild CMAKE_BINARY_DIR
+equals Slicer_BINARY_DIR, so the existing behaviour is preserved.
+
+Also expose Slicer_QTSCRIPTEDMODULES_SUBDIR and Slicer_QTSCRIPTEDMODULES_LIB_DIR
+in SlicerInstallConfig.cmake.in.  SlicerConfig.cmake.in (build-tree) already
+provides these non-install relative paths; the install-tree config must supply
+them too so that standalone module builds can construct the correct
+DESTINATION_DIR path (e.g. ${CMAKE_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}).
+---
+ CMake/SlicerInstallConfig.cmake.in                         | 4 ++++
+ .../Widgets/Python/SubjectHierarchyPlugins/CMakeLists.txt  | 7 ++++++-
+ 2 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/CMake/SlicerInstallConfig.cmake.in b/CMake/SlicerInstallConfig.cmake.in
+index 5860d00e95..882cb9a9e4 100644
+--- a/CMake/SlicerInstallConfig.cmake.in
++++ b/CMake/SlicerInstallConfig.cmake.in
+@@ -165,6 +165,10 @@ set(Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR "@Slicer_INSTALL_QTLOADABLEMODU
+ set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR "@Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR@")
+ 
+ if(Slicer_USE_PYTHONQT)
++  # Non-install relative paths needed by standalone module builds (e.g. for
++  # ctkMacroCompilePythonScript DESTINATION_DIR which is relative to CMAKE_BINARY_DIR).
++  set(Slicer_QTSCRIPTEDMODULES_SUBDIR "@Slicer_QTSCRIPTEDMODULES_SUBDIR@")
++  set(Slicer_QTSCRIPTEDMODULES_LIB_DIR "@Slicer_QTSCRIPTEDMODULES_LIB_DIR@")
+   set(Slicer_INSTALL_QTSCRIPTEDMODULES_BIN_DIR "@Slicer_INSTALL_QTSCRIPTEDMODULES_BIN_DIR@")
+   set(Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR "@Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR@")
+   set(Slicer_INSTALL_QTSCRIPTEDMODULES_INCLUDE_DIR "@Slicer_INSTALL_QTSCRIPTEDMODULES_INCLUDE_DIR@")
+diff --git a/Modules/Loadable/SubjectHierarchy/Widgets/Python/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/SubjectHierarchy/Widgets/Python/SubjectHierarchyPlugins/CMakeLists.txt
+index 9902de240e..2f1607edd6 100644
+--- a/Modules/Loadable/SubjectHierarchy/Widgets/Python/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Loadable/SubjectHierarchy/Widgets/Python/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -9,11 +9,16 @@ set(SubjectHierarchyPlugins_PYTHON_SCRIPTS
+ set(SubjectHierarchyPlugins_PYTHON_RESOURCES
+   )
+ 
++# Ensure the destination directory exists at configure time so that
++# ctkMacroCompilePythonScript's get_filename_component(... REALPATH) call
++# can resolve the path correctly (realpath() requires existing dirs on Linux).
++file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins")
++
+ ctkMacroCompilePythonScript(
+   TARGET_NAME ${MODULE_NAME}SubjectHierarchyPlugins
+   SCRIPTS "${SubjectHierarchyPlugins_PYTHON_SCRIPTS}"
+   RESOURCES "${SubjectHierarchyPlugins_PYTHON_RESOURCES}"
+-  DESTINATION_DIR ${Slicer_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins
++  DESTINATION_DIR ${CMAKE_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins
+   INSTALL_DIR ${Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins
+   NO_INSTALL_SUBDIR
+   )
+-- 
+2.52.0
+

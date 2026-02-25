@@ -1,0 +1,40 @@
+From d413d4e8174f574e3f78914976044c552e9dab3e Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 24 Feb 2026 13:34:19 +0100
+Subject: [PATCH] COMP: Link Python3 for ScriptedEffect in standalone
+ Segmentations builds
+
+qSlicerSegmentEditorScriptedEffect.cxx and its siblings call the Python C
+API directly (PyObject_GetAttrString, PyDict_New, PyTuple_New, etc.).  In
+the full Slicer superbuild these symbols are satisfied transitively through
+Slicer's core libraries.  In a standalone (install-tree) build the
+transitive Python dependency is not propagated, so the linker fails with
+undefined references.
+
+Add Python3::Python to the EditorEffects TARGET_LIBRARIES explicitly when
+Slicer_USE_PYTHONQT is ON and the target exists.  This is a no-op inside
+a Slicer superbuild but makes the standalone build link correctly.
+---
+ Modules/Loadable/Segmentations/EditorEffects/CMakeLists.txt | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/Modules/Loadable/Segmentations/EditorEffects/CMakeLists.txt b/Modules/Loadable/Segmentations/EditorEffects/CMakeLists.txt
+index 32a939316f..0346da0484 100644
+--- a/Modules/Loadable/Segmentations/EditorEffects/CMakeLists.txt
++++ b/Modules/Loadable/Segmentations/EditorEffects/CMakeLists.txt
+@@ -79,6 +79,12 @@ set(${KIT}_TARGET_LIBRARIES
+   MRMLCore
+   qSlicerBaseQTGUI # required for access to qSlicerApplication singletons
+   )
++if(Slicer_USE_PYTHONQT AND TARGET Python3::Python)
++  # qSlicerSegmentEditorScriptedEffect.cxx (and siblings) call the Python C API
++  # directly; link Python3 explicitly so the symbols are available in standalone
++  # (install-tree) builds where transitive Python deps are not propagated.
++  list(APPEND ${KIT}_TARGET_LIBRARIES Python3::Python)
++endif()
+ 
+ #-----------------------------------------------------------------------------
+ SlicerMacroBuildModuleQtLibrary(
+-- 
+2.52.0
+

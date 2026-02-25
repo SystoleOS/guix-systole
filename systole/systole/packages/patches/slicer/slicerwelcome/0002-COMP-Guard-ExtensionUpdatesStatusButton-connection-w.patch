@@ -1,0 +1,37 @@
+From a49b78e7f2f3016d3b62cfdc31aba4f8c8b96820 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 25 Feb 2026 02:17:34 +0100
+Subject: [PATCH] COMP: Guard ExtensionUpdatesStatusButton connection with
+ Slicer_BUILD_EXTENSIONMANAGER_SUPPORT
+
+Slicer_BUILD_APPLICATIONUPDATE_SUPPORT is unconditionally defined even when
+Slicer_BUILD_EXTENSIONMANAGER_SUPPORT is OFF (it is a separate option that
+defaults to ON).  This causes applicationUpdatesEnabled to be true, which
+triggers the ExtensionUpdatesStatusButton -> openExtensionsManagerDialog()
+connection at runtime - but that slot does not exist when the extension
+manager is not built, producing a spurious Qt warning.
+
+Guard the connection with #ifdef Slicer_BUILD_EXTENSIONMANAGER_SUPPORT since
+it references an extension-manager-only slot.
+---
+ Modules/Loadable/SlicerWelcome/qSlicerWelcomeModuleWidget.cxx | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Modules/Loadable/SlicerWelcome/qSlicerWelcomeModuleWidget.cxx b/Modules/Loadable/SlicerWelcome/qSlicerWelcomeModuleWidget.cxx
+index 3ec261f14a..da9dada916 100644
+--- a/Modules/Loadable/SlicerWelcome/qSlicerWelcomeModuleWidget.cxx
++++ b/Modules/Loadable/SlicerWelcome/qSlicerWelcomeModuleWidget.cxx
+@@ -298,8 +298,10 @@ void qSlicerWelcomeModuleWidget::setup()
+     QObject::connect(d->CheckForUpdatesNowButton, SIGNAL(clicked()),
+       this, SLOT(checkForUpdates()));
+ 
++#ifdef Slicer_BUILD_EXTENSIONMANAGER_SUPPORT
+     QObject::connect(d->ExtensionUpdatesStatusButton, SIGNAL(clicked()),
+       qSlicerApplication::application(), SLOT(openExtensionsManagerDialog()));
++#endif
+   }
+ 
+   this->Superclass::setup();
+-- 
+2.52.0
+

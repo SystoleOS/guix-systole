@@ -130,7 +130,8 @@
        (sha256
         (base32 "0wazsirav972mxkawfaw0lpnkylxfr19xjrd5s03blr2kid50a91"))
        (patches (search-patches
-                 "0007-ENH-packages-vtk-use-CMAKE-GNUInstallDirs.patch"))))
+                 "0007-ENH-packages-vtk-use-CMAKE-GNUInstallDirs.patch"
+                 "0001-COMP-Fix-Python-detection-in-vtkMacroKitPythonWrap-f.patch"))))
     (build-system cmake-build-system)
     (arguments
      `(#:tests? #f

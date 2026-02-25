@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 24 Feb 2026 11:00:00 +0100
+Subject: [PATCH] COMP: Link Python3 for ScriptedPlugin in standalone builds
+
+qSlicerSubjectHierarchyScriptedPlugin.cxx uses the Python C API directly
+(PyTuple_New, PyLong_FromLongLong, _Py_Dealloc, etc.).  In the full Slicer
+superbuild these symbols are satisfied transitively through Slicer's core
+libraries.  In a standalone (install-tree) build the transitive Python
+dependency is not propagated, so the linker fails with undefined references.
+
+Add Python3::Python to the Widgets TARGET_LIBRARIES explicitly when
+Slicer_USE_PYTHONQT is ON and the target exists.  This is a no-op inside
+a Slicer superbuild (the symbols are already available), but makes the
+standalone build link correctly.
+---
+ .../SubjectHierarchy/Widgets/CMakeLists.txt  | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt b/Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt
+--- a/Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/SubjectHierarchy/Widgets/CMakeLists.txt
+@@ -110,6 +110,13 @@ if(Slicer_SUPERBUILD)
+   list(APPEND ${KIT}_TARGET_LIBRARIES vtkSlicerVolumesModuleLogic)
+ endif()
+
++# qSlicerSubjectHierarchyScriptedPlugin calls the Python C API directly;
++# link Python3 explicitly so the symbols are available in standalone builds
++# where transitive Python deps from Slicer core libraries are not present.
++if(Slicer_USE_PYTHONQT AND TARGET Python3::Python)
++  list(APPEND ${KIT}_TARGET_LIBRARIES Python3::Python)
++endif()
++
+ #-----------------------------------------------------------------------------
+ SlicerMacroBuildModuleWidgets(
+   NAME ${KIT}
+--
+2.52.0

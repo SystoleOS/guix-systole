@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: guix-systole <guix-systole@example.com>
+Date: Mon, 24 Feb 2026 00:00:00 +0000
+Subject: [PATCH] COMP: Fix Python detection in vtkMacroKitPythonWrap for CMake >= 3.27
+
+FindPythonLibs.cmake was removed in CMake 3.27. When VTK_WRAP_PYTHON_FIND_LIBS
+is set to 1, vtkWrapPython.cmake calls find_package(PythonLibs) which now
+fails unconditionally on modern toolchains.
+
+Prefer the CMake Python3 module targets (available since CMake 3.12) which
+are already found upstream before this macro is invoked.  Set VTK_PYTHON_LIBRARIES
+from the Python3::Python imported target and skip the VTK_WRAP_PYTHON_FIND_LIBS
+discovery step.  Fall back to the old find_package(PythonLibs) path only when
+no Python3 target is present, preserving backwards compatibility.
+---
+ CMake/vtkMacroKitPythonWrap.cmake | 19 +++++++++++++++++--
+ 1 file changed, 17 insertions(+), 2 deletions(-)
+
+diff --git a/CMake/vtkMacroKitPythonWrap.cmake b/CMake/vtkMacroKitPythonWrap.cmake
+index 1111111..2222222 100644
+--- a/CMake/vtkMacroKitPythonWrap.cmake
++++ b/CMake/vtkMacroKitPythonWrap.cmake
+@@ -160,8 +160,25 @@
+
+   if(VTK_WRAP_PYTHON AND BUILD_SHARED_LIBS)
+
+-    # Tell vtkWrapPython.cmake to set VTK_PYTHON_LIBRARIES for us.
+-    set(VTK_WRAP_PYTHON_FIND_LIBS 1)
++    # Prefer the CMake Python3 targets (CMake >= 3.12) over the legacy
++    # PythonLibs approach.  find_package(PythonLibs) was removed in CMake
++    # 3.27, so when Python3::Python is already available we derive
++    # VTK_PYTHON_LIBRARIES from it and skip the VTK_WRAP_PYTHON_FIND_LIBS
++    # discovery step.
++    if(TARGET Python3::Python)
++      if(NOT DEFINED PYTHON_LIBRARY OR "${PYTHON_LIBRARY}" STREQUAL "")
++        set(PYTHON_LIBRARY Python3::Python)
++      endif()
++      if(NOT DEFINED PYTHON_INCLUDE_DIRS OR "${PYTHON_INCLUDE_DIRS}" STREQUAL "")
++        get_target_property(PYTHON_INCLUDE_DIRS
++          Python3::Python INTERFACE_INCLUDE_DIRECTORIES)
++      endif()
++      set(VTK_PYTHON_LIBRARIES Python3::Python)
++      set(VTK_WRAP_PYTHON_FIND_LIBS 0)
++    else()
++      # Fall back: ask vtkWrapPython.cmake to find PythonLibs for us.
++      set(VTK_WRAP_PYTHON_FIND_LIBS 1)
++    endif()
+     include(vtkWrapPython)
+
+     set(TMP_WRAP_FILES ${MY_KIT_SRCS} ${MY_KIT_WRAP_HEADERS})
