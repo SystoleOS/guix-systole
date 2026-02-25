@@ -1,0 +1,109 @@
+From 3244f79e4f3e359731c1df130e30e3b3cbcebcea Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 24 Feb 2026 06:16:11 +0100
+Subject: [PATCH] COMP: Fix module install-dir variables for install-tree
+ standalone builds
+
+SlicerInstallConfig.cmake.in guarded Slicer_INSTALL_QTLOADABLEMODULES_*
+inside if(Slicer_BUILD_QTLOADABLEMODULES), so those variables were never
+set when Slicer is installed with Slicer_BUILD_QTLOADABLEMODULES=OFF.
+Also, Slicer_INSTALL_QTLOADABLEMODULES_PYTHON_LIB_DIR and all
+Slicer_INSTALL_QTSCRIPTEDMODULES_* variables were absent entirely.
+
+UseSlicer.cmake.in unconditionally overwrote Slicer_INSTALL_QTLOADABLE*
+and Slicer_INSTALL_QTSCRIPTED* by recomputing them from
+Slicer_QTLOADABLEMODULES_BIN_DIR and Slicer_INSTALL_ROOT, which are
+not present in the install-tree config.  In standalone extension builds
+(find_package(Slicer) against an installed tree) this zeroed out all
+install-directory variables, causing e.g. vtkMacroKitPythonWrap to
+abort with "KIT_INSTALL_BIN_DIR CMake variable is empty!".
+
+Fix:
+* SlicerInstallConfig.cmake.in: expose all Slicer_INSTALL_QTLOADABLE*
+  and (when Slicer_USE_PYTHONQT) Slicer_INSTALL_QTSCRIPTED* vars
+  unconditionally, so that external module projects always have the
+  correct install-relative paths regardless of Slicer_BUILD_QTLOADABLEMODULES.
+* UseSlicer.cmake.in: guard the recomputation of those variables with
+  if(Slicer_QTLOADABLEMODULES_BIN_DIR) so that in an install-tree context
+  (where the source variable is absent) the correctly-baked values from
+  SlicerInstallConfig.cmake are preserved.  The recomputation still runs
+  unchanged in build-tree / superbuild contexts where the source variable
+  is defined by SlicerDirectories.cmake or SlicerConfig.cmake.
+---
+ CMake/SlicerInstallConfig.cmake.in | 18 +++++++++++++-----
+ CMake/UseSlicer.cmake.in           | 28 +++++++++++++++++++---------
+ 2 files changed, 32 insertions(+), 14 deletions(-)
+
+diff --git a/CMake/SlicerInstallConfig.cmake.in b/CMake/SlicerInstallConfig.cmake.in
+index 4d26388e22..5860d00e95 100644
+--- a/CMake/SlicerInstallConfig.cmake.in
++++ b/CMake/SlicerInstallConfig.cmake.in
+@@ -156,11 +156,19 @@ set(Slicer_INSTALL_CLIMODULES_BIN_DIR "@Slicer_INSTALL_CLIMODULES_BIN_DIR@")
+ set(Slicer_INSTALL_CLIMODULES_LIB_DIR "@Slicer_INSTALL_CLIMODULES_LIB_DIR@")
+ set(Slicer_INSTALL_CLIMODULES_SHARE_DIR "@Slicer_INSTALL_CLIMODULES_SHARE_DIR@")
+ 
+-if(Slicer_BUILD_QTLOADABLEMODULES)
+-  set(Slicer_INSTALL_QTLOADABLEMODULES_BIN_DIR "@Slicer_INSTALL_QTLOADABLEMODULES_BIN_DIR@")
+-  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR "@Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR@")
+-  set(Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR "@Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR@")
+-  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR "@Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR@")
++# Always expose install dirs so external projects can build loadable and scripted
++# modules against an installed Slicer even when Slicer_BUILD_QTLOADABLEMODULES=OFF.
++set(Slicer_INSTALL_QTLOADABLEMODULES_BIN_DIR "@Slicer_INSTALL_QTLOADABLEMODULES_BIN_DIR@")
++set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR "@Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR@")
++set(Slicer_INSTALL_QTLOADABLEMODULES_PYTHON_LIB_DIR "@Slicer_INSTALL_QTLOADABLEMODULES_PYTHON_LIB_DIR@")
++set(Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR "@Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR@")
++set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR "@Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR@")
++
++if(Slicer_USE_PYTHONQT)
++  set(Slicer_INSTALL_QTSCRIPTEDMODULES_BIN_DIR "@Slicer_INSTALL_QTSCRIPTEDMODULES_BIN_DIR@")
++  set(Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR "@Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR@")
++  set(Slicer_INSTALL_QTSCRIPTEDMODULES_INCLUDE_DIR "@Slicer_INSTALL_QTSCRIPTEDMODULES_INCLUDE_DIR@")
++  set(Slicer_INSTALL_QTSCRIPTEDMODULES_SHARE_DIR "@Slicer_INSTALL_QTSCRIPTEDMODULES_SHARE_DIR@")
+ endif()
+ 
+ # Components needed to build modules from outside a Slicer build tree or
+diff --git a/CMake/UseSlicer.cmake.in b/CMake/UseSlicer.cmake.in
+index 63eca84c5e..4d5bd7f7e6 100644
+--- a/CMake/UseSlicer.cmake.in
++++ b/CMake/UseSlicer.cmake.in
+@@ -355,17 +355,27 @@ if(Slicer_BUILD_CLI_SUPPORT)
+   endif()
+ endif()
+ 
+-set(Slicer_INSTALL_QTLOADABLEMODULES_BIN_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTLOADABLEMODULES_BIN_DIR}")
+-set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTLOADABLEMODULES_LIB_DIR}")
+-set(Slicer_INSTALL_QTLOADABLEMODULES_PYTHON_LIB_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTLOADABLEMODULES_PYTHON_LIB_DIR}")
+-set(Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTLOADABLEMODULES_INCLUDE_DIR}")
+-set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTLOADABLEMODULES_SHARE_DIR}")
++# Recalculate install dirs only when the non-install source variables are defined,
++# i.e. in a build-tree (superbuild) context where Slicer_QTLOADABLEMODULES_BIN_DIR
++# is set by SlicerDirectories.cmake or SlicerConfig.cmake.  In an install-tree
++# (standalone extension) context these variables are absent and the correctly-
++# baked Slicer_INSTALL_QTLOADABLEMODULES_* values from SlicerInstallConfig.cmake
++# must not be overwritten.
++if(Slicer_QTLOADABLEMODULES_BIN_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_BIN_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTLOADABLEMODULES_BIN_DIR}")
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTLOADABLEMODULES_LIB_DIR}")
++  set(Slicer_INSTALL_QTLOADABLEMODULES_PYTHON_LIB_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTLOADABLEMODULES_PYTHON_LIB_DIR}")
++  set(Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTLOADABLEMODULES_INCLUDE_DIR}")
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTLOADABLEMODULES_SHARE_DIR}")
++endif()
+ 
+ if(Slicer_USE_PYTHONQT)
+-  set(Slicer_INSTALL_QTSCRIPTEDMODULES_BIN_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTSCRIPTEDMODULES_BIN_DIR}")
+-  set(Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTSCRIPTEDMODULES_LIB_DIR}")
+-  set(Slicer_INSTALL_QTSCRIPTEDMODULES_INCLUDE_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTSCRIPTEDMODULES_INCLUDE_DIR}")
+-  set(Slicer_INSTALL_QTSCRIPTEDMODULES_SHARE_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTSCRIPTEDMODULES_SHARE_DIR}")
++  if(Slicer_QTSCRIPTEDMODULES_BIN_DIR)
++    set(Slicer_INSTALL_QTSCRIPTEDMODULES_BIN_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTSCRIPTEDMODULES_BIN_DIR}")
++    set(Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTSCRIPTEDMODULES_LIB_DIR}")
++    set(Slicer_INSTALL_QTSCRIPTEDMODULES_INCLUDE_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTSCRIPTEDMODULES_INCLUDE_DIR}")
++    set(Slicer_INSTALL_QTSCRIPTEDMODULES_SHARE_DIR "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_QTSCRIPTEDMODULES_SHARE_DIR}")
++  endif()
+ endif()
+ 
+ # These variables can be used when configuring extension external projects in
+-- 
+2.52.0
+

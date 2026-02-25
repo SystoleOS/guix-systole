@@ -1,0 +1,38 @@
+From 27a47a70d7b4801429cd1f79ef9f5ba5e9f2b2b7 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 24 Feb 2026 18:51:49 +0100
+Subject: [PATCH] COMP: Use abspath instead of realpath in
+ SubjectHierarchyPlugins __init__
+
+In a Guix profile, SubjectHierarchyPlugins/__init__.py is a symlink into
+the slicer-subjecthierarchy-5.8 store path, while the containing directory
+is a real merged directory with plugins contributed by multiple packages
+(SegmentEditor, SegmentStatistics, etc.).
+
+os.path.realpath(__file__) resolves the symlink of __init__.py itself,
+returning the slicer-subjecthierarchy store path, so os.listdir() only
+sees the plugins installed by that one package.
+
+Replace with os.path.abspath(__file__), which does not resolve symlinks,
+so __file__ retains the profile directory path and os.listdir() enumerates
+the full merged set of plugins.
+---
+ .../Widgets/Python/SubjectHierarchyPlugins/__init__.py          | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Modules/Loadable/SubjectHierarchy/Widgets/Python/SubjectHierarchyPlugins/__init__.py b/Modules/Loadable/SubjectHierarchy/Widgets/Python/SubjectHierarchyPlugins/__init__.py
+index 2cbe1bc73a..1c7a843575 100644
+--- a/Modules/Loadable/SubjectHierarchy/Widgets/Python/SubjectHierarchyPlugins/__init__.py
++++ b/Modules/Loadable/SubjectHierarchy/Widgets/Python/SubjectHierarchyPlugins/__init__.py
+@@ -5,7 +5,7 @@ import traceback
+ import logging
+ import sys
+ 
+-currentDir = os.path.dirname(os.path.realpath(__file__))
++currentDir = os.path.dirname(os.path.abspath(__file__))
+ sys.path.append(currentDir)
+ for fileName in os.listdir(currentDir):
+     fileNameNoExtension = os.path.splitext(fileName)[0]
+-- 
+2.52.0
+

@@ -1,0 +1,65 @@
+From 8919417262b2739e8009fbfededdf5eae4b17c4d Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 24 Feb 2026 21:20:23 +0100
+Subject: [PATCH] [COMP][Transforms] Lower NRRD confidence unless header
+ indicates displacement field
+
+In a modular Guix build, both Transforms and Volumes readers register for
+.nrrd with equal base confidence (0.55).  QMultiMap preserves insertion
+order on ties, and Transforms (T) is loaded alphabetically before Volumes
+(V), so it wins and scalar MRI volumes are misidentified as grid transforms.
+
+Mirror the existing NIfTI logic: start at 0.4 for .nrrd/.nhdr and raise to
+0.6 only when the NRRD header contains a 'kinds: vector' or 'kinds: 3-vector'
+field, which is the canonical indicator of a displacement vector field stored
+in NRRD format.
+---
+ .../Transforms/qSlicerTransformsReader.cxx    | 32 +++++++++++++++++++
+ 1 file changed, 32 insertions(+)
+
+diff --git a/Modules/Loadable/Transforms/qSlicerTransformsReader.cxx b/Modules/Loadable/Transforms/qSlicerTransformsReader.cxx
+index e6792d7b8b..9d6f10a03f 100644
+--- a/Modules/Loadable/Transforms/qSlicerTransformsReader.cxx
++++ b/Modules/Loadable/Transforms/qSlicerTransformsReader.cxx
+@@ -151,6 +151,38 @@ double qSlicerTransformsReader::canLoadFileConfidence(const QString& fileName)co
+         // this does not look like a transform file.
+       }
+     }
++    else if (upperCaseFileName.endsWith(".NRRD") || upperCaseFileName.endsWith(".NHDR"))
++    {
++      // Use lower than default confidence value unless the NRRD header indicates a vector/displacement field.
++      // Scalar volumes (e.g. MRI, CT) are far more common in .nrrd files than grid transforms, so without
++      // a positive indicator we defer to the Volumes reader (which also handles .nrrd at 0.55).
++      confidence = 0.4;
++      QFile file(fileName);
++      if (file.open(QIODevice::ReadOnly | QIODevice::Text))
++      {
++        int lineCount = 0;
++        while (!file.atEnd() && lineCount < 40)
++        {
++          QString line = QString::fromUtf8(file.readLine()).trimmed();
++          if (line.isEmpty())
++          {
++            break; // blank line = end of NRRD header
++          }
++          // "kinds: vector domain domain domain" or "kinds: 3-vector domain domain domain"
++          // indicates a displacement vector field stored in NRRD format.
++          if (line.startsWith("kinds:") || line.startsWith("kind:"))
++          {
++            if (line.contains("vector", Qt::CaseInsensitive))
++            {
++              confidence = 0.6;
++            }
++            break;
++          }
++          lineCount++;
++        }
++        file.close();
++      }
++    }
+   }
+   return confidence;
+ }
+-- 
+2.52.0
+

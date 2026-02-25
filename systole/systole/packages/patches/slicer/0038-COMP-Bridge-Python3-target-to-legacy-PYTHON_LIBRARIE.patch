@@ -1,0 +1,53 @@
+From b53826da83b1a02c44d4cb994de96a15473d5e76 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 24 Feb 2026 08:55:34 +0100
+Subject: [PATCH] COMP: Bridge Python3 target to legacy PYTHON_LIBRARIES in
+ UseSlicer
+
+ctkMacroBuildLibWrapper calls ctkFunctionExtractOptimizedLibrary(PYTHON_LIBRARIES ...)
+which fails when PYTHON_LIBRARIES is empty.  On CMake >= 3.27 find_package(PythonLibs)
+no longer exists, so PYTHON_LIBRARIES is never set.
+
+After find_package(PythonQt) (which runs when Slicer_USE_PYTHONQT=ON), the
+Python3::Python imported target is already available via find_package(CTK).
+Set the legacy PYTHON_LIBRARIES variable from that target so that CTK macros
+that have not yet been ported to the modern Python3 CMake API continue to work.
+---
+ CMake/UseSlicer.cmake.in | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/CMake/UseSlicer.cmake.in b/CMake/UseSlicer.cmake.in
+index 4d5bd7f7e6..91d0039cdf 100644
+--- a/CMake/UseSlicer.cmake.in
++++ b/CMake/UseSlicer.cmake.in
+@@ -167,6 +167,27 @@ endif()
+ # and https://github.com/commontk/PythonQt/issues/8
+ if(Slicer_USE_PYTHONQT)
+   find_package(PythonQt)
++  # Bridge modern Python3 CMake variables/targets to the legacy names expected
++  # by CTK macros (ctkMacroBuildLibWrapper, ctkMacroWrapPythonQt, etc.).
++  # find_package(PythonInterp) and find_package(PythonLibs) were removed in
++  # CMake 3.27; find_package(CTK) above has already found Python3 for us.
++  if(TARGET Python3::Python)
++    if(NOT PYTHON_EXECUTABLE)
++      set(PYTHON_EXECUTABLE "${Python3_EXECUTABLE}")
++    endif()
++    if(NOT PYTHON_LIBRARIES)
++      set(PYTHON_LIBRARIES ${Python3_LIBRARIES})
++    endif()
++    if(NOT PYTHON_INCLUDE_DIRS)
++      set(PYTHON_INCLUDE_DIRS ${Python3_INCLUDE_DIRS})
++    endif()
++    if(NOT PYTHONINTERP_FOUND)
++      set(PYTHONINTERP_FOUND TRUE)
++    endif()
++    if(NOT PYTHONLIBS_FOUND)
++      set(PYTHONLIBS_FOUND TRUE)
++    endif()
++  endif()
+ endif()
+ 
+ # --------------------------------------------------------------------------
+-- 
+2.52.0
+

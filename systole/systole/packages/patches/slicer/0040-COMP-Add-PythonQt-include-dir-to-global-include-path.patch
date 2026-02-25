@@ -1,0 +1,44 @@
+From 3a6dd6889363e3edb215e2de214bd189143177f6 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 24 Feb 2026 12:45:33 +0100
+Subject: [PATCH] COMP: Add PythonQt include dir to global include path in
+ UseSlicer
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+find_package(PythonQt) sets PYTHONQT_INCLUDE_DIR but never adds it to
+the include path.  In a standalone (install-tree) module build the
+Slicer core's global include_directories() calls are absent, so any
+CTK or Slicer header that includes PythonQt headers directly (e.g.
+ctkAbstractPythonManager.h → PythonQtPythonInclude.h) fails to compile.
+
+Add include_directories(${PYTHONQT_INCLUDE_DIR}) immediately after
+find_package(PythonQt) so that all subsequent compilation units can
+find PythonQt headers regardless of build context.
+---
+ CMake/UseSlicer.cmake.in | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/CMake/UseSlicer.cmake.in b/CMake/UseSlicer.cmake.in
+index 91d0039cdf..dec6a2716b 100644
+--- a/CMake/UseSlicer.cmake.in
++++ b/CMake/UseSlicer.cmake.in
+@@ -167,6 +167,14 @@ endif()
+ # and https://github.com/commontk/PythonQt/issues/8
+ if(Slicer_USE_PYTHONQT)
+   find_package(PythonQt)
++  # Expose the PythonQt header directory globally so that any target in a
++  # standalone (install-tree) build can include PythonQt headers directly
++  # (e.g. ctkAbstractPythonManager.h includes PythonQtPythonInclude.h).
++  # In the full Slicer superbuild this is satisfied by global include dirs
++  # set in the top-level CMakeLists.txt; in standalone builds it is not.
++  if(PYTHONQT_INCLUDE_DIR)
++    include_directories(${PYTHONQT_INCLUDE_DIR})
++  endif()
+   # Bridge modern Python3 CMake variables/targets to the legacy names expected
+   # by CTK macros (ctkMacroBuildLibWrapper, ctkMacroWrapPythonQt, etc.).
+   # find_package(PythonInterp) and find_package(PythonLibs) were removed in
+-- 
+2.52.0
+
