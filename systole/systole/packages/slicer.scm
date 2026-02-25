@@ -727,7 +727,7 @@ modifier look-ups backed by JSON terminology files) and is built from the
                    ;; Link CTKScriptingPythonCore explicitly for
                    ;; ctkAbstractPythonManager::executeString() called by the
                    ;; module's setup() function.
-                   "subjecthierarchy/0008-COMP-Link-CTKScriptingPythonCore-for-standalone-Subj.patch"
+                   "subjecthierarchy/0007-COMP-Link-CTKScriptingPythonCore-for-standalone-Subj.patch"
                    ;; Use os.path.abspath instead of os.path.realpath in
                    ;; SubjectHierarchyPlugins/__init__.py so that the merged
                    ;; profile directory (not the store symlink target) is scanned

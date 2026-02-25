@@ -1,4 +1,4 @@
-From aa53381f7b58b8c2f492169912456d4d5b8ce616 Mon Sep 17 00:00:00 2001
+From a3b4df470e9b172c775dc10b9b5f68e18cd2cebe Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 24 Feb 2026 09:49:25 +0100
 Subject: [PATCH] COMP: Fix Slicer_BINARY_DIR usage in SubjectHierarchyPlugins
@@ -23,7 +23,7 @@ calls get_filename_component(... REALPATH) which on Linux calls realpath();
 realpath() requires all path components to exist, so pre-creating the
 directory prevents it from failing or returning an unexpected path.
 ---
- .../Widgets/Python/SubjectHierarchyPlugins/CMakeLists.txt | 7 ++++++-
+ .../Widgets/Python/SubjectHierarchyPlugins/CMakeLists.txt  | 7 ++++++-
  1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/Modules/Loadable/SubjectHierarchy/Widgets/Python/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/SubjectHierarchy/Widgets/Python/SubjectHierarchyPlugins/CMakeLists.txt
@@ -33,7 +33,7 @@ index 9902de240e..2f1607edd6 100644
 @@ -9,11 +9,16 @@ set(SubjectHierarchyPlugins_PYTHON_SCRIPTS
  set(SubjectHierarchyPlugins_PYTHON_RESOURCES
    )
-
+ 
 +# Ensure the destination directory exists at configure time so that
 +# ctkMacroCompilePythonScript's get_filename_component(... REALPATH) call
 +# can resolve the path correctly (realpath() requires existing dirs on Linux).
@@ -48,6 +48,6 @@ index 9902de240e..2f1607edd6 100644
    INSTALL_DIR ${Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins
    NO_INSTALL_SUBDIR
    )
---
+-- 
 2.52.0
 
