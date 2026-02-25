@@ -1,0 +1,40 @@
+From 523aad8dff3759b3270095ae3315db774924527e Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 25 Feb 2026 09:48:48 +0100
+Subject: [PATCH] COMP: Use GenerateCLP directly instead of launcher in install
+ config
+
+In a system-install build (e.g. Guix) the GenerateCLP binary is built
+with a correct RUNPATH pointing to its shared library dependencies
+(ITK, etc.), so the GenerateCLPLauncher wrapper that sets
+LD_LIBRARY_PATH is unnecessary.  Point GENERATECLP_EXE directly at
+the real executable to avoid the launcher's hard-coded relative-path
+assumption (FORWARD_DIR_INSTALL="..") which would look for GenerateCLP
+one level above bin/ and fail.
+---
+ GenerateCLP/GenerateCLPInstallConfig.cmake.in | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/GenerateCLP/GenerateCLPInstallConfig.cmake.in b/GenerateCLP/GenerateCLPInstallConfig.cmake.in
+index a53fa54..374150b 100644
+--- a/GenerateCLP/GenerateCLPInstallConfig.cmake.in
++++ b/GenerateCLP/GenerateCLPInstallConfig.cmake.in
+@@ -10,11 +10,10 @@ endif()
+ set(GenerateCLP_INCLUDE_DIRS "${GenerateCLP_CONFIG_DIR}/../../include/GenerateCLP")
+ set(GenerateCLP_LIBRARY_DIRS "${GenerateCLP_CONFIG_DIR}")
+ set(GenerateCLP_USE_FILE "${GenerateCLP_CONFIG_DIR}/UseGenerateCLP.cmake")
+-set(GENERATECLP_EXE "${GenerateCLP_CONFIG_DIR}/../../bin/GenerateCLP")
+-if(NOT WIN32)
+-  set(GENERATECLP_EXE "${GENERATECLP_EXE}Launcher")
+-endif()
+-set(GENERATECLP_EXE "${GENERATECLP_EXE}${__EXE_EXT}")
++# In a Guix (or similar) system-install build the binary has a correct
++# RUNPATH and does not need the launcher wrapper to set LD_LIBRARY_PATH.
++# Point GENERATECLP_EXE directly at the real executable.
++set(GENERATECLP_EXE "${GenerateCLP_CONFIG_DIR}/../../bin/GenerateCLP${__EXE_EXT}")
+ get_filename_component(GENERATECLP_EXE "${GENERATECLP_EXE}" ABSOLUTE)
+ set(TCLAP_DIR "@TCLAP_DIR@")
+ set(ModuleDescriptionParser_DIR "@ModuleDescriptionParser_DIR@")
+-- 
+2.52.0
+

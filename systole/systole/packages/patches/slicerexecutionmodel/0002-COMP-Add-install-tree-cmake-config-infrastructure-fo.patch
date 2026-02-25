@@ -1,0 +1,349 @@
+From 45a891ee1f0d70809252927010909b4cbd58eba9 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 25 Feb 2026 10:20:48 +0100
+Subject: [PATCH] COMP: Add install-tree cmake config infrastructure for
+ external builds
+
+Generate proper SlicerExecutionModelConfig.cmake, GenerateCLPConfig.cmake,
+ModuleDescriptionParserConfig.cmake, and TCLAPConfig.cmake for the install
+tree so that downstream packages (e.g. slicer-5.8 in Guix) can find
+SlicerExecutionModel via find_package() without requiring a superbuild.
+
+Changes:
+- tclap: add TCLAPInstallConfig.cmake.in + configure_file in GenerateTCLAPConfig
+- ModuleDescriptionParser: add install(EXPORT), install(EXPORT ...) rule,
+  ModuleDescriptionParserInstallConfig.cmake.in, configure_file in Generate*
+- GenerateCLP: update GenerateCLPInstallConfig.cmake.in to use relative cmake
+  paths for TCLAP/MDP dirs; add configure_file in GenerateGenerateCLPConfig;
+  also install GenerateCLP.cmake macro file
+- Add SlicerExecutionModelInstallConfig.cmake.in
+- GenerateSlicerExecutionModelConfig.cmake: generate + install SEM config
+- Root CMakeLists.txt: install cmake scripts and UseSlicerExecutionModel.cmake
+---
+ CMakeLists.txt                                | 17 +++++++
+ GenerateCLP/CMakeLists.txt                    |  9 ++++
+ GenerateCLP/GenerateCLPInstallConfig.cmake.in |  9 +++-
+ GenerateCLP/GenerateGenerateCLPConfig.cmake   | 13 +++++
+ GenerateSlicerExecutionModelConfig.cmake      | 18 ++++---
+ ModuleDescriptionParser/CMakeLists.txt        | 19 ++++++++
+ ...enerateModuleDescriptionParserConfig.cmake | 14 +++---
+ ...uleDescriptionParserInstallConfig.cmake.in | 34 ++++++-------
+ SlicerExecutionModelInstallConfig.cmake.in    | 48 +++++++++++++++++++
+ tclap/GenerateTCLAPConfig.cmake               |  7 +--
+ tclap/TCLAPInstallConfig.cmake.in             | 16 ++-----
+ 11 files changed, 155 insertions(+), 49 deletions(-)
+ create mode 100644 SlicerExecutionModelInstallConfig.cmake.in
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 917e3f7..89dfbcd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -247,3 +247,20 @@ foreach(SCRIPT ${allscripts})
+   configure_file(${SCRIPT}
+     ${CMAKE_CURRENT_BINARY_DIR}/CMake/${_fileName} COPYONLY IMMEDIATE)
+ endforeach()
++
++# Install cmake scripts and UseSlicerExecutionModel.cmake for external builds.
++# NOTE: allscripts must be defined before this block.
++if(NOT DEFINED SlicerExecutionModel_INSTALL_NO_DEVELOPMENT)
++  set(SlicerExecutionModel_INSTALL_NO_DEVELOPMENT ON)
++endif()
++if(NOT SlicerExecutionModel_INSTALL_NO_DEVELOPMENT)
++  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/UseSlicerExecutionModel.cmake
++    DESTINATION lib/CMake
++    COMPONENT Development)
++  foreach(_script ${allscripts})
++    get_filename_component(_fname ${_script} NAME)
++    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/CMake/${_fname}
++      DESTINATION lib/CMake
++      COMPONENT Development)
++  endforeach()
++endif()
+diff --git a/GenerateCLP/CMakeLists.txt b/GenerateCLP/CMakeLists.txt
+index 75fabef..0c060da 100644
+--- a/GenerateCLP/CMakeLists.txt
++++ b/GenerateCLP/CMakeLists.txt
+@@ -28,6 +28,11 @@ include(${TCLAP_USE_FILE})
+ set(${PROJECT_NAME}_ITK_COMPONENTS
+   ${ModuleDescriptionParser_ITK_COMPONENTS}
+   )
++# See ModuleDescriptionParser/CMakeLists.txt for explanation of these guards.
++set(_ITK_ITKVtkGlue_USED 1)
++set(_ITK_ITKVTK_USED 1)
++set(ITKVtkGlue_LOADED TRUE)
++set(ITKVTK_LOADED TRUE)
+ find_package(ITK 4.3 COMPONENTS ${${PROJECT_NAME}_ITK_COMPONENTS} REQUIRED)
+ set(ITK_NO_IO_FACTORY_REGISTER_MANAGER 1) # See Slicer/Libs/ITKFactoryRegistration/CMakeLists.txt
+ include(${ITK_USE_FILE})
+@@ -147,6 +152,10 @@ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+     COMPONENT Development
+     RENAME UseGenerateCLP.cmake
+     )
++  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/GenerateCLP.cmake
++    DESTINATION lib/GenerateCLP
++    COMPONENT Development
++    )
+ endif()
+ 
+ # --------------------------------------------------------------------------
+diff --git a/GenerateCLP/GenerateCLPInstallConfig.cmake.in b/GenerateCLP/GenerateCLPInstallConfig.cmake.in
+index 374150b..646772e 100644
+--- a/GenerateCLP/GenerateCLPInstallConfig.cmake.in
++++ b/GenerateCLP/GenerateCLPInstallConfig.cmake.in
+@@ -15,7 +15,12 @@ set(GenerateCLP_USE_FILE "${GenerateCLP_CONFIG_DIR}/UseGenerateCLP.cmake")
+ # Point GENERATECLP_EXE directly at the real executable.
+ set(GENERATECLP_EXE "${GenerateCLP_CONFIG_DIR}/../../bin/GenerateCLP${__EXE_EXT}")
+ get_filename_component(GENERATECLP_EXE "${GENERATECLP_EXE}" ABSOLUTE)
+-set(TCLAP_DIR "@TCLAP_DIR@")
+-set(ModuleDescriptionParser_DIR "@ModuleDescriptionParser_DIR@")
++set(GenerateCLP_CMAKE_DIR "${GenerateCLP_CONFIG_DIR}")
++set(GenerateCLP_USE_JSONCPP @GenerateCLP_USE_JSONCPP@)
++set(GenerateCLP_USE_SERIALIZER @GenerateCLP_USE_SERIALIZER@)
++set(SlicerExecutionModel_USE_UTF8 @SlicerExecutionModel_USE_UTF8@)
++set(SlicerExecutionModel_CMAKE_DIR "${GenerateCLP_CONFIG_DIR}/../CMake")
++set(TCLAP_DIR "${GenerateCLP_CONFIG_DIR}/../tclap")
++set(ModuleDescriptionParser_DIR "${GenerateCLP_CONFIG_DIR}/../ModuleDescriptionParser")
+ set(ITK_DIR "@ITK_DIR@")
+ 
+diff --git a/GenerateCLP/GenerateGenerateCLPConfig.cmake b/GenerateCLP/GenerateGenerateCLPConfig.cmake
+index 18faa77..f717b8b 100644
+--- a/GenerateCLP/GenerateGenerateCLPConfig.cmake
++++ b/GenerateCLP/GenerateGenerateCLPConfig.cmake
+@@ -20,3 +20,16 @@ set(ITK_DIR_CONFIG ${ITK_DIR})
+ configure_file(${GenerateCLP_SOURCE_DIR}/GenerateCLPConfig.cmake.in
+   ${GenerateCLP_BINARY_DIR}/GenerateCLPConfig.cmake @ONLY)
+ 
++
++# Settings specific for installation trees
++# Generate GenerateCLPConfig.cmake and UseGenerateCLP.cmake for install tree.
++file(MAKE_DIRECTORY ${GenerateCLP_BINARY_DIR})
++set(GenerateCLP_CONFIG_DIR "${GenerateCLP_BINARY_DIR}")  # used in InstallConfig template
++configure_file(
++  ${GenerateCLP_SOURCE_DIR}/GenerateCLPInstallConfig.cmake.in
++  ${GenerateCLP_BINARY_DIR}/GenerateCLPConfig.cmake_install
++  @ONLY)
++configure_file(
++  ${GenerateCLP_SOURCE_DIR}/UseGenerateCLP.cmake.in
++  ${GenerateCLP_BINARY_DIR}/UseGenerateCLP.cmake_install
++  @ONLY)
+diff --git a/GenerateSlicerExecutionModelConfig.cmake b/GenerateSlicerExecutionModelConfig.cmake
+index fe15724..2dc1cdc 100644
+--- a/GenerateSlicerExecutionModelConfig.cmake
++++ b/GenerateSlicerExecutionModelConfig.cmake
+@@ -60,10 +60,14 @@ configure_file(
+ #
+ #
+ 
+-# TODO - Configure SlicerExecutionModelConfig.cmake for the install tree.
+-#
+-#configure_file(
+-#  ${SlicerExecutionModel_SOURCE_DIR}/SlicerExecutionModelInstallConfig.cmake.in
+-#  ${SlicerExecutionModel_BINARY_DIR}/install/SlicerExecutionModelConfig.cmake
+-#  @ONLY
+-#  )
++# Configure SlicerExecutionModelConfig.cmake for the install tree.
++configure_file(
++  ${SlicerExecutionModel_SOURCE_DIR}/SlicerExecutionModelInstallConfig.cmake.in
++  ${SlicerExecutionModel_BINARY_DIR}/install/SlicerExecutionModelConfig.cmake
++  @ONLY
++  )
++install(FILES
++  ${SlicerExecutionModel_BINARY_DIR}/install/SlicerExecutionModelConfig.cmake
++  DESTINATION lib
++  RENAME SlicerExecutionModelConfig.cmake
++  COMPONENT Development)
+diff --git a/ModuleDescriptionParser/CMakeLists.txt b/ModuleDescriptionParser/CMakeLists.txt
+index 8dd1dc7..003d908 100644
+--- a/ModuleDescriptionParser/CMakeLists.txt
++++ b/ModuleDescriptionParser/CMakeLists.txt
+@@ -41,6 +41,20 @@ set(${PROJECT_NAME}_ITK_COMPONENTS
+   ITKExpat # For Expat library
+   )
+ 
++# Prevent loading of VTK-dependent ITK modules.  When itk-slicer is built with
++# Module_ITKVtkGlue=ON, ITKConfig.cmake's unconditional itk_module_config() call
++# (line 88) loads ALL enabled modules — including ITKVtkGlue and ITKVTK — before
++# honouring the COMPONENTS list.  ITKVtkGlue.cmake calls find_package(VTK) which
++# drags in Qt5, GLEW, and the full VTK dependency stack.
++#
++# _itk_module_config_recurse checks _${ns}_${mod}_USED first; itk_module_load
++# checks ${mod}_LOADED.  Pre-setting both guards makes both macros skip the VTK-
++# dependent modules without invoking find_package(VTK), letting this package
++# build against itk-slicer without the full VTK+Qt5+GLEW stack.
++set(_ITK_ITKVtkGlue_USED 1)
++set(_ITK_ITKVTK_USED 1)
++set(ITKVtkGlue_LOADED TRUE)
++set(ITKVTK_LOADED TRUE)
+ find_package(ITK 4.3 COMPONENTS ${${PROJECT_NAME}_ITK_COMPONENTS} REQUIRED)
+ include(${ITK_USE_FILE})
+ 
+@@ -221,10 +235,15 @@ if(NOT DEFINED ${PROJECT_NAME}_INSTALL_LIB_DIR)
+ endif()
+ 
+ install(TARGETS ${lib_name}
++  EXPORT ModuleDescriptionParserTargets
+   RUNTIME DESTINATION ${${PROJECT_NAME}_INSTALL_BIN_DIR} COMPONENT RuntimeLibraries
+   LIBRARY DESTINATION ${${PROJECT_NAME}_INSTALL_LIB_DIR} COMPONENT RuntimeLibraries
+   ARCHIVE DESTINATION ${${PROJECT_NAME}_INSTALL_LIB_DIR} COMPONENT Development
+   )
++install(EXPORT ModuleDescriptionParserTargets
++  FILE ModuleDescriptionParserTargets.cmake
++  DESTINATION lib/${PROJECT_NAME}
++  COMPONENT Development)
+ 
+ # --------------------------------------------------------------------------
+ # Testing
+diff --git a/ModuleDescriptionParser/GenerateModuleDescriptionParserConfig.cmake b/ModuleDescriptionParser/GenerateModuleDescriptionParserConfig.cmake
+index 9e85342..02e4b62 100644
+--- a/ModuleDescriptionParser/GenerateModuleDescriptionParserConfig.cmake
++++ b/ModuleDescriptionParser/GenerateModuleDescriptionParserConfig.cmake
+@@ -31,10 +31,10 @@ configure_file(
+ #
+ #
+ 
+-# TODO Configure ModuleDescriptionParserConfig.cmake for the install tree.
+-#
+-#configure_file(
+-#  ${ModuleDescriptionParser_SOURCE_DIR}/ModuleDescriptionParserInstallConfig.cmake.in
+-#  ${ModuleDescriptionParser_BINARY_DIR}/install/ModuleDescriptionParserConfig.cmake
+-#  @ONLY
+-#  )
++# Configure ModuleDescriptionParserConfig.cmake for the install tree.
++file(MAKE_DIRECTORY ${ModuleDescriptionParser_BINARY_DIR}/install)
++configure_file(
++  ${ModuleDescriptionParser_SOURCE_DIR}/ModuleDescriptionParserInstallConfig.cmake.in
++  ${ModuleDescriptionParser_BINARY_DIR}/install/ModuleDescriptionParserConfig.cmake
++  @ONLY
++  )
+diff --git a/ModuleDescriptionParser/ModuleDescriptionParserInstallConfig.cmake.in b/ModuleDescriptionParser/ModuleDescriptionParserInstallConfig.cmake.in
+index 0490599..eccf5f8 100644
+--- a/ModuleDescriptionParser/ModuleDescriptionParserInstallConfig.cmake.in
++++ b/ModuleDescriptionParser/ModuleDescriptionParserInstallConfig.cmake.in
+@@ -1,19 +1,15 @@
+-# ModuleDescriptionParser could be installed anywhere, so set all paths based
+-# on where this file was found (which should be the lib/ModuleDescriptionParser
+-# directory of the installation)
+-get_filename_component(ModuleDescriptionParser_CONFIG_DIR
+-  "${CMAKE_CURRENT_LIST_FILE}" PATH
+-  )
+-
+-#
+-set(ModuleDescriptionParser_INCLUDE_DIRS
+-  "${ModuleDescriptionParser_CONFIG_DIR}/../../include/ModuleDescriptionParser"
+-  )
+-set(ModuleDescriptionParser_LIBRARY_DIRS
+-  "${ModuleDescriptionParser_CONFIG_DIR}"
+-  )
+-set(ModuleDescriptionParser_USE_FILE
+-  "${ModuleDescriptionParser_CONFIG_DIR}/UseModuleDescriptionParser.cmake"
+-  )
+-
+-set(ITK_DIR "@ITK_DIR@")
++# ModuleDescriptionParser install-tree configuration file.
++# This file is found at lib/ModuleDescriptionParser/ModuleDescriptionParserConfig.cmake.
++get_filename_component(_mdp_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
++set(ModuleDescriptionParser_INCLUDE_DIRS "${_mdp_dir}/../../include/ModuleDescriptionParser")
++set(ModuleDescriptionParser_LIBRARY_DIRS "${_mdp_dir}")
++set(ModuleDescriptionParser_USE_FILE "${_mdp_dir}/UseModuleDescriptionParser.cmake")
++set(ModuleDescriptionParser_LIBRARIES ModuleDescriptionParser)
++set(ModuleDescriptionParser_ITK_COMPONENTS @ModuleDescriptionParser_ITK_COMPONENTS@)
++set(ModuleDescriptionParser_USE_SERIALIZER OFF)
++set(ITK_DIR "@ITK_DIR_CONFIG@")
++# Import the installed library target.
++if(NOT TARGET ModuleDescriptionParser
++    AND EXISTS "${_mdp_dir}/ModuleDescriptionParserTargets.cmake")
++  include("${_mdp_dir}/ModuleDescriptionParserTargets.cmake")
++endif()
+diff --git a/SlicerExecutionModelInstallConfig.cmake.in b/SlicerExecutionModelInstallConfig.cmake.in
+new file mode 100644
+index 0000000..e4342a3
+--- /dev/null
++++ b/SlicerExecutionModelInstallConfig.cmake.in
+@@ -0,0 +1,48 @@
++# SlicerExecutionModel install-tree configuration file.
++# This file is found at lib/SlicerExecutionModelConfig.cmake.
++get_filename_component(_sem_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
++
++# Sub-package cmake config directories (relative to lib/).
++set(GenerateCLP_DIR "${_sem_dir}/GenerateCLP")
++set(ModuleDescriptionParser_DIR "${_sem_dir}/ModuleDescriptionParser")
++set(TCLAP_DIR "${_sem_dir}/tclap")
++
++# SlicerExecutionModel cmake scripts and use-file.
++set(SlicerExecutionModel_CMAKE_DIR "${_sem_dir}/CMake")
++set(SlicerExecutionModel_USE_FILE "${_sem_dir}/CMake/UseSlicerExecutionModel.cmake")
++set(SlicerExecutionModel_DIR "${_sem_dir}")
++
++# Build flags baked in at Guix build time.
++set(SlicerExecutionModel_USE_UTF8 @SlicerExecutionModel_USE_UTF8@)
++
++# Check requested components and enable flags.
++if(SlicerExecutionModel_FIND_COMPONENTS)
++  foreach(component ${SlicerExecutionModel_FIND_COMPONENTS})
++    string(TOUPPER ${component} _COMPONENT)
++    set(SlicerExecutionModel_USE_${_COMPONENT} 1)
++  endforeach()
++else()
++  set(SlicerExecutionModel_USE_GENERATECLP 1)
++  set(SlicerExecutionModel_USE_MODULEDESCRIPTIONPARSER 1)
++  set(SlicerExecutionModel_USE_TCLAP 1)
++endif()
++
++if(SlicerExecutionModel_USE_MODULEDESCRIPTIONPARSER)
++  find_package(ModuleDescriptionParser REQUIRED)
++endif()
++if(SlicerExecutionModel_USE_GENERATECLP)
++  find_package(GenerateCLP REQUIRED)
++endif()
++if(SlicerExecutionModel_USE_TCLAP)
++  find_package(TCLAP REQUIRED)
++endif()
++
++set(SlicerExecutionModel_INCLUDE_DIRS
++  "${_sem_dir}/../include/ModuleDescriptionParser"
++  "${_sem_dir}/../include/GenerateCLP"
++  "${_sem_dir}/../include/tclap"
++  )
++set(SlicerExecutionModel_LIBRARIES ModuleDescriptionParser)
++set(SlicerExecutionModel_LIBRARY_DIRS
++  "${_sem_dir}/ModuleDescriptionParser"
++  )
+diff --git a/tclap/GenerateTCLAPConfig.cmake b/tclap/GenerateTCLAPConfig.cmake
+index aaa62a0..db659b0 100644
+--- a/tclap/GenerateTCLAPConfig.cmake
++++ b/tclap/GenerateTCLAPConfig.cmake
+@@ -23,6 +23,7 @@ configure_file(${TCLAP_SOURCE_DIR}/TCLAPConfig.cmake.in
+ #    tclap include files referenced as "tclap/foo.h"
+ 
+ 
+-# TODO- Configure TCLAPInstallConfig.cmake for the install tree.
+-#configure_file(${TCLAP_SOURCE_DIR}/TCLAPInstallConfig.cmake.in
+-#               ${TCLAP_BINARY_DIR}/install/TCLAPConfig.cmake @ONLY)
++# Configure TCLAPConfig.cmake for the install tree.
++file(MAKE_DIRECTORY ${TCLAP_BINARY_DIR}/install)
++configure_file(${TCLAP_SOURCE_DIR}/TCLAPInstallConfig.cmake.in
++               ${TCLAP_BINARY_DIR}/install/TCLAPConfig.cmake @ONLY)
+diff --git a/tclap/TCLAPInstallConfig.cmake.in b/tclap/TCLAPInstallConfig.cmake.in
+index cbda43f..77a5b2d 100644
+--- a/tclap/TCLAPInstallConfig.cmake.in
++++ b/tclap/TCLAPInstallConfig.cmake.in
+@@ -1,11 +1,5 @@
+-# tclap could be installed anywhere, so set all paths based on where
+-# this file was found (which should be the lib/tclap directory of the
+-# installation)
+-get_filename_component(tclap_CONFIG_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+-
+-# The TCLAP include directories.
+-#    tclap include files referenced as "tclap/foo.h"
+-set(TCLAP_INCLUDE_DIRS "${tclap_CONFIG_DIR}/../../include/")
+-
+-# The TCLAP USE file
+-set(TCLAP_USE_FILE "${tclap_CONFIG_DIR}/UseTCLAP.cmake")
++# TCLAP install-tree configuration file.
++# This file is found at lib/tclap/TCLAPConfig.cmake.
++get_filename_component(_tclap_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
++set(TCLAP_INCLUDE_DIRS "${_tclap_dir}/../../include")
++set(TCLAP_USE_FILE "${_tclap_dir}/UseTCLAP.cmake")
+-- 
+2.52.0
+

@@ -59,7 +59,8 @@
                          (string-append systole-patches "/ctk")
                          (string-append systole-patches "/qrestapi")
                          (string-append systole-patches "/slicer")
-                         (string-append systole-patches "/slicer-openigtlink"))
+                         (string-append systole-patches "/slicer-openigtlink")
+                         (string-append systole-patches "/slicerexecutionmodel"))
                    ((module-ref (resolve-module '(gnu packages)) '%patch-path)))))
 
 ;; Define search-patch functio

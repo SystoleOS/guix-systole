@@ -22,6 +22,7 @@
   #:use-module (gnu packages backup)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages fontutils)
+  #:use-module (gnu packages elf)
   #:use-module (gnu packages gcc)
   #:use-module (gnu packages geo)
   #:use-module (gnu packages gl)
@@ -122,6 +123,7 @@
                  "0040-COMP-Add-PythonQt-include-dir-to-global-include-path.patch"
                  "0041-COMP-Use-abspath-instead-of-realpath-in-SubjectHiera.patch"
                  "0042-COMP-Skip-launcher-settings-read-when-file-is-absent.patch"
+                 "0043-COMP-Bake-SlicerExecutionModel_DIR-into-install-tree.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -147,9 +149,20 @@
               ;; "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=$(usex DICOM ON OFF)"
               "-DSlicer_BUILD_ITKPython:BOOL=OFF"
 
-              ;; CLI
+              ;; CLI — support library only; CLI module executables are
+              ;; built as separate packages via make-slicer-cli-module.
               "-DSlicer_BUILD_CLI:BOOL=OFF"
-              "-DSlicer_BUILD_CLI_SUPPORT:BOOL=OFF"
+              "-DSlicer_BUILD_CLI_SUPPORT:BOOL=ON"
+              ;; Tell Slicer where to find SlicerExecutionModel.  The install-tree
+              ;; SlicerExecutionModelConfig.cmake is installed at <sem>/lib/.
+              (string-append "-DSlicerExecutionModel_DIR="
+                             #$(this-package-input "slicerexecutionmodel")
+                             "/lib")
+              ;; Also set GenerateCLP_DIR so Slicer's own CMake can find the
+              ;; GenerateCLP sub-package config directly.
+              (string-append "-DGenerateCLP_DIR="
+                             #$(this-package-input "slicerexecutionmodel")
+                             "/lib/GenerateCLP")
 
               ;; QT
               "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=OFF"
@@ -215,11 +228,6 @@
                                           (setenv "CMAKE_PREFIX_PATH"
                                                   (string-append (assoc-ref inputs "vtkaddon")
                                                                  "/lib/cmake:"
-
-                                                                 ;; (assoc-ref inputs
-                                                                 ;;            "slicerexecutionmodel")
-                                                                 ;; "/lib/CMake:"
-
                                                                  (or (getenv "CMAKE_PREFIX_PATH")
                                                                      ""))) #t))
 
@@ -331,7 +339,7 @@ exec ~a ${module_path_args} \"$@\"~%"
            libarchive-slicer
            teem-slicer
            vtkaddon
-           ;;slicerexecutionmodel
+           slicerexecutionmodel
            qrestapi))
     (native-inputs (list pkg-config))
     ;; Each Slicer module package (e.g. slicer-volumes-5.8) installs its
@@ -357,68 +365,79 @@ visualization and medical image computing. It provides capabilities for:
     (home-page "https://www.slicer.org/")
     (license license:bsd-3)))
 
-;; (define slicerexecutionmodel
-;;   (package
-;;    (name "slicerexecutionmodel")
-;;    (version "2.0.0")
-;;    (source
-;;     (origin
-;;      (method url-fetch)
-;;      (uri
-;;       "https:///github.com/Slicer/SlicerExecutionModel/archive/91b921bd5977c3384916ba4b03705d87b26067f7.tar.gz")
-;;      (sha256
-;;       (base32 "10k1m3impplv9hwhxx06wfmvlx9h54avhibv4id1pjlqjn5gjjza"))
-;;      (patches (search-patches
-;;                "0011-COMP-packages-slicer-Add-GNUInstallDirs-for-execution-model.patch"
-;;                "0012-COMP-packages-slicer-Generate-configuration-file-for-execution-model.patch"
-;;                "0013-ENH-packages-slicer-Generate-configuration-file-for-install-ModuleDe.patch"
-;;                "0014-COMP-packages-slicer-Install-GenerateCLP.cmake-GenerateCLP-and-Gener.patch"))))
-;;    (build-system cmake-build-system)
-;;    (arguments
-;;     `(#:tests? #f
-;;       #:parallel-build? #f
-;;       #:configure-flags (list "-DBUILD_TESTING:BOOL=OFF"
-;;                               "-DSlicerExecutionModel_USE_UTF8:BOOL=ON"
-;;                               "-DSlicerExecutionModel_INSTALL_NO_DEVELOPMENT:BOOL=OFF"
-;;                               "-DSlicerExecutionModel_DEFAULT_CLI_TARGETS_FOLDER_PREFIX:STRING=Module-")))
-;;    (inputs (list
-;;             ;; Slicer modules
-;;             itk-slicer
-
-;;             ;; Libraries
-;;             double-conversion
-;;             eigen
-;;             expat
-;;             freetype
-;;             gl2ps
-;;             glew
-;;             hdf5-1.10
-;;             libharu
-;;             libjpeg-turbo
-;;             libogg
-;;             libpng
-;;             libtheora
-;;             libxml2
-;;             lz4
-;;             jsoncpp
-;;             mpich
-;;             netcdf-slicer
-;;             proj
-;;             qtbase-5
-;;             tbb))
-;;    (home-page
-;;     "https://www.slicer.org/wiki/Documentation/Nightly/Developers/SlicerExecutionModel/")
-;;    (synopsis
-;;     "The SlicerExecutionModel is a CMake-based project providing
-;; macros and associated tools allowing to easily build Slicer CLI (Command line
-;; module).")
-;;    (description
-;;     "It is designed to improve the acceptance and productivity of Slicer
-;; application developers. The Execution Model provides a simple mechanism for
-;; incorporating command line programs as Slicer modules. These command line
-;; modules are self-describing, emitting an XML description of its command line
-;; arguments. Slicer uses this XML description to construct a GUI for the module.")
-;;    (license license:bsd-2)))
+(define-public slicerexecutionmodel
+  ;; SlicerExecutionModel provides the SEMMacroBuildCLI macro and the
+  ;; GenerateCLP code-generator used to build Slicer CLI modules.
+  ;; tclap and ModuleDescriptionParser are bundled as subdirectories;
+  ;; the only external dependency is ITK (for ModuleDescriptionParser).
+  (package
+   (name "slicerexecutionmodel")
+   (version "2.0.0")
+   (source
+    (origin
+     (method url-fetch)
+     (uri
+      "https://github.com/Slicer/SlicerExecutionModel/archive/91b921bd5977c3384916ba4b03705d87b26067f7.tar.gz")
+     (sha256
+      (base32 "10k1m3impplv9hwhxx06wfmvlx9h54avhibv4id1pjlqjn5gjjza"))
+     (patches (search-patches
+               "0001-COMP-Use-GenerateCLP-directly-instead-of-launcher-in.patch"
+               "0002-COMP-Add-install-tree-cmake-config-infrastructure-fo.patch"))))
+   (build-system cmake-build-system)
+   (arguments
+    (list
+     #:tests? #f
+     #:configure-flags
+     #~(list
+        "-DBUILD_TESTING:BOOL=OFF"
+        "-DSlicerExecutionModel_USE_UTF8:BOOL=ON"
+        ;; Install development files (GenerateCLP binary, cmake config,
+        ;; headers) so downstream packages can use GenerateCLP.
+        "-DSlicerExecutionModel_INSTALL_NO_DEVELOPMENT:BOOL=OFF"
+        ;; tclap/CMakeLists.txt checks ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT
+        ;; where PROJECT_NAME=TCLAP (uppercase), but the root CMakeLists only
+        ;; propagates tclap_INSTALL_NO_DEVELOPMENT (lowercase).  Set the
+        ;; uppercase variant explicitly so tclap headers and TCLAPConfig.cmake
+        ;; are actually installed.
+        "-DTCLAP_INSTALL_NO_DEVELOPMENT:BOOL=OFF"
+        (string-append "-DITK_DIR="
+                       #$(this-package-input "itk-slicer")
+                       "/lib/cmake/ITK-5.4"))
+     #:phases
+     #~(modify-phases %standard-phases
+         (add-after 'install 'fix-rpath
+           ;; libModuleDescriptionParser.so is installed to lib/ModuleDescriptionParser/
+           ;; but GenerateCLP's RPATH only includes lib/.  Append the subdirectory to
+           ;; the existing RPATH (read via --print-rpath) so we don't lose the GCC
+           ;; libstdc++/libgcc_s paths that CMake's linker already recorded.
+           (lambda* (#:key outputs #:allow-other-keys)
+             (use-modules (ice-9 popen) (ice-9 textual-ports))
+             (let* ((out (assoc-ref outputs "out"))
+                    (mdp (string-append out "/lib/ModuleDescriptionParser")))
+               (for-each
+                (lambda (bin)
+                  (when (file-exists? bin)
+                    (let* ((pipe (open-pipe* OPEN_READ "patchelf" "--print-rpath" bin))
+                           (cur  (string-trim-right (get-string-all pipe) #\newline)))
+                      (close-pipe pipe)
+                      (invoke "patchelf" "--set-rpath"
+                              (string-append cur ":" mdp)
+                              bin))))
+                (list (string-append out "/bin/GenerateCLP")
+                      (string-append out "/bin/GenerateCLPLauncher")))
+               #t))))))
+   (inputs (list itk-slicer
+                 expat       ; ITKExpat / ITKIOXML dependency
+                 hdf5-1.10)) ; ITKHDF5 pulled in transitively via ITKConfig
+   (native-inputs (list pkg-config patchelf))
+   (home-page "https://github.com/Slicer/SlicerExecutionModel")
+   (synopsis "Slicer Execution Model — CLI module build infrastructure")
+   (description
+    "SlicerExecutionModel provides the @code{SEMMacroBuildCLI} CMake macro and
+the @code{GenerateCLP} code generator used to build 3D Slicer CLI (Command
+Line Interface) modules.  It bundles @code{tclap} and
+@code{ModuleDescriptionParser}; the only external dependency is ITK.")
+   (license license:bsd-3)))
 
 ;;;
 ;;; Python-enabled Slicer variant
