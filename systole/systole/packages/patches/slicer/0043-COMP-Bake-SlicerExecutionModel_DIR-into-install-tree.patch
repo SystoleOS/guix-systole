@@ -1,0 +1,31 @@
+From d0eb8aca4a2da29bd4cf30a608dbf2edd0a46bc9 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 25 Feb 2026 10:21:35 +0100
+Subject: [PATCH] COMP: Bake SlicerExecutionModel_DIR into install-tree
+ SlicerConfig
+
+When Slicer_BUILD_CLI_SUPPORT is ON, downstream standalone module builds
+need find_package(SlicerExecutionModel) to work. Set SlicerExecutionModel_DIR
+in the install-tree SlicerConfig so the installed SEM package is found
+even when it lives in a non-standard path (e.g. a Guix store path).
+---
+ CMake/SlicerInstallConfig.cmake.in | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/CMake/SlicerInstallConfig.cmake.in b/CMake/SlicerInstallConfig.cmake.in
+index 882cb9a9e4..f3ad1f4afc 100644
+--- a/CMake/SlicerInstallConfig.cmake.in
++++ b/CMake/SlicerInstallConfig.cmake.in
+@@ -68,6 +68,9 @@ if(NOT Slicer_SUPERBUILD)
+     set(TBB_DIR "@TBB_DIR@")
+   endif()
+   set(CTK_DIR "@CTK_DIR@")
++  if(Slicer_BUILD_CLI_SUPPORT)
++    set(SlicerExecutionModel_DIR "@SlicerExecutionModel_DIR@")
++  endif()
+ endif()
+ 
+ # Set the Slicer_EXPORT_HEADER_TEMPLATE to the install dir
+-- 
+2.52.0
+
