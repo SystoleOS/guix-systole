@@ -1,4 +1,4 @@
-From e0f401308187db17dfbc40f2eb794dad53a0e051 Mon Sep 17 00:00:00 2001
+From f901838f2a6a1fc0b361e80c24cb84a4cd3bf974 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 11:27:39 +0100
 Subject: [PATCH] ENH: Add standalone build support for Cameras module
@@ -8,7 +8,7 @@ Subject: [PATCH] ENH: Add standalone build support for Cameras module
  1 file changed, 17 insertions(+)
 
 diff --git a/Modules/Loadable/Cameras/CMakeLists.txt b/Modules/Loadable/Cameras/CMakeLists.txt
-index 0e4572a76d..3ad4fd857a 100644
+index 9cea5cce3c..1513bbc568 100644
 --- a/Modules/Loadable/Cameras/CMakeLists.txt
 +++ b/Modules/Loadable/Cameras/CMakeLists.txt
 @@ -1,9 +1,26 @@
