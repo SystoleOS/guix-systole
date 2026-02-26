@@ -1,8 +1,7 @@
 From 71fc405f1017292155be5edb1eec909b0e379a81 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 19:22:37 +0100
-Subject: [PATCH 2/2] COMP: Add vtkAddon and ITKCommon to Markups MRML link
- deps
+Subject: [PATCH] COMP: Add vtkAddon and ITKCommon to Markups MRML link deps
 
 Markups MRML uses symbols from vtkAddon (vtkCurveGenerator,
 vtkAddonMathUtilities, vtkSlicerDijkstraGraphGeodesicPath,
