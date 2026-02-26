@@ -1,0 +1,96 @@
+From 7c08a3ad58b0b0b2311dea558a75d4748198a33b Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 26 Feb 2026 09:49:36 +0100
+Subject: [PATCH] COMP: Re-enable ITK IO factory registration for standalone
+ CLI builds
+
+Each CLI module's CMakeLists.txt sets ITK_NO_IMAGEIO_FACTORY_REGISTER_MANAGER
+and similar variables before include(${ITK_USE_FILE}), expecting Slicer's
+ITKFactoryRegistration library to handle IO factory registration at runtime.
+In standalone Guix builds that library is absent, causing 'There are no
+registered IO factories' errors at runtime.
+
+Add an include() macro override to UseSlicerExecutionModel.cmake.in that
+is active for the rest of each CLI module's CMakeLists.txt processing.
+The override intercepts include(UseITK.cmake) / include(${ITK_USE_FILE})
+and unsets ITK_NO_{IMAGEIO,MESHIO,TRANSFORMIO}_FACTORY_REGISTER_MANAGER
+immediately before UseITK.cmake processes them, restoring auto-registration.
+---
+ UseSlicerExecutionModel.cmake.in | 64 ++++++++++++++++++++++++++++++++
+ 1 file changed, 64 insertions(+)
+
+diff --git a/UseSlicerExecutionModel.cmake.in b/UseSlicerExecutionModel.cmake.in
+index e4a528f..2235c63 100644
+--- a/UseSlicerExecutionModel.cmake.in
++++ b/UseSlicerExecutionModel.cmake.in
+@@ -4,3 +4,67 @@ set(CMAKE_MODULE_PATH ${SlicerExecutionModel_CMAKE_DIR} ${CMAKE_MODULE_PATH})
+ 
+ include(SEMMacroBuildCLI)
+ include(SEMFunctionAddExecutable)
++
++# Re-enable ITK IO factory auto-registration for standalone CLI-module builds.
++#
++# Background: Slicer's superbuild provides an ITKFactoryRegistration library
++# that (a) links against ALL ITK IO modules and (b) is called from the CLI
++# wrapper main() to register every IO factory before module code runs.
++# Standalone Guix builds lack that library, so two things must happen here:
++#
++#  1. The "no-registration" flags set by each CLI module's CMakeLists.txt
++#     (ITK_NO_{IMAGEIO,MESHIO,TRANSFORMIO}_FACTORY_REGISTER_MANAGER) must be
++#     cleared before UseITK.cmake processes them, so that UseITK.cmake emits
++#     the ITK_IMAGEIO_FACTORY_REGISTER_MANAGER compile definition and generates
++#     itkImageIOFactoryRegisterManager.h.
++#
++#  2. The ITK IO format modules (ITKIONRRD, ITKIOMeta, etc.) must be found and
++#     added to ITK_LIBRARIES so that the generated registration header's
++#     *FactoryRegister__Private() symbols are actually available at link time.
++#     Each CLI module only requests algorithmic components (ITKIOImageBase,
++#     ITKImageIntensity, …) which carry no factory names, leaving
++#     ITK_FACTORY_NAMES empty and itk_generate_factory_registration() producing
++#     an empty header – even if the flags are cleared.
++#
++# We define an include() override here (active for the rest of the calling
++# CMakeLists.txt) that intercepts include(UseITK.cmake) / include(${ITK_USE_FILE})
++# and performs both steps immediately before UseITK.cmake is processed.
++macro(include)
++  if("${ARGV0}" MATCHES "UseITK\\.cmake$" OR
++     (DEFINED ITK_USE_FILE AND "${ARGV0}" STREQUAL "${ITK_USE_FILE}"))
++
++    # Step 1 – clear the no-registration flags
++    foreach(_sem_fu IN ITEMS "IMAGEIO" "MESHIO" "TRANSFORMIO")
++      unset(ITK_NO_${_sem_fu}_FACTORY_REGISTER_MANAGER)
++    endforeach()
++    unset(ITK_NO_IO_FACTORY_REGISTER_MANAGER)
++    unset(_sem_fu)
++
++    # Step 2 – save the ITK_LIBRARIES already collected by the CLI module's
++    #           own find_package(ITK COMPONENTS ...) call (algorithmic libs
++    #           with no IO factory names).
++    set(_sem_saved_ITK_LIBS ${ITK_LIBRARIES})
++
++    # Step 3 – find the full set of Slicer CLI IO modules.
++    #   • Populates ITK_FACTORY_NAMES / ITK_ImageIO / ITK_TransformIO so that
++    #     itk_generate_factory_registration() produces a non-empty header.
++    #   • Adds the IO format shared libraries to ITK_LIBRARIES so that the
++    #     *FactoryRegister__Private() symbols are available at link time.
++    #   QUIET: missing optional modules are silently skipped.
++    find_package(ITK COMPONENTS
++      ITKIOJPEG ITKIOBMP ITKIOPNG ITKIOTIFF ITKIOVTK
++      ITKIOBioRad ITKIOMeta ITKIOMRC ITKIONIFTI ITKIONRRD ITKIOGIPL
++      ITKIOGDCM ITKIODCMTK ITKIOLSM ITKIOStimulate MGHIO ITKIOMINC IOScanco
++      ITKIOTransformHDF5 ITKIOTransformInsightLegacy ITKIOTransformMatlab
++      QUIET)
++
++    # Step 4 – merge: the algorithmic libs must stay in ITK_LIBRARIES so that
++    #           SEMMacroBuildCLI(TARGET_LIBRARIES ${ITK_LIBRARIES}) still links
++    #           e.g. ITKImageIntensity, ITKImageFunction, etc.
++    list(APPEND ITK_LIBRARIES ${_sem_saved_ITK_LIBS})
++    list(REMOVE_DUPLICATES ITK_LIBRARIES)
++    unset(_sem_saved_ITK_LIBS)
++
++  endif()
++  _include(${ARGV})
++endmacro()
+-- 
+2.52.0
+
