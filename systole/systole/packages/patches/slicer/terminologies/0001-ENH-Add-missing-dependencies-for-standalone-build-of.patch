@@ -9,16 +9,16 @@ Subject: [PATCH] ENH: Add missing dependencies for standalone build of
 - Add explicit library dependencies for Logic (VTK::CommonCore, vtkSegmentationCore)
 - Add explicit library dependencies for Widgets (CTKWidgets, qSlicerBaseQTCore, qMRMLWidgets)
 ---
- Modules/Loadable/Terminologies/CMakeLists.txt    | 23 +++++++++++++++++++++++
+ Modules/Loadable/Terminologies/CMakeLists.txt    | 16 ++++++++++++++++
  .../Loadable/Terminologies/Logic/CMakeLists.txt  |  2 ++
  .../Terminologies/Widgets/CMakeLists.txt         |  3 +++
- 3 files changed, 28 insertions(+)
+ 3 files changed, 21 insertions(+)
 
 diff --git a/Modules/Loadable/Terminologies/CMakeLists.txt b/Modules/Loadable/Terminologies/CMakeLists.txt
 index 6d3e2117cf..81f51b2673 100644
 --- a/Modules/Loadable/Terminologies/CMakeLists.txt
 +++ b/Modules/Loadable/Terminologies/CMakeLists.txt
-@@ -1,8 +1,31 @@
+@@ -1,8 +1,24 @@
 +cmake_minimum_required(VERSION 3.31)
 +
  #-----------------------------------------------------------------------------
@@ -38,13 +38,6 @@ index 6d3e2117cf..81f51b2673 100644
 +if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
 +  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
 +    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
-+endif()
-+
-+# UseSlicer.cmake also resets Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR to empty
-+# when Slicer_QTLOADABLEMODULES_LIB_DIR is unset (standalone build). Restore.
-+if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
-+  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
-+    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
 +endif()
 +
  #-----------------------------------------------------------------------------
