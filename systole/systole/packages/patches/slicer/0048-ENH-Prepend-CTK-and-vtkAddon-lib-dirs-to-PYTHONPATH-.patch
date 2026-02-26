@@ -1,0 +1,72 @@
+From 434c4721fd1d95fd9df83d0ab3147f74b743b31d Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 26 Feb 2026 16:09:24 +0100
+Subject: [PATCH] ENH: Prepend CTK and vtkAddon lib dirs to PYTHONPATH at
+ startup
+
+---
+ Base/QTCore/qSlicerCoreApplication.cxx | 32 ++++++++++++++++++--------
+ CMake/vtkSlicerConfigure.h.in          |  1 +
+ 2 files changed, 23 insertions(+), 10 deletions(-)
+
+diff --git a/Base/QTCore/qSlicerCoreApplication.cxx b/Base/QTCore/qSlicerCoreApplication.cxx
+index 3a89b20100..cad384a165 100644
+--- a/Base/QTCore/qSlicerCoreApplication.cxx
++++ b/Base/QTCore/qSlicerCoreApplication.cxx
+@@ -381,19 +381,31 @@ void qSlicerCoreApplicationPrivate::init()
+     }
+   }
+ 
+-  // Prepend SLICER_PYTHONPATH (colon-separated, assembled by Guix
+-  // native-search-path from contributing packages) to PYTHONPATH so that
+-  // Slicer's Python stack is available when qSlicerCorePythonManager calls
+-  // Py_InitializeFromConfig(), which reads PYTHONPATH from the process
+-  // environment.
+-  {
++  // Build PYTHONPATH for the Guix profile layout:
++  //   1. CTK_LIBRARY_DIR     — CTKWidgetsPythonQt*.so and other CTK PythonQt
++  //                            extension modules (installed to lib/, no subdir).
++  //   2. vtkAddon_LIB_DIR    — vtkAddonPython.so (similarly flat in lib/).
++  //   3. SLICER_PYTHONPATH   — colon-separated list assembled by Guix
++  //                            native-search-path: slicer bin/Python wrappers,
++  //                            lib/Slicer-5.8 C-extensions, site-packages for
++  //                            vtk, vtkAddon, numpy, scipy, …
++  //   4. existing PYTHONPATH — anything the user already set.
++  // Steps 1–2 are guarded by Slicer_USE_PYTHONQT because the PythonQt
++  // extension modules only exist in the Python-enabled build.
++  {
++  QString existing = this->Environment.value("PYTHONPATH");
++  QStringList paths;
++#ifdef Slicer_USE_PYTHONQT
++  paths << QString::fromLatin1(CTK_LIBRARY_DIR);
++  paths << QString::fromLatin1(vtkAddon_LIB_DIR);
++#endif
+   QString slicerPyPath = this->Environment.value("SLICER_PYTHONPATH");
+   if (!slicerPyPath.isEmpty())
++    paths << slicerPyPath.split(QLatin1Char(':'));
++  if (!existing.isEmpty())
++    paths << existing.split(QLatin1Char(':'));
++  if (!paths.isEmpty())
+     {
+-    QString existing = this->Environment.value("PYTHONPATH");
+-    QStringList paths = slicerPyPath.split(QLatin1Char(':'));
+-    if (!existing.isEmpty())
+-      paths << existing.split(QLatin1Char(':'));
+     paths.removeDuplicates();
+     q->setEnvironmentVariable("PYTHONPATH", paths.join(QLatin1Char(':')));
+     }
+diff --git a/CMake/vtkSlicerConfigure.h.in b/CMake/vtkSlicerConfigure.h.in
+index 26f3804cc8..6f9b32067b 100644
+--- a/CMake/vtkSlicerConfigure.h.in
++++ b/CMake/vtkSlicerConfigure.h.in
+@@ -125,6 +125,7 @@
+ #define VTK_DIR "@VTK_DIR@"
+ #define CTK_DIR "@CTK_DIR@"
+ #define CTK_LIBRARY_DIR "@CTK_LIBRARY_DIR@"
++#define vtkAddon_LIB_DIR "@vtkAddon_LIB_DIR@"
+ //#define Teem_DIR "@Teem_DIR@"
+ 
+ #define Slicer_QM_DIR "@Slicer_QM_DIR@"
+-- 
+2.52.0
+

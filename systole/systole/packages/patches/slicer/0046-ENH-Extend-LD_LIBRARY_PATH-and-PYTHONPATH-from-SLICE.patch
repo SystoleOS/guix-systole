@@ -1,0 +1,77 @@
+From 26c34ae1d8c30bb65bb1ae24101032c578552914 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 26 Feb 2026 15:30:38 +0100
+Subject: [PATCH] ENH: Extend LD_LIBRARY_PATH and PYTHONPATH from
+ SLICER_ADDITIONAL_MODULE_PATHS/SLICER_PYTHONPATH on startup
+
+---
+ Base/QTCore/qSlicerCoreApplication.cxx | 53 ++++++++++++++++++++++++++
+ 1 file changed, 53 insertions(+)
+
+diff --git a/Base/QTCore/qSlicerCoreApplication.cxx b/Base/QTCore/qSlicerCoreApplication.cxx
+index 81f06086af..3a89b20100 100644
+--- a/Base/QTCore/qSlicerCoreApplication.cxx
++++ b/Base/QTCore/qSlicerCoreApplication.cxx
+@@ -346,6 +346,59 @@ void qSlicerCoreApplicationPrivate::init()
+     q->setEnvironmentVariable(key, value);
+   }
+ 
++  // --- Guix / Nix profile integration ---
++  //
++  // Extend LD_LIBRARY_PATH with every directory listed in
++  // SLICER_ADDITIONAL_MODULE_PATHS so that dlopen() finds module
++  // side-libraries (e.g. libqSlicerMarkupsModuleWidgets.so) when Slicer
++  // loads a standalone module shared library.  glibc re-reads
++  // LD_LIBRARY_PATH from the process environment on each dlopen() call,
++  // so calling setEnvironmentVariable() here (before module loading)
++  // is sufficient.
++  {
++  QByteArray modulePathsEnv = qgetenv("SLICER_ADDITIONAL_MODULE_PATHS");
++  if (!modulePathsEnv.isEmpty())
++    {
++#ifdef Q_OS_WIN
++    const char sep = ';';
++#else
++    const char sep = ':';
++#endif
++    QStringList newPaths;
++    for (const QByteArray& p : modulePathsEnv.split(sep))
++      {
++      if (!p.isEmpty())
++        newPaths << QString::fromLocal8Bit(p);
++      }
++    if (!newPaths.isEmpty())
++      {
++      QString existing = this->Environment.value("LD_LIBRARY_PATH");
++      if (!existing.isEmpty())
++        newPaths << existing.split(QLatin1Char(':'));
++      newPaths.removeDuplicates();
++      q->setEnvironmentVariable("LD_LIBRARY_PATH", newPaths.join(QLatin1Char(':')));
++      }
++    }
++  }
++
++  // Prepend SLICER_PYTHONPATH (colon-separated, assembled by Guix
++  // native-search-path from contributing packages) to PYTHONPATH so that
++  // Slicer's Python stack is available when qSlicerCorePythonManager calls
++  // Py_InitializeFromConfig(), which reads PYTHONPATH from the process
++  // environment.
++  {
++  QString slicerPyPath = this->Environment.value("SLICER_PYTHONPATH");
++  if (!slicerPyPath.isEmpty())
++    {
++    QString existing = this->Environment.value("PYTHONPATH");
++    QStringList paths = slicerPyPath.split(QLatin1Char(':'));
++    if (!existing.isEmpty())
++      paths << existing.split(QLatin1Char(':'));
++    paths.removeDuplicates();
++    q->setEnvironmentVariable("PYTHONPATH", paths.join(QLatin1Char(':')));
++    }
++  }
++
+ #ifdef Slicer_USE_PYTHONQT_WITH_OPENSSL
+   if (!QSslSocket::supportsSsl())
+   {
+-- 
+2.52.0
+

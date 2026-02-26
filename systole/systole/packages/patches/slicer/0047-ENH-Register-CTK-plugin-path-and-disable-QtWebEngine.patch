@@ -1,0 +1,65 @@
+From 3ab697ecf39aea2ec78b02fac880c1c97b9e6b80 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 26 Feb 2026 16:04:41 +0100
+Subject: [PATCH] ENH: Register CTK plugin path and disable QtWebEngine sandbox
+ at startup
+
+---
+ Base/QTApp/qSlicerApplicationHelper.cxx | 14 ++++++++++++++
+ CMake/vtkSlicerConfigure.h.in           |  1 +
+ 2 files changed, 15 insertions(+)
+
+diff --git a/Base/QTApp/qSlicerApplicationHelper.cxx b/Base/QTApp/qSlicerApplicationHelper.cxx
+index ef22e59f4d..c9af820487 100644
+--- a/Base/QTApp/qSlicerApplicationHelper.cxx
++++ b/Base/QTApp/qSlicerApplicationHelper.cxx
+@@ -21,6 +21,8 @@
+ #include "qSlicerApplicationHelper.h"
+ 
+ // Qt includes
++#include <QCoreApplication>
++#include <QDir>
+ #include <QFont>
+ #include <QtGlobal> // For Q_OS_*, QT_VERSION
+ #include <QLabel>
+@@ -44,6 +46,7 @@
+ #include "qSlicerLoadableModuleFactory.h"
+ #include "qSlicerModuleFactoryManager.h"
+ #include "qSlicerModuleManager.h"
++#include "vtkSlicerConfigure.h"         // For CTK_LIBRARY_DIR
+ #include "vtkSlicerVersionConfigure.h" // For Slicer_MAIN_PROJECT_VERSION_FULL
+ 
+ #ifdef Slicer_USE_PYTHONQT
+@@ -93,6 +96,17 @@ qSlicerApplicationHelper::~qSlicerApplicationHelper() = default;
+ void qSlicerApplicationHelper::preInitializeApplication(
+     const char* argv0, ctkProxyStyle* style)
+ {
++  // Register CTK Qt designer plugins (ctkCollapsibleButton, …) so that
++  // QFormBuilder finds them.  Must be done before QApplication is created.
++  // CTK_LIBRARY_DIR is baked in at compile time via vtkSlicerConfigure.h.
++  QCoreApplication::addLibraryPath(
++    QDir::cleanPath(QString::fromLatin1(CTK_LIBRARY_DIR)));
++
++  // Disable the QtWebEngine sandbox in environments that do not support
++  // unprivileged user namespaces (e.g. Docker, most HPC systems).
++  // Must be set before any QtWebEngine object is instantiated.
++  qputenv("QTWEBENGINE_DISABLE_SANDBOX", "1");
++
+ #if defined(Q_OS_MACOS) && (QT_VERSION < QT_VERSION_CHECK(5, 15, 10))
+   // See https://github.com/Slicer/Slicer/issues/7261
+   QLoggingCategory::setFilterRules("qt.qpa.fonts=false");
+diff --git a/CMake/vtkSlicerConfigure.h.in b/CMake/vtkSlicerConfigure.h.in
+index 260ca93f24..26f3804cc8 100644
+--- a/CMake/vtkSlicerConfigure.h.in
++++ b/CMake/vtkSlicerConfigure.h.in
+@@ -124,6 +124,7 @@
+ // Library sub-directory - The following macros define directories only valid for a given build tree.
+ #define VTK_DIR "@VTK_DIR@"
+ #define CTK_DIR "@CTK_DIR@"
++#define CTK_LIBRARY_DIR "@CTK_LIBRARY_DIR@"
+ //#define Teem_DIR "@Teem_DIR@"
+ 
+ #define Slicer_QM_DIR "@Slicer_QM_DIR@"
+-- 
+2.52.0
+

@@ -125,6 +125,10 @@
                  "0042-COMP-Skip-launcher-settings-read-when-file-is-absent.patch"
                  "0043-COMP-Bake-SlicerExecutionModel_DIR-into-install-tree.patch"
                  "0044-COMP-Expose-MRMLCLI_INCLUDE_DIRS-in-install-tree-Sli.patch"
+                 "0045-ENH-Read-SLICER_ADDITIONAL_MODULE_PATHS-env-var-in-a.patch"
+                 "0046-ENH-Extend-LD_LIBRARY_PATH-and-PYTHONPATH-from-SLICE.patch"
+                 "0047-ENH-Register-CTK-plugin-path-and-disable-QtWebEngine.patch"
+                 "0048-ENH-Prepend-CTK-and-vtkAddon-lib-dirs-to-PYTHONPATH-.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -232,66 +236,32 @@
                                                                  (or (getenv "CMAKE_PREFIX_PATH")
                                                                      ""))) #t))
 
-                            (add-after 'install 'wrap
-                                       (lambda* (#:key outputs inputs #:allow-other-keys)
-                                                (let* ((out (assoc-ref outputs "out"))
-                                                       (ctk (assoc-ref inputs "ctk"))
-                                                       (slicer-real (string-append out "/bin/SlicerApp-real"))
-                                                       (slicer-wrapper (string-append out "/Slicer-wrapper")))
-                                                  ;; Replace the CTK app launcher with a plain shell
-                                                  ;; wrapper.  The CTK launcher's only job on Guix is to
-                                                  ;; set a handful of environment variables before
-                                                  ;; exec-ing bin/SlicerApp-real; we do that here instead.
-                                                  (call-with-output-file slicer-wrapper
-                                                                         (lambda (port)
-                                                                           (format port
-"#!/bin/sh
-# Guix wrapper for 3D Slicer – replaces the CTK application launcher.
-
-# Slicer uses SLICER_HOME to locate resources, modules, Python, etc.
-export SLICER_HOME=~a
-
-# SlicerApp-real's RUNPATH does not include lib/Slicer-5.8/ where the
-# core Slicer shared libraries live; add them explicitly.
-export LD_LIBRARY_PATH=~a/lib/Slicer-5.8:~a/lib/Slicer-5.8/qt-loadable-modules${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-
-# CTK designer plugins for QFormBuilder (ctkCollapsibleButton, ctkCollapsibleGroupBox, …).
-# Qt appends the plugin type as a subdirectory, so it looks in $QT_PLUGIN_PATH/designer/.
-export QT_PLUGIN_PATH=~a/lib${QT_PLUGIN_PATH:+:${QT_PLUGIN_PATH}}
-
-# Required for QtWebEngine in environments without user namespaces.
-export QTWEBENGINE_DISABLE_SANDBOX=1
-
-# Translate SLICER_ADDITIONAL_MODULE_PATHS (colon-separated list set by
-# Guix when module packages share a profile) into --additional-module-paths
-# arguments recognised by 3D Slicer.
-module_path_args=\"\"
-if [ -n \"${SLICER_ADDITIONAL_MODULE_PATHS}\" ]; then
-  old_IFS=\"$IFS\"
-  IFS=':'
-  for path in ${SLICER_ADDITIONAL_MODULE_PATHS}; do
-    [ -n \"$path\" ] && module_path_args=\"${module_path_args} --additional-module-paths ${path}\"
-    # Also extend LD_LIBRARY_PATH so that standalone module side-libraries
-    # (e.g. libqSlicerMarkupsModuleWidgets.so) are found by dlopen when
-    # Slicer loads the module shared library.
-    [ -n \"$path\" ] && export LD_LIBRARY_PATH=\"${path}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}\"
-  done
-  IFS=\"${old_IFS}\"
-fi
-exec ~a ${module_path_args} \"$@\"~%"
-                                                                                   out out out
-                                                                                   ctk
-                                                                                   slicer-real)))
-                                                  (chmod slicer-wrapper #o755)
-                                                  #t)))
-                            (add-after 'wrap 'symlink-slicer-applauncher
-                                       (lambda* (#:key outputs #:allow-other-keys)
-                                                (symlink (string-append (assoc-ref outputs "out")
-                                                                        "/Slicer-wrapper")
-                                                         (string-append (string-append (assoc-ref
-                                                                                         outputs "out")
-                                                                                       "/bin/Slicer")))
-                                                #t)))))
+                            (add-after 'install 'patch-runpath
+                              ;; SlicerApp-real's build RUNPATH does not
+                              ;; include lib/Slicer-5.8/ where the core Slicer
+                              ;; shared libraries live.  Extend it with
+                              ;; $ORIGIN-relative entries so the binary finds
+                              ;; them without LD_LIBRARY_PATH.
+                              (lambda* (#:key outputs #:allow-other-keys)
+                                (let* ((out (assoc-ref outputs "out"))
+                                       (bin (string-append out "/bin/SlicerApp-real")))
+                                  (invoke "patchelf" "--add-rpath"
+                                          (string-append "$ORIGIN/../lib/Slicer-5.8"
+                                                         ":"
+                                                         "$ORIGIN/../lib/Slicer-5.8/qt-loadable-modules")
+                                          bin))))
+                            (add-after 'patch-runpath 'install-slicer-symlink
+                              ;; Expose the binary as bin/Slicer (on PATH).
+                              ;; bin/SlicerApp-real keeps its original name for
+                              ;; compatibility (e.g. gdb bin/SlicerApp-real).
+                              (lambda* (#:key outputs #:allow-other-keys)
+                                (let* ((out (assoc-ref outputs "out"))
+                                       (link (string-append out "/bin/Slicer")))
+                                  ;; The CTK launcher was installed as bin/Slicer;
+                                  ;; replace it with a symlink to the real binary.
+                                  (when (file-exists? link)
+                                    (delete-file link))
+                                  (symlink "SlicerApp-real" link)))))))
     (inputs
      (list libxt
            dcmtk
@@ -342,13 +312,13 @@ exec ~a ${module_path_args} \"$@\"~%"
            vtkaddon
            slicerexecutionmodel
            qrestapi))
-    (native-inputs (list pkg-config))
+    (native-inputs (list patchelf pkg-config))
     ;; Each Slicer module package (e.g. slicer-volumes-5.8) installs its
     ;; shared library under lib/Slicer-5.8/qt-loadable-modules/.  Guix
     ;; collects those directories into SLICER_ADDITIONAL_MODULE_PATHS when
-    ;; module packages share a profile with slicer-5.8.  The wrapper script
-    ;; installed by the 'wrap phase translates this variable into
-    ;; --additional-module-path arguments for 3D Slicer.
+    ;; module packages share a profile with slicer-5.8.  Slicer reads this
+    ;; variable directly (patch 0045) and extends LD_LIBRARY_PATH from it
+    ;; at startup (patch 0046).
     (native-search-paths
      (list (search-path-specification
             (variable "SLICER_ADDITIONAL_MODULE_PATHS")
@@ -627,73 +597,7 @@ Line Interface) modules.  It bundles @code{tclap} and
                          (assoc-ref inputs "vtkaddon") "/lib/cmake:"
                          (or (getenv "CMAKE_PREFIX_PATH") "")))
                 #t))
-            ;; Replace the wrapper to add PYTHONPATH for VTK and vtkAddon
-            ;; Python modules so `import vtk` and `import vtkAddon` work.
-            (replace 'wrap
-              (lambda* (#:key outputs #:allow-other-keys)
-                (let* ((out (assoc-ref outputs "out"))
-                       (slicer-real (string-append out "/bin/SlicerApp-real"))
-                       (slicer-wrapper (string-append out "/Slicer-wrapper")))
-                  (call-with-output-file slicer-wrapper
-                    (lambda (port)
-                      (format port
-"#!/bin/sh
-# Guix wrapper for 3D Slicer (Python-enabled variant) – replaces the CTK launcher.
-
-# Slicer uses SLICER_HOME to locate resources, modules, Python, etc.
-export SLICER_HOME=~a
-
-# SlicerApp-real's RUNPATH does not include lib/Slicer-5.8/ where the
-# core Slicer shared libraries live; add them explicitly.
-export LD_LIBRARY_PATH=~a/lib/Slicer-5.8:~a/lib/Slicer-5.8/qt-loadable-modules${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-
-# Python module locations:
-#   slicer/bin/Python          — .py wrappers (mrml.py, vtkAddon.py, slicer/, …)
-#   slicer/lib/Slicer-5.8     — C extension .so (MRMLCorePython, SlicerBaseLogicPython,
-#                                 qMRMLWidgetsPythonQt, qSlicerBaseQT*PythonQt, …)
-#   ctk-python/bin/Python      — ctk/ and qt/ Python packages (ctk/__init__.py, …)
-#   ctk-python/lib             — CTK PythonQt extension .so (CTKWidgetsPythonQt, …)
-#   vtkaddon-python/lib        — vtkAddonPython.so (no python3.11 subdir)
-#   vtk-slicer-python/lib/…    — VTK Python modules (vtkmodules/)
-#   vtkaddon-python/lib/…      — vtkAddon Python module
-export PYTHONPATH=~a/bin/Python:~a/lib/Slicer-5.8:~a/bin/Python:~a/lib:~a/lib:~a/lib/python3.11/site-packages:~a/lib/python3.11/site-packages${SLICER_PYTHONPATH:+:${SLICER_PYTHONPATH}}${PYTHONPATH:+:${PYTHONPATH}}
-
-# CTK designer plugins for QFormBuilder (ctkCollapsibleButton, ctkCollapsibleGroupBox, …).
-# Qt appends the plugin type as a subdirectory, so it looks in $QT_PLUGIN_PATH/designer/.
-export QT_PLUGIN_PATH=~a/lib${QT_PLUGIN_PATH:+:${QT_PLUGIN_PATH}}
-
-# Required for QtWebEngine in environments without user namespaces.
-export QTWEBENGINE_DISABLE_SANDBOX=1
-
-# Translate SLICER_ADDITIONAL_MODULE_PATHS (colon-separated list set by
-# Guix when module packages share a profile) into --additional-module-paths
-# arguments recognised by 3D Slicer.
-module_path_args=\"\"
-if [ -n \"${SLICER_ADDITIONAL_MODULE_PATHS}\" ]; then
-  old_IFS=\"$IFS\"
-  IFS=':'
-  for path in ${SLICER_ADDITIONAL_MODULE_PATHS}; do
-    [ -n \"$path\" ] && module_path_args=\"${module_path_args} --additional-module-paths ${path}\"
-    # Also extend LD_LIBRARY_PATH so that standalone module side-libraries
-    # (e.g. libqSlicerMarkupsModuleWidgets.so) are found by dlopen when
-    # Slicer loads the module shared library.
-    [ -n \"$path\" ] && export LD_LIBRARY_PATH=\"${path}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}\"
-  done
-  IFS=\"${old_IFS}\"
-fi
-exec ~a ${module_path_args} \"$@\"~%"
-                             out out out
-                             out          ; PYTHONPATH: slicer bin/Python
-                             out          ; PYTHONPATH: slicer lib/Slicer-5.8 (Python .so)
-                             #$ctk-python ; PYTHONPATH: ctk-python bin/Python
-                             #$ctk-python ; PYTHONPATH: ctk-python lib (CTK*PythonQt.so)
-                             #$vtkaddon-python ; PYTHONPATH: vtkaddon-python lib (vtkAddonPython.so)
-                             #$vtk-slicer-python
-                             #$vtkaddon-python
-                             #$ctk-python ; QT_PLUGIN_PATH: CTK lib/ (Qt scans lib/designer/ beneath it)
-                             slicer-real)))
-                  (chmod slicer-wrapper #o755)
-                  #t)))))))
+))))
     (inputs
      (modify-inputs (package-inputs slicer-5.8)
        ;; Replace the entire VTK-dependent chain with Python-enabled variants so
@@ -713,7 +617,16 @@ exec ~a ${module_path_args} \"$@\"~%"
     ;; slicer-python-5.8 as a build input), producing duplicate derivations
     ;; (original + transformed) for those modules.  Placing the runtime deps
     ;; only in the meta-package breaks the cascade cleanly.
-    (propagated-inputs '())
+    ;;
+    ;; vtk-slicer-python, ctk-python, and vtkaddon-python ARE propagated so
+    ;; that their Python directories land in the Guix profile symlink farm:
+    ;;   vtk-slicer-python/lib/python3.11/site-packages  → `import vtk`
+    ;;   ctk-python/bin/Python                           → `import ctk`, `import qt`
+    ;;   vtkaddon-python/lib/python3.11/site-packages    → vtkAddon Python wrappers
+    ;; SLICER_PYTHONPATH (native-search-path) then collects all three via its
+    ;; `lib/python3.11/site-packages` and `bin/Python` patterns, and Slicer
+    ;; prepends SLICER_PYTHONPATH to PYTHONPATH at startup (patch 0046/0048).
+    (propagated-inputs (list vtk-slicer-python ctk-python vtkaddon-python))
     ;; Extend the base search-path to include qt-scripted-modules so that
     ;; standalone scripted-module packages (installed to that subdirectory)
     ;; are discovered when sharing a profile with slicer-python-5.8.
@@ -725,7 +638,14 @@ exec ~a ${module_path_args} \"$@\"~%"
                      "lib/Slicer-5.8/cli-modules")))
            (search-path-specification
             (variable "SLICER_PYTHONPATH")
-            (files '("lib/python3.11/site-packages")))))))
+            ;; bin/Python: .py wrappers installed by slicer-python-5.8 and
+            ;;   ctk-python (ctk/, qt/ packages) — contributed via ctk-python's
+            ;;   own SLICER_PYTHONPATH native-search-path.
+            ;; lib/Slicer-5.8: C-extension .so (MRMLCorePython, …).
+            ;; lib/python3.11/site-packages: numpy, vtk, vtkAddon, user pkgs.
+            (files '("bin/Python"
+                     "lib/Slicer-5.8"
+                     "lib/python3.11/site-packages")))))))
 
 ;;;
 ;;; Factory for standalone Slicer loadable-module packages

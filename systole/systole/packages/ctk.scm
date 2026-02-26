@@ -254,4 +254,11 @@ Plugin Framework.")
        (replace "vtk-slicer" vtk-slicer-python)
        (replace "itk-slicer" itk-slicer-python)
        (prepend pythonqt-commontk
-                qtmultimedia-5)))))
+                qtmultimedia-5)))
+    ;; bin/Python/ contains ctk/__init__.py and qt/__init__.py used by Slicer's
+    ;; Python environment.  Collected into SLICER_PYTHONPATH (merged into
+    ;; PYTHONPATH by Slicer at startup, patch 0046).
+    (native-search-paths
+     (list (search-path-specification
+            (variable "SLICER_PYTHONPATH")
+            (files '("bin/Python")))))))
