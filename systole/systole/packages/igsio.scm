@@ -187,7 +187,8 @@ SlicerIGSIO 3D Slicer extensions.")
    (sha256
     (base32 "1dxwbjwdazzf0k29hyzg0zh8mm07q0lqhzcj1xrsgaf9r2zq8h0z"))
    (patches (search-patches
-             "0001-ENH-Add-standalone-CMake-preamble-for-SlicerIGSIOCom.patch"))))
+             "0001-ENH-Add-standalone-CMake-preamble-for-SlicerIGSIOCom.patch"
+             "0002-COMP-Guard-vtkIGSIOMkvSequenceIO-include-behind-IGSI.patch"))))
 
 ;;; Factory for SlicerIGSIOCommon (non-Python and Python variants).
 (define* (make-slicer-igsio-common
@@ -251,10 +252,40 @@ SlicerIGT.")
   (make-slicer-igsio-common
    #:name "slicer-igsio-common"
    #:slicer slicer-python-5.8
-   #:igsio igsio))
+   #:igsio igsio
+   #:extra-inputs (list slicer-sequences-5.8 slicer-volumes-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DvtkSlicerSequencesModuleMRML_INCLUDE_DIRS="
+       #$slicer-sequences-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSequencesModuleMRML")
+      (string-append
+       "-DvtkSlicerVolumesModuleLogic_INCLUDE_DIRS="
+       #$slicer-volumes-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerVolumesModuleLogic")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-sequences-5.8 "/lib/Slicer-5.8/qt-loadable-modules"
+       ";" #$slicer-volumes-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
 
 (define-public slicer-igsio-common-python
   (make-slicer-igsio-common
    #:name "slicer-igsio-common-python"
    #:slicer slicer-python-5.8
-   #:igsio igsio-python))
+   #:igsio igsio-python
+   #:extra-inputs (list slicer-sequences-5.8 slicer-volumes-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DvtkSlicerSequencesModuleMRML_INCLUDE_DIRS="
+       #$slicer-sequences-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSequencesModuleMRML")
+      (string-append
+       "-DvtkSlicerVolumesModuleLogic_INCLUDE_DIRS="
+       #$slicer-volumes-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerVolumesModuleLogic")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-sequences-5.8 "/lib/Slicer-5.8/qt-loadable-modules"
+       ";" #$slicer-volumes-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
