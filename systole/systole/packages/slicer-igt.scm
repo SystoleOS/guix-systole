@@ -68,6 +68,8 @@
           (slicer slicer-5.8)
           ;; Extra packages added to inputs before slicer's own inputs.
           (extra-inputs '())
+          ;; Packages propagated to consumers (runtime Slicer module deps).
+          (propagated-inputs '())
           ;; A gexp evaluating to a list of extra CMake -D flags.
           (extra-configure-flags #~'()))
   (package
@@ -110,6 +112,7 @@
                  (modify-inputs (package-inputs slicer)
                    (prepend slicer))
                  extra-inputs))
+   (propagated-inputs propagated-inputs)
    (home-page "https://github.com/SlicerIGT/SlicerIGT")
    (synopsis synopsis)
    (description description)
@@ -127,6 +130,7 @@
           synopsis      ; one-line synopsis string
           description   ; multi-line description string
           (extra-inputs '())
+          (propagated-inputs '())
           (extra-configure-flags #~'()))
   (package
    (name name)
@@ -164,13 +168,14 @@
                  (modify-inputs (package-inputs slicer-python-5.8)
                    (prepend slicer-python-5.8))
                  extra-inputs))
+   (propagated-inputs propagated-inputs)
    (home-page "https://github.com/SlicerIGT/SlicerIGT")
    (synopsis synopsis)
    (description description)
    (license license:bsd-3)))
 
 ;;;
-;;; Loadable modules — non-Python variants (built against slicer-5.8)
+;;; Loadable modules — non-Python variants (built against slicer-python-5.8)
 ;;;
 
 (define-public slicer-igt-breachwarning
@@ -188,6 +193,7 @@ distance between a tracked tool and a surface model and provides visual and
 audio alerts when the tool approaches or breaches the surface.  Built from
 the @file{BreachWarning} sub-directory of the SlicerIGT source tree."
    #:extra-inputs (list slicer-markups-5.8)
+   #:propagated-inputs (list slicer-markups-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -212,6 +218,7 @@ the @file{BreachWarning} sub-directory of the SlicerIGT source tree."
 Built against slicer-python-5.8 for ABI compatibility with the Python
 runtime stack."
    #:extra-inputs (list slicer-markups-5.8)
+   #:propagated-inputs (list slicer-markups-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -231,6 +238,7 @@ runtime stack."
                    "collectpoints/0002-COMP-Add-markups-includes-LINK_DIRECTORIES-and-qMRMLWidgets.patch")
    #:synopsis "SlicerIGT CollectPoints loadable module"
    #:extra-inputs (list slicer-markups-5.8)
+   #:propagated-inputs (list slicer-markups-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -255,6 +263,7 @@ sub-directory of the SlicerIGT source tree."))
                    "collectpoints/0002-COMP-Add-markups-includes-LINK_DIRECTORIES-and-qMRMLWidgets.patch")
    #:synopsis "SlicerIGT CollectPoints loadable module (Python-enabled)"
    #:extra-inputs (list slicer-markups-5.8)
+   #:propagated-inputs (list slicer-markups-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -308,6 +317,7 @@ physical space using fiducial landmarks.  Depends on the Markups module
 for landmark placement.  Built from the @file{FiducialRegistrationWizard}
 sub-directory of the SlicerIGT source tree."
    #:extra-inputs (list slicer-markups-5.8)
+   #:propagated-inputs (list slicer-markups-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -338,6 +348,7 @@ sub-directory of the SlicerIGT source tree."
    #:description
    "Python-enabled variant of the FiducialRegistrationWizard module from SlicerIGT."
    #:extra-inputs (list slicer-markups-5.8)
+   #:propagated-inputs (list slicer-markups-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -371,6 +382,7 @@ anatomical landmarks from tracked tool trajectories using the IGSIO
 calibration library.  Built from the @file{LandmarkDetection} sub-directory
 of the SlicerIGT source tree."
    #:extra-inputs (list igsio slicer-markups-5.8)
+   #:propagated-inputs (list igsio slicer-markups-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -397,6 +409,7 @@ of the SlicerIGT source tree."
    #:description
    "Python-enabled variant of the LandmarkDetection module from SlicerIGT."
    #:extra-inputs (list igsio-python slicer-markups-5.8)
+   #:propagated-inputs (list igsio-python slicer-markups-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -426,6 +439,7 @@ cross-sectional images along a user-defined curved path (e.g. for needle
 trajectory planning), with reslicing views and a subject-hierarchy plugin.
 Built from the @file{PathExplorer} sub-directory of the SlicerIGT source tree."
    #:extra-inputs (list slicer-markups-5.8 slicer-subjecthierarchy-5.8 slicer-plots-5.8)
+   #:propagated-inputs (list slicer-markups-5.8 slicer-subjecthierarchy-5.8 slicer-plots-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -461,6 +475,7 @@ Built from the @file{PathExplorer} sub-directory of the SlicerIGT source tree."
    #:description
    "Python-enabled variant of the PathExplorer module from SlicerIGT."
    #:extra-inputs (list slicer-markups-5.8 slicer-subjecthierarchy-5.8 slicer-plots-5.8)
+   #:propagated-inputs (list slicer-markups-5.8 slicer-subjecthierarchy-5.8 slicer-plots-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -501,6 +516,7 @@ pivoting around its tip, using the IGSIO pivot calibration algorithm.
 Built from the @file{PivotCalibration} sub-directory of the SlicerIGT
 source tree."
    #:extra-inputs (list igsio)
+   #:propagated-inputs (list igsio)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -522,6 +538,7 @@ source tree."
    #:description
    "Python-enabled variant of the PivotCalibration module from SlicerIGT."
    #:extra-inputs (list igsio-python)
+   #:propagated-inputs (list igsio-python)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -597,6 +614,7 @@ transform node in real time, enabling live image guidance workflows.
 Built from the @file{VolumeResliceDriver} sub-directory of the SlicerIGT
 source tree."
    #:extra-inputs (list slicer-markups-5.8 slicer-annotations-5.8)
+   #:propagated-inputs (list slicer-markups-5.8 slicer-annotations-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -623,6 +641,7 @@ source tree."
    #:description
    "Python-enabled variant of the VolumeResliceDriver module from SlicerIGT."
    #:extra-inputs (list slicer-markups-5.8 slicer-annotations-5.8)
+   #:propagated-inputs (list slicer-markups-5.8 slicer-annotations-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -684,6 +703,12 @@ SlicerIGT source tree."
                         slicer-markups-5.8
                         slicer-sequences-5.8
                         slicer-volumes-5.8)
+   #:propagated-inputs (list igsio
+                             slicer-igsio-common
+                             slicer-annotations-5.8
+                             slicer-markups-5.8
+                             slicer-sequences-5.8
+                             slicer-volumes-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -737,6 +762,12 @@ SlicerIGT source tree."
                         slicer-markups-5.8
                         slicer-sequences-5.8
                         slicer-volumes-5.8)
+   #:propagated-inputs (list igsio-python
+                             slicer-igsio-common-python
+                             slicer-annotations-5.8
+                             slicer-markups-5.8
+                             slicer-sequences-5.8
+                             slicer-volumes-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -896,7 +927,8 @@ target, and saving/restoring camera positions.  Built from the
 
 (define-public slicer-igt
   ;; Meta-package: non-Python loadable modules + slicer-openigtlink.
-  ;; Works together with slicer-5.8 (no Python required).
+  ;; Pulls in only the Slicer modules each IGT module actually needs at
+  ;; runtime (via their propagated-inputs), not all of slicer-all-5.8.
   (package
    (name "slicer-igt")
    (version %slicer-igt-version)
@@ -904,10 +936,8 @@ target, and saving/restoring camera positions.  Built from the
    (build-system trivial-build-system)
    (arguments (list #:builder #~(mkdir #$output)))
    (propagated-inputs
-    (append (list slicer-all-5.8
-                  slicer-openigtlink
-                  igsio
-                  slicer-igsio-common)
+    (append (list slicer-python-5.8
+                  slicer-openigtlink)
             %slicer-igt-loadable-modules))
    (synopsis "SlicerIGT extension — all loadable modules")
    (description
@@ -915,21 +945,22 @@ target, and saving/restoring camera positions.  Built from the
 CollectPoints, CreateModels, FiducialRegistrationWizard, LandmarkDetection,
 PathExplorer, PivotCalibration, TransformProcessor, UltrasoundSnapshots,
 VolumeResliceDriver, VolumeReconstruction, and Watchdog) together with
-their dependencies (SlicerOpenIGTLink, IGSIO, SlicerIGSIOCommon).")
+their direct dependencies (SlicerOpenIGTLink, IGSIO, SlicerIGSIOCommon,
+and the specific Slicer modules each IGT module requires at runtime).")
    (home-page "https://github.com/SlicerIGT/SlicerIGT")
    (license license:bsd-3)))
 
 (define-public slicer-igt-python
-  ;; Meta-package: Python loadable + all scripted modules.
-  ;; Works with slicer-python-5.8.
+  ;; Meta-package: Python-enabled loadable + scripted modules.
+  ;; Pulls in only the Slicer modules actually needed, not all of
+  ;; slicer-python-all-5.8.  Add slicer-python-all-5.8 to your profile
+  ;; alongside this package if you also want the full Slicer module set.
   (package
    (inherit slicer-igt)
    (name "slicer-igt-python")
    (propagated-inputs
-    (append (list slicer-python-all-5.8
-                  slicer-openigtlink-python
-                  igsio-python
-                  slicer-igsio-common-python)
+    (append (list slicer-python-5.8
+                  slicer-openigtlink-python)
             %slicer-igt-loadable-modules-python
             %slicer-igt-scripted-modules))
    (synopsis "SlicerIGT extension — Python-enabled loadable and scripted modules")
@@ -938,4 +969,6 @@ their dependencies (SlicerOpenIGTLink, IGSIO, SlicerIGSIOCommon).")
 and all scripted modules (FiducialsToModelRegistration, Guidelet,
 ModelRegistration, SequenceReplay, TextureModel, Viewpoint), together with
 their Python-enabled dependencies (slicer-openigtlink-python, igsio-python,
-slicer-igsio-common-python).")))
+slicer-igsio-common-python, and the specific Slicer modules each IGT module
+requires at runtime).  The full Slicer module set is NOT pulled in; compose
+with slicer-python-all-5.8 if you need DICOM, Segmentations, etc.")))

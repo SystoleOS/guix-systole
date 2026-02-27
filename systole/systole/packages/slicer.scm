@@ -726,7 +726,11 @@ Line Interface) modules.  It bundles @code{tclap} and
           (extra-inputs '())
           ;; A gexp that evaluates to a (possibly empty) list of extra
           ;; CMake -D flags.  Defaults to the empty list.
-          (extra-configure-flags #~'()))
+          (extra-configure-flags #~'())
+          ;; Packages that must be present in the profile at runtime.
+          ;; Use this to declare inter-module runtime (dlopen) dependencies
+          ;; (e.g. slicer-colors-5.8 for modules that load Colors widgets).
+          (propagated-inputs '()))
   (package
    (name name)
    (version (package-version slicer))
@@ -791,6 +795,7 @@ Line Interface) modules.  It bundles @code{tclap} and
                  (modify-inputs (package-inputs slicer)
                    (prepend slicer))
                  extra-inputs))
+   (propagated-inputs propagated-inputs)
    (home-page (package-home-page slicer))
    (synopsis synopsis)
    (description description)
@@ -850,6 +855,9 @@ actions.  Built from the @file{Modules/Loadable/SubjectHierarchy} subtree of
 the Slicer source tree."
    ;; SubjectHierarchy Widgets link against Terminologies module.
    #:extra-inputs (list slicer-terminologies-5.8)
+   ;; Terminologies must be in the profile so dlopen resolves
+   ;; libqSlicerTerminologiesModuleWidgets.so at runtime.
+   #:propagated-inputs (list slicer-terminologies-5.8)
    #:extra-configure-flags
    #~(list
       ;; Include dirs for qSlicerTerminologyItemDelegate.h and friends.
@@ -884,6 +892,10 @@ bar actor), and a subject hierarchy plugin for color legends.  Built from the
 @file{Modules/Loadable/Colors} subtree of the Slicer source tree."
    ;; Colors SubjectHierarchyPlugins link against SubjectHierarchy.
    #:extra-inputs (list slicer-subjecthierarchy-5.8)
+   ;; SubjectHierarchy must be in the profile so dlopen resolves
+   ;; libqSlicerSubjectHierarchyModuleWidgets.so at runtime.
+   ;; slicer-subjecthierarchy-5.8 itself propagates slicer-terminologies-5.8.
+   #:propagated-inputs (list slicer-subjecthierarchy-5.8)
    #:extra-configure-flags
    #~(list
       ;; Include dirs for qSlicerSubjectHierarchyAbstractPlugin.h and friends.
@@ -915,8 +927,11 @@ compatibility for older Slicer scenes.  This module has been largely superseded
 by the Markups module but remains available for loading legacy annotation data.
 Built from the @file{Modules/Loadable/Annotations} subtree of the Slicer
 source tree."
-   ;; Annotations likely depends on SubjectHierarchy for plugins
+   ;; Annotations depends on SubjectHierarchy for plugins.
    #:extra-inputs (list slicer-subjecthierarchy-5.8)
+   ;; SubjectHierarchy must be in the profile so dlopen resolves
+   ;; libqSlicerSubjectHierarchyModuleWidgets.so at runtime.
+   #:propagated-inputs (list slicer-subjecthierarchy-5.8)
    #:extra-configure-flags
    #~(list
       ;; Include dirs for qSlicerSubjectHierarchyAbstractPlugin.h and friends.
@@ -961,6 +976,10 @@ the Slicer source tree."
                         slicer-annotations-5.8
                         slicer-terminologies-5.8
                         slicer-colors-5.8)
+   ;; Colors and Annotations must be in the profile so dlopen resolves their
+   ;; widgets .so files at runtime.  Colors propagates SubjectHierarchy, which
+   ;; propagates Terminologies — so all four are covered transitively.
+   #:propagated-inputs (list slicer-colors-5.8 slicer-annotations-5.8)
    #:extra-configure-flags
    #~(list
       ;; RapidJSON is used by Markups/MRML but not re-exported by Slicer.
@@ -1019,6 +1038,18 @@ the Slicer source tree."
        #$slicer-annotations-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
 
+(define-public slicer-units-5.8
+  (make-slicer-loadable-module
+   #:name "slicer-units-5.8"
+   #:module-subdir "Units"
+   #:patches (list "units/0001-ENH-Add-standalone-build-support-for-Units-module.patch")
+   #:synopsis "3D Slicer Units loadable module"
+   #:description
+   "The Units loadable module extracted from 3D Slicer.  It provides
+measurement unit management (length, time, frequency, velocity, etc.) and
+a settings panel for configuring display precision.  Built from the
+@file{Modules/Loadable/Units} subtree of the Slicer source tree."))
+
 (define-public slicer-volumes-5.8
   (make-slicer-loadable-module
    #:name "slicer-volumes-5.8"
@@ -1034,6 +1065,12 @@ volume rendering and scalar-volume display capabilities and is built from the
    ;; against libi2d.so.19 and other DCMTK libraries (via CTK DICOM widgets).
    ;; Adding it as a direct input ensures its lib path ends up in the RUNPATH.
    #:extra-inputs (list slicer-subjecthierarchy-5.8 slicer-colors-5.8 dcmtk)
+   ;; Colors must be in the profile so dlopen resolves
+   ;; libqSlicerColorsModuleWidgets.so at runtime.
+   ;; slicer-colors-5.8 propagates slicer-subjecthierarchy-5.8 transitively.
+   ;; slicer-units-5.8 is needed at runtime: Volumes calls
+   ;; GetModuleLogic("Units") for unit-aware scalar display.
+   #:propagated-inputs (list slicer-colors-5.8 slicer-units-5.8)
    #:extra-configure-flags
    #~(list
       ;; Include dirs for qSlicerSubjectHierarchyAbstractPlugin.h and friends.
@@ -1118,18 +1155,6 @@ volume rendering and scalar-volume display capabilities and is built from the
 ;;        "/lib/Slicer-5.8/qt-loadable-modules;"
 ;;        #$slicer-markups-5.8
 ;;        "/lib/Slicer-5.8/qt-loadable-modules"))))
-
-(define-public slicer-units-5.8
-  (make-slicer-loadable-module
-   #:name "slicer-units-5.8"
-   #:module-subdir "Units"
-   #:patches (list "units/0001-ENH-Add-standalone-build-support-for-Units-module.patch")
-   #:synopsis "3D Slicer Units loadable module"
-   #:description
-   "The Units loadable module extracted from 3D Slicer.  It provides
-measurement unit management (length, time, frequency, velocity, etc.) and
-a settings panel for configuring display precision.  Built from the
-@file{Modules/Loadable/Units} subtree of the Slicer source tree."))
 
 (define-public slicer-tables-5.8
   (make-slicer-loadable-module
@@ -1349,6 +1374,10 @@ and scatter plots tied to MRML table nodes, with subject hierarchy
 integration.  Built from the @file{Modules/Loadable/Plots} subtree of
 the Slicer source tree."
    #:extra-inputs (list slicer-subjecthierarchy-5.8)
+   ;; SubjectHierarchy must be in the profile so dlopen resolves
+   ;; libqSlicerSubjectHierarchyModuleWidgets.so (and transitively
+   ;; libqSlicerTerminologiesModuleWidgets.so) at runtime.
+   #:propagated-inputs (list slicer-subjecthierarchy-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
