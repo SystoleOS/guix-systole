@@ -1,27 +1,27 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From d67254d2af094465b6fbcf690bad780202eaed4f Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
-Date: Thu, 27 Feb 2026 12:00:00 +0100
+Date: Fri, 27 Feb 2026 10:56:25 +0100
 Subject: [PATCH] ENH: Add standalone CMake preamble for SlicerIGSIOCommon
 
 Add cmake_minimum_required + find_package(Slicer) preamble before
 project(vtkSlicerIGSIOCommon) so the module can be built standalone
-against an installed slicer-python-5.8.  Also:
+against an installed Slicer. Also:
 - Guard Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR/SHARE_DIR for standalone.
 - Install public headers to the Slicer loadable-module include tree so
   downstream modules (VolumeReconstruction) can find vtkSlicerIGSIOCommon.h.
 ---
- SlicerIGSIOCommon/CMakeLists.txt | 34 ++++++++++++++++++++++++++++++++
- 1 file changed, 34 insertions(+)
+ SlicerIGSIOCommon/CMakeLists.txt | 28 +++++++++++++++++++++++++++-
+ 1 file changed, 27 insertions(+), 1 deletion(-)
 
 diff --git a/SlicerIGSIOCommon/CMakeLists.txt b/SlicerIGSIOCommon/CMakeLists.txt
-index 1111111..2222222 100644
+index 66952db..69755d0 100644
 --- a/SlicerIGSIOCommon/CMakeLists.txt
 +++ b/SlicerIGSIOCommon/CMakeLists.txt
-@@ -1,4 +1,38 @@
+@@ -1,5 +1,21 @@
 +cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
 +
  project(vtkSlicerIGSIOCommon)
-
+ 
 +set(CMAKE_CXX_STANDARD "17")
 +
 +find_package(Slicer REQUIRED)
@@ -29,22 +29,34 @@ index 1111111..2222222 100644
 +
 +if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
 +  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
-+    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++    "lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
 +endif()
 +if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
 +  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
-+    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++    "share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
 +endif()
 +
  # --------------------------------------------------------------------------
  # Sources
  # --------------------------------------------------------------------------
-@@ -59,4 +93,4 @@ endif()
-+# Install public headers so downstream modules can locate
-+# vtkSlicerIGSIOCommon.h via SlicerIGSIOCommon_INCLUDE_DIRS.
+@@ -108,4 +124,14 @@ if(VTK_WRAP_PYTHON AND BUILD_SHARED_LIBS)
+   if(${VTK_VERSION} VERSION_LESS "8.90")
+     set_property(GLOBAL APPEND PROPERTY Slicer_TARGETS ${PROJECT_NAME}PythonD)
+   endif()
+-endif()
+\ No newline at end of file
++endif()
++
++# --------------------------------------------------------------------------
++# Install public headers
++# --------------------------------------------------------------------------
 +install(FILES
 +  ${CMAKE_CURRENT_SOURCE_DIR}/vtkSlicerIGSIOCommon.h
 +  ${CMAKE_CURRENT_SOURCE_DIR}/vtkSlicerIGSIOLogger.h
 +  DESTINATION
 +    include/Slicer-${Slicer_VERSION}/qt-loadable-modules/vtkSlicerIGSIOCommon
 +  COMPONENT Development)
+\ No newline at end of file
+-- 
+2.52.0
+
