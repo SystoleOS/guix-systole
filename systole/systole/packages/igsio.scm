@@ -18,12 +18,21 @@
 (define-module (systole packages igsio)
   #:use-module ((guix licenses)
                 #:prefix license:)
+  #:use-module (gnu packages algebra)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages)
+  #:use-module (gnu packages fontutils)
+  #:use-module (gnu packages geo)
   #:use-module (gnu packages gl)
+  #:use-module (gnu packages image)
   #:use-module (gnu packages maths)
+  #:use-module (gnu packages mpi)
+  #:use-module (gnu packages pdf)
   #:use-module (gnu packages python)
   #:use-module (gnu packages qt)
+  #:use-module (gnu packages serialization)
+  #:use-module (gnu packages tbb)
+  #:use-module (gnu packages xml)
   #:use-module (gnu packages xiph)
   #:use-module (guix build-system cmake)
   #:use-module (guix download)
@@ -32,6 +41,7 @@
   #:use-module (guix utils)
   #:use-module (srfi srfi-1)
   #:use-module (systole packages itk)
+  #:use-module (systole packages maths)
   #:use-module (systole packages pythonqt)
   #:use-module (systole packages slicer)
   #:use-module (systole packages vtk)
@@ -58,7 +68,9 @@
      (sha256
       (base32 "1wqzyi28yi5s5jhip996b594lxcjmbf2l6l0a7a3rvy6qbx68lxs"))
      (patches (search-patches
-               "0001-ENH-Add-install-tree-CMake-configuration-to-IGSIO.patch"))))
+               "0001-ENH-Add-install-tree-CMake-configuration-to-IGSIO.patch"
+               "0002-ENH-Restrict-find_package-VTK-to-required-components.patch"
+               "0003-COMP-Fall-back-to-find_library-when-vtkAddonTargets..patch"))))
    (build-system cmake-build-system)
    (arguments
     (list #:tests? #f
@@ -68,6 +80,7 @@
                   "-DIGSIO_BUILD_SEQUENCEIO:BOOL=ON"
                   "-DIGSIO_BUILD_VOLUMERECONSTRUCTION:BOOL=ON"
                   "-DIGSIO_BUILD_CODECS:BOOL=OFF"
+                  "-DIGSIO_SEQUENCEIO_ENABLE_MKV:BOOL=OFF"
                   "-DIGSIO_USE_SYSTEM_ZLIB:BOOL=ON"
                   "-DIGSIO_USE_3DSlicer:BOOL=OFF"
                   (string-append "-DVTK_DIR="
@@ -78,7 +91,7 @@
                                  "/lib/cmake/ITK-5.4")
                   (string-append "-DvtkAddon_DIR="
                                  #$(this-package-input "vtkaddon-python")
-                                 "/lib/cmake/vtkAddon")
+                                 "/lib/cmake")
                   (string-append "-DQt5_DIR="
                                  #$(this-package-input "qtbase")
                                  "/lib/cmake/Qt5")
@@ -101,9 +114,29 @@
             itk-slicer
             vtkaddon-python
             zlib
+            ;; VTK external deps — VTK's cmake config (and ITK's UseITK.cmake, which
+            ;; calls find_package(VTK) internally) requires all packages that vtk-slicer
+            ;; was built with to be findable at configure time.
+            double-conversion
+            eigen
+            expat
+            freetype
+            gl2ps
+            glew
+            hdf5-1.10
+            jsoncpp
+            libharu
+            libjpeg-turbo
+            libtheora
+            libogg
+            libxml2
+            lz4
+            netcdf-slicer
+            openmpi
+            proj
             qtbase-5
-            python
-            glew))
+            tbb
+            python))
 
    (propagated-inputs (list vtk-slicer-python ctk-python vtkaddon-python))
 
@@ -134,7 +167,7 @@ SlicerIGSIO 3D Slicer extensions.")
                                   #$vtk-slicer-python "/lib/cmake/vtk-9.2"))
                   ((string-prefix? "-DvtkAddon_DIR=" f)
                    (string-append "-DvtkAddon_DIR="
-                                  #$vtkaddon-python "/lib/cmake/vtkAddon"))
+                                  #$vtkaddon-python "/lib/cmake"))
                   (else f)))
               #$flags))))))
 
