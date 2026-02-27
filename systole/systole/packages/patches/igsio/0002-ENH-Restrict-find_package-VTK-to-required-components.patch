@@ -1,0 +1,42 @@
+From 04421e81d33feb4f460f396988544bf2c4ec1570 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 27 Feb 2026 14:19:54 +0100
+Subject: [PATCH] ENH: Restrict find_package(VTK) to required components only
+
+Without COMPONENTS, VTK's cmake config searches for ALL its built-in
+dependencies (theora, netcdf, ogg, ...) and fails when they are not
+present in the build environment.  Restricting to the components
+actually used by IGSIO avoids pulling in unneeded external deps.
+---
+ CMakeLists.txt | 15 ++++++++++++++-
+ 1 file changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e7cea91..0b3cc79 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -88,7 +88,20 @@ endif()
+ 
+ # --------------------------------------------------------------------------
+ # Try to find VTK and include its settings (otherwise complain)
+-find_package(VTK NO_MODULE REQUIRED PATHS ${VTK_DIR} NO_DEFAULT_PATH)
++find_package(VTK NO_MODULE REQUIRED PATHS ${VTK_DIR} NO_DEFAULT_PATH
++  COMPONENTS
++    CommonCore
++    CommonDataModel
++    CommonSystem
++    FiltersGeneral
++    FiltersSources
++    ImagingCore
++    ImagingMath
++    ImagingStatistics
++    IOImage
++    IOLegacy
++    IOXMLParser
++    vtksys)
+ if(VTK_FOUND AND VTK_VERSION VERSION_LESS 8.9.0)
+   include(${VTK_USE_FILE})
+ endif()
+-- 
+2.52.0
+

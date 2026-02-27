@@ -1,0 +1,97 @@
+From 5500c289b5cb49cedee2273afd2ee5f0ef4afa33 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 27 Feb 2026 15:06:41 +0100
+Subject: [PATCH] COMP: Fall back to find_library when vtkAddonTargets.cmake is
+ absent
+
+When vtkAddon is installed without cmake export rules (i.e. the install
+tree contains only a flat vtkAddonConfig.cmake with no vtkAddonTargets.cmake
+alongside it), create the vtkAddon IMPORTED target manually from the
+vtkAddon_LIB_DIR and vtkAddon_INCLUDE_DIRS variables that are already set
+by vtkAddonConfig.cmake.
+---
+ IGSIOCommon/CMakeLists.txt          | 25 ++++++++++++++++++++++---
+ SequenceIO/CMakeLists.txt           |  4 +++-
+ VolumeReconstruction/CMakeLists.txt |  4 +++-
+ 3 files changed, 28 insertions(+), 5 deletions(-)
+
+diff --git a/IGSIOCommon/CMakeLists.txt b/IGSIOCommon/CMakeLists.txt
+index b3a1a85..c08f1c5 100644
+--- a/IGSIOCommon/CMakeLists.txt
++++ b/IGSIOCommon/CMakeLists.txt
+@@ -5,7 +5,21 @@ if (IGSIO_USE_3DSlicer)
+   find_package(Slicer REQUIRED)
+ else()
+   find_package(vtkAddon REQUIRED)
+-  include(${vtkAddon_DIR}/vtkAddonTargets.cmake)
++  if(EXISTS "${vtkAddon_DIR}/vtkAddonTargets.cmake")
++    include(${vtkAddon_DIR}/vtkAddonTargets.cmake)
++  else()
++    # vtkAddon was installed without CMake export rules (flat cmake/ layout).
++    # Create the imported target from the installed library and include dirs.
++    find_library(_vtkAddon_LIB
++      NAMES vtkAddon
++      PATHS "${vtkAddon_LIB_DIR}"
++      NO_DEFAULT_PATH)
++    add_library(vtkAddon SHARED IMPORTED)
++    set_target_properties(vtkAddon PROPERTIES
++      IMPORTED_LOCATION "${_vtkAddon_LIB}"
++      INTERFACE_INCLUDE_DIRECTORIES "${vtkAddon_INCLUDE_DIRS}")
++    unset(_vtkAddon_LIB)
++  endif()
+ endif()
+ 
+ # --------------------------------------------------------------------------
+@@ -100,10 +114,15 @@ install(TARGETS ${PROJECT_NAME} EXPORT IGSIO
+   RUNTIME DESTINATION ${IGSIO_INSTALL_BIN_DIR} COMPONENT RuntimeLibraries
+   LIBRARY DESTINATION ${IGSIO_INSTALL_LIB_DIR} COMPONENT RuntimeLibraries
+   ARCHIVE DESTINATION ${IGSIO_INSTALL_LIB_DIR} COMPONENT Development)
+-install(FILES ${${PROJECT_NAME}_HDRS}
++file(GLOB _${PROJECT_NAME}_INSTALL_HDRS
++  "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
++  "${CMAKE_CURRENT_SOURCE_DIR}/*.txx")
++install(FILES ${_${PROJECT_NAME}_INSTALL_HDRS}
+   DESTINATION ${IGSIO_INCLUDE_INSTALL} COMPONENT Development)
+-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_export.h
++string(TOLOWER "${PROJECT_NAME}" _lower_name)
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${_lower_name}_export.h
+   DESTINATION ${IGSIO_INCLUDE_INSTALL} COMPONENT Development)
++unset(_lower_name)
+ 
+ foreach(p IN LISTS ${PROJECT_NAME}_INCLUDE_DIRS)
+   target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${p}>)
+diff --git a/SequenceIO/CMakeLists.txt b/SequenceIO/CMakeLists.txt
+index 814782b..f388cd2 100644
+--- a/SequenceIO/CMakeLists.txt
++++ b/SequenceIO/CMakeLists.txt
+@@ -85,8 +85,10 @@ install(TARGETS ${PROJECT_NAME} EXPORT IGSIO
+   ARCHIVE DESTINATION ${IGSIO_INSTALL_LIB_DIR} COMPONENT Development)
+ install(FILES ${${PROJECT_NAME}_HDRS}
+   DESTINATION ${IGSIO_INCLUDE_INSTALL} COMPONENT Development)
+-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_export.h
++string(TOLOWER "${PROJECT_NAME}" _lower_name)
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${_lower_name}_export.h
+   DESTINATION ${IGSIO_INCLUDE_INSTALL} COMPONENT Development)
++unset(_lower_name)
+ 
+ foreach(p IN LISTS ${PROJECT_NAME}_INCLUDE_DIRS)
+   target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${p}>)
+diff --git a/VolumeReconstruction/CMakeLists.txt b/VolumeReconstruction/CMakeLists.txt
+index 4e8a3c5..58e2de5 100644
+--- a/VolumeReconstruction/CMakeLists.txt
++++ b/VolumeReconstruction/CMakeLists.txt
+@@ -67,8 +67,10 @@ install(TARGETS ${PROJECT_NAME} EXPORT IGSIO
+   ARCHIVE DESTINATION ${IGSIO_INSTALL_LIB_DIR} COMPONENT Development)
+ install(FILES ${${PROJECT_NAME}_HDRS}
+   DESTINATION ${IGSIO_INCLUDE_INSTALL} COMPONENT Development)
+-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_export.h
++string(TOLOWER "${PROJECT_NAME}" _lower_name)
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${_lower_name}_export.h
+   DESTINATION ${IGSIO_INCLUDE_INSTALL} COMPONENT Development)
++unset(_lower_name)
+ 
+ GENERATE_EXPORT_HEADER(${PROJECT_NAME})
+ set_property(GLOBAL APPEND PROPERTY IGSIO_TARGETS ${PROJECT_NAME})
+-- 
+2.52.0
+
