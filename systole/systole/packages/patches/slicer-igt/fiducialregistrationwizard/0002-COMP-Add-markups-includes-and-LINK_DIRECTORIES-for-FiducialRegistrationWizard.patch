@@ -1,0 +1,88 @@
+From 85db9e8497231ef353ce3b334b3bea57fe542687 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 27 Feb 2026 17:18:27 +0100
+Subject: [PATCH] COMP: Add markups includes and LINK_DIRECTORIES for
+ FiducialRegistrationWizard
+
+---
+ FiducialRegistrationWizard/CMakeLists.txt         | 2 ++
+ FiducialRegistrationWizard/Logic/CMakeLists.txt   | 3 +++
+ FiducialRegistrationWizard/MRML/CMakeLists.txt    | 2 ++
+ FiducialRegistrationWizard/Widgets/CMakeLists.txt | 3 +++
+ 4 files changed, 10 insertions(+)
+
+diff --git a/FiducialRegistrationWizard/CMakeLists.txt b/FiducialRegistrationWizard/CMakeLists.txt
+index 80fdf82..69378b6 100644
+--- a/FiducialRegistrationWizard/CMakeLists.txt
++++ b/FiducialRegistrationWizard/CMakeLists.txt
+@@ -38,6 +38,8 @@ set(MODULE_INCLUDE_DIRECTORIES
+   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets
+   ${CMAKE_CURRENT_BINARY_DIR}/Widgets
+   ${qSlicerMarkupsModuleWidgets_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleLogic_INCLUDE_DIRS}
+   )
+ 
+ set(MODULE_SRCS
+diff --git a/FiducialRegistrationWizard/Logic/CMakeLists.txt b/FiducialRegistrationWizard/Logic/CMakeLists.txt
+index 5cce11f..8756f79 100644
+--- a/FiducialRegistrationWizard/Logic/CMakeLists.txt
++++ b/FiducialRegistrationWizard/Logic/CMakeLists.txt
+@@ -5,6 +5,8 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_LOGIC_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleLogic_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+@@ -32,4 +34,5 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+diff --git a/FiducialRegistrationWizard/MRML/CMakeLists.txt b/FiducialRegistrationWizard/MRML/CMakeLists.txt
+index 437662e..9f13efc 100644
+--- a/FiducialRegistrationWizard/MRML/CMakeLists.txt
++++ b/FiducialRegistrationWizard/MRML/CMakeLists.txt
+@@ -6,6 +6,7 @@ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_MRML_EXPORT"
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+   ${Slicer_Base_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ # --------------------------------------------------------------------------
+@@ -34,4 +35,5 @@ SlicerMacroBuildModuleMRML(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+\ No newline at end of file
+diff --git a/FiducialRegistrationWizard/Widgets/CMakeLists.txt b/FiducialRegistrationWizard/Widgets/CMakeLists.txt
+index 78282ef..1ac90e0 100644
+--- a/FiducialRegistrationWizard/Widgets/CMakeLists.txt
++++ b/FiducialRegistrationWizard/Widgets/CMakeLists.txt
+@@ -6,6 +6,8 @@ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_MODULE_${MODULE_NAME_UPPER}_WIDGETS_EXPORT
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+   ${qSlicerMarkupsModuleWidgets_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleLogic_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+@@ -41,6 +43,7 @@ SlicerMacroBuildModuleWidgets(
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   RESOURCES ${${KIT}_RESOURCES}
+   WRAP_PYTHONQT
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+

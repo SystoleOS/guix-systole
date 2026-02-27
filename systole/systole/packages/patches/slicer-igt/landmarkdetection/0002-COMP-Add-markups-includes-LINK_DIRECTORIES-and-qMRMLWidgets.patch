@@ -1,0 +1,73 @@
+From 90e9c4d55f4a1fccd783ce53d8e2e8d20890554a Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 27 Feb 2026 16:43:59 +0100
+Subject: [PATCH] COMP: Add markups/annotations includes, LINK_DIRECTORIES, and
+ qMRMLWidgets for CollectPoints, LandmarkDetection, VolumeResliceDriver
+
+---
+ LandmarkDetection/CMakeLists.txt       | 2 ++
+ LandmarkDetection/Logic/CMakeLists.txt | 3 +++
+ LandmarkDetection/MRML/CMakeLists.txt  | 2 ++
+ 3 files changed, 7 insertions(+)
+
+diff --git a/LandmarkDetection/CMakeLists.txt b/LandmarkDetection/CMakeLists.txt
+index 914aa98..e621b63 100644
+--- a/LandmarkDetection/CMakeLists.txt
++++ b/LandmarkDetection/CMakeLists.txt
+@@ -36,6 +36,7 @@ set(MODULE_INCLUDE_DIRECTORIES
+   ${CMAKE_CURRENT_BINARY_DIR}/MRML
+   ${CMAKE_CURRENT_SOURCE_DIR}/Logic
+   ${CMAKE_CURRENT_BINARY_DIR}/Logic
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(MODULE_SRCS
+@@ -57,6 +58,7 @@ set(MODULE_UI_SRCS
+ set(MODULE_TARGET_LIBRARIES
+   vtkSlicer${MODULE_NAME}ModuleMRML
+   vtkSlicer${MODULE_NAME}ModuleLogic
++  qMRMLWidgets
+   )
+ 
+ set(MODULE_RESOURCES
+diff --git a/LandmarkDetection/Logic/CMakeLists.txt b/LandmarkDetection/Logic/CMakeLists.txt
+index e9d6c0d..d918d33 100644
+--- a/LandmarkDetection/Logic/CMakeLists.txt
++++ b/LandmarkDetection/Logic/CMakeLists.txt
+@@ -6,6 +6,8 @@ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_LOGIC_EXPORT
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+   ${VTKIGSIOCalibration_INCLUDE_DIRS}
++  ${VTKIGSIOCALIBRATION_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+@@ -27,4 +29,5 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+diff --git a/LandmarkDetection/MRML/CMakeLists.txt b/LandmarkDetection/MRML/CMakeLists.txt
+index 3bcbdd6..7a2bf36 100644
+--- a/LandmarkDetection/MRML/CMakeLists.txt
++++ b/LandmarkDetection/MRML/CMakeLists.txt
+@@ -5,6 +5,7 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_MRML_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+@@ -24,4 +25,5 @@ SlicerMacroBuildModuleMRML(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+\ No newline at end of file
+-- 
+2.52.0
+

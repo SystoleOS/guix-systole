@@ -1,0 +1,60 @@
+From dae6c7dcf92988768e89d0a5c232b70c19243b78 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 27 Feb 2026 16:43:59 +0100
+Subject: [PATCH] COMP: Add markups/annotations includes, LINK_DIRECTORIES, and
+ qMRMLWidgets for CollectPoints, LandmarkDetection, VolumeResliceDriver
+
+---
+ VolumeResliceDriver/Logic/CMakeLists.txt   | 3 +++
+ VolumeResliceDriver/Widgets/CMakeLists.txt | 7 ++++++-
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/VolumeResliceDriver/Logic/CMakeLists.txt b/VolumeResliceDriver/Logic/CMakeLists.txt
+index 29bb4ee..9431745 100644
+--- a/VolumeResliceDriver/Logic/CMakeLists.txt
++++ b/VolumeResliceDriver/Logic/CMakeLists.txt
+@@ -11,6 +11,8 @@ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_LOGIC_EXPORT
+ 
+ # Additional directories to include
+ set(${KIT}_INCLUDE_DIRECTORIES
++  ${vtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ # Source files
+@@ -34,4 +36,5 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+diff --git a/VolumeResliceDriver/Widgets/CMakeLists.txt b/VolumeResliceDriver/Widgets/CMakeLists.txt
+index 2a8b41a..b9d4d93 100644
+--- a/VolumeResliceDriver/Widgets/CMakeLists.txt
++++ b/VolumeResliceDriver/Widgets/CMakeLists.txt
+@@ -7,6 +7,8 @@ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_MODULE_${MODULE_NAME_UPPER}_WIDGETS_EXPORT
+ set(${KIT}_INCLUDE_DIRECTORIES
+   ${vtkSlicer${MODULE_NAME}ModuleLogic_SOURCE_DIR}
+   ${vtkSlicer${MODULE_NAME}ModuleLogic_BINARY_DIR}
++  ${vtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+@@ -40,7 +42,10 @@ SlicerMacroBuildModuleWidgets(
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   RESOURCES ${${KIT}_RESOURCES}
+   WRAP_PYTHONQT
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+ 
+ #-----------------------------------------------------------------------------
+-add_subdirectory(DesignerPlugins)
+\ No newline at end of file
++if(DEFINED Slicer_SOURCE_DIR)
++  add_subdirectory(DesignerPlugins)
++endif()
+\ No newline at end of file
+-- 
+2.52.0
+

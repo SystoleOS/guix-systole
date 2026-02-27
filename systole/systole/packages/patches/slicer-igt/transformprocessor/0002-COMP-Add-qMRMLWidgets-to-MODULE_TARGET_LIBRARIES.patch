@@ -1,0 +1,25 @@
+From 48e103fb8c52807fc5d51136546e15300e81b2f4 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 27 Feb 2026 16:31:41 +0100
+Subject: [PATCH] COMP: Add qMRMLWidgets to MODULE_TARGET_LIBRARIES for simple
+ modules
+
+---
+ TransformProcessor/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/TransformProcessor/CMakeLists.txt b/TransformProcessor/CMakeLists.txt
+index 42a9fd4..2deaebf 100644
+--- a/TransformProcessor/CMakeLists.txt
++++ b/TransformProcessor/CMakeLists.txt
+@@ -55,6 +55,7 @@ set(MODULE_UI_SRCS
+ 
+ set(MODULE_TARGET_LIBRARIES
+   vtkSlicer${MODULE_NAME}ModuleLogic
++  qMRMLWidgets
+   )
+ 
+ set(MODULE_RESOURCES
+-- 
+2.52.0
+

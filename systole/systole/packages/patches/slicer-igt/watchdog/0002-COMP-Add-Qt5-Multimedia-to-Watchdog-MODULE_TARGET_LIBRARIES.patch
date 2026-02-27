@@ -1,0 +1,24 @@
+From cc1ab3d147570b6767525564d91ef6572d1de41d Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 27 Feb 2026 16:38:49 +0100
+Subject: [PATCH] COMP: Add Qt5::Multimedia to Watchdog MODULE_TARGET_LIBRARIES
+
+---
+ Watchdog/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Watchdog/CMakeLists.txt b/Watchdog/CMakeLists.txt
+index e078cb7..9c0226e 100644
+--- a/Watchdog/CMakeLists.txt
++++ b/Watchdog/CMakeLists.txt
+@@ -58,6 +58,7 @@ set(MODULE_TARGET_LIBRARIES
+   vtkSlicer${MODULE_NAME}ModuleMRML
+   vtkSlicer${MODULE_NAME}ModuleLogic
+   ${QT_LIBRARIES}
++  Qt5::Multimedia
+   qMRMLWidgets
+   MRMLLogic
+   MRMLDisplayableManager
+-- 
+2.52.0
+

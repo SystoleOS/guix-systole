@@ -1,0 +1,26 @@
+From 6c96384762cadf1934cd221e70e649cabefd4a71 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 27 Feb 2026 16:57:32 +0100
+Subject: [PATCH] COMP: Install vtkigsiocalibration_export.h generated header
+
+---
+ IGSIOCalibration/CMakeLists.txt | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/IGSIOCalibration/CMakeLists.txt b/IGSIOCalibration/CMakeLists.txt
+index 848d0bc..9716b10 100644
+--- a/IGSIOCalibration/CMakeLists.txt
++++ b/IGSIOCalibration/CMakeLists.txt
+@@ -37,6 +37,9 @@ target_link_libraries(vtk${PROJECT_NAME} PUBLIC ${${PROJECT_NAME}_LIBS})
+ set_property(GLOBAL APPEND PROPERTY IGSIO_TARGETS vtk${PROJECT_NAME})
+ 
+ GENERATE_EXPORT_HEADER(vtk${PROJECT_NAME})
++string(TOLOWER ${PROJECT_NAME} _lower_name)
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/vtk${_lower_name}_export.h
++  DESTINATION "${IGSIO_INCLUDE_INSTALL}" COMPONENT Development)
+ 
+ # --------------------------------------------------------------------------
+ # Set external MS project
+-- 
+2.52.0
+
