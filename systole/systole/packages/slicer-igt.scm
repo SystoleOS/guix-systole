@@ -112,7 +112,9 @@
                  (modify-inputs (package-inputs slicer)
                    (prepend slicer))
                  extra-inputs))
-   (propagated-inputs propagated-inputs)
+   ;; Propagate the Slicer variant so "guix shell slicer-igt-<name>" gives
+   ;; a usable Slicer in the profile.
+   (propagated-inputs (cons slicer propagated-inputs))
    (home-page "https://github.com/SlicerIGT/SlicerIGT")
    (synopsis synopsis)
    (description description)
@@ -168,7 +170,9 @@
                  (modify-inputs (package-inputs slicer-python-5.8)
                    (prepend slicer-python-5.8))
                  extra-inputs))
-   (propagated-inputs propagated-inputs)
+   ;; Propagate Slicer so "guix shell slicer-igt-<name>" gives a usable
+   ;; Slicer in the profile.
+   (propagated-inputs (cons slicer-python-5.8 propagated-inputs))
    (home-page "https://github.com/SlicerIGT/SlicerIGT")
    (synopsis synopsis)
    (description description)
