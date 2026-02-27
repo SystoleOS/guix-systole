@@ -1172,6 +1172,7 @@ for adding, removing, and renaming columns of various types.  Built from the
 @file{Modules/Loadable/Tables} subtree of the Slicer source tree."
    ;; Tables SubjectHierarchyPlugins link against SubjectHierarchy.
    #:extra-inputs (list slicer-subjecthierarchy-5.8)
+   #:propagated-inputs (list slicer-subjecthierarchy-5.8)
    #:extra-configure-flags
    #~(list
       ;; Include dirs for qSlicerSubjectHierarchyAbstractPlugin.h and friends.
@@ -1217,6 +1218,7 @@ It also provides scene reader/writer support via the Cameras module logic for
 camera state persistence.  Built from the @file{Modules/Loadable/Data}
 subtree of the Slicer source tree."
    #:extra-inputs (list slicer-cameras-5.8 slicer-subjecthierarchy-5.8)
+   #:propagated-inputs (list slicer-cameras-5.8 slicer-subjecthierarchy-5.8)
    #:extra-configure-flags
    #~(list
       ;; Cameras Logic include directory: replaces _SOURCE_DIR + _BINARY_DIR.
@@ -1255,6 +1257,9 @@ of the Slicer source tree."
    #:extra-inputs (list slicer-subjecthierarchy-5.8
                         slicer-terminologies-5.8
                         slicer-colors-5.8)
+   ;; slicer-colors-5.8 propagates slicer-subjecthierarchy-5.8 which propagates
+   ;; slicer-terminologies-5.8, so one entry covers all three runtime deps.
+   #:propagated-inputs (list slicer-colors-5.8)
    #:extra-configure-flags
    #~(list
       ;; SubjectHierarchy includes (top-level module + SubjectHierarchyPlugins)
@@ -1315,6 +1320,8 @@ for navigating sequence items.  Built from the
    #:extra-inputs (list slicer-subjecthierarchy-5.8
                         slicer-terminologies-5.8
                         slicer-colors-5.8)
+   ;; slicer-colors-5.8 propagates SH → terminologies; covers all three runtime deps.
+   #:propagated-inputs (list slicer-colors-5.8)
    #:extra-configure-flags
    #~(list
       ;; Markups includes (top-level module)
@@ -1409,6 +1416,7 @@ display properties, camera positions) so users can save and restore
 multiple views of the same data set.  Built from the
 @file{Modules/Loadable/SceneViews} subtree of the Slicer source tree."
    #:extra-inputs (list slicer-subjecthierarchy-5.8)
+   #:propagated-inputs (list slicer-subjecthierarchy-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -1444,6 +1452,8 @@ representations, and subject-hierarchy integration.  Built from the
    #:extra-inputs (list slicer-subjecthierarchy-5.8
                         slicer-terminologies-5.8
                         slicer-markups-5.8)
+   ;; slicer-markups-5.8 propagates colors+annotations+SH+terminologies.
+   #:propagated-inputs (list slicer-markups-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -1497,6 +1507,10 @@ and a subject-hierarchy plugin.  Built from the
                         slicer-markups-5.8
                         slicer-volumes-5.8
                         dcmtk)
+   ;; VolumeRendering links against Markups and Volumes widgets at runtime.
+   ;; slicer-markups-5.8 propagates colors+annotations+subjecthierarchy+terminologies.
+   ;; slicer-volumes-5.8 propagates colors+units.
+   #:propagated-inputs (list slicer-markups-5.8 slicer-volumes-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -1547,6 +1561,8 @@ subject-hierarchy plugin for managing transform hierarchies.  Built from
 the @file{Modules/Loadable/Transforms} subtree of the Slicer source tree."
    #:extra-inputs (list slicer-subjecthierarchy-5.8
                         slicer-markups-5.8)
+   ;; slicer-markups-5.8 propagates colors+annotations+SH+terminologies.
+   #:propagated-inputs (list slicer-markups-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -1583,6 +1599,8 @@ plugin for managing text nodes.  Built from the
 @file{Modules/Loadable/Texts} subtree of the Slicer source tree."
    #:extra-inputs (list slicer-subjecthierarchy-5.8
                         slicer-markups-5.8)
+   ;; slicer-markups-5.8 propagates colors+annotations+SH+terminologies.
+   #:propagated-inputs (list slicer-markups-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -1671,7 +1689,10 @@ tree."))
           ;; extra packages added to inputs *before* slicer-python-5.8's own inputs.
           (extra-inputs '())
           ;; a gexp that evaluates to a (possibly empty) list of extra cmake -d flags.
-          (extra-configure-flags #~'()))
+          (extra-configure-flags #~'())
+          ;; Packages that must be present in the profile at runtime.
+          ;; Use this to declare inter-module runtime (dlopen) dependencies.
+          (propagated-inputs '()))
   (package
    (name name)
    (version (package-version slicer-python-5.8))
@@ -1716,6 +1737,9 @@ tree."))
                  (modify-inputs (package-inputs slicer-python-5.8)
                    (prepend slicer-python-5.8))
                  extra-inputs))
+   ;; Propagate slicer-python-5.8 so "guix shell slicer-<name>-5.8" provides
+   ;; a usable Slicer in the profile, plus any declared runtime module deps.
+   (propagated-inputs (cons slicer-python-5.8 propagated-inputs))
    (home-page (package-home-page slicer-5.8))
    (synopsis synopsis)
    (description description)
@@ -1941,6 +1965,7 @@ subject-hierarchy dicom plugin, and python utilities for dicom database
 management, series import, and export.  built from the
 @file{modules/scripted/dicomlib} subtree of the slicer source tree."
    #:extra-inputs (list slicer-subjecthierarchy-5.8)
+   #:propagated-inputs (list slicer-subjecthierarchy-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
