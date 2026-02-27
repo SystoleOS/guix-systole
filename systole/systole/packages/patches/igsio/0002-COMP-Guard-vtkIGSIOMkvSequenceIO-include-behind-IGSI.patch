@@ -1,0 +1,40 @@
+From da3d5135a93a56f6e1f35bd8378b1c1fa1293397 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 27 Feb 2026 15:45:29 +0100
+Subject: [PATCH] COMP: Guard vtkIGSIOMkvSequenceIO include behind
+ IGSIO_SEQUENCEIO_ENABLE_MKV
+
+---
+ SlicerIGSIOCommon/CMakeLists.txt           | 1 +
+ SlicerIGSIOCommon/vtkSlicerIGSIOCommon.cxx | 2 ++
+ 2 files changed, 3 insertions(+)
+
+diff --git a/SlicerIGSIOCommon/CMakeLists.txt b/SlicerIGSIOCommon/CMakeLists.txt
+index 22c8fd2..c49ce33 100644
+--- a/SlicerIGSIOCommon/CMakeLists.txt
++++ b/SlicerIGSIOCommon/CMakeLists.txt
+@@ -56,6 +56,7 @@ set(SlicerIGSIOCommon_LIBS ${SlicerIGSIOCommon_LIBS}
+   vtkSlicerVolumesModuleLogic
+   )
+ 
++link_directories(${Slicer_Base_LIBRARY_DIRS} ${Slicer_Libs_LIBRARY_DIRS})
+ if(DEFINED EXTRA_MODULE_LIB_DIRS)
+   link_directories(${EXTRA_MODULE_LIB_DIRS})
+ endif()
+diff --git a/SlicerIGSIOCommon/vtkSlicerIGSIOCommon.cxx b/SlicerIGSIOCommon/vtkSlicerIGSIOCommon.cxx
+index 455a7d2..cda410c 100644
+--- a/SlicerIGSIOCommon/vtkSlicerIGSIOCommon.cxx
++++ b/SlicerIGSIOCommon/vtkSlicerIGSIOCommon.cxx
+@@ -48,7 +48,9 @@ Care Ontario.
+ #include <vtkTransform.h>
+ 
+ // vtkSequenceIO includes
++#ifdef IGSIO_SEQUENCEIO_ENABLE_MKV
+ #include <vtkIGSIOMkvSequenceIO.h>
++#endif
+ 
+ #include <stack>
+ 
+-- 
+2.52.0
+

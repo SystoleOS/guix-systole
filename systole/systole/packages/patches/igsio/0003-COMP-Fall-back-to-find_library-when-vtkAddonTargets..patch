@@ -1,4 +1,4 @@
-From 5500c289b5cb49cedee2273afd2ee5f0ef4afa33 Mon Sep 17 00:00:00 2001
+From c1d16983c031d911c2bf0ce5fb6785c2a3278fd1 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Fri, 27 Feb 2026 15:06:41 +0100
 Subject: [PATCH] COMP: Fall back to find_library when vtkAddonTargets.cmake is
@@ -10,11 +10,42 @@ alongside it), create the vtkAddon IMPORTED target manually from the
 vtkAddon_LIB_DIR and vtkAddon_INCLUDE_DIRS variables that are already set
 by vtkAddonConfig.cmake.
 ---
+ CMake/IGSIOInstallConfig.cmake.in   |  2 ++
+ CMakeLists.txt                      |  2 ++
  IGSIOCommon/CMakeLists.txt          | 25 ++++++++++++++++++++++---
  SequenceIO/CMakeLists.txt           |  4 +++-
  VolumeReconstruction/CMakeLists.txt |  4 +++-
- 3 files changed, 28 insertions(+), 5 deletions(-)
+ 5 files changed, 32 insertions(+), 5 deletions(-)
 
+diff --git a/CMake/IGSIOInstallConfig.cmake.in b/CMake/IGSIOInstallConfig.cmake.in
+index 5814ced..1fd79b8 100644
+--- a/CMake/IGSIOInstallConfig.cmake.in
++++ b/CMake/IGSIOInstallConfig.cmake.in
+@@ -4,9 +4,11 @@
+ #
+ # Compute the installation prefix from this file's location:
+ #   <prefix>/lib/cmake/IGSIO/IGSIOConfig.cmake  →  <prefix>
++#   (4 PATH operations: file → IGSIO/ → cmake/ → lib/ → prefix)
+ get_filename_component(_IGSIO_PREFIX "${CMAKE_CURRENT_LIST_FILE}" PATH)
+ get_filename_component(_IGSIO_PREFIX "${_IGSIO_PREFIX}" PATH)
+ get_filename_component(_IGSIO_PREFIX "${_IGSIO_PREFIX}" PATH)
++get_filename_component(_IGSIO_PREFIX "${_IGSIO_PREFIX}" PATH)
+ 
+ # Include directories for each IGSIO component (all headers are installed
+ # flat into include/@IGSIO_INSTALL_FOLDERNAME@/).
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0b3cc79..6f34925 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -172,6 +172,8 @@ else()
+     ${CMAKE_CURRENT_SOURCE_DIR}/igsioConfigure.h.in
+     ${CMAKE_CURRENT_BINARY_DIR}/igsioConfigure.h
+     )
++  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/igsioConfigure.h
++    DESTINATION ${IGSIO_INCLUDE_INSTALL} COMPONENT Development)
+ 
+   add_subdirectory(Codecs)
+   add_subdirectory(IGSIOCommon)
 diff --git a/IGSIOCommon/CMakeLists.txt b/IGSIOCommon/CMakeLists.txt
 index b3a1a85..c08f1c5 100644
 --- a/IGSIOCommon/CMakeLists.txt

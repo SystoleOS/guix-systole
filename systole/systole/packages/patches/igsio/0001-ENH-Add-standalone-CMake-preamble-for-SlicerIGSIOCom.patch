@@ -1,4 +1,4 @@
-From d67254d2af094465b6fbcf690bad780202eaed4f Mon Sep 17 00:00:00 2001
+From a915c422c862a3e4423ec304751e3f1c5315dded Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Fri, 27 Feb 2026 10:56:25 +0100
 Subject: [PATCH] ENH: Add standalone CMake preamble for SlicerIGSIOCommon
@@ -10,11 +10,11 @@ against an installed Slicer. Also:
 - Install public headers to the Slicer loadable-module include tree so
   downstream modules (VolumeReconstruction) can find vtkSlicerIGSIOCommon.h.
 ---
- SlicerIGSIOCommon/CMakeLists.txt | 28 +++++++++++++++++++++++++++-
- 1 file changed, 27 insertions(+), 1 deletion(-)
+ SlicerIGSIOCommon/CMakeLists.txt | 31 ++++++++++++++++++++++++++++++-
+ 1 file changed, 30 insertions(+), 1 deletion(-)
 
 diff --git a/SlicerIGSIOCommon/CMakeLists.txt b/SlicerIGSIOCommon/CMakeLists.txt
-index 66952db..69755d0 100644
+index 66952db..22c8fd2 100644
 --- a/SlicerIGSIOCommon/CMakeLists.txt
 +++ b/SlicerIGSIOCommon/CMakeLists.txt
 @@ -1,5 +1,21 @@
@@ -39,7 +39,17 @@ index 66952db..69755d0 100644
  # --------------------------------------------------------------------------
  # Sources
  # --------------------------------------------------------------------------
-@@ -108,4 +124,14 @@ if(VTK_WRAP_PYTHON AND BUILD_SHARED_LIBS)
+@@ -40,6 +56,9 @@ set(SlicerIGSIOCommon_LIBS ${SlicerIGSIOCommon_LIBS}
+   vtkSlicerVolumesModuleLogic
+   )
+ 
++if(DEFINED EXTRA_MODULE_LIB_DIRS)
++  link_directories(${EXTRA_MODULE_LIB_DIRS})
++endif()
+ include_directories( ${SlicerIGSIOCommon_INCLUDE_DIRS} )
+ add_library(${PROJECT_NAME} ${SlicerIGSIOCommon_SRCS})
+ target_link_libraries( ${PROJECT_NAME} ${SlicerIGSIOCommon_LIBS} )
+@@ -108,4 +127,14 @@ if(VTK_WRAP_PYTHON AND BUILD_SHARED_LIBS)
    if(${VTK_VERSION} VERSION_LESS "8.90")
      set_property(GLOBAL APPEND PROPERTY Slicer_TARGETS ${PROJECT_NAME}PythonD)
    endif()
