@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 27 Feb 2026 12:00:00 +0100
+Subject: [PATCH] ENH: Add standalone CMake preamble for SlicerIGSIOCommon
+
+Add cmake_minimum_required + find_package(Slicer) preamble before
+project(vtkSlicerIGSIOCommon) so the module can be built standalone
+against an installed slicer-python-5.8.  Also:
+- Guard Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR/SHARE_DIR for standalone.
+- Install public headers to the Slicer loadable-module include tree so
+  downstream modules (VolumeReconstruction) can find vtkSlicerIGSIOCommon.h.
+---
+ SlicerIGSIOCommon/CMakeLists.txt | 34 ++++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+
+diff --git a/SlicerIGSIOCommon/CMakeLists.txt b/SlicerIGSIOCommon/CMakeLists.txt
+index 1111111..2222222 100644
+--- a/SlicerIGSIOCommon/CMakeLists.txt
++++ b/SlicerIGSIOCommon/CMakeLists.txt
+@@ -1,4 +1,38 @@
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
+ project(vtkSlicerIGSIOCommon)
+
++set(CMAKE_CXX_STANDARD "17")
++
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ # --------------------------------------------------------------------------
+ # Sources
+ # --------------------------------------------------------------------------
+@@ -59,4 +93,4 @@ endif()
++# Install public headers so downstream modules can locate
++# vtkSlicerIGSIOCommon.h via SlicerIGSIOCommon_INCLUDE_DIRS.
++install(FILES
++  ${CMAKE_CURRENT_SOURCE_DIR}/vtkSlicerIGSIOCommon.h
++  ${CMAKE_CURRENT_SOURCE_DIR}/vtkSlicerIGSIOLogger.h
++  DESTINATION
++    include/Slicer-${Slicer_VERSION}/qt-loadable-modules/vtkSlicerIGSIOCommon
++  COMPONENT Development)

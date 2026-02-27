@@ -53,6 +53,7 @@
   #:use-module (guix download)
   #:use-module (guix gexp)
   #:use-module (guix packages)
+  #:use-module (guix utils)
   #:use-module (systole packages slicer)
   #:use-module (systole packages ctk)
   #:use-module (systole packages itk)
@@ -60,7 +61,8 @@
   #:use-module (systole packages qrestapi)
   #:use-module (systole packages teem)
   #:use-module (systole packages vtk)
-  #:use-module (systole packages))
+  #:use-module (systole packages)
+  #:use-module (srfi srfi-1))
 
 (define-public openigtlink
   (package
@@ -274,3 +276,54 @@ both industrial and academic developers.")
   (description "OpenIGTLinkIO contains several wrapper layers on top of OpenIGTLink. The code originates from OpenIGTLink/OpenIGTLinkIF. The main intent of the library is to share igtl code between Slicer, CustusX, IBIS, MITK and other systems.")
   (license license:bsd-2)
   (home-page "https://github.com/IGSIO/OpenIGTLinkIO")))
+
+;;;
+;;; Python-enabled variants of OpenIGTLinkIO and SlicerOpenIGTLink
+;;;
+
+(define-public openigtlinkio-python
+  ;; Python-enabled variant: replace non-Python VTK/CTK/Slicer inputs with
+  ;; the Python-enabled counterparts so the library is ABI-compatible with
+  ;; the Python runtime stack loaded by slicer-python-5.8.
+  (package
+   (inherit openigtlinkio)
+   (name "openigtlinkio-python")
+   (inputs (modify-inputs (package-inputs openigtlinkio)
+             (replace "slicer-5.8" slicer-python-5.8)
+             (replace "vtk-slicer" vtk-slicer-python)
+             (replace "ctk" ctk-python)
+             (replace "vtkaddon" vtkaddon-python)))
+   (arguments
+    (substitute-keyword-arguments (package-arguments openigtlinkio)
+      ((#:configure-flags flags)
+       #~(map (lambda (f)
+                (if (string-prefix? "-DSlicer_DIR:PATH=" f)
+                    (string-append "-DSlicer_DIR:PATH="
+                                   #$slicer-python-5.8 "/lib/Slicer-5.8")
+                    f))
+              #$flags))))))
+
+(define-public slicer-openigtlink-python
+  ;; Python-enabled variant of the SlicerOpenIGTLink Slicer extension.
+  (package
+   (inherit slicer-openigtlink)
+   (name "slicer-openigtlink-python")
+   (inputs (modify-inputs (package-inputs slicer-openigtlink)
+             (replace "slicer-5.8" slicer-python-5.8)
+             (replace "vtk-slicer" vtk-slicer-python)
+             (replace "ctk" ctk-python)
+             (replace "vtkaddon" vtkaddon-python)
+             (replace "openigtlinkio" openigtlinkio-python)))
+   (arguments
+    (substitute-keyword-arguments (package-arguments slicer-openigtlink)
+      ((#:configure-flags flags)
+       #~(map (lambda (f)
+                (cond
+                  ((string-prefix? "-DSlicer_DIR:PATH=" f)
+                   (string-append "-DSlicer_DIR:PATH="
+                                  #$slicer-python-5.8 "/lib/Slicer-5.8"))
+                  ((string-prefix? "-DOpenIGTLinkIO_DIR:PATH=" f)
+                   (string-append "-DOpenIGTLinkIO_DIR:PATH="
+                                  #$openigtlinkio-python "/lib/cmake/igtlio"))
+                  (else f)))
+              #$flags))))))
