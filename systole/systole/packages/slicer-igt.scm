@@ -904,7 +904,7 @@ target, and saving/restoring camera positions.  Built from the
    (build-system trivial-build-system)
    (arguments (list #:builder #~(mkdir #$output)))
    (propagated-inputs
-    (append (list slicer-python-5.8
+    (append (list slicer-all-5.8
                   slicer-openigtlink
                   igsio
                   slicer-igsio-common)
@@ -926,7 +926,7 @@ their dependencies (SlicerOpenIGTLink, IGSIO, SlicerIGSIOCommon).")
    (inherit slicer-igt)
    (name "slicer-igt-python")
    (propagated-inputs
-    (append (list slicer-python-5.8
+    (append (list slicer-python-all-5.8
                   slicer-openigtlink-python
                   igsio-python
                   slicer-igsio-common-python)
