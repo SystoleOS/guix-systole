@@ -20,6 +20,11 @@
                 #:prefix license:)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages)
+  #:use-module (gnu packages gl)
+  #:use-module (gnu packages maths)
+  #:use-module (gnu packages python)
+  #:use-module (gnu packages qt)
+  #:use-module (gnu packages xiph)
   #:use-module (guix build-system cmake)
   #:use-module (guix download)
   #:use-module (guix gexp)
@@ -30,6 +35,7 @@
   #:use-module (systole packages pythonqt)
   #:use-module (systole packages slicer)
   #:use-module (systole packages vtk)
+  #:use-module (systole packages ctk)
   #:use-module (systole packages))
 
 ;;;
@@ -71,9 +77,36 @@
                                  #$(this-package-input "itk-slicer")
                                  "/lib/cmake/ITK-5.4")
                   (string-append "-DvtkAddon_DIR="
-                                 #$(this-package-input "vtkaddon")
-                                 "/lib/cmake/vtkAddon"))))
-   (inputs (list vtk-slicer itk-slicer vtkaddon zlib))
+                                 #$(this-package-input "vtkaddon-python")
+                                 "/lib/cmake/vtkAddon")
+                  (string-append "-DQt5_DIR="
+                                 #$(this-package-input "qtbase")
+                                 "/lib/cmake/Qt5")
+                  ;; TODO check whether these could not be picked up from Slicer
+                  ;; cmake configuration files instead
+                  (string-append "-DPython3_EXECUTABLE="
+                                 #$(this-package-input "python") "/bin/python3")
+                  (string-append "-DPython3_INCLUDE_DIR="
+                                 #$(this-package-input "python") "/include/python3.11")
+                  (string-append "-DPython3_LIBRARY="
+                                 #$(this-package-input "python") "/lib/libpython3.11.so")
+                  (string-append "-DGLEW_INCLUDE_DIR="
+                                 #$(this-package-input "glew") "/include/GL")
+                  (string-append "-DGLEW_LIBRARY="
+                                 #$(this-package-input "glew") "/lib/libGLEW.so")
+
+                  )))
+   (inputs (list
+            vtk-slicer
+            itk-slicer
+            vtkaddon-python
+            zlib
+            qtbase-5
+            python
+            glew))
+
+   (propagated-inputs (list vtk-slicer-python ctk-python vtkaddon-python))
+
    (home-page "https://github.com/IGSIO/IGSIO")
    (synopsis "Image Guided Surgery InterOperability library")
    (description
@@ -90,8 +123,7 @@ SlicerIGSIO 3D Slicer extensions.")
    (inherit igsio)
    (name "igsio-python")
    (inputs (modify-inputs (package-inputs igsio)
-             (replace "vtk-slicer" vtk-slicer-python)
-             (replace "vtkaddon" vtkaddon-python)))
+             (replace "vtk-slicer" vtk-slicer-python)))
    (arguments
     (substitute-keyword-arguments (package-arguments igsio)
       ((#:configure-flags flags)
