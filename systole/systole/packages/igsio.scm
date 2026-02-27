@@ -70,7 +70,9 @@
      (patches (search-patches
                "0001-ENH-Add-install-tree-CMake-configuration-to-IGSIO.patch"
                "0002-ENH-Restrict-find_package-VTK-to-required-components.patch"
-               "0003-COMP-Fall-back-to-find_library-when-vtkAddonTargets..patch"))))
+               "0003-COMP-Fall-back-to-find_library-when-vtkAddonTargets..patch"
+               "0004-COMP-Install-vtkigsiocalibration_export.h-generated-header.patch"
+               "0005-COMP-Always-install-VolumeReconstruction-headers-on-all-platforms.patch"))))
    (build-system cmake-build-system)
    (arguments
     (list #:tests? #f

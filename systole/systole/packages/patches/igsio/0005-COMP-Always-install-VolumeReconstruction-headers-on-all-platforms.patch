@@ -1,0 +1,35 @@
+From a1626d9ff3d27848d4f1a72405a13a5e8a59d7ee Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 27 Feb 2026 17:31:47 +0100
+Subject: [PATCH] COMP: Always install VolumeReconstruction headers on all
+ platforms
+
+---
+ VolumeReconstruction/CMakeLists.txt | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/VolumeReconstruction/CMakeLists.txt b/VolumeReconstruction/CMakeLists.txt
+index 58e2de5..4935864 100644
+--- a/VolumeReconstruction/CMakeLists.txt
++++ b/VolumeReconstruction/CMakeLists.txt
+@@ -67,6 +67,17 @@ install(TARGETS ${PROJECT_NAME} EXPORT IGSIO
+   ARCHIVE DESTINATION ${IGSIO_INSTALL_LIB_DIR} COMPONENT Development)
+ install(FILES ${${PROJECT_NAME}_HDRS}
+   DESTINATION ${IGSIO_INCLUDE_INSTALL} COMPONENT Development)
++# On non-MSVC/Xcode platforms the headers are not in _HDRS; install them unconditionally.
++install(FILES
++    fixed.h
++    vtkIGSIOPasteSliceIntoVolume.h
++    vtkIGSIOPasteSliceIntoVolumeHelperCommon.h
++    vtkIGSIOPasteSliceIntoVolumeHelperOptimized.h
++    vtkIGSIOPasteSliceIntoVolumeHelperUnoptimized.h
++    vtkIGSIOVolumeReconstructor.h
++    vtkIGSIOFillHolesInVolume.h
++    vtkIGSIOFanAngleDetectorAlgo.h
++  DESTINATION ${IGSIO_INCLUDE_INSTALL} COMPONENT Development)
+ string(TOLOWER "${PROJECT_NAME}" _lower_name)
+ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${_lower_name}_export.h
+   DESTINATION ${IGSIO_INCLUDE_INSTALL} COMPONENT Development)
+-- 
+2.52.0
+

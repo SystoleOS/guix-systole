@@ -227,8 +227,19 @@ runtime stack."
    #:name "slicer-igt-collectpoints"
    #:slicer slicer-python-5.8
    #:module-subdir "CollectPoints"
-   #:patches (list "collectpoints/0001-ENH-Add-standalone-CMake-preamble-for-CollectPoints.patch")
+   #:patches (list "collectpoints/0001-ENH-Add-standalone-CMake-preamble-for-CollectPoints.patch"
+                   "collectpoints/0002-COMP-Add-markups-includes-LINK_DIRECTORIES-and-qMRMLWidgets.patch")
    #:synopsis "SlicerIGT CollectPoints loadable module"
+   #:extra-inputs (list slicer-markups-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))
    #:description
    "The CollectPoints module from the SlicerIGT extension.  It records the
 positions of a tracked tool as a fiducial markup list, suitable for
@@ -240,8 +251,19 @@ sub-directory of the SlicerIGT source tree."))
    #:name "slicer-igt-collectpoints-python"
    #:slicer slicer-python-5.8
    #:module-subdir "CollectPoints"
-   #:patches (list "collectpoints/0001-ENH-Add-standalone-CMake-preamble-for-CollectPoints.patch")
+   #:patches (list "collectpoints/0001-ENH-Add-standalone-CMake-preamble-for-CollectPoints.patch"
+                   "collectpoints/0002-COMP-Add-markups-includes-LINK_DIRECTORIES-and-qMRMLWidgets.patch")
    #:synopsis "SlicerIGT CollectPoints loadable module (Python-enabled)"
+   #:extra-inputs (list slicer-markups-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))
    #:description
    "Python-enabled variant of the CollectPoints module from SlicerIGT."))
 
@@ -250,7 +272,8 @@ sub-directory of the SlicerIGT source tree."))
    #:name "slicer-igt-createmodels"
    #:slicer slicer-python-5.8
    #:module-subdir "CreateModels"
-   #:patches (list "createmodels/0001-ENH-Add-standalone-CMake-preamble-for-CreateModels.patch")
+   #:patches (list "createmodels/0001-ENH-Add-standalone-CMake-preamble-for-CreateModels.patch"
+                   "createmodels/0002-COMP-Add-qMRMLWidgets-to-MODULE_TARGET_LIBRARIES.patch")
    #:synopsis "SlicerIGT CreateModels loadable module"
    #:description
    "The CreateModels module from the SlicerIGT extension.  It provides
@@ -264,7 +287,8 @@ sub-directory of the SlicerIGT source tree."))
    #:name "slicer-igt-createmodels-python"
    #:slicer slicer-python-5.8
    #:module-subdir "CreateModels"
-   #:patches (list "createmodels/0001-ENH-Add-standalone-CMake-preamble-for-CreateModels.patch")
+   #:patches (list "createmodels/0001-ENH-Add-standalone-CMake-preamble-for-CreateModels.patch"
+                   "createmodels/0002-COMP-Add-qMRMLWidgets-to-MODULE_TARGET_LIBRARIES.patch")
    #:synopsis "SlicerIGT CreateModels loadable module (Python-enabled)"
    #:description
    "Python-enabled variant of the CreateModels module from SlicerIGT."))
@@ -274,7 +298,8 @@ sub-directory of the SlicerIGT source tree."))
    #:name "slicer-igt-fiducialregistrationwizard"
    #:slicer slicer-python-5.8
    #:module-subdir "FiducialRegistrationWizard"
-   #:patches (list "fiducialregistrationwizard/0001-ENH-Add-standalone-CMake-preamble-for-FiducialRegistrationWizard.patch")
+   #:patches (list "fiducialregistrationwizard/0001-ENH-Add-standalone-CMake-preamble-for-FiducialRegistrationWizard.patch"
+                   "fiducialregistrationwizard/0002-COMP-Add-markups-includes-and-LINK_DIRECTORIES-for-FiducialRegistrationWizard.patch")
    #:synopsis "SlicerIGT FiducialRegistrationWizard loadable module"
    #:description
    "The FiducialRegistrationWizard module from SlicerIGT.  It provides a
@@ -294,6 +319,10 @@ sub-directory of the SlicerIGT source tree."
        #$slicer-markups-5.8
        "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
       (string-append
+       "-DvtkSlicerMarkupsModuleLogic_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleLogic")
+      (string-append
        "-DEXTRA_MODULE_LIB_DIRS="
        #$slicer-markups-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
@@ -303,7 +332,8 @@ sub-directory of the SlicerIGT source tree."
    #:name "slicer-igt-fiducialregistrationwizard-python"
    #:slicer slicer-python-5.8
    #:module-subdir "FiducialRegistrationWizard"
-   #:patches (list "fiducialregistrationwizard/0001-ENH-Add-standalone-CMake-preamble-for-FiducialRegistrationWizard.patch")
+   #:patches (list "fiducialregistrationwizard/0001-ENH-Add-standalone-CMake-preamble-for-FiducialRegistrationWizard.patch"
+                   "fiducialregistrationwizard/0002-COMP-Add-markups-includes-and-LINK_DIRECTORIES-for-FiducialRegistrationWizard.patch")
    #:synopsis "SlicerIGT FiducialRegistrationWizard loadable module (Python-enabled)"
    #:description
    "Python-enabled variant of the FiducialRegistrationWizard module from SlicerIGT."
@@ -319,6 +349,10 @@ sub-directory of the SlicerIGT source tree."
        #$slicer-markups-5.8
        "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
       (string-append
+       "-DvtkSlicerMarkupsModuleLogic_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleLogic")
+      (string-append
        "-DEXTRA_MODULE_LIB_DIRS="
        #$slicer-markups-5.8
        "/lib/Slicer-5.8/qt-loadable-modules"))))
@@ -328,7 +362,8 @@ sub-directory of the SlicerIGT source tree."
    #:name "slicer-igt-landmarkdetection"
    #:slicer slicer-python-5.8
    #:module-subdir "LandmarkDetection"
-   #:patches (list "landmarkdetection/0001-ENH-Add-standalone-CMake-preamble-for-LandmarkDetection.patch")
+   #:patches (list "landmarkdetection/0001-ENH-Add-standalone-CMake-preamble-for-LandmarkDetection.patch"
+                   "landmarkdetection/0002-COMP-Add-markups-includes-LINK_DIRECTORIES-and-qMRMLWidgets.patch")
    #:synopsis "SlicerIGT LandmarkDetection loadable module"
    #:description
    "The LandmarkDetection module from SlicerIGT.  It automatically detects
@@ -356,7 +391,8 @@ of the SlicerIGT source tree."
    #:name "slicer-igt-landmarkdetection-python"
    #:slicer slicer-python-5.8
    #:module-subdir "LandmarkDetection"
-   #:patches (list "landmarkdetection/0001-ENH-Add-standalone-CMake-preamble-for-LandmarkDetection.patch")
+   #:patches (list "landmarkdetection/0001-ENH-Add-standalone-CMake-preamble-for-LandmarkDetection.patch"
+                   "landmarkdetection/0002-COMP-Add-markups-includes-LINK_DIRECTORIES-and-qMRMLWidgets.patch")
    #:synopsis "SlicerIGT LandmarkDetection loadable module (Python-enabled)"
    #:description
    "Python-enabled variant of the LandmarkDetection module from SlicerIGT."
@@ -381,14 +417,15 @@ of the SlicerIGT source tree."
    #:name "slicer-igt-pathexplorer"
    #:slicer slicer-python-5.8
    #:module-subdir "PathExplorer"
-   #:patches (list "pathexplorer/0001-ENH-Add-standalone-CMake-preamble-for-PathExplorer.patch")
+   #:patches (list "pathexplorer/0001-ENH-Add-standalone-CMake-preamble-for-PathExplorer.patch"
+                   "pathexplorer/0002-COMP-Add-markups-includes-and-LINK_DIRECTORIES-for-PathExplorer.patch")
    #:synopsis "SlicerIGT PathExplorer loadable module"
    #:description
    "The PathExplorer module from SlicerIGT.  It provides tools for exploring
 cross-sectional images along a user-defined curved path (e.g. for needle
 trajectory planning), with reslicing views and a subject-hierarchy plugin.
 Built from the @file{PathExplorer} sub-directory of the SlicerIGT source tree."
-   #:extra-inputs (list slicer-markups-5.8 slicer-subjecthierarchy-5.8)
+   #:extra-inputs (list slicer-markups-5.8 slicer-subjecthierarchy-5.8 slicer-plots-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -410,18 +447,20 @@ Built from the @file{PathExplorer} sub-directory of the SlicerIGT source tree."
       (string-append
        "-DEXTRA_MODULE_LIB_DIRS="
        #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
-       #$slicer-subjecthierarchy-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
+       #$slicer-subjecthierarchy-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-plots-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
 
 (define-public slicer-igt-pathexplorer-python
   (make-slicer-igt-loadable-module
    #:name "slicer-igt-pathexplorer-python"
    #:slicer slicer-python-5.8
    #:module-subdir "PathExplorer"
-   #:patches (list "pathexplorer/0001-ENH-Add-standalone-CMake-preamble-for-PathExplorer.patch")
+   #:patches (list "pathexplorer/0001-ENH-Add-standalone-CMake-preamble-for-PathExplorer.patch"
+                   "pathexplorer/0002-COMP-Add-markups-includes-and-LINK_DIRECTORIES-for-PathExplorer.patch")
    #:synopsis "SlicerIGT PathExplorer loadable module (Python-enabled)"
    #:description
    "Python-enabled variant of the PathExplorer module from SlicerIGT."
-   #:extra-inputs (list slicer-markups-5.8 slicer-subjecthierarchy-5.8)
+   #:extra-inputs (list slicer-markups-5.8 slicer-subjecthierarchy-5.8 slicer-plots-5.8)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -443,14 +482,17 @@ Built from the @file{PathExplorer} sub-directory of the SlicerIGT source tree."
       (string-append
        "-DEXTRA_MODULE_LIB_DIRS="
        #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
-       #$slicer-subjecthierarchy-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
+       #$slicer-subjecthierarchy-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-plots-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
 
 (define-public slicer-igt-pivotcalibration
   (make-slicer-igt-loadable-module
    #:name "slicer-igt-pivotcalibration"
    #:slicer slicer-python-5.8
    #:module-subdir "PivotCalibration"
-   #:patches (list "pivotcalibration/0001-ENH-Add-standalone-CMake-preamble-for-PivotCalibration.patch")
+   #:patches (list "pivotcalibration/0001-ENH-Add-standalone-CMake-preamble-for-PivotCalibration.patch"
+                   "pivotcalibration/0002-COMP-Add-qMRMLWidgets-to-MODULE_TARGET_LIBRARIES.patch"
+                   "pivotcalibration/0003-COMP-Add-IGSIO-include-dirs-and-LINK_DIRECTORIES-to-PivotCalibration-Logic.patch")
    #:synopsis "SlicerIGT PivotCalibration loadable module"
    #:description
    "The PivotCalibration module from SlicerIGT.  It computes the pivot point
@@ -473,7 +515,9 @@ source tree."
    #:name "slicer-igt-pivotcalibration-python"
    #:slicer slicer-python-5.8
    #:module-subdir "PivotCalibration"
-   #:patches (list "pivotcalibration/0001-ENH-Add-standalone-CMake-preamble-for-PivotCalibration.patch")
+   #:patches (list "pivotcalibration/0001-ENH-Add-standalone-CMake-preamble-for-PivotCalibration.patch"
+                   "pivotcalibration/0002-COMP-Add-qMRMLWidgets-to-MODULE_TARGET_LIBRARIES.patch"
+                   "pivotcalibration/0003-COMP-Add-IGSIO-include-dirs-and-LINK_DIRECTORIES-to-PivotCalibration-Logic.patch")
    #:synopsis "SlicerIGT PivotCalibration loadable module (Python-enabled)"
    #:description
    "Python-enabled variant of the PivotCalibration module from SlicerIGT."
@@ -492,7 +536,8 @@ source tree."
    #:name "slicer-igt-transformprocessor"
    #:slicer slicer-python-5.8
    #:module-subdir "TransformProcessor"
-   #:patches (list "transformprocessor/0001-ENH-Add-standalone-CMake-preamble-for-TransformProcessor.patch")
+   #:patches (list "transformprocessor/0001-ENH-Add-standalone-CMake-preamble-for-TransformProcessor.patch"
+                   "transformprocessor/0002-COMP-Add-qMRMLWidgets-to-MODULE_TARGET_LIBRARIES.patch")
    #:synopsis "SlicerIGT TransformProcessor loadable module"
    #:description
    "The TransformProcessor module from SlicerIGT.  It computes composite
@@ -506,7 +551,8 @@ of the SlicerIGT source tree."))
    #:name "slicer-igt-transformprocessor-python"
    #:slicer slicer-python-5.8
    #:module-subdir "TransformProcessor"
-   #:patches (list "transformprocessor/0001-ENH-Add-standalone-CMake-preamble-for-TransformProcessor.patch")
+   #:patches (list "transformprocessor/0001-ENH-Add-standalone-CMake-preamble-for-TransformProcessor.patch"
+                   "transformprocessor/0002-COMP-Add-qMRMLWidgets-to-MODULE_TARGET_LIBRARIES.patch")
    #:synopsis "SlicerIGT TransformProcessor loadable module (Python-enabled)"
    #:description
    "Python-enabled variant of the TransformProcessor module from SlicerIGT."))
@@ -516,7 +562,8 @@ of the SlicerIGT source tree."))
    #:name "slicer-igt-ultrasoundsnapshots"
    #:slicer slicer-python-5.8
    #:module-subdir "UltrasoundSnapshots"
-   #:patches (list "ultrasoundsnapshots/0001-ENH-Add-standalone-CMake-preamble-for-UltrasoundSnapshots.patch")
+   #:patches (list "ultrasoundsnapshots/0001-ENH-Add-standalone-CMake-preamble-for-UltrasoundSnapshots.patch"
+                   "ultrasoundsnapshots/0002-COMP-Add-qMRMLWidgets-to-MODULE_TARGET_LIBRARIES.patch")
    #:synopsis "SlicerIGT UltrasoundSnapshots loadable module"
    #:description
    "The UltrasoundSnapshots module from SlicerIGT.  It captures snapshots of
@@ -529,7 +576,8 @@ the @file{UltrasoundSnapshots} sub-directory of the SlicerIGT source tree."))
    #:name "slicer-igt-ultrasoundsnapshots-python"
    #:slicer slicer-python-5.8
    #:module-subdir "UltrasoundSnapshots"
-   #:patches (list "ultrasoundsnapshots/0001-ENH-Add-standalone-CMake-preamble-for-UltrasoundSnapshots.patch")
+   #:patches (list "ultrasoundsnapshots/0001-ENH-Add-standalone-CMake-preamble-for-UltrasoundSnapshots.patch"
+                   "ultrasoundsnapshots/0002-COMP-Add-qMRMLWidgets-to-MODULE_TARGET_LIBRARIES.patch")
    #:synopsis "SlicerIGT UltrasoundSnapshots loadable module (Python-enabled)"
    #:description
    "Python-enabled variant of the UltrasoundSnapshots module from SlicerIGT."))
@@ -539,31 +587,64 @@ the @file{UltrasoundSnapshots} sub-directory of the SlicerIGT source tree."))
    #:name "slicer-igt-volumereslicedriver"
    #:slicer slicer-python-5.8
    #:module-subdir "VolumeResliceDriver"
-   #:patches (list "volumereslicedriver/0001-ENH-Add-standalone-CMake-preamble-for-VolumeResliceDriver.patch")
+   #:patches (list "volumereslicedriver/0001-ENH-Add-standalone-CMake-preamble-for-VolumeResliceDriver.patch"
+                   "volumereslicedriver/0002-COMP-Add-markups-annotations-includes-and-LINK_DIRECTORIES.patch")
    #:synopsis "SlicerIGT VolumeResliceDriver loadable module"
    #:description
    "The VolumeResliceDriver module from SlicerIGT.  It drives the reslice
 planes of 2D slice views to follow a tracked tool or a user-defined
 transform node in real time, enabling live image guidance workflows.
 Built from the @file{VolumeResliceDriver} sub-directory of the SlicerIGT
-source tree."))
+source tree."
+   #:extra-inputs (list slicer-markups-5.8 slicer-annotations-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
+       "-DvtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS="
+       #$slicer-annotations-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-annotations-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
 
 (define-public slicer-igt-volumereslicedriver-python
   (make-slicer-igt-loadable-module
    #:name "slicer-igt-volumereslicedriver-python"
    #:slicer slicer-python-5.8
    #:module-subdir "VolumeResliceDriver"
-   #:patches (list "volumereslicedriver/0001-ENH-Add-standalone-CMake-preamble-for-VolumeResliceDriver.patch")
+   #:patches (list "volumereslicedriver/0001-ENH-Add-standalone-CMake-preamble-for-VolumeResliceDriver.patch"
+                   "volumereslicedriver/0002-COMP-Add-markups-annotations-includes-and-LINK_DIRECTORIES.patch")
    #:synopsis "SlicerIGT VolumeResliceDriver loadable module (Python-enabled)"
    #:description
-   "Python-enabled variant of the VolumeResliceDriver module from SlicerIGT."))
+   "Python-enabled variant of the VolumeResliceDriver module from SlicerIGT."
+   #:extra-inputs (list slicer-markups-5.8 slicer-annotations-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
+       "-DvtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS="
+       #$slicer-annotations-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-annotations-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
 
 (define-public slicer-igt-watchdog
   (make-slicer-igt-loadable-module
    #:name "slicer-igt-watchdog"
    #:slicer slicer-python-5.8
    #:module-subdir "Watchdog"
-   #:patches (list "watchdog/0001-ENH-Add-standalone-CMake-preamble-for-Watchdog.patch")
+   #:patches (list "watchdog/0001-ENH-Add-standalone-CMake-preamble-for-Watchdog.patch"
+                   "watchdog/0002-COMP-Add-Qt5-Multimedia-to-Watchdog-MODULE_TARGET_LIBRARIES.patch")
    #:synopsis "SlicerIGT Watchdog loadable module"
    #:description
    "The Watchdog module from SlicerIGT.  It monitors transform nodes for
@@ -577,7 +658,8 @@ SlicerIGT source tree."))
    #:name "slicer-igt-watchdog-python"
    #:slicer slicer-python-5.8
    #:module-subdir "Watchdog"
-   #:patches (list "watchdog/0001-ENH-Add-standalone-CMake-preamble-for-Watchdog.patch")
+   #:patches (list "watchdog/0001-ENH-Add-standalone-CMake-preamble-for-Watchdog.patch"
+                   "watchdog/0002-COMP-Add-Qt5-Multimedia-to-Watchdog-MODULE_TARGET_LIBRARIES.patch")
    #:synopsis "SlicerIGT Watchdog loadable module (Python-enabled)"
    #:description
    "Python-enabled variant of the Watchdog module from SlicerIGT."))
@@ -587,7 +669,8 @@ SlicerIGT source tree."))
    #:name "slicer-igt-volumereconstruction"
    #:slicer slicer-python-5.8
    #:module-subdir "VolumeReconstruction"
-   #:patches (list "volumereconstruction/0001-ENH-Add-standalone-CMake-preamble-for-VolumeReconstruction.patch")
+   #:patches (list "volumereconstruction/0001-ENH-Add-standalone-CMake-preamble-for-VolumeReconstruction.patch"
+                   "volumereconstruction/0002-COMP-Add-LINK_DIRECTORIES-to-VolumeReconstruction-MRML-and-Logic.patch")
    #:synopsis "SlicerIGT VolumeReconstruction loadable module"
    #:description
    "The VolumeReconstruction module from SlicerIGT.  It reconstructs a
@@ -598,6 +681,7 @@ SlicerIGT source tree."
    #:extra-inputs (list igsio
                         slicer-igsio-common
                         slicer-annotations-5.8
+                        slicer-markups-5.8
                         slicer-sequences-5.8
                         slicer-volumes-5.8)
    #:extra-configure-flags
@@ -621,6 +705,10 @@ SlicerIGT source tree."
        #$slicer-annotations-5.8
        "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML")
       (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
        "-DvtkSlicerVolumesModuleLogic_INCLUDE_DIRS="
        #$slicer-volumes-5.8
        "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerVolumesModuleLogic")
@@ -629,6 +717,7 @@ SlicerIGT source tree."
        #$igsio "/lib;"
        #$slicer-igsio-common "/lib/Slicer-5.8/qt-loadable-modules;"
        #$slicer-annotations-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
        #$slicer-sequences-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
        #$slicer-volumes-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
 
@@ -637,13 +726,15 @@ SlicerIGT source tree."
    #:name "slicer-igt-volumereconstruction-python"
    #:slicer slicer-python-5.8
    #:module-subdir "VolumeReconstruction"
-   #:patches (list "volumereconstruction/0001-ENH-Add-standalone-CMake-preamble-for-VolumeReconstruction.patch")
+   #:patches (list "volumereconstruction/0001-ENH-Add-standalone-CMake-preamble-for-VolumeReconstruction.patch"
+                   "volumereconstruction/0002-COMP-Add-LINK_DIRECTORIES-to-VolumeReconstruction-MRML-and-Logic.patch")
    #:synopsis "SlicerIGT VolumeReconstruction loadable module (Python-enabled)"
    #:description
    "Python-enabled variant of the VolumeReconstruction module from SlicerIGT."
    #:extra-inputs (list igsio-python
                         slicer-igsio-common-python
                         slicer-annotations-5.8
+                        slicer-markups-5.8
                         slicer-sequences-5.8
                         slicer-volumes-5.8)
    #:extra-configure-flags
@@ -667,6 +758,10 @@ SlicerIGT source tree."
        #$slicer-annotations-5.8
        "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML")
       (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
        "-DvtkSlicerVolumesModuleLogic_INCLUDE_DIRS="
        #$slicer-volumes-5.8
        "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerVolumesModuleLogic")
@@ -675,6 +770,7 @@ SlicerIGT source tree."
        #$igsio-python "/lib;"
        #$slicer-igsio-common-python "/lib/Slicer-5.8/qt-loadable-modules;"
        #$slicer-annotations-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
+       #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
        #$slicer-sequences-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
        #$slicer-volumes-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
 

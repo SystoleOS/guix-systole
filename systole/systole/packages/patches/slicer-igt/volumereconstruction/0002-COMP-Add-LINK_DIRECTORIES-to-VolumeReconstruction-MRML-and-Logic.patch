@@ -1,0 +1,77 @@
+From e0143b02019190b9e62625e6467d64af22bde11a Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 27 Feb 2026 17:32:59 +0100
+Subject: [PATCH] COMP: Add LINK_DIRECTORIES to VolumeReconstruction MRML and
+ Logic builds
+
+---
+ VolumeReconstruction/CMakeLists.txt       | 1 +
+ VolumeReconstruction/Logic/CMakeLists.txt | 5 +++++
+ VolumeReconstruction/MRML/CMakeLists.txt  | 3 +++
+ 3 files changed, 9 insertions(+)
+
+diff --git a/VolumeReconstruction/CMakeLists.txt b/VolumeReconstruction/CMakeLists.txt
+index c48c6fc..31b93b6 100644
+--- a/VolumeReconstruction/CMakeLists.txt
++++ b/VolumeReconstruction/CMakeLists.txt
+@@ -70,6 +70,7 @@ set(MODULE_TARGET_LIBRARIES
+   vtkVolumeReconstruction
+   vtkSlicerIGSIOCommon
+   vtkSlicerSequencesModuleMRML
++  qMRMLWidgets
+   )
+ 
+ set(MODULE_RESOURCES
+diff --git a/VolumeReconstruction/Logic/CMakeLists.txt b/VolumeReconstruction/Logic/CMakeLists.txt
+index 9447551..29ed825 100644
+--- a/VolumeReconstruction/Logic/CMakeLists.txt
++++ b/VolumeReconstruction/Logic/CMakeLists.txt
+@@ -7,6 +7,8 @@ set(${KIT}_INCLUDE_DIRECTORIES
+   ${vtkSlicer${MODULE_NAME}ModuleMRML_INCLUDE_DIRS}
+   ${vtkSlicerSequencesModuleMRML_INCLUDE_DIRS}
+   ${vtkSlicerAnnotationModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   ${VTKVOLUMERECONSTRUCTION_INCLUDE_DIRS}
+   )
+ 
+@@ -20,6 +22,8 @@ set(${KIT}_TARGET_LIBRARIES
+   vtkSlicer${MODULE_NAME}ModuleMRML
+   vtkSlicerMarkupsModuleMRML
+   vtkVolumeReconstruction
++  vtkIGSIOCommon
++  vtkSequenceIO
+   )
+ 
+ #-----------------------------------------------------------------------------
+@@ -29,6 +33,7 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+ 
+ 
+diff --git a/VolumeReconstruction/MRML/CMakeLists.txt b/VolumeReconstruction/MRML/CMakeLists.txt
+index 20b30b4..2565cf9 100644
+--- a/VolumeReconstruction/MRML/CMakeLists.txt
++++ b/VolumeReconstruction/MRML/CMakeLists.txt
+@@ -7,6 +7,8 @@ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_MRML_EXPORT"
+ set(${KIT}_INCLUDE_DIRECTORIES
+   ${vtkSlicerSequencesModuleMRML_INCLUDE_DIRS}
+   ${VTKVOLUMERECONSTRUCTION_INCLUDE_DIRS}
++  ${vtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+@@ -28,4 +30,5 @@ SlicerMacroBuildModuleMRML(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+\ No newline at end of file
+-- 
+2.52.0
+

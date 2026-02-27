@@ -1,0 +1,71 @@
+From 90e9c4d55f4a1fccd783ce53d8e2e8d20890554a Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 27 Feb 2026 16:43:59 +0100
+Subject: [PATCH] COMP: Add markups/annotations includes, LINK_DIRECTORIES, and
+ qMRMLWidgets for CollectPoints, LandmarkDetection, VolumeResliceDriver
+
+---
+ CollectPoints/CMakeLists.txt       | 2 ++
+ CollectPoints/Logic/CMakeLists.txt | 2 ++
+ CollectPoints/MRML/CMakeLists.txt  | 2 ++
+ 3 files changed, 6 insertions(+)
+
+diff --git a/CollectPoints/CMakeLists.txt b/CollectPoints/CMakeLists.txt
+index 2622aa5..3d89428 100644
+--- a/CollectPoints/CMakeLists.txt
++++ b/CollectPoints/CMakeLists.txt
+@@ -36,6 +36,7 @@ set(MODULE_INCLUDE_DIRECTORIES
+   ${CMAKE_CURRENT_BINARY_DIR}/Logic
+   ${CMAKE_CURRENT_SOURCE_DIR}/MRML
+   ${CMAKE_CURRENT_BINARY_DIR}/MRML
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(MODULE_SRCS
+@@ -56,6 +57,7 @@ set(MODULE_UI_SRCS
+ 
+ set(MODULE_TARGET_LIBRARIES
+   vtkSlicer${MODULE_NAME}ModuleLogic
++  qMRMLWidgets
+   )
+ 
+ set(MODULE_RESOURCES
+diff --git a/CollectPoints/Logic/CMakeLists.txt b/CollectPoints/Logic/CMakeLists.txt
+index 1fb950a..f8e941f 100644
+--- a/CollectPoints/Logic/CMakeLists.txt
++++ b/CollectPoints/Logic/CMakeLists.txt
+@@ -5,6 +5,7 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_LOGIC_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+@@ -25,4 +26,5 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+diff --git a/CollectPoints/MRML/CMakeLists.txt b/CollectPoints/MRML/CMakeLists.txt
+index c503478..aa47ad1 100644
+--- a/CollectPoints/MRML/CMakeLists.txt
++++ b/CollectPoints/MRML/CMakeLists.txt
+@@ -6,6 +6,7 @@ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_MRML_EXPORT"
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+   ${Slicer_Base_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ # --------------------------------------------------------------------------
+@@ -33,4 +34,5 @@ SlicerMacroBuildModuleMRML(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+-- 
+2.52.0
+
