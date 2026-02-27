@@ -178,25 +178,49 @@
    #:name "slicer-igt-breachwarning"
    #:slicer slicer-python-5.8
    #:module-subdir "BreachWarning"
-   #:patches (list "breachwarning/0001-ENH-Add-standalone-CMake-preamble-for-BreachWarning.patch")
+   #:patches (list "breachwarning/0001-ENH-Add-standalone-CMake-preamble-for-BreachWarning.patch"
+                   "breachwarning/0002-COMP-Add-markups-include-and-link-dirs-for-BreachWar.patch"
+                   "breachwarning/0003-COMP-Add-Qt5-Multimedia-to-BreachWarning-target-libr.patch")
    #:synopsis "SlicerIGT BreachWarning loadable module"
    #:description
    "The BreachWarning module from the SlicerIGT extension.  It monitors the
 distance between a tracked tool and a surface model and provides visual and
 audio alerts when the tool approaches or breaches the surface.  Built from
-the @file{BreachWarning} sub-directory of the SlicerIGT source tree."))
+the @file{BreachWarning} sub-directory of the SlicerIGT source tree."
+   #:extra-inputs (list slicer-markups-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
 
 (define-public slicer-igt-breachwarning-python
   (make-slicer-igt-loadable-module
    #:name "slicer-igt-breachwarning-python"
    #:slicer slicer-python-5.8
    #:module-subdir "BreachWarning"
-   #:patches (list "breachwarning/0001-ENH-Add-standalone-CMake-preamble-for-BreachWarning.patch")
+   #:patches (list "breachwarning/0001-ENH-Add-standalone-CMake-preamble-for-BreachWarning.patch"
+                   "breachwarning/0002-COMP-Add-markups-include-and-link-dirs-for-BreachWar.patch"
+                   "breachwarning/0003-COMP-Add-Qt5-Multimedia-to-BreachWarning-target-libr.patch")
    #:synopsis "SlicerIGT BreachWarning loadable module (Python-enabled)"
    #:description
    "Python-enabled variant of the BreachWarning module from SlicerIGT.
 Built against slicer-python-5.8 for ABI compatibility with the Python
-runtime stack."))
+runtime stack."
+   #:extra-inputs (list slicer-markups-5.8)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.8
+       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
 
 (define-public slicer-igt-collectpoints
   (make-slicer-igt-loadable-module
