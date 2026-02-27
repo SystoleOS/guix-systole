@@ -54,6 +54,7 @@
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (guix utils)
+  #:use-module (systole packages pythonqt)
   #:use-module (systole packages slicer)
   #:use-module (systole packages ctk)
   #:use-module (systole packages itk)
@@ -116,7 +117,7 @@ both industrial and academic developers.")
       (base32 "0m56zqjdv87iv0p6g269kj9bjknjsaq18ijpsjawh9wi2w8ybsaj"))
      (patches (search-patches
                "0001-COMP-Add-conditional-build-of-UltrasoundRemoteContro.patch"
-               "0002-COMP-Fix-include-directories.patch"))))
+               "0002-COMP-Fix-include-directories-and-use-CMake-variables.patch"))))
    (build-system cmake-build-system)
    (arguments
     (list #:tests? #f
@@ -125,15 +126,46 @@ both industrial and academic developers.")
           #~(list
              "-DSlicerOpenIGTLink_SUPERBUILD:BOOL=OFF"
              "-DBUILD_TESTING:BOOL=OFF"
+             "-DSlicer_USE_PYTHONQT:BOOL=OFF"
+             ;; vtk-slicer-python's cmake config calls find_package(Python3)
+             (string-append "-DPython3_EXECUTABLE="
+                            #$(this-package-input "python")
+                            "/bin/python3")
+             (string-append "-DPython3_INCLUDE_DIR="
+                            #$(this-package-input "python")
+                            "/include/python3.11")
+             (string-append "-DPython3_LIBRARY="
+                            #$(this-package-input "python")
+                            "/lib/libpython3.11.so")
+             ;; SlicerConfig.cmake forces Slicer_USE_PYTHONQT=ON; WRAP_PYTHONQT in
+             ;; Widgets/CMakeLists.txt then requires PythonQt to be findable.
+             (string-append "-DPYTHONQT_INSTALL_DIR="
+                            #$(this-package-input "pythonqt-commontk"))
              (string-append "-DSlicer_DIR:PATH="
-                            #$(this-package-input "slicer-5.8")
+                            #$(this-package-input "slicer-python-5.8")
                             "/lib/Slicer-5.8")
              (string-append "-DOpenIGTLink_DIR:PATH="
                             #$(this-package-input "openigtlink")
                             "/lib/igtl/cmake/igtl-3.1")
              (string-append "-DOpenIGTLinkIO_DIR:PATH="
                             #$(this-package-input "openigtlinkio")
-                            "/lib/cmake/igtlio"))
+                            "/lib/cmake/igtlio")
+             (string-append "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+                            #$(this-package-input "slicer-markups-5.8")
+                            "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+             (string-append "-DvtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS="
+                            #$(this-package-input "slicer-annotations-5.8")
+                            "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML")
+             (string-append "-DvtkSlicerColorsModuleLogic_INCLUDE_DIRS="
+                            #$(this-package-input "slicer-colors-5.8")
+                            "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerColorsModuleLogic")
+             (string-append "-DEXTRA_MODULE_LIB_DIRS="
+                            #$(this-package-input "slicer-markups-5.8")
+                            "/lib/Slicer-5.8/qt-loadable-modules;"
+                            #$(this-package-input "slicer-annotations-5.8")
+                            "/lib/Slicer-5.8/qt-loadable-modules;"
+                            #$(this-package-input "slicer-colors-5.8")
+                            "/lib/Slicer-5.8/qt-loadable-modules"))
 
          #:phases
            #~(modify-phases %standard-phases
@@ -150,7 +182,8 @@ both industrial and academic developers.")
                      (find-files lib-dir "\\.so$"))))))
                             ))
    (inputs
-    (list slicer-5.8
+    (list slicer-python-5.8
+          python
           mesa
           ;; QT5
           qtbase-5
@@ -163,7 +196,7 @@ both industrial and academic developers.")
           qtwebchannel-5
           qttools-5
           ;;VTK
-          vtk-slicer
+          vtk-slicer-python
           itk-slicer
           double-conversion
           freetype
@@ -189,14 +222,19 @@ both industrial and academic developers.")
           mesa ;libGL equivalent
           rapidjson
           tbb
-          ctk
+          pythonqt-commontk
+          ctk-python
           ctkapplauncher
           libarchive-slicer
           teem-slicer
-          vtkaddon
+          vtkaddon-python
           qrestapi
           openigtlink
           openigtlinkio
+          ;; Extra Slicer loadable modules needed for headers/libs
+          slicer-markups-5.8
+          slicer-annotations-5.8
+          slicer-colors-5.8
           ))
    (synopsis "Slicer Extension for communication of IGT data")
    (description "SlicerOpenIGTLink is a 3D Slicer extension designed to facilitate the communication between 3D Slicer and other platforms via OpenIGTLink.")
@@ -219,14 +257,27 @@ both industrial and academic developers.")
           #:validate-runpath? #f
           #:configure-flags
           #~(list
+             "-DSlicer_USE_PYTHONQT:BOOL=OFF"
+             ;; vtk-slicer-python's VTK cmake config calls find_package(Python3)
+             ;; unconditionally; provide paths so it finds Guix Python.
+             (string-append "-DPython3_EXECUTABLE="
+                            #$(this-package-input "python")
+                            "/bin/python3")
+             (string-append "-DPython3_INCLUDE_DIR="
+                            #$(this-package-input "python")
+                            "/include/python3.11")
+             (string-append "-DPython3_LIBRARY="
+                            #$(this-package-input "python")
+                            "/lib/libpython3.11.so")
              (string-append "-DSlicer_DIR:PATH="
-                            #$(this-package-input "slicer-5.8")
+                            #$(this-package-input "slicer-python-5.8")
                             "/lib/Slicer-5.8")
              (string-append "-DOpenIGTLink_DIR:PATH="
                             #$(this-package-input "openigtlink")
                             "/lib/igtl/cmake/igtl-3.1"))))
   (inputs
-   (list slicer-5.8
+   (list slicer-python-5.8
+         python
          mesa
          ;; QT5
          qtbase-5
@@ -239,7 +290,7 @@ both industrial and academic developers.")
          qtwebchannel-5
          qttools-5
          ;;VTK
-         vtk-slicer
+         vtk-slicer-python
          itk-slicer
          double-conversion
          freetype
@@ -265,11 +316,11 @@ both industrial and academic developers.")
          mesa ;libGL equivalent
          rapidjson
          tbb
-         ctk
+         ctk-python
          ctkapplauncher
          libarchive-slicer
          teem-slicer
-         vtkaddon
+         vtkaddon-python
          qrestapi
          openigtlink))
   (synopsis "Library for interfacing to openigtlink/OpenIGTLink, dependent on VTK and Qt. Based on openigtlink/OpenIGTLinkIF")
@@ -282,26 +333,11 @@ both industrial and academic developers.")
 ;;;
 
 (define-public openigtlinkio-python
-  ;; Python-enabled variant: replace non-Python VTK/CTK/Slicer inputs with
-  ;; the Python-enabled counterparts so the library is ABI-compatible with
-  ;; the Python runtime stack loaded by slicer-python-5.8.
+  ;; Python-enabled variant: the base openigtlinkio already uses Python-enabled
+  ;; VTK/CTK/Slicer inputs, so this is a thin alias for ABI-consistency.
   (package
    (inherit openigtlinkio)
-   (name "openigtlinkio-python")
-   (inputs (modify-inputs (package-inputs openigtlinkio)
-             (replace "slicer-5.8" slicer-python-5.8)
-             (replace "vtk-slicer" vtk-slicer-python)
-             (replace "ctk" ctk-python)
-             (replace "vtkaddon" vtkaddon-python)))
-   (arguments
-    (substitute-keyword-arguments (package-arguments openigtlinkio)
-      ((#:configure-flags flags)
-       #~(map (lambda (f)
-                (if (string-prefix? "-DSlicer_DIR:PATH=" f)
-                    (string-append "-DSlicer_DIR:PATH="
-                                   #$slicer-python-5.8 "/lib/Slicer-5.8")
-                    f))
-              #$flags))))))
+   (name "openigtlinkio-python")))
 
 (define-public slicer-openigtlink-python
   ;; Python-enabled variant of the SlicerOpenIGTLink Slicer extension.
