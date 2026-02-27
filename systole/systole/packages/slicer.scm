@@ -795,7 +795,9 @@ Line Interface) modules.  It bundles @code{tclap} and
                  (modify-inputs (package-inputs slicer)
                    (prepend slicer))
                  extra-inputs))
-   (propagated-inputs propagated-inputs)
+   ;; Propagate the Slicer variant this module was built against so that
+   ;; "guix shell slicer-<name>-5.8" gives a usable Slicer in the profile.
+   (propagated-inputs (cons slicer propagated-inputs))
    (home-page (package-home-page slicer))
    (synopsis synopsis)
    (description description)
