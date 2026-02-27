@@ -1,0 +1,25 @@
+From 7a88d1ba963c915a6cec1e8ea150f01d165f3e74 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 27 Feb 2026 16:01:17 +0100
+Subject: [PATCH] COMP: Add Qt5::Multimedia to BreachWarning target libraries
+
+---
+ BreachWarning/CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/BreachWarning/CMakeLists.txt b/BreachWarning/CMakeLists.txt
+index cd9cdf5..9b8e86b 100644
+--- a/BreachWarning/CMakeLists.txt
++++ b/BreachWarning/CMakeLists.txt
+@@ -55,6 +55,8 @@ set(MODULE_UI_SRCS
+ set(MODULE_TARGET_LIBRARIES
+   vtkSlicer${MODULE_NAME}ModuleMRML
+   vtkSlicer${MODULE_NAME}ModuleLogic
++  Qt5::Multimedia
++  qMRMLWidgets
+   )
+ 
+ set(MODULE_RESOURCES
+-- 
+2.52.0
+
