@@ -57,8 +57,10 @@
   (make-parameter (append
                    (list systole-patches
                          (string-append systole-patches "/ctk")
+                         (string-append systole-patches "/igsio")
                          (string-append systole-patches "/qrestapi")
                          (string-append systole-patches "/slicer")
+                         (string-append systole-patches "/slicer-igt")
                          (string-append systole-patches "/slicer-openigtlink")
                          (string-append systole-patches "/slicerexecutionmodel"))
                    ((module-ref (resolve-module '(gnu packages)) '%patch-path)))))
