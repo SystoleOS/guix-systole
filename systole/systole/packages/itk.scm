@@ -28,9 +28,12 @@
   #:use-module (gnu packages qt)
   #:use-module (gnu packages serialization)
   #:use-module (gnu packages xiph)
+  #:use-module (gnu packages base)
   #:use-module (guix build-system cmake)
   #:use-module (guix build-system copy)
+  #:use-module (guix build-system trivial)
   #:use-module (guix download)
+  #:use-module (guix gexp)
   #:use-module (guix git-download)
   #:use-module ((guix licenses)
                 #:prefix license:)
@@ -142,6 +145,37 @@
                       itk-morphologicalcontourinterpolation)))
 
     (home-page "https://github.com/Slicer/ITK/")))
+
+(define-public itk-slicer-source
+  ;; Upstream ITK source at the exact commit used by itk-slicer.
+  ;; No build patches — suitable as a read-only reference for code search.
+  (package
+    (inherit itk-slicer)
+    (name "itk-slicer-source")
+    (source (origin (inherit (package-source itk-slicer))
+                    (patches '())))
+    (build-system trivial-build-system)
+    (outputs '("out"))
+    (native-inputs (list tar gzip))
+    (inputs '())
+    (propagated-inputs '())
+    (native-search-paths '())
+    (arguments
+     (list #:builder
+           (with-imported-modules '((guix build utils))
+             #~(begin
+                 (use-modules (guix build utils))
+                 (setenv "PATH"
+                         (string-append #$(file-append tar "/bin") ":"
+                                        #$(file-append gzip "/bin")))
+                 (mkdir-p #$output)
+                 (invoke "tar" "xf" #$source
+                         "--strip-components=1" "-C" #$output)))))
+    (synopsis "ITK source tree (Slicer variant)")
+    (description
+     "Upstream ITK source tree at the exact commit used by @code{itk-slicer},
+without any Guix-specific build patches.  Useful as a read-only reference for
+code search and API exploration.")))
 
 ;; itk-slicer-python: ITK rebuilt against vtk-slicer-python.
 ;;

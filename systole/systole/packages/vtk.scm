@@ -26,6 +26,7 @@
   #:use-module (gnu packages xml)
   #:use-module (guix download)
   #:use-module (guix build-system cmake)
+  #:use-module (guix build-system trivial)
   #:use-module (guix gexp)
   #:use-module (guix utils)
   #:use-module (gnu packages qt)
@@ -117,6 +118,36 @@
             (replace "hdf5" hdf5-1.10)
             (replace "netcdf" netcdf-slicer)
               (append python-pyqt qtbase-5 tbb openmpi)))))
+
+(define-public vtk-slicer-source
+  ;; Upstream VTK source at the exact commit used by vtk-slicer.
+  ;; No build patches — suitable as a read-only reference for code search.
+  (package
+    (inherit vtk-slicer)
+    (name "vtk-slicer-source")
+    (source (origin (inherit (package-source vtk-slicer))
+                    (patches '())))
+    (build-system trivial-build-system)
+    (native-inputs (list tar gzip))
+    (inputs '())
+    (propagated-inputs '())
+    (native-search-paths '())
+    (arguments
+     (list #:builder
+           (with-imported-modules '((guix build utils))
+             #~(begin
+                 (use-modules (guix build utils))
+                 (setenv "PATH"
+                         (string-append #$(file-append tar "/bin") ":"
+                                        #$(file-append gzip "/bin")))
+                 (mkdir-p #$output)
+                 (invoke "tar" "xf" #$source
+                         "--strip-components=1" "-C" #$output)))))
+    (synopsis "VTK source tree (Slicer variant)")
+    (description
+     "Upstream VTK source tree at the exact commit used by @code{vtk-slicer},
+without any Guix-specific build patches.  Useful as a read-only reference for
+code search and API exploration.")))
 
 (define-public vtkaddon
   (package

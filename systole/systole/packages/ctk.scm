@@ -33,7 +33,9 @@
   #:use-module (gnu packages xiph)              ; Theora lib.
   #:use-module (gnu packages xml)               ; libxml2, expat
   #:use-module (gnu packages)                   ; libxml2, expat
+  #:use-module (gnu packages base)
   #:use-module (guix build-system cmake)
+  #:use-module (guix build-system trivial)
   #:use-module (guix download)
   #:use-module (guix gexp)
   #:use-module ((guix licenses)
@@ -153,6 +155,36 @@ mutual interest and needs of the CTK community. The main scope of current CTK
 efforts includes the topics DICOM, DICOM Application Hosting, Widgets, and
 Plugin Framework.")
    (license license:asl2.0)))
+
+(define-public ctk-source
+  ;; Upstream CTK source at the exact commit used by ctk.
+  ;; Patches stripped — suitable as a read-only reference for code search.
+  (package
+    (inherit ctk)
+    (name "ctk-source")
+    (source (origin (inherit (package-source ctk))
+                    (patches '())))
+    (build-system trivial-build-system)
+    (native-inputs (list tar gzip))
+    (inputs '())
+    (propagated-inputs '())
+    (native-search-paths '())
+    (arguments
+     (list #:builder
+           (with-imported-modules '((guix build utils))
+             #~(begin
+                 (use-modules (guix build utils))
+                 (setenv "PATH"
+                         (string-append #$(file-append tar "/bin") ":"
+                                        #$(file-append gzip "/bin")))
+                 (mkdir-p #$output)
+                 (invoke "tar" "xf" #$source
+                         "--strip-components=1" "-C" #$output)))))
+    (synopsis "CTK (Common Toolkit) source tree")
+    (description
+     "Upstream CTK source tree at the exact commit used by @code{ctk},
+without any Guix-specific build patches.  Useful as a read-only reference for
+code search and API exploration.")))
 
 (define-public ctkapplauncher
   (package

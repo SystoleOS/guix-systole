@@ -20,6 +20,7 @@
                 #:prefix license:)
   #:use-module (gnu packages algebra)
   #:use-module (gnu packages backup)
+  #:use-module (gnu packages base)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages fontutils)
   #:use-module (gnu packages elf)
@@ -69,6 +70,44 @@
   #:use-module (srfi srfi-1)
   )
 
+(define %slicer-5.8-commit "11eaf62e5a70b828021ff8beebbdd14d10d4f51c")
+(define %slicer-5.8-hash (base32 "05rz797ddci3a2m8297zyzv2g2hp6bd6djmwa1n0gbsla8b175bx"))
+
+(define-public slicer-source-5.8
+  ;; Upstream Slicer 5.8 source tree, without Guix-specific build patches.
+  ;; Suitable as a code-search reference for development tools and skills.
+  (package
+    (name "slicer-source-5.8")
+    (version "5.8.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append
+             "https://github.com/Slicer/Slicer/archive/"
+             %slicer-5.8-commit ".tar.gz"))
+       (sha256 %slicer-5.8-hash)))
+    (build-system trivial-build-system)
+    (native-inputs (list tar gzip))
+    (arguments
+     (list #:builder
+           (with-imported-modules '((guix build utils))
+             #~(begin
+                 (use-modules (guix build utils))
+                 (setenv "PATH"
+                         (string-append #$(file-append tar "/bin") ":"
+                                        #$(file-append gzip "/bin")))
+                 (mkdir-p #$output)
+                 (invoke "tar" "xf" #$source
+                         "--strip-components=1"
+                         "-C" #$output)))))
+    (synopsis "3D Slicer 5.8 upstream source tree")
+    (description
+     "Upstream source tree of 3D Slicer 5.8 (commit @code{11eaf62e}), without
+any Guix-specific build patches.  Useful as a read-only reference for
+development tools, code search, and documentation generation.")
+    (home-page "https://www.slicer.org")
+    (license license:bsd-3)))
+
 (define-public slicer-5.8
   (package
     (name "slicer-5.8")
@@ -77,9 +116,10 @@
      (origin
        (method url-fetch)
        (uri
-        "https://github.com/Slicer/Slicer/archive/11eaf62e5a70b828021ff8beebbdd14d10d4f51c.tar.gz")
-       (sha256
-        (base32 "05rz797ddci3a2m8297zyzv2g2hp6bd6djmwa1n0gbsla8b175bx"))
+        (string-append
+         "https://github.com/Slicer/Slicer/archive/"
+         %slicer-5.8-commit ".tar.gz"))
+       (sha256 %slicer-5.8-hash)
        (patches (search-patches
                  "0001-COMP-Add-vtk-CommonSystem-component-as-requirement.patch"
                  "0002-COMP-Find-Eigen-required.patch"
