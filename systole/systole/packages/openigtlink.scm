@@ -26,6 +26,7 @@
   #:use-module (gnu packages backup)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages fontutils)
+  #:use-module (gnu packages elf)
   #:use-module (gnu packages gcc)
   #:use-module (gnu packages geo)
   #:use-module (gnu packages gl)
@@ -179,7 +180,19 @@ both industrial and academic developers.")
                      (lambda (file)
                         (let ((target (string-append modules-dir "/" (basename file))))
                            (symlink file target)))
-                     (find-files lib-dir "\\.so$"))))))
+                     (find-files lib-dir "\\.so$")))))
+            (add-after 'symlink-so-files 'patch-runpath
+               ;; Each library in qt-loadable-modules must be able to find its
+               ;; sibling libraries (e.g. libqSlicerOpenIGTLinkIFModule.so needs
+               ;; libqSlicerOpenIGTLinkIFModuleWidgets.so).  Adding $ORIGIN ensures
+               ;; the dynamic linker searches the library's own directory first.
+               (lambda* (#:key outputs #:allow-other-keys)
+                  (let* ((out (assoc-ref outputs "out"))
+                         (modules-dir (string-append out "/lib/Slicer-5.8/qt-loadable-modules")))
+                     (for-each
+                     (lambda (lib)
+                        (invoke "patchelf" "--add-rpath" "$ORIGIN" lib))
+                     (find-files modules-dir "\\.so$"))))))
                             ))
    (inputs
     (list slicer-python-5.8
@@ -236,6 +249,7 @@ both industrial and academic developers.")
           slicer-annotations-5.8
           slicer-colors-5.8
           ))
+   (native-inputs (list patchelf))
    (synopsis "Slicer Extension for communication of IGT data")
    (description "SlicerOpenIGTLink is a 3D Slicer extension designed to facilitate the communication between 3D Slicer and other platforms via OpenIGTLink.")
    (license license:bsd-2)
