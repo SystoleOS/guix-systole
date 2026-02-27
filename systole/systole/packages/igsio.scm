@@ -52,7 +52,7 @@
      (sha256
       (base32 "1wqzyi28yi5s5jhip996b594lxcjmbf2l6l0a7a3rvy6qbx68lxs"))
      (patches (search-patches
-               "0001-ENH-Add-install-tree-CMake-configuration.patch"))))
+               "0001-ENH-Add-install-tree-CMake-configuration-to-IGSIO.patch"))))
    (build-system cmake-build-system)
    (arguments
     (list #:tests? #f
@@ -122,7 +122,7 @@ SlicerIGSIO 3D Slicer extensions.")
    (sha256
     (base32 "1dxwbjwdazzf0k29hyzg0zh8mm07q0lqhzcj1xrsgaf9r2zq8h0z"))
    (patches (search-patches
-             "0002-ENH-Add-standalone-CMake-preamble-for-SlicerIGSIOCommon.patch"))))
+             "0001-ENH-Add-standalone-CMake-preamble-for-SlicerIGSIOCom.patch"))))
 
 ;;; Factory for SlicerIGSIOCommon (non-Python and Python variants).
 (define* (make-slicer-igsio-common
