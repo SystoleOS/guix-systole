@@ -1,23 +1,24 @@
-From 9101c7ba04d8ef4fd528885b08f45ec8b3bf2997 Mon Sep 17 00:00:00 2001
+From f3e84c94a795fe30da018a0a6e4bd872afb5e96f Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
-Date: Fri, 9 May 2025 23:34:31 +0200
-Subject: [PATCH 2/2] COMP: Fix include directories
+Date: Fri, 27 Feb 2026 18:47:23 +0100
+Subject: [PATCH] COMP: Fix include directories and use CMake variables for
+ link paths
 
 ---
  CMakeLists.txt                           |  2 +-
- OpenIGTLinkIF/CMakeLists.txt             |  8 ++++++++
- OpenIGTLinkIF/Logic/CMakeLists.txt       | 10 ++++++++++
- OpenIGTLinkIF/MRML/CMakeLists.txt        | 17 ++++++++++++++++-
- OpenIGTLinkIF/Widgets/CMakeLists.txt     |  8 ++++++++
- OpenIGTLinkRemote/CMakeLists.txt         | 11 +++++++++--
- OpenIGTLinkRemote/Logic/CMakeLists.txt   |  7 +++++++
- OpenIGTLinkRemote/MRML/CMakeLists.txt    |  7 +++++++
- OpenIGTLinkRemote/Widgets/CMakeLists.txt | 10 +++++++++-
- PlusRemote/CMakeLists.txt                | 14 +++++++++++++-
- PlusRemote/Logic/CMakeLists.txt          | 12 ++++++++++++
- PlusRemote/MRML/CMakeLists.txt           | 11 ++++++++++-
- PlusRemote/Widgets/CMakeLists.txt        | 11 ++++++++++-
- 13 files changed, 120 insertions(+), 8 deletions(-)
+ OpenIGTLinkIF/CMakeLists.txt             |  7 +++++++
+ OpenIGTLinkIF/Logic/CMakeLists.txt       |  9 +++++++++
+ OpenIGTLinkIF/MRML/CMakeLists.txt        | 16 +++++++++++++++-
+ OpenIGTLinkIF/Widgets/CMakeLists.txt     |  7 +++++++
+ OpenIGTLinkRemote/CMakeLists.txt         | 10 ++++++++--
+ OpenIGTLinkRemote/Logic/CMakeLists.txt   |  6 ++++++
+ OpenIGTLinkRemote/MRML/CMakeLists.txt    |  6 ++++++
+ OpenIGTLinkRemote/Widgets/CMakeLists.txt |  9 ++++++++-
+ PlusRemote/CMakeLists.txt                | 13 ++++++++++++-
+ PlusRemote/Logic/CMakeLists.txt          | 11 +++++++++++
+ PlusRemote/MRML/CMakeLists.txt           | 10 +++++++++-
+ PlusRemote/Widgets/CMakeLists.txt        | 10 +++++++++-
+ 13 files changed, 108 insertions(+), 8 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index a9537af..08dcf7e 100644
@@ -33,18 +34,17 @@ index a9537af..08dcf7e 100644
    add_subdirectory(UltrasoundRemoteControl)
    add_subdirectory(GenericSerialDeviceRemoteControl)
 diff --git a/OpenIGTLinkIF/CMakeLists.txt b/OpenIGTLinkIF/CMakeLists.txt
-index 676132c..34c7407 100644
+index 676132c..2bc9fb5 100644
 --- a/OpenIGTLinkIF/CMakeLists.txt
 +++ b/OpenIGTLinkIF/CMakeLists.txt
-@@ -63,6 +63,14 @@ set(MODULE_TARGET_LIBRARIES
+@@ -63,6 +63,13 @@ set(MODULE_TARGET_LIBRARIES
  set(MODULE_RESOURCES
    )
  
 +
 +link_directories(${Slicer_Base_LIBRARY_DIRS}
 +  ${Slicer_Libs_LIBRARY_DIRS}
-+  ${Slicer_HOME}/lib/Slicer-5.8/qt-loadable-modules/
-+  ${Slicer_HOME}/lib/Slicer-5.8
++  ${EXTRA_MODULE_LIB_DIRS}
 +  ${vtkAddon_LIB_DIR}
 +)
 +
@@ -52,27 +52,26 @@ index 676132c..34c7407 100644
  slicerMacroBuildLoadableModule(
    NAME ${MODULE_NAME}
 diff --git a/OpenIGTLinkIF/Logic/CMakeLists.txt b/OpenIGTLinkIF/Logic/CMakeLists.txt
-index ba10dfc..647a988 100644
+index ba10dfc..3e2e5ea 100644
 --- a/OpenIGTLinkIF/Logic/CMakeLists.txt
 +++ b/OpenIGTLinkIF/Logic/CMakeLists.txt
 @@ -8,6 +8,8 @@ set(${KIT}_INCLUDE_DIRECTORIES
    ${vtkSlicerOpenIGTLinkIFModuleMRML_SOURCE_DIR}
    ${vtkSlicerOpenIGTLinkIFModuleMRML_BINARY_DIR}
    ${OpenIGTLinkIO_INCLUDE_DIRS}
-+  ${Slicer_HOME}/include/Slicer-5.8/qt-loadable-modules/vtkSlicerColorsModuleLogic
++  ${vtkSlicerColorsModuleLogic_INCLUDE_DIRS}
 +  ${Slicer_Libs_INCLUDE_DIRS}
    )
  
  set(${KIT}_SRCS
-@@ -23,6 +25,14 @@ set(${KIT}_TARGET_LIBRARIES
+@@ -23,6 +25,13 @@ set(${KIT}_TARGET_LIBRARIES
    ${ITK_LIBRARIES}
    )
  
 +
 +link_directories(${Slicer_Base_LIBRARY_DIRS}
 +  ${Slicer_Libs_LIBRARY_DIRS}
-+  ${Slicer_HOME}/lib/Slicer-5.8/qt-loadable-modules/
-+  ${Slicer_HOME}/lib/Slicer-5.8
++  ${EXTRA_MODULE_LIB_DIRS}
 +  ${vtkAddon_LIB_DIR}
 +)
 +
@@ -80,18 +79,18 @@ index ba10dfc..647a988 100644
  SlicerMacroBuildModuleLogic(
    NAME ${KIT}
 diff --git a/OpenIGTLinkIF/MRML/CMakeLists.txt b/OpenIGTLinkIF/MRML/CMakeLists.txt
-index 35389e8..bbc8038 100644
+index 35389e8..5037adf 100644
 --- a/OpenIGTLinkIF/MRML/CMakeLists.txt
 +++ b/OpenIGTLinkIF/MRML/CMakeLists.txt
 @@ -10,6 +10,7 @@ set(${KIT}_INCLUDE_DIRECTORIES
    ${CMAKE_CURRENT_SOURCE_DIR}/../Logic
    ${CMAKE_CURRENT_BINARY_DIR}/../Logic
    ${OpenIGTLinkIO_INCLUDE_DIRS}
-+  ${Slicer_HOME}/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
    )
  
  set(${KIT}_SRCS
-@@ -40,11 +41,25 @@ set(${KIT}_TARGET_LIBRARIES
+@@ -40,11 +41,24 @@ set(${KIT}_TARGET_LIBRARIES
    ${OpenIGTLinkIO_LIBRARIES}
    ${MRML_LIBRARIES}
    SlicerBaseLogic
@@ -110,8 +109,7 @@ index 35389e8..bbc8038 100644
  
 +link_directories(${Slicer_Base_LIBRARY_DIRS}
 +  ${Slicer_Libs_LIBRARY_DIRS}
-+  ${Slicer_HOME}/lib/Slicer-5.8/qt-loadable-modules/
-+  ${Slicer_HOME}/lib/Slicer-5.8
++  ${EXTRA_MODULE_LIB_DIRS}
 +  ${vtkAddon_LIB_DIR}
 +)
 +
@@ -119,10 +117,10 @@ index 35389e8..bbc8038 100644
  SlicerMacroBuildModuleMRML(
    NAME ${KIT}
 diff --git a/OpenIGTLinkIF/Widgets/CMakeLists.txt b/OpenIGTLinkIF/Widgets/CMakeLists.txt
-index 7e2deb0..dfd2bca 100644
+index 7e2deb0..753c46d 100644
 --- a/OpenIGTLinkIF/Widgets/CMakeLists.txt
 +++ b/OpenIGTLinkIF/Widgets/CMakeLists.txt
-@@ -52,8 +52,16 @@ set(${KIT}_TARGET_LIBRARIES
+@@ -52,8 +52,15 @@ set(${KIT}_TARGET_LIBRARIES
    ${MRML_LIBRARIES}
    vtkSlicerOpenIGTLinkIFModuleLogic
    vtkSlicerOpenIGTLinkIFModuleMRML
@@ -131,8 +129,7 @@ index 7e2deb0..dfd2bca 100644
  
 +link_directories(${Slicer_Base_LIBRARY_DIRS}
 +  ${Slicer_Libs_LIBRARY_DIRS}
-+  ${Slicer_HOME}/lib/Slicer-5.8/qt-loadable-modules/
-+  ${Slicer_HOME}/lib/Slicer-5.8
++  ${EXTRA_MODULE_LIB_DIRS}
 +  ${vtkAddon_LIB_DIR}
 +)
 +
@@ -140,7 +137,7 @@ index 7e2deb0..dfd2bca 100644
  SlicerMacroBuildModuleWidgets(
    NAME ${KIT}
 diff --git a/OpenIGTLinkRemote/CMakeLists.txt b/OpenIGTLinkRemote/CMakeLists.txt
-index 6752e7e..8430b3e 100644
+index 6752e7e..da6497d 100644
 --- a/OpenIGTLinkRemote/CMakeLists.txt
 +++ b/OpenIGTLinkRemote/CMakeLists.txt
 @@ -30,8 +30,8 @@ set(MODULE_SRCS
@@ -154,14 +151,13 @@ index 6752e7e..8430b3e 100644
  set(MODULE_TARGET_LIBRARIES
    vtkSlicer${MODULE_NAME}ModuleLogic
    qSlicer${MODULE_NAME}ModuleWidgets
-@@ -41,6 +41,13 @@ set(MODULE_RESOURCES
+@@ -41,6 +41,12 @@ set(MODULE_RESOURCES
    Resources/qSlicer${MODULE_NAME}Module.qrc
    )
  
 +link_directories(${Slicer_Base_LIBRARY_DIRS}
 +  ${Slicer_Libs_LIBRARY_DIRS}
-+  ${Slicer_HOME}/lib/Slicer-5.8/qt-loadable-modules/
-+  ${Slicer_HOME}/lib/Slicer-5.8
++  ${EXTRA_MODULE_LIB_DIRS}
 +  ${vtkAddon_LIB_DIR}
 +)
 +
@@ -169,17 +165,16 @@ index 6752e7e..8430b3e 100644
  slicerMacroBuildQtModule(
    NAME ${MODULE_NAME}
 diff --git a/OpenIGTLinkRemote/Logic/CMakeLists.txt b/OpenIGTLinkRemote/Logic/CMakeLists.txt
-index ef222a8..1555812 100644
+index ef222a8..397857e 100644
 --- a/OpenIGTLinkRemote/Logic/CMakeLists.txt
 +++ b/OpenIGTLinkRemote/Logic/CMakeLists.txt
-@@ -17,6 +17,13 @@ LIST(APPEND ${KIT}_TARGET_LIBRARIES
+@@ -17,6 +17,12 @@ LIST(APPEND ${KIT}_TARGET_LIBRARIES
    vtkSlicerOpenIGTLinkIFModuleLogic
    )
  
 +link_directories(${Slicer_Base_LIBRARY_DIRS}
 +  ${Slicer_Libs_LIBRARY_DIRS}
-+   ${Slicer_HOME}/lib/Slicer-5.8/qt-loadable-modules/
-+   ${Slicer_HOME}/lib/Slicer-5.8
++   ${EXTRA_MODULE_LIB_DIRS}
 +  ${vtkAddon_LIB_DIR}
 +)
 +
@@ -187,17 +182,16 @@ index ef222a8..1555812 100644
  SlicerMacroBuildModuleLogic(
    NAME ${KIT}
 diff --git a/OpenIGTLinkRemote/MRML/CMakeLists.txt b/OpenIGTLinkRemote/MRML/CMakeLists.txt
-index 68eebf5..cb955f8 100644
+index 68eebf5..1f2073d 100644
 --- a/OpenIGTLinkRemote/MRML/CMakeLists.txt
 +++ b/OpenIGTLinkRemote/MRML/CMakeLists.txt
-@@ -25,6 +25,13 @@ LIST(APPEND ${KIT}_TARGET_LIBRARIES
+@@ -25,6 +25,12 @@ LIST(APPEND ${KIT}_TARGET_LIBRARIES
    ${MRML_LIBRARIES}
    )
  
 +link_directories(${Slicer_Base_LIBRARY_DIRS}
 +    ${Slicer_Libs_LIBRARY_DIRS}
-+    ${Slicer_HOME}/lib/Slicer-5.8/qt-loadable-modules/
-+    ${Slicer_HOME}/lib/Slicer-5.8
++    ${EXTRA_MODULE_LIB_DIRS}
 +    ${vtkAddon_LIB_DIR}
 +)
 +
@@ -205,18 +199,18 @@ index 68eebf5..cb955f8 100644
  SlicerMacroBuildModuleMRML(
    NAME ${KIT}
 diff --git a/OpenIGTLinkRemote/Widgets/CMakeLists.txt b/OpenIGTLinkRemote/Widgets/CMakeLists.txt
-index e761c6a..5b0f1c0 100644
+index e761c6a..032177d 100644
 --- a/OpenIGTLinkRemote/Widgets/CMakeLists.txt
 +++ b/OpenIGTLinkRemote/Widgets/CMakeLists.txt
 @@ -6,6 +6,7 @@ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_QTMODULES_${MODULE_NAME_UPPER}_WIDGETS_EXP
  
  set(${KIT}_INCLUDE_DIRECTORIES
    ${CMAKE_BUILD_DIR}
-+  ${Slicer_HOME}/include/Slicer-5.8/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML/
++  ${vtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS}
    )
  
  set(${KIT}_SRCS
-@@ -35,8 +36,16 @@ set(${KIT}_RESOURCES
+@@ -35,8 +36,15 @@ set(${KIT}_RESOURCES
  
  set(${KIT}_TARGET_LIBRARIES
    vtkSlicer${MODULE_NAME}ModuleLogic
@@ -225,21 +219,20 @@ index e761c6a..5b0f1c0 100644
  
 +link_directories(${Slicer_Base_LIBRARY_DIRS}
 +  ${Slicer_Libs_LIBRARY_DIRS}
-+  ${Slicer_HOME}/lib/Slicer-5.8/qt-loadable-modules/
-+  ${Slicer_HOME}/lib/Slicer-5.8
++  ${EXTRA_MODULE_LIB_DIRS}
 +  ${vtkAddon_LIB_DIR}
 +)
 +
  #-----------------------------------------------------------------------------
  SlicerMacroBuildModuleWidgets(
    NAME ${KIT}
-@@ -49,4 +58,3 @@ SlicerMacroBuildModuleWidgets(
+@@ -49,4 +57,3 @@ SlicerMacroBuildModuleWidgets(
    RESOURCES ${${KIT}_RESOURCES}
    WRAP_PYTHONQT
    )
 -
 diff --git a/PlusRemote/CMakeLists.txt b/PlusRemote/CMakeLists.txt
-index af2a215..7f1311c 100644
+index af2a215..cacb591 100644
 --- a/PlusRemote/CMakeLists.txt
 +++ b/PlusRemote/CMakeLists.txt
 @@ -7,6 +7,8 @@ add_subdirectory(MRML)
@@ -255,8 +248,8 @@ index af2a215..7f1311c 100644
    ${CMAKE_CURRENT_BINARY_DIR}/Logic
    ${CMAKE_CURRENT_SOURCE_DIR}/Widgets
    ${CMAKE_CURRENT_BINARY_DIR}/Widgets
-+  ${Slicer_HOME}/include/Slicer-5.8/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML/
-+  ${Slicer_HOME}/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML/
++  ${vtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
    )
  
  set(MODULE_SRCS
@@ -277,14 +270,13 @@ index af2a215..7f1311c 100644
    )
  
  set(MODULE_UI_SRCS
-@@ -57,6 +62,13 @@ set(MODULE_RESOURCES
+@@ -57,6 +62,12 @@ set(MODULE_RESOURCES
    Resources/qSlicer${MODULE_NAME}Module.qrc
    )
  
 +link_directories(${Slicer_Base_LIBRARY_DIRS}
 +  ${Slicer_Libs_LIBRARY_DIRS}
-+  ${Slicer_HOME}/lib/Slicer-5.8/qt-loadable-modules/
-+  ${Slicer_HOME}/lib/Slicer-5.8
++  ${EXTRA_MODULE_LIB_DIRS}
 +  ${vtkAddon_LIB_DIR}
 +)
 +
@@ -292,29 +284,28 @@ index af2a215..7f1311c 100644
  slicerMacroBuildQtModule(
    NAME ${MODULE_NAME}
 diff --git a/PlusRemote/Logic/CMakeLists.txt b/PlusRemote/Logic/CMakeLists.txt
-index 960b3c1..9f23cf9 100644
+index 960b3c1..126bf6c 100644
 --- a/PlusRemote/Logic/CMakeLists.txt
 +++ b/PlusRemote/Logic/CMakeLists.txt
 @@ -10,6 +10,11 @@ set(${KIT}_INCLUDE_DIRECTORIES
    ${vtkSlicerVolumeRenderingModuleMRML_INCLUDE_DIRS}
    ${vtkSlicerVolumeRenderingModuleMRMLDisplayableManager_SOURCE_DIR}
    ${vtkSlicerVolumeRenderingModuleMRMLDisplayableManager_BINARY_DIR}
-+  ${Slicer_HOME}/include/Slicer-5.8/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML
-+  ${Slicer_HOME}/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML
-+  ${Slicer_HOME}/include/Slicer-5.8/qt-loadable-modules/vtkSlicerVolumeRenderingModuleLogic
-+  ${Slicer_HOME}/include/Slicer-5.8/qt-loadable-modules/vtkSlicerVolumeRenderingModuleMRML
-+  ${Slicer_HOME}/include/Slicer-5.8/qt-loadable-modules/vtkSlicerVolumeRenderingMRMLDisplayableManager
++  ${vtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerVolumeRenderingModuleLogic_INCLUDE_DIRS}
++  ${vtkSlicerVolumeRenderingModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerVolumeRenderingMRMLDisplayableManager_INCLUDE_DIRS}
    )
  
  set(${KIT}_SRCS
-@@ -25,6 +30,13 @@ set(${KIT}_TARGET_LIBRARIES
+@@ -25,6 +30,12 @@ set(${KIT}_TARGET_LIBRARIES
    qSlicerVolumeRenderingModuleWidgets
    )
  
 +link_directories(${Slicer_Base_LIBRARY_DIRS}
 +  ${Slicer_Libs_LIBRARY_DIRS}
-+  ${Slicer_HOME}/lib/Slicer-5.8/qt-loadable-modules/
-+  ${Slicer_HOME}/lib/Slicer-5.8
++  ${EXTRA_MODULE_LIB_DIRS}
 +  ${vtkAddon_LIB_DIR}
 +)
 +
@@ -322,33 +313,32 @@ index 960b3c1..9f23cf9 100644
  SlicerMacroBuildModuleLogic(
    NAME ${KIT}
 diff --git a/PlusRemote/MRML/CMakeLists.txt b/PlusRemote/MRML/CMakeLists.txt
-index 4319cd0..d4964eb 100644
+index 4319cd0..ac63e74 100644
 --- a/PlusRemote/MRML/CMakeLists.txt
 +++ b/PlusRemote/MRML/CMakeLists.txt
 @@ -7,6 +7,8 @@ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_MRML_EXPORT"
  set(${KIT}_INCLUDE_DIRECTORIES
    ${vtkSlicerOpenIGTLinkIFModuleMRML_INCLUDE_DIRS}
    ${Slicer_Base_INCLUDE_DIRS}
-+  ${Slicer_HOME}/include/Slicer-5.8/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML/
-+  ${Slicer_HOME}/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML/
++  ${vtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
    )
  
  set(${KIT}_SRCS
-@@ -24,6 +26,13 @@ set(${KIT}_TARGET_LIBRARIES
+@@ -24,6 +26,12 @@ set(${KIT}_TARGET_LIBRARIES
    vtkSlicerOpenIGTLinkIFModuleMRML
    )
  
 +link_directories(${Slicer_Base_LIBRARY_DIRS}
 +  ${Slicer_Libs_LIBRARY_DIRS}
-+  ${Slicer_HOME}/lib/Slicer-5.8/qt-loadable-modules/
-+  ${Slicer_HOME}/lib/Slicer-5.8
++  ${EXTRA_MODULE_LIB_DIRS}
 +  ${vtkAddon_LIB_DIR}
 +)
 +
  # --------------------------------------------------------------------------
  SlicerMacroBuildModuleMRML(
    NAME ${KIT}
-@@ -31,4 +40,4 @@ SlicerMacroBuildModuleMRML(
+@@ -31,4 +39,4 @@ SlicerMacroBuildModuleMRML(
    INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
    SRCS ${${KIT}_SRCS}
    TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
@@ -356,10 +346,10 @@ index 4319cd0..d4964eb 100644
 \ No newline at end of file
 +  )
 diff --git a/PlusRemote/Widgets/CMakeLists.txt b/PlusRemote/Widgets/CMakeLists.txt
-index 7511b76..8f45ff0 100644
+index 7511b76..3b7bc52 100644
 --- a/PlusRemote/Widgets/CMakeLists.txt
 +++ b/PlusRemote/Widgets/CMakeLists.txt
-@@ -34,8 +34,17 @@ set(${KIT}_TARGET_LIBRARIES
+@@ -34,8 +34,16 @@ set(${KIT}_TARGET_LIBRARIES
    vtkSlicerOpenIGTLinkIFModuleMRML
    vtkSlicer${MODULE_NAME}ModuleMRML
    vtkSlicer${MODULE_NAME}ModuleLogic
@@ -369,15 +359,14 @@ index 7511b76..8f45ff0 100644
 +
 +link_directories(${Slicer_Base_LIBRARY_DIRS}
 +  ${Slicer_Libs_LIBRARY_DIRS}
-+  ${Slicer_HOME}/lib/Slicer-5.8/qt-loadable-modules/
-+  ${Slicer_HOME}/lib/Slicer-5.8
++  ${EXTRA_MODULE_LIB_DIRS}
 +  ${vtkAddon_LIB_DIR}
 +)
 +
  #-----------------------------------------------------------------------------
  SlicerMacroBuildModuleWidgets(
    NAME ${KIT}
-@@ -50,4 +59,4 @@ SlicerMacroBuildModuleWidgets(
+@@ -50,4 +58,4 @@ SlicerMacroBuildModuleWidgets(
    )
  
  #-----------------------------------------------------------------------------
@@ -385,5 +374,5 @@ index 7511b76..8f45ff0 100644
 \ No newline at end of file
 +add_subdirectory(DesignerPlugins)
 -- 
-2.49.0
+2.52.0
 

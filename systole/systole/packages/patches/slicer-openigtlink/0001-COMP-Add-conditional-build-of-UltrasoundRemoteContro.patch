@@ -1,7 +1,7 @@
-From 4ce7337df8e230f6ce58d89e2dcc242d0919a6b8 Mon Sep 17 00:00:00 2001
+From 4b14333dc486ee410ae8e846e7f0bec8b3b5ed52 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
-Date: Fri, 9 May 2025 21:46:31 +0200
-Subject: [PATCH 1/2] COMP: Add conditional build of UltrasoundRemoteControl
+Date: Fri, 27 Feb 2026 18:44:48 +0100
+Subject: [PATCH] COMP: Add conditional build of UltrasoundRemoteControl
 
 ---
  CMakeLists.txt | 38 +++++++++++++++++++++-----------------
@@ -60,5 +60,5 @@ index 6f43133..a9537af 100644
 +  include(${Slicer_EXTENSION_CPACK})
 +endif()
 -- 
-2.49.0
+2.52.0
 
