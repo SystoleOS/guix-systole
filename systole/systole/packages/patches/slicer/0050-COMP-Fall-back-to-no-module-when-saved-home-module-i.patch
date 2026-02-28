@@ -1,0 +1,45 @@
+From 64ed1cbe5c1f3a96cc8a8c4ab6e8384536cc4c83 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 28 Feb 2026 14:52:02 +0100
+Subject: [PATCH] COMP: Fall back to no module when saved home module is not
+ available
+
+If the user's QSettings contain a Modules/HomeModule value that names a
+module not present in the current profile (e.g. running slicer-5.8 alone
+after having used slicer-all-5.8), selectModule() would store the name as
+a pending future selection and return without triggering any action.  This
+left the module panel in a stale state and prevented proper layout
+initialization at startup.
+
+Check module availability in setHomeModuleCurrent() and fall back to an
+empty selection (no module) when the saved home module is not loaded.
+---
+ Base/QTApp/qSlicerMainWindow.cxx | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/Base/QTApp/qSlicerMainWindow.cxx b/Base/QTApp/qSlicerMainWindow.cxx
+index 0697b09927..94f336f0d6 100644
+--- a/Base/QTApp/qSlicerMainWindow.cxx
++++ b/Base/QTApp/qSlicerMainWindow.cxx
+@@ -1831,6 +1831,18 @@ void qSlicerMainWindow::setHomeModuleCurrent()
+   Q_D(qSlicerMainWindow);
+   QSettings settings;
+   QString homeModule = settings.value("Modules/HomeModule").toString();
++  // If the saved home module is not available in the current module pool
++  // (e.g. the profile has fewer modules than the session that saved the
++  // setting), fall back to no module rather than silently keeping a stale
++  // pending name that prevents proper layout initialization.
++  if (!homeModule.isEmpty())
++    {
++    qSlicerModuleManager* moduleManager = qSlicerApplication::application()->moduleManager();
++    if (!moduleManager || !moduleManager->module(homeModule))
++      {
++      homeModule = QString();
++      }
++    }
+   d->ModuleSelectorToolBar->selectModule(homeModule);
+ }
+ 
+-- 
+2.52.0
+
