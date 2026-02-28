@@ -51,7 +51,8 @@
   #:use-module (systole packages maths)
   #:use-module (systole packages))
 
-(define-public vtk-slicer
+;; Private non-Python base — used only for (inherit) in vtk-slicer (Python).
+(define %vtk-slicer
   (package
     (inherit imgproc:vtk)
     (name "vtk-slicer")
@@ -119,13 +120,29 @@
             (replace "netcdf" netcdf-slicer)
               (append python-pyqt qtbase-5 tbb openmpi)))))
 
+;; Python-enabled VTK for use by the Slicer stack.
+;; Adds VTK Python wrappers (vtkmodules/*.so) and the Guix python package.
+;; CMake's FindPython3 auto-detects the interpreter from PATH when python is in inputs.
+(define-public vtk-slicer
+  (package
+    (inherit %vtk-slicer)
+    (name "vtk-slicer")
+    (arguments
+     (substitute-keyword-arguments (package-arguments %vtk-slicer)
+       ((#:configure-flags flags)
+        `(cons "-DVTK_WRAP_PYTHON:BOOL=ON"
+               (delete "-DVTK_WRAP_PYTHON:BOOL=OFF" ,flags)))))
+    (inputs
+     (modify-inputs (package-inputs %vtk-slicer)
+       (prepend python)))))
+
 (define-public vtk-slicer-source
   ;; Upstream VTK source at the exact commit used by vtk-slicer.
   ;; No build patches — suitable as a read-only reference for code search.
   (package
-    (inherit vtk-slicer)
+    (inherit %vtk-slicer)
     (name "vtk-slicer-source")
-    (source (origin (inherit (package-source vtk-slicer))
+    (source (origin (inherit (package-source %vtk-slicer))
                     (patches '())))
     (build-system trivial-build-system)
     (native-inputs (list tar gzip))
@@ -149,7 +166,8 @@
 without any Guix-specific build patches.  Useful as a read-only reference for
 code search and API exploration.")))
 
-(define-public vtkaddon
+;; Private non-Python base — used only for (inherit) in vtkaddon (Python).
+(define %vtkaddon
   (package
     (name "vtkaddon")
     (version "b5aa061")
@@ -173,7 +191,7 @@ code search and API exploration.")))
                                "-DvtkAddon_WRAP_PYTHON:BOOL=OFF" ;Enable whenever Python support is enabled
                                ;; "-DvtkAddon_LAUNCH_COMMAND:STRING=" ;; Needs testing
                                "-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON")))
-    (inputs (list vtk-slicer
+    (inputs (list %vtk-slicer
                   eigen
                   expat
                   double-conversion
@@ -200,34 +218,18 @@ code search and API exploration.")))
      "General-purpose features that may be integrated into VTK library in the future.")
     (license license:bsd-3)))
 
-;; Python-enabled VTK variant for use by slicer-python-5.8.
-;; Adds VTK Python wrappers (vtkmodules/*.so) and the Guix python package.
-;; CMake's FindPython3 auto-detects the interpreter from PATH when python is in inputs.
-(define-public vtk-slicer-python
+;; Python-enabled vtkAddon.  Links against vtk-slicer so the generated
+;; Python wrappers are consistent with the Python-enabled VTK build.
+(define-public vtkaddon
   (package
-    (inherit vtk-slicer)
-    (name "vtk-slicer-python")
+    (inherit %vtkaddon)
+    (name "vtkaddon")
     (arguments
-     (substitute-keyword-arguments (package-arguments vtk-slicer)
-       ((#:configure-flags flags)
-        `(cons "-DVTK_WRAP_PYTHON:BOOL=ON"
-               (delete "-DVTK_WRAP_PYTHON:BOOL=OFF" ,flags)))))
-    (inputs
-     (modify-inputs (package-inputs vtk-slicer)
-       (prepend python)))))
-
-;; Python-enabled vtkAddon variant.  Links against vtk-slicer-python so the
-;; generated Python wrappers are consistent with the Python-enabled VTK build.
-(define-public vtkaddon-python
-  (package
-    (inherit vtkaddon)
-    (name "vtkaddon-python")
-    (arguments
-     (substitute-keyword-arguments (package-arguments vtkaddon)
+     (substitute-keyword-arguments (package-arguments %vtkaddon)
        ((#:configure-flags flags)
         `(cons "-DvtkAddon_WRAP_PYTHON:BOOL=ON"
                (delete "-DvtkAddon_WRAP_PYTHON:BOOL=OFF" ,flags)))))
     (inputs
-     (modify-inputs (package-inputs vtkaddon)
-       (replace "vtk-slicer" vtk-slicer-python)
+     (modify-inputs (package-inputs %vtkaddon)
+       (replace "vtk-slicer" vtk-slicer)
        (prepend python)))))

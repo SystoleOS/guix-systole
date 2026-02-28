@@ -1,0 +1,54 @@
+From 2d5bb6051207e6c2d01fbb46cdd00a11785338f8 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sat, 28 Feb 2026 13:33:50 +0100
+Subject: [PATCH] COMP: Guard Windows 11 numpy/scipy preload workaround behind
+ sys.platform check
+
+The numpy/scipy eager-import block exists solely to work around an
+application hang on Windows 11 (Slicer issue #5945).  On Linux and
+macOS the block is a no-op when numpy/scipy are absent, but still
+prints an ImportError to the terminal, which is confusing for users.
+
+Guard the block with sys.platform == 'win32' so the workaround only
+runs where it is needed.
+---
+ Base/Python/slicer/__init__.py | 17 ++++++++---------
+ 1 file changed, 8 insertions(+), 9 deletions(-)
+
+diff --git a/Base/Python/slicer/__init__.py b/Base/Python/slicer/__init__.py
+index c0f677dc63..88c8dadfc8 100644
+--- a/Base/Python/slicer/__init__.py
++++ b/Base/Python/slicer/__init__.py
+@@ -200,21 +200,20 @@ for kit in available_kits:
+     del kit
+ 
+ # -----------------------------------------------------------------------------
+-# Import numpy and scipy early, as a workaround for application hang in import
+-# of numpy or scipy at application startup on Windows 11 due to output redirection
+-# (only needed for embedded Python, not for standalone).
+-# See details in https://github.com/Slicer/Slicer/issues/5945
+-# While the workaround is only needed for Windows 11, it is performed on
+-# all operating systems to minimize differences of the startup process
+-# between different platforms.
+-
+-if not standalone_python:
++# Import numpy and scipy early on Windows 11 to work around an application
++# hang caused by output redirection at startup (Slicer issue #5945).
++# The workaround is only needed on Windows; skip it on other platforms to
++# avoid printing spurious ImportErrors when numpy/scipy are not installed.
++
++import sys as _sys
++if not standalone_python and _sys.platform == "win32":
+     try:
+         import numpy  # noqa: F401
+         import scipy  # noqa: F401
+         import scipy.linalg  # noqa: F401
+     except ImportError as detail:
+         print(detail)
++del _sys
+ 
+ # -----------------------------------------------------------------------------
+ # Cleanup: Removing things the user shouldn't have to see.
+-- 
+2.52.0
+

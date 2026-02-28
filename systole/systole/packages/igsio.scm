@@ -92,7 +92,7 @@
                                  #$(this-package-input "itk-slicer")
                                  "/lib/cmake/ITK-5.4")
                   (string-append "-DvtkAddon_DIR="
-                                 #$(this-package-input "vtkaddon-python")
+                                 #$(this-package-input "vtkaddon")
                                  "/lib/cmake")
                   (string-append "-DQt5_DIR="
                                  #$(this-package-input "qtbase")
@@ -114,7 +114,7 @@
    (inputs (list
             vtk-slicer
             itk-slicer
-            vtkaddon-python
+            vtkaddon
             zlib
             ;; VTK external deps — VTK's cmake config (and ITK's UseITK.cmake, which
             ;; calls find_package(VTK) internally) requires all packages that vtk-slicer
@@ -140,7 +140,7 @@
             tbb
             python))
 
-   (propagated-inputs (list vtk-slicer-python ctk-python vtkaddon-python))
+   (propagated-inputs (list vtk-slicer ctk vtkaddon))
 
    (home-page "https://github.com/IGSIO/IGSIO")
    (synopsis "Image Guided Surgery InterOperability library")
@@ -152,26 +152,6 @@ writing tracked image sequences), and pivot and landmark calibration
 algorithms.  It is used as the algorithmic back-end for the SlicerIGT and
 SlicerIGSIO 3D Slicer extensions.")
    (license license:bsd-3)))
-
-(define-public igsio-python
-  (package
-   (inherit igsio)
-   (name "igsio-python")
-   (inputs (modify-inputs (package-inputs igsio)
-             (replace "vtk-slicer" vtk-slicer-python)))
-   (arguments
-    (substitute-keyword-arguments (package-arguments igsio)
-      ((#:configure-flags flags)
-       #~(map (lambda (f)
-                (cond
-                  ((string-prefix? "-DVTK_DIR=" f)
-                   (string-append "-DVTK_DIR="
-                                  #$vtk-slicer-python "/lib/cmake/vtk-9.2"))
-                  ((string-prefix? "-DvtkAddon_DIR=" f)
-                   (string-append "-DvtkAddon_DIR="
-                                  #$vtkaddon-python "/lib/cmake"))
-                  (else f)))
-              #$flags))))))
 
 ;;;
 ;;; SlicerIGSIOCommon — Slicer loadable module providing IGSIO-Slicer bridge
@@ -192,12 +172,10 @@ SlicerIGSIO 3D Slicer extensions.")
              "0001-ENH-Add-standalone-CMake-preamble-for-SlicerIGSIOCom.patch"
              "0002-COMP-Guard-vtkIGSIOMkvSequenceIO-include-behind-IGSI.patch"))))
 
-;;; Factory for SlicerIGSIOCommon (non-Python and Python variants).
+;;; Factory for SlicerIGSIOCommon.
 (define* (make-slicer-igsio-common
           #:key
           (name "slicer-igsio-common")
-          (slicer slicer-python-5.8)
-          (igsio igsio)
           (extra-inputs '())
           (extra-configure-flags #~'()))
   (package
@@ -215,8 +193,7 @@ SlicerIGSIO 3D Slicer extensions.")
              (list "-DCMAKE_BUILD_TYPE:STRING=Release"
                    "-DBUILD_TESTING:BOOL=OFF"
                    (string-append "-DSlicer_DIR="
-                                  #$slicer "/lib/Slicer-5.8")
-                   "-DSlicer_USE_PYTHONQT:BOOL=OFF"
+                                  #$slicer-5.8 "/lib/Slicer-5.8")
                    (string-append "-DPYTHONQT_INSTALL_DIR="
                                   #$pythonqt-commontk)
                    (string-append "-DIGSIO_DIR="
@@ -236,8 +213,8 @@ SlicerIGSIO 3D Slicer extensions.")
                     #t))))))
    (inputs (fold (lambda (pkg acc)
                    (modify-inputs acc (prepend pkg)))
-                 (modify-inputs (package-inputs slicer)
-                   (prepend slicer)
+                 (modify-inputs (package-inputs slicer-5.8)
+                   (prepend slicer-5.8)
                    (prepend igsio))
                  extra-inputs))
    (home-page "https://github.com/IGSIO/SlicerIGSIO")
@@ -253,8 +230,6 @@ SlicerIGT.")
 (define-public slicer-igsio-common
   (make-slicer-igsio-common
    #:name "slicer-igsio-common"
-   #:slicer slicer-python-5.8
-   #:igsio igsio
    #:extra-inputs (list slicer-sequences-5.8 slicer-volumes-5.8)
    #:extra-configure-flags
    #~(list
@@ -271,23 +246,3 @@ SlicerIGT.")
        #$slicer-sequences-5.8 "/lib/Slicer-5.8/qt-loadable-modules"
        ";" #$slicer-volumes-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
 
-(define-public slicer-igsio-common-python
-  (make-slicer-igsio-common
-   #:name "slicer-igsio-common-python"
-   #:slicer slicer-python-5.8
-   #:igsio igsio-python
-   #:extra-inputs (list slicer-sequences-5.8 slicer-volumes-5.8)
-   #:extra-configure-flags
-   #~(list
-      (string-append
-       "-DvtkSlicerSequencesModuleMRML_INCLUDE_DIRS="
-       #$slicer-sequences-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSequencesModuleMRML")
-      (string-append
-       "-DvtkSlicerVolumesModuleLogic_INCLUDE_DIRS="
-       #$slicer-volumes-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerVolumesModuleLogic")
-      (string-append
-       "-DEXTRA_MODULE_LIB_DIRS="
-       #$slicer-sequences-5.8 "/lib/Slicer-5.8/qt-loadable-modules"
-       ";" #$slicer-volumes-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))

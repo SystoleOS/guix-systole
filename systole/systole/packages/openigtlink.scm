@@ -127,8 +127,7 @@ both industrial and academic developers.")
           #~(list
              "-DSlicerOpenIGTLink_SUPERBUILD:BOOL=OFF"
              "-DBUILD_TESTING:BOOL=OFF"
-             "-DSlicer_USE_PYTHONQT:BOOL=OFF"
-             ;; vtk-slicer-python's cmake config calls find_package(Python3)
+             ;; vtk-slicer's cmake config calls find_package(Python3)
              (string-append "-DPython3_EXECUTABLE="
                             #$(this-package-input "python")
                             "/bin/python3")
@@ -143,7 +142,7 @@ both industrial and academic developers.")
              (string-append "-DPYTHONQT_INSTALL_DIR="
                             #$(this-package-input "pythonqt-commontk"))
              (string-append "-DSlicer_DIR:PATH="
-                            #$(this-package-input "slicer-python-5.8")
+                            #$(this-package-input "slicer-5.8")
                             "/lib/Slicer-5.8")
              (string-append "-DOpenIGTLink_DIR:PATH="
                             #$(this-package-input "openigtlink")
@@ -195,7 +194,7 @@ both industrial and academic developers.")
                      (find-files modules-dir "\\.so$"))))))
                             ))
    (inputs
-    (list slicer-python-5.8
+    (list slicer-5.8
           python
           mesa
           ;; QT5
@@ -209,7 +208,7 @@ both industrial and academic developers.")
           qtwebchannel-5
           qttools-5
           ;;VTK
-          vtk-slicer-python
+          vtk-slicer
           itk-slicer
           double-conversion
           freetype
@@ -236,11 +235,11 @@ both industrial and academic developers.")
           rapidjson
           tbb
           pythonqt-commontk
-          ctk-python
+          ctk
           ctkapplauncher
           libarchive-slicer
           teem-slicer
-          vtkaddon-python
+          vtkaddon
           qrestapi
           openigtlink
           openigtlinkio
@@ -271,8 +270,7 @@ both industrial and academic developers.")
           #:validate-runpath? #f
           #:configure-flags
           #~(list
-             "-DSlicer_USE_PYTHONQT:BOOL=OFF"
-             ;; vtk-slicer-python's VTK cmake config calls find_package(Python3)
+             ;; vtk-slicer VTK cmake config calls find_package(Python3)
              ;; unconditionally; provide paths so it finds Guix Python.
              (string-append "-DPython3_EXECUTABLE="
                             #$(this-package-input "python")
@@ -284,13 +282,13 @@ both industrial and academic developers.")
                             #$(this-package-input "python")
                             "/lib/libpython3.11.so")
              (string-append "-DSlicer_DIR:PATH="
-                            #$(this-package-input "slicer-python-5.8")
+                            #$(this-package-input "slicer-5.8")
                             "/lib/Slicer-5.8")
              (string-append "-DOpenIGTLink_DIR:PATH="
                             #$(this-package-input "openigtlink")
                             "/lib/igtl/cmake/igtl-3.1"))))
   (inputs
-   (list slicer-python-5.8
+   (list slicer-5.8
          python
          mesa
          ;; QT5
@@ -304,7 +302,7 @@ both industrial and academic developers.")
          qtwebchannel-5
          qttools-5
          ;;VTK
-         vtk-slicer-python
+         vtk-slicer
          itk-slicer
          double-conversion
          freetype
@@ -330,11 +328,11 @@ both industrial and academic developers.")
          mesa ;libGL equivalent
          rapidjson
          tbb
-         ctk-python
+         ctk
          ctkapplauncher
          libarchive-slicer
          teem-slicer
-         vtkaddon-python
+         vtkaddon
          qrestapi
          openigtlink))
   (synopsis "Library for interfacing to openigtlink/OpenIGTLink, dependent on VTK and Qt. Based on openigtlink/OpenIGTLinkIF")
@@ -342,38 +340,3 @@ both industrial and academic developers.")
   (license license:bsd-2)
   (home-page "https://github.com/IGSIO/OpenIGTLinkIO")))
 
-;;;
-;;; Python-enabled variants of OpenIGTLinkIO and SlicerOpenIGTLink
-;;;
-
-(define-public openigtlinkio-python
-  ;; Python-enabled variant: the base openigtlinkio already uses Python-enabled
-  ;; VTK/CTK/Slicer inputs, so this is a thin alias for ABI-consistency.
-  (package
-   (inherit openigtlinkio)
-   (name "openigtlinkio-python")))
-
-(define-public slicer-openigtlink-python
-  ;; Python-enabled variant of the SlicerOpenIGTLink Slicer extension.
-  (package
-   (inherit slicer-openigtlink)
-   (name "slicer-openigtlink-python")
-   (inputs (modify-inputs (package-inputs slicer-openigtlink)
-             (replace "slicer-5.8" slicer-python-5.8)
-             (replace "vtk-slicer" vtk-slicer-python)
-             (replace "ctk" ctk-python)
-             (replace "vtkaddon" vtkaddon-python)
-             (replace "openigtlinkio" openigtlinkio-python)))
-   (arguments
-    (substitute-keyword-arguments (package-arguments slicer-openigtlink)
-      ((#:configure-flags flags)
-       #~(map (lambda (f)
-                (cond
-                  ((string-prefix? "-DSlicer_DIR:PATH=" f)
-                   (string-append "-DSlicer_DIR:PATH="
-                                  #$slicer-python-5.8 "/lib/Slicer-5.8"))
-                  ((string-prefix? "-DOpenIGTLinkIO_DIR:PATH=" f)
-                   (string-append "-DOpenIGTLinkIO_DIR:PATH="
-                                  #$openigtlinkio-python "/lib/cmake/igtlio"))
-                  (else f)))
-              #$flags))))))
