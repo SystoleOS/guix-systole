@@ -170,6 +170,7 @@ development tools, code search, and documentation generation.")
                  "0047-ENH-Register-CTK-plugin-path-and-disable-QtWebEngine.patch"
                  "0048-ENH-Prepend-CTK-and-vtkAddon-lib-dirs-to-PYTHONPATH-.patch"
                  "0049-COMP-Guard-Windows-11-numpy-scipy-preload-workaround.patch"
+                 "0050-COMP-Fall-back-to-no-module-when-saved-home-module-i.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -679,6 +680,21 @@ Line Interface) modules.  It bundles @code{tclap} and
             ;; lib/python3.11/site-packages: numpy, vtk, vtkAddon, user pkgs.
             (files '("bin/Python"
                      "lib/Slicer-5.8"
+                     "lib/python3.11/site-packages")))
+           ;; PYTHONPATH mirrors SLICER_PYTHONPATH so that a plain `python3`
+           ;; launched inside `guix shell slicer-all-5.8` (or any profile that
+           ;; includes slicer-5.8) can `import slicer`, `import vtk`, `import ctk`
+           ;; and work with MRML nodes, VTK pipelines, and slicer.util functions
+           ;; without launching the full Slicer GUI.
+           ;;
+           ;; qt-loadable-modules is added so that loadable-module Python wrappers
+           ;; (vtkSlicerVolumesModuleLogicPython.so etc.) are also importable when
+           ;; the relevant module packages (slicer-volumes-5.8 …) are in the profile.
+           (search-path-specification
+            (variable "PYTHONPATH")
+            (files '("bin/Python"
+                     "lib/Slicer-5.8"
+                     "lib/Slicer-5.8/qt-loadable-modules"
                      "lib/python3.11/site-packages")))))))
 
 ;;;
