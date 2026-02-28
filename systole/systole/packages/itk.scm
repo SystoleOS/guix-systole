@@ -177,25 +177,12 @@
 without any Guix-specific build patches.  Useful as a read-only reference for
 code search and API exploration.")))
 
-;; itk-slicer-python: ITK rebuilt against vtk-slicer-python.
-;;
-;; This variant does NOT yet enable ITK Python wrapping (ITK_WRAP_PYTHON)
-;; because `python-pygccxml` is not currently packaged in Guix.  Its sole
-;; purpose is to ensure ITKConfig.cmake references vtk-slicer-python instead
-;; of vtk-slicer, preventing a duplicate VTK cmake target conflict when
-;; slicer-python-5.8 loads both ITK's and Slicer's find_package(VTK) results.
-;;
-;; Once python-pygccxml is packaged, extend this variant with:
+;; NOTE: itk-slicer uses vtk-slicer (Python-enabled) after the vtk.scm rename.
+;; ITK Python wrapping (ITK_WRAP_PYTHON) remains OFF because python-pygccxml
+;; is not packaged in Guix.  Once available, extend itk-slicer with:
 ;;   #:configure-flags: cons* "-DITK_WRAPPING:BOOL=ON" "-DITK_WRAP_PYTHON:BOOL=ON"
 ;;   #:native-inputs: prepend castxml python-pygccxml
 ;;   #:inputs: prepend python
-(define-public itk-slicer-python
-  (package
-    (inherit itk-slicer)
-    (name "itk-slicer-python")
-    (inputs
-     (modify-inputs (package-inputs itk-slicer)
-       (replace "vtk-slicer" vtk-slicer-python)))))
 
 (define itk-growcut
   (package

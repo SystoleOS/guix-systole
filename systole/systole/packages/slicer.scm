@@ -108,7 +108,7 @@ development tools, code search, and documentation generation.")
     (home-page "https://www.slicer.org")
     (license license:bsd-3)))
 
-(define-public slicer-5.8
+(define %slicer-5.8
   (package
     (name "slicer-5.8")
     (version "5.8.1")
@@ -169,6 +169,7 @@ development tools, code search, and documentation generation.")
                  "0046-ENH-Extend-LD_LIBRARY_PATH-and-PYTHONPATH-from-SLICE.patch"
                  "0047-ENH-Register-CTK-plugin-path-and-disable-QtWebEngine.patch"
                  "0048-ENH-Prepend-CTK-and-vtkAddon-lib-dirs-to-PYTHONPATH-.patch"
+                 "0049-COMP-Guard-Windows-11-numpy-scipy-preload-workaround.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -574,29 +575,28 @@ Line Interface) modules.  It bundles @code{tclap} and
    (license (package-license slicer-5.8))))
 
 ;;;
-;;; Python-enabled Slicer variant
+;;; Python-enabled Slicer — canonical public variant
 ;;;
 
-;; slicer-python-5.8 is an (inherit slicer-5.8) variant that enables the full
-;; Python stack: PythonQt (via CTK), VTK Python wrappers, and Qt-scripted
-;; modules.  It uses the *-python variants of CTK, VTK, and vtkAddon.
+;; slicer-5.8 is the canonical public Slicer package.  Python support is a
+;; hard requirement: PythonQt (via CTK), VTK Python wrappers, and Qt-scripted
+;; modules are all enabled.  vtk-slicer, ctk, vtkaddon, and itk-slicer are
+;; already Python-enabled (their canonical names = Python variants after the
+;; vtk/ctk/itk rename).
 ;;
 ;; All standalone loadable modules (slicer-*-5.8) are built against this
-;; variant so their build-time and runtime ABIs are identical: the same
-;; ctk-python / vtk-slicer-python / … libraries that Slicer uses at runtime
-;; are also present when the module's headers are compiled.
-;; Slicer_USE_PYTHONQT is overridden to OFF in standalone module builds to
-;; suppress PythonQt wrapper generation (which requires the full Slicer build
-;; tree and is not needed for standalone C++ modules).
+;; package so their build-time and runtime ABIs are identical.  Python wrapper
+;; generation in each module's CMake build is handled by SlicerConfig.cmake,
+;; which unconditionally sets Slicer_USE_PYTHONQT=ON.
 ;;
 ;; ITK Python wrapping (Slicer_BUILD_ITKPython) remains OFF until
 ;; python-pygccxml is packaged in Guix.  See itk.scm for the TODO.
-(define-public slicer-python-5.8
+(define-public slicer-5.8
   (package
-    (inherit slicer-5.8)
-    (name "slicer-python-5.8")
+    (inherit %slicer-5.8)
+    (name "slicer-5.8")
     (arguments
-     (substitute-keyword-arguments (package-arguments slicer-5.8)
+     (substitute-keyword-arguments (package-arguments %slicer-5.8)
        ((#:configure-flags flags)
         #~(append
            (list
@@ -639,37 +639,31 @@ Line Interface) modules.  It bundles @code{tclap} and
                 #t))
 ))))
     (inputs
-     (modify-inputs (package-inputs slicer-5.8)
-       ;; Replace the entire VTK-dependent chain with Python-enabled variants so
-       ;; that all cmake configs (CTKConfig, ITKConfig, VTK-targets) reference the
-       ;; same vtk-slicer-python, preventing duplicate cmake target conflicts.
-       (replace "ctk" ctk-python)
-       (replace "vtk-slicer" vtk-slicer-python)
-       (replace "vtkaddon" vtkaddon-python)
-       (replace "itk-slicer" itk-slicer-python)
-       ;; Add python and pythonqt-commontk explicitly for CMake find modules.
+     ;; vtk-slicer, ctk, vtkaddon, and itk-slicer are already Python-enabled
+     ;; (canonical names = Python variants after vtk/ctk/itk rename).
+     ;; Only python and pythonqt-commontk need to be added explicitly.
+     (modify-inputs (package-inputs %slicer-5.8)
        (prepend python pythonqt-commontk)))
     ;; Python runtime packages (numpy, scipy, pydicom, requests,
     ;; dicomweb-client) are intentionally NOT listed here.  They are propagated
-    ;; by slicer-python-all-5.8 instead.  Keeping them in slicer-python-5.8
-    ;; would cause --without-tests=<any-of-them> to cascade through
-    ;; slicer-python-5.8 into every loadable module (which all use
-    ;; slicer-python-5.8 as a build input), producing duplicate derivations
-    ;; (original + transformed) for those modules.  Placing the runtime deps
-    ;; only in the meta-package breaks the cascade cleanly.
+    ;; by slicer-all-5.8 instead.  Keeping them in slicer-5.8 would cause
+    ;; --without-tests=<any-of-them> to cascade through slicer-5.8 into every
+    ;; loadable module (which all use slicer-5.8 as a build input), producing
+    ;; duplicate derivations.  Placing the runtime deps only in the meta-package
+    ;; breaks the cascade cleanly.
     ;;
-    ;; vtk-slicer-python, ctk-python, and vtkaddon-python ARE propagated so
-    ;; that their Python directories land in the Guix profile symlink farm:
-    ;;   vtk-slicer-python/lib/python3.11/site-packages  → `import vtk`
-    ;;   ctk-python/bin/Python                           → `import ctk`, `import qt`
-    ;;   vtkaddon-python/lib/python3.11/site-packages    → vtkAddon Python wrappers
+    ;; vtk-slicer, ctk, and vtkaddon ARE propagated so that their Python
+    ;; directories land in the Guix profile symlink farm:
+    ;;   vtk-slicer/lib/python3.11/site-packages  → `import vtk`
+    ;;   ctk/bin/Python                            → `import ctk`, `import qt`
+    ;;   vtkaddon/lib/python3.11/site-packages     → vtkAddon Python wrappers
     ;; SLICER_PYTHONPATH (native-search-path) then collects all three via its
     ;; `lib/python3.11/site-packages` and `bin/Python` patterns, and Slicer
     ;; prepends SLICER_PYTHONPATH to PYTHONPATH at startup (patch 0046/0048).
-    (propagated-inputs (list vtk-slicer-python ctk-python vtkaddon-python))
+    (propagated-inputs (list vtk-slicer ctk vtkaddon))
     ;; Extend the base search-path to include qt-scripted-modules so that
     ;; standalone scripted-module packages (installed to that subdirectory)
-    ;; are discovered when sharing a profile with slicer-python-5.8.
+    ;; are discovered when sharing a profile with slicer-5.8.
     (native-search-paths
      (list (search-path-specification
             (variable "SLICER_ADDITIONAL_MODULE_PATHS")
@@ -678,9 +672,9 @@ Line Interface) modules.  It bundles @code{tclap} and
                      "lib/Slicer-5.8/cli-modules")))
            (search-path-specification
             (variable "SLICER_PYTHONPATH")
-            ;; bin/Python: .py wrappers installed by slicer-python-5.8 and
-            ;;   ctk-python (ctk/, qt/ packages) — contributed via ctk-python's
-            ;;   own SLICER_PYTHONPATH native-search-path.
+            ;; bin/Python: .py wrappers installed by slicer-5.8 and ctk
+            ;;   (ctk/, qt/ packages) — contributed via ctk's own
+            ;;   SLICER_PYTHONPATH native-search-path.
             ;; lib/Slicer-5.8: C-extension .so (MRMLCorePython, …).
             ;; lib/python3.11/site-packages: numpy, vtk, vtkAddon, user pkgs.
             (files '("bin/Python"
@@ -691,24 +685,15 @@ Line Interface) modules.  It bundles @code{tclap} and
 ;;; Factory for standalone Slicer loadable-module packages
 ;;;
 
-;; Do NOT use (inherit slicer) in the packages produced here: Guix forbids
+;; Do NOT use (inherit slicer-5.8) in the packages produced here: Guix forbids
 ;; listing a package as an input when it also appears in the inheritance chain.
 ;; We reuse only the source origin and build each sub-module as a fully
 ;; independent package that depends on an installed Slicer.
 ;;
-;; The #:slicer keyword (default: slicer-python-5.8) selects which Slicer
-;; variant to build against.  Using slicer-python-5.8 ensures that the
-;; build-time CTK/VTK/Slicer headers and libraries are the same Python-enabled
-;; variants that will be resident in memory at runtime, eliminating any
-;; possibility of ABI mismatch caused by conditional compilation guards
-;; (e.g. #ifdef CTK_BUILD_PYTHON_SCRIPTING) changing class layouts between
-;; the ctk and ctk-python variants.
-;;
-;; Slicer_USE_PYTHONQT is overridden to OFF to suppress PythonQt wrapper
-;; generation inside standalone module CMake builds (the macro
-;; slicerMacroBuildLoadableModule tries to wrap module classes when
-;; Slicer_USE_PYTHONQT=ON, which requires the full Slicer build tree and
-;; is not available in a standalone build).
+;; All modules are built against the canonical slicer-5.8 (Python-enabled).
+;; Python wrapping (VTK + PythonQt) is enabled by SlicerConfig.cmake, which
+;; unconditionally sets Slicer_USE_PYTHONQT=ON; each module therefore produces
+;; *Python.so and *PythonQt.so wrappers as part of the normal build.
 (define* (make-slicer-loadable-module
           #:key
           name            ; package name string, e.g. "slicer-volumes-5.8"
@@ -716,11 +701,7 @@ Line Interface) modules.  It bundles @code{tclap} and
           patches         ; list of patch filename strings
           synopsis        ; one-line synopsis string
           description     ; multi-line description string
-          ;; Slicer variant to build against.  Must be slicer-python-5.8 (the
-          ;; default) or slicer-5.8.  All production packages use the Python
-          ;; variant so build-time and runtime ABIs are consistent.
-          (slicer slicer-python-5.8)
-          ;; Extra packages added to inputs *before* slicer's own inputs.
+          ;; Extra packages added to inputs *before* slicer-5.8's own inputs.
           ;; Use this to declare inter-module build-time dependencies
           ;; (e.g. slicer-terminologies-5.8 for SubjectHierarchy).
           (extra-inputs '())
@@ -733,10 +714,10 @@ Line Interface) modules.  It bundles @code{tclap} and
           (propagated-inputs '()))
   (package
    (name name)
-   (version (package-version slicer))
+   (version (package-version slicer-5.8))
    (source
     (origin
-     (inherit (package-source slicer))
+     (inherit (package-source slicer-5.8))
      (patches (map search-patch patches))))
    (build-system cmake-build-system)
    (arguments
@@ -755,12 +736,8 @@ Line Interface) modules.  It bundles @code{tclap} and
                    ;; Avoids CMAKE_PREFIX_PATH list-separator ambiguity
                    ;; (CMake -D variables use ";" while env vars use ":").
                    (string-append "-DSlicer_DIR="
-                                  #$slicer
+                                  #$slicer-5.8
                                   "/lib/Slicer-5.8")
-                   ;; Prevent slicerMacroBuildLoadableModule from attempting
-                   ;; PythonQt wrapper generation, which requires the full
-                   ;; Slicer build tree and fails in standalone builds.
-                   "-DSlicer_USE_PYTHONQT:BOOL=OFF"
                    ;; UseSlicer.cmake calls find_package(PythonQt) which uses
                    ;; PYTHONQT_INSTALL_DIR as a hint to find PythonQt.h and set
                    ;; PYTHONQT_INCLUDE_DIR.  Without this hint, find_path may
@@ -784,24 +761,24 @@ Line Interface) modules.  It bundles @code{tclap} and
                            configure-flags)
                     (chdir "build")
                     #t))))))
-   ;; UseSlicer.cmake transitively requires all of slicer's build-time
+   ;; UseSlicer.cmake transitively requires all of slicer-5.8's build-time
    ;; libraries (Qt5, VTK, ITK, etc.) to be present in the build environment,
-   ;; not just slicer itself.  We therefore start from slicer's input list and
-   ;; prepend slicer so cmake can locate SlicerConfig.cmake.  Any extra-inputs
-   ;; (other standalone modules this module depends on) are also prepended so
-   ;; cmake can link against them.
+   ;; not just slicer-5.8 itself.  We therefore start from slicer-5.8's input
+   ;; list and prepend slicer-5.8 so cmake can locate SlicerConfig.cmake.
+   ;; Any extra-inputs (other standalone modules this module depends on) are
+   ;; also prepended so cmake can link against them.
    (inputs (fold (lambda (pkg acc)
                    (modify-inputs acc (prepend pkg)))
-                 (modify-inputs (package-inputs slicer)
-                   (prepend slicer))
+                 (modify-inputs (package-inputs slicer-5.8)
+                   (prepend slicer-5.8))
                  extra-inputs))
-   ;; Propagate the Slicer variant this module was built against so that
-   ;; "guix shell slicer-<name>-5.8" gives a usable Slicer in the profile.
-   (propagated-inputs (cons slicer propagated-inputs))
-   (home-page (package-home-page slicer))
+   ;; Propagate slicer-5.8 so "guix shell slicer-<name>-5.8" gives a usable
+   ;; Slicer in the profile.
+   (propagated-inputs (cons slicer-5.8 propagated-inputs))
+   (home-page (package-home-page slicer-5.8))
    (synopsis synopsis)
    (description description)
-   (license (package-license slicer))))
+   (license (package-license slicer-5.8))))
 
 (define-public slicer-terminologies-5.8
   (make-slicer-loadable-module
@@ -1671,8 +1648,7 @@ tree."))
 ;;;
 
 ;; analogous to make-slicer-loadable-module but for python scripted modules.
-;; these require slicer-python-5.8 (slicer_use_pythonqt=on) and install
-;; python scripts to lib/slicer-5.8/qt-scripted-modules/.
+;; these install python scripts to lib/slicer-5.8/qt-scripted-modules/.
 ;;
 ;; each scripted-module source branch is named
 ;;   guix-systole-<modulename>-scripted-module-5.8.1
@@ -1686,7 +1662,7 @@ tree."))
           patches         ; list of patch filename strings
           synopsis        ; one-line synopsis string
           description     ; multi-line description string
-          ;; extra packages added to inputs *before* slicer-python-5.8's own inputs.
+          ;; extra packages added to inputs *before* slicer-5.8's own inputs.
           (extra-inputs '())
           ;; a gexp that evaluates to a (possibly empty) list of extra cmake -d flags.
           (extra-configure-flags #~'())
@@ -1695,7 +1671,7 @@ tree."))
           (propagated-inputs '()))
   (package
    (name name)
-   (version (package-version slicer-python-5.8))
+   (version (package-version slicer-5.8))
    (source
     (origin
      (inherit (package-source slicer-5.8))
@@ -1709,9 +1685,9 @@ tree."))
           #~(append
              (list "-DCMAKE_BUILD_TYPE:STRING=Release"
                    "-DBUILD_TESTING:BOOL=OFF"
-                   ;; point cmake at the python-enabled slicer config directory.
+                   ;; point cmake at the slicer config directory.
                    (string-append "-DSlicer_DIR="
-                                  #$slicer-python-5.8
+                                  #$slicer-5.8
                                   "/lib/Slicer-5.8"))
              #$extra-configure-flags)
           #:phases
@@ -1729,17 +1705,17 @@ tree."))
                            configure-flags)
                     (chdir "build")
                     #t))))))
-   ;; useslicer.cmake requires the full python-enabled dependency tree.
-   ;; we start from slicer-python-5.8's inputs and prepend slicer-python-5.8
+   ;; useslicer.cmake requires the full dependency tree.
+   ;; we start from slicer-5.8's inputs and prepend slicer-5.8
    ;; itself so cmake can locate slicerconfig.cmake.
    (inputs (fold (lambda (pkg acc)
                    (modify-inputs acc (prepend pkg)))
-                 (modify-inputs (package-inputs slicer-python-5.8)
-                   (prepend slicer-python-5.8))
+                 (modify-inputs (package-inputs slicer-5.8)
+                   (prepend slicer-5.8))
                  extra-inputs))
-   ;; Propagate slicer-python-5.8 so "guix shell slicer-<name>-5.8" provides
+   ;; Propagate slicer-5.8 so "guix shell slicer-<name>-5.8" provides
    ;; a usable Slicer in the profile, plus any declared runtime module deps.
-   (propagated-inputs (cons slicer-python-5.8 propagated-inputs))
+   (propagated-inputs (cons slicer-5.8 propagated-inputs))
    (home-page (package-home-page slicer-5.8))
    (synopsis synopsis)
    (description description)
@@ -1980,9 +1956,9 @@ management, series import, and export.  built from the
        "-DEXTRA_MODULE_LIB_DIRS="
        #$slicer-subjecthierarchy-5.8
        "/lib/Slicer-5.8/qt-loadable-modules;"
-       #$slicer-python-5.8
+       #$slicer-5.8
        "/lib/Slicer-5.8/qt-loadable-modules;"
-       #$slicer-python-5.8
+       #$slicer-5.8
        "/lib/Slicer-5.8"))))
 
 ;;;
@@ -1990,7 +1966,7 @@ management, series import, and export.  built from the
 ;;;
 
 (define %slicer-5.8-scripted-modules
-  ;; all standalone scripted modules for slicer-python-5.8, in load order.
+  ;; all standalone scripted modules for slicer-5.8, in load order.
   (list slicer-sampledata-5.8
         slicer-endoscopy-5.8
         slicer-importitksnaplabel-5.8
@@ -2319,46 +2295,25 @@ source tree."))
 (define-public slicer-all-5.8
   (package
     (name "slicer-all-5.8")
-    (version (package-version slicer-python-5.8))
+    (version (package-version slicer-5.8))
     (source #f)
     (build-system trivial-build-system)
     (arguments (list #:builder #~(mkdir #$output)))
     (propagated-inputs
-     (append (list slicer-5.8)
-             %slicer-5.8-loadable-modules
-             %slicer-5.8-cli-modules))
-    (synopsis "3d slicer 5.8 with all loadable modules")
-    (description
-     "meta-package that installs python-enabled 3d slicer 5.8 together with
-all its standalone loadable modules (terminologies, subjecthierarchy, colors,
-volumes, volumerendering, units, tables, cameras, data, annotations, markups,
-models, sequences, viewcontrollers, reformat, plots, sceneviews, transforms,
-texts, and welcome).  all loadable modules are built against
-@code{slicer-python-5.8} so their build-time and runtime abis are
-consistent.")
-    (home-page (package-home-page slicer-python-5.8))
-    (license (package-license slicer-python-5.8))))
-
-(define-public slicer-python-all-5.8
-  (package
-    (name "slicer-python-all-5.8")
-    (version (package-version slicer-python-5.8))
-    (source #f)
-    (build-system trivial-build-system)
-    (arguments (list #:builder #~(mkdir #$output)))
-    (propagated-inputs
-     ;; Python runtime packages live here (not in slicer-python-5.8) so that
+     ;; Python runtime packages live here (not in slicer-5.8) so that
      ;; --without-tests transforms on any of them do not cascade into every
      ;; loadable module derivation and cause duplicate builds.
-     (append (list slicer-python-5.8
+     ;; vtk-slicer, ctk, vtkaddon are already transitively present via
+     ;; slicer-5.8's own propagated-inputs.
+     (append (list slicer-5.8
                    python-numpy python-requests python-pydicom python-scipy
                    python-dicomweb-client)
              %slicer-5.8-loadable-modules
              %slicer-5.8-scripted-modules
              %slicer-5.8-cli-modules))
-    (synopsis "3d slicer 5.8 (python) with all loadable and scripted modules")
+    (synopsis "3d slicer 5.8 with all loadable and scripted modules")
     (description
-     "meta-package that installs python-enabled 3d slicer 5.8 together with
+     "meta-package that installs 3d slicer 5.8 (python-enabled) together with
 all its standalone loadable modules (terminologies, subjecthierarchy, colors,
 volumes, volumerendering, units, tables, cameras, data, annotations, markups,
 models, sequences, viewcontrollers, reformat, plots, sceneviews, transforms,
@@ -2367,5 +2322,5 @@ texts, slicerwelcome, segmentations) and all python scripted modules
 screencapture, vectortoscalarvolume, dataprobe, cropvolumesequence,
 webserver, dicompatcher, dicomplugins, segmenteditor, segmentstatistics,
 dicom, extensionwizard, dicomlib).")
-    (home-page (package-home-page slicer-python-5.8))
-    (license (package-license slicer-python-5.8))))
+    (home-page (package-home-page slicer-5.8))
+    (license (package-license slicer-5.8))))

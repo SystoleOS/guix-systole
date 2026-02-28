@@ -48,7 +48,8 @@
   #:use-module (systole packages))
 
 ;; --------------------------- CTK ---------------------------
-(define-public ctk
+;; Private non-Python base — used only for (inherit) in ctk (Python).
+(define %ctk
   (package
    (name "ctk")
    (version "0.1")
@@ -160,9 +161,9 @@ Plugin Framework.")
   ;; Upstream CTK source at the exact commit used by ctk.
   ;; Patches stripped — suitable as a read-only reference for code search.
   (package
-    (inherit ctk)
+    (inherit %ctk)
     (name "ctk-source")
-    (source (origin (inherit (package-source ctk))
+    (source (origin (inherit (package-source %ctk))
                     (patches '())))
     (build-system trivial-build-system)
     (native-inputs (list tar gzip))
@@ -212,15 +213,15 @@ code search and API exploration.")))
     "Simple and small program allowing to set the environment of any executable.")
    (license license:asl2.0)))
 
-;; Python-enabled CTK variant.  Uses pythonqt-commontk for PythonQt bindings
+;; Python-enabled CTK.  Uses pythonqt-commontk for PythonQt bindings
 ;; and enables all Qt-module wrappings except QtWebKit (absent in Qt 5.6+).
 ;; The VTK PythonQt bridge (PYTHONQT_USE_VTK) is ON so that
 ;; ctkVTKPythonQtWrapperFactory is compiled into libCTKVisualizationVTKCore —
 ;; Slicer's qSlicerCorePythonManager unconditionally references this symbol.
-(define-public ctk-python
+(define-public ctk
   (package
-    (inherit ctk)
-    (name "ctk-python")
+    (inherit %ctk)
+    (name "ctk")
     (arguments
      (list #:tests? #f
            #:parallel-build? #t
@@ -273,18 +274,14 @@ code search and API exploration.")))
                              #$(this-package-input "python") "/include/python3.11")
               (string-append "-DPython3_LIBRARY="
                              #$(this-package-input "python") "/lib/libpython3.11.so")
-              ;; DCMTK (same as ctk)
+              ;; DCMTK (same as %ctk)
               (string-append "-DDCMTK_DIR:PATH="
                              #$(this-package-input "dcmtk")
                              "/lib/cmake/dcmtk"))))
     (inputs
-     (modify-inputs (package-inputs ctk)
-       ;; Use Python-enabled VTK and ITK so their cmake configs reference
-       ;; vtk-slicer-python.  itk-slicer hard-codes VTK_DIR in ITKVtkGlue.cmake;
-       ;; using itk-slicer-python ensures find_package(VTK) resolves to
-       ;; vtk-slicer-python throughout the build.
-       (replace "vtk-slicer" vtk-slicer-python)
-       (replace "itk-slicer" itk-slicer-python)
+     (modify-inputs (package-inputs %ctk)
+       ;; vtk-slicer and itk-slicer are already Python-enabled after the vtk/itk rename.
+       ;; Add PythonQt and Qt multimedia for the scripting layer.
        (prepend pythonqt-commontk
                 qtmultimedia-5)))
     ;; bin/Python/ contains ctk/__init__.py and qt/__init__.py used by Slicer's
