@@ -1,0 +1,142 @@
+From 8b76ae2ca3453e282aeb568e42072641da351757 Mon Sep 17 00:00:00 2001
+From: SystoleOS <systole@example.org>
+Date: Sun, 1 Mar 2026 08:18:27 +0100
+Subject: [PATCH] COMP: Guard CPack inclusion behind PLUSAPP_BUILD_PACKAGING
+ option
+
+CPackConfig.cmake references paths from the PlusLib build tree
+(e.g., License.txt inside the build-time source directory) that are
+not available in a standalone install-tree build.  Guarding the
+INCLUDE behind an option lets downstream packagers skip CPack without
+patching CPackConfig.cmake.
+---
+ CMakeLists.txt     | 72 ++++++++++++++++++++++++++++++++++++++++++++--
+ InstallFiles.cmake | 12 +++++---
+ 2 files changed, 78 insertions(+), 6 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2ac6de7..ccd6b47 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -10,6 +10,39 @@ INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMake/PlusAppMacros.cmake)
+ FIND_PACKAGE(PlusLib REQUIRED NO_MODULE)
+ INCLUDE(${PlusLib_USE_FILE})
+ 
++# VTK was built with Python support; libvtkWrappingPythonCore3.11 has
++# intentionally unresolved Python symbols that executables must supply.
++# vtkAddon (Python-enabled) links libvtkWrappingPythonCore3.11 as a raw
++# library (vtkAddonConfig.cmake creates no cmake target), so VTK's
++# generator-expression-based Python auto-link does not fire.  Find Python3
++# explicitly and set CMAKE_EXE_LINKER_FLAGS so all executables satisfy the
++# Python symbols at link time.
++FIND_PACKAGE(Python3 REQUIRED COMPONENTS Interpreter Development)
++IF(Python3_FOUND)
++  GET_FILENAME_COMPONENT(_python_lib_dir "${Python3_LIBRARIES}" DIRECTORY)
++  SET(CMAKE_EXE_LINKER_FLAGS
++    "${CMAKE_EXE_LINKER_FLAGS} -L${_python_lib_dir} -lpython3.11")
++ENDIF()
++
++# PlusConfigure.h (installed with PlusLib) includes vtkIGSIOAccurateTimer.h
++# from IGSIO.  PlusLibTargets.cmake does not propagate IGSIO include dirs
++# through INTERFACE_INCLUDE_DIRECTORIES, so we must add them explicitly.
++FIND_PACKAGE(IGSIO REQUIRED NO_MODULE)
++INCLUDE_DIRECTORIES(${VTKIGSIOCOMMON_INCLUDE_DIRS})
++
++# igsioVideoFrame.h (installed by IGSIO) includes vtkStreamingVolumeFrame.h
++# from vtkAddon.  IGSIO's cmake config does not propagate the vtkAddon
++# include directory, so we must find vtkAddon explicitly.
++FIND_PACKAGE(vtkAddon REQUIRED NO_MODULE)
++INCLUDE_DIRECTORIES(${vtkAddon_INCLUDE_DIRS})
++
++# libvtkPlusCalibration.so embeds ITK IO factory registration calls (including
++# slicer_itk::ScancoImageIOFactoryRegister__Private) but does not link the
++# corresponding IO module itself — the final executable must resolve them.
++# UseITK.cmake does not call link_libraries globally in ITK 5.x, so add all
++# ITK libraries explicitly to every executable in this project.
++LINK_LIBRARIES(${ITK_LIBRARIES})
++
+ IF(VTK_VERSION VERSION_LESS 8.9.0)
+   SET(PLUSAPP_VTK_PREFIX vtk)
+ ELSE()
+@@ -170,7 +203,12 @@ ELSE()
+   SET(TEST_EXECUTABLE_OUTPUT_PATH "${PLUS_EXECUTABLE_OUTPUT_PATH}")
+ ENDIF()
+ 
+-SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Install)
++# PlusApp's default is to install into the build tree for standalone packaging.
++# Respect an explicitly provided CMAKE_INSTALL_PREFIX (e.g., from Guix).
++IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
++  SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Install CACHE PATH
++    "Install path for PlusApp" FORCE)
++ENDIF()
+ SET(INSTALL_DESTINATION_DIR "PlusApp_v${PLUSAPP_VERSION_MAJOR}.${PLUSAPP_VERSION_MINOR}.${PLUSAPP_VERSION_PATCH}")
+ 
+ OPTION(PLUSAPP_BUILD_DiagnosticTools "Build the DiagnosticTools" ON)
+@@ -199,10 +237,40 @@ MACRO(GENERATE_HELP_DOC TARGET_NAME)
+   ENDIF()
+ ENDMACRO()
+ 
++# --------------------------------------------------------------------------
++# Install directory defaults
++# (normally set inside CPackConfig.cmake; define here so that
++#  InstallFiles.cmake works even when packaging is disabled)
++# --------------------------------------------------------------------------
++IF(NOT PLUSAPP_INSTALL_BIN_DIR)
++  SET(PLUSAPP_INSTALL_BIN_DIR "bin")
++ENDIF()
++IF(NOT PLUSAPP_INSTALL_LIB_DIR)
++  SET(PLUSAPP_INSTALL_LIB_DIR "lib")
++ENDIF()
++IF(NOT PLUSAPP_INSTALL_DATA_DIR)
++  SET(PLUSAPP_INSTALL_DATA_DIR "share/PlusApp-${PlusLib_VERSION_MAJOR}.${PlusLib_VERSION_MINOR}")
++ENDIF()
++IF(NOT PLUSAPP_INSTALL_CONFIG_DIR)
++  SET(PLUSAPP_INSTALL_CONFIG_DIR "share/PlusApp-${PlusLib_VERSION_MAJOR}.${PlusLib_VERSION_MINOR}/config")
++ENDIF()
++IF(NOT PLUSAPP_INSTALL_SCRIPTS_DIR)
++  SET(PLUSAPP_INSTALL_SCRIPTS_DIR "share/PlusApp-${PlusLib_VERSION_MAJOR}.${PlusLib_VERSION_MINOR}/scripts")
++ENDIF()
++IF(NOT PLUSAPP_INSTALL_INCLUDE_DIR)
++  SET(PLUSAPP_INSTALL_INCLUDE_DIR "include")
++ENDIF()
++IF(NOT PLUSAPP_INSTALL_DOCUMENTATION_DIR)
++  SET(PLUSAPP_INSTALL_DOCUMENTATION_DIR "share/doc/PlusApp-${PlusLib_VERSION_MAJOR}.${PlusLib_VERSION_MINOR}")
++ENDIF()
++
+ # --------------------------------------------------------------------------
+ # Packaging
+ # --------------------------------------------------------------------------
+-INCLUDE (${CMAKE_CURRENT_SOURCE_DIR}/CPackConfig.cmake)
++OPTION(PLUSAPP_BUILD_PACKAGING "Generate CPack packaging rules" OFF)
++IF(PLUSAPP_BUILD_PACKAGING)
++  INCLUDE (${CMAKE_CURRENT_SOURCE_DIR}/CPackConfig.cmake)
++ENDIF()
+ 
+ # --------------------------------------------------------------------------
+ # Qt
+diff --git a/InstallFiles.cmake b/InstallFiles.cmake
+index 93e7e59..ff78f1c 100644
+--- a/InstallFiles.cmake
++++ b/InstallFiles.cmake
+@@ -330,10 +330,14 @@ IF(WIN32)
+     COMPONENT Scripts
+    )
+ ELSEIF(UNIX AND NOT APPLE)
+-  INSTALL(FILES ${QT_ROOT_DIR}/plugins/platforms/libqxcb${CMAKE_SHARED_LIBRARY_SUFFIX}
+-    DESTINATION ${PLUSAPP_INSTALL_BIN_DIR}/platforms
+-    COMPONENT RuntimeLibraries
+-    )
++  # Guard against non-standard Qt plugin layouts (e.g. Guix stores plugins
++  # under lib/qt5/plugins/ rather than plugins/).
++  IF(EXISTS "${QT_ROOT_DIR}/plugins/platforms/libqxcb${CMAKE_SHARED_LIBRARY_SUFFIX}")
++    INSTALL(FILES ${QT_ROOT_DIR}/plugins/platforms/libqxcb${CMAKE_SHARED_LIBRARY_SUFFIX}
++      DESTINATION ${PLUSAPP_INSTALL_BIN_DIR}/platforms
++      COMPONENT RuntimeLibraries
++      )
++  ENDIF()
+ ENDIF()
+ 
+ IF(PLUSAPP_INSTALL_CONFIG_DIR)
+-- 
+2.52.0
+
