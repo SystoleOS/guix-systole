@@ -171,6 +171,8 @@ development tools, code search, and documentation generation.")
                  "0048-ENH-Prepend-CTK-and-vtkAddon-lib-dirs-to-PYTHONPATH-.patch"
                  "0049-COMP-Guard-Windows-11-numpy-scipy-preload-workaround.patch"
                  "0050-COMP-Fall-back-to-no-module-when-saved-home-module-i.patch"
+                 "0051-ENH-Load-custom-splash-screen-and-QSS-stylesheet-fro.patch"
+                 "0052-ENH-Execute-SLICER_INIT_DIR-init.py-after-slicerqt.p.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -361,11 +363,20 @@ development tools, code search, and documentation generation.")
     ;; module packages share a profile with slicer-5.8.  Slicer reads this
     ;; variable directly (patch 0045) and extends LD_LIBRARY_PATH from it
     ;; at startup (patch 0046).
+    ;;
+    ;; A theme/init package can install to share/slicer-init/ and expose
+    ;; optional files: splash.png (custom splash screen), style.qss (Qt
+    ;; stylesheet applied at startup), and init.py (Python script executed
+    ;; after slicerqt.py).  Patches 0051-0052 read SLICER_INIT_DIR for this.
     (native-search-paths
      (list (search-path-specification
             (variable "SLICER_ADDITIONAL_MODULE_PATHS")
             (files '("lib/Slicer-5.8/qt-loadable-modules"
-                     "lib/Slicer-5.8/cli-modules")))))
+                     "lib/Slicer-5.8/cli-modules")))
+           (search-path-specification
+            (variable "SLICER_INIT_DIR")
+            (files '("share/slicer-init"))
+            (separator #f))))
     (synopsis "3D Slicer - Medical visualization and computing environment")
     (description
      "3D Slicer is a multi-platform, free and open source software package for
