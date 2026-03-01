@@ -1,0 +1,120 @@
+From 644d474d8ac7c16482724b95e7c7da6459e59ae6 Mon Sep 17 00:00:00 2001
+From: SystoleOS <systole@example.org>
+Date: Sun, 1 Mar 2026 10:41:19 +0100
+Subject: [PATCH] COMP: Read/write PlusConfig.xml from XDG_CONFIG_HOME on Linux
+
+vtkPlusConfig always located PlusConfig.xml next to the application
+binary (ProgramDirectory).  This is read-only when the binary lives in
+a content-addressed store (e.g. Guix), and the store hash changes on
+every rebuild, so user preferences could never be persisted.
+
+Add a static GetXdgConfigFilePath() helper that computes
+$XDG_CONFIG_HOME/PlusToolkit/PlusConfig.xml (falling back to
+$HOME/.config/PlusToolkit/PlusConfig.xml).  Use it in:
+
+- LoadApplicationConfiguration(): read from XDG path when it exists,
+  otherwise seed from the store copy on first run (saveNeeded will be
+  true for missing attributes, triggering a save to the XDG path).
+- SaveApplicationConfigurationToFile(): always write to XDG path,
+  creating the directory if necessary.
+- GetApplicationConfigurationFilePath(): return XDG path so callers
+  get a stable, writable path independent of the store hash.
+---
+ src/PlusCommon/vtkPlusConfig.cxx | 60 ++++++++++++++++++++++++++++++--
+ 1 file changed, 58 insertions(+), 2 deletions(-)
+
+diff --git a/src/PlusCommon/vtkPlusConfig.cxx b/src/PlusCommon/vtkPlusConfig.cxx
+index b899fea0..3e2ddc1b 100644
+--- a/src/PlusCommon/vtkPlusConfig.cxx
++++ b/src/PlusCommon/vtkPlusConfig.cxx
+@@ -29,6 +29,35 @@
+ 
+ static const char APPLICATION_CONFIGURATION_FILE_NAME[] = "PlusConfig.xml";
+ 
++//-----------------------------------------------------------------------------
++// Return the path $XDG_CONFIG_HOME/PlusToolkit/PlusConfig.xml, which is
++// writable regardless of where the application binary lives.  Falls back to
++// $HOME/.config/PlusToolkit/PlusConfig.xml when XDG_CONFIG_HOME is not set.
++// Returns an empty string only when neither variable is available (e.g. in a
++// headless build environment without a home directory).
++static std::string GetXdgConfigFilePath()
++{
++  std::string base;
++  std::string xdg;
++  if (vtksys::SystemTools::GetEnv("XDG_CONFIG_HOME", xdg) && !xdg.empty())
++  {
++    base = xdg;
++  }
++  else
++  {
++    std::string home;
++    if (vtksys::SystemTools::GetEnv("HOME", home) && !home.empty())
++    {
++      base = home + "/.config";
++    }
++  }
++  if (base.empty())
++  {
++    return "";
++  }
++  return base + "/PlusToolkit/" + APPLICATION_CONFIGURATION_FILE_NAME;
++}
++
+ 
+ vtkPlusConfig* vtkPlusConfig::Instance = NULL;
+ 
+@@ -264,7 +293,16 @@ PlusStatus vtkPlusConfig::LoadApplicationConfiguration()
+     LOG_ERROR("Unable to read configuration - program directory has to be set first!");
+     return PLUS_FAIL;
+   }
+-  std::string applicationConfigurationFilePath = vtksys::SystemTools::CollapseFullPath(APPLICATION_CONFIGURATION_FILE_NAME, this->ProgramDirectory.c_str());
++  // Prefer a mutable copy under $XDG_CONFIG_HOME/PlusToolkit/ so preferences
++  // can be persisted even when the binary lives in a read-only store (e.g. Guix).
++  // On first run the XDG file does not exist yet; the store copy is read as a
++  // seed and SaveApplicationConfigurationToFile() will write to the XDG path.
++  std::string xdgConfigFilePath = GetXdgConfigFilePath();
++  std::string storeConfigFilePath = vtksys::SystemTools::CollapseFullPath(APPLICATION_CONFIGURATION_FILE_NAME, this->ProgramDirectory.c_str());
++  std::string applicationConfigurationFilePath =
++    (!xdgConfigFilePath.empty() && vtksys::SystemTools::FileExists(xdgConfigFilePath.c_str(), true))
++      ? xdgConfigFilePath
++      : storeConfigFilePath;
+ 
+   bool saveNeeded = false;
+ 
+@@ -530,7 +568,20 @@ PlusStatus vtkPlusConfig::SaveApplicationConfigurationToFile()
+     return PLUS_FAIL;
+   }
+ 
+-  std::string applicationConfigurationFilePath = vtksys::SystemTools::CollapseFullPath(APPLICATION_CONFIGURATION_FILE_NAME, this->ProgramDirectory.c_str());
++  // Always write to the mutable XDG path so the store copy stays pristine.
++  // Create the directory on first use.
++  std::string xdgConfigFilePath = GetXdgConfigFilePath();
++  std::string applicationConfigurationFilePath;
++  if (!xdgConfigFilePath.empty())
++  {
++    std::string xdgDir = vtksys::SystemTools::GetFilenamePath(xdgConfigFilePath);
++    vtksys::SystemTools::MakeDirectory(xdgDir.c_str());
++    applicationConfigurationFilePath = xdgConfigFilePath;
++  }
++  else
++  {
++    applicationConfigurationFilePath = vtksys::SystemTools::CollapseFullPath(APPLICATION_CONFIGURATION_FILE_NAME, this->ProgramDirectory.c_str());
++  }
+   igsioCommon::XML::PrintXML(applicationConfigurationFilePath.c_str(), this->ApplicationConfigurationData);
+ 
+   LOG_DEBUG("Application configuration file '" << applicationConfigurationFilePath << "' saved");
+@@ -541,6 +592,11 @@ PlusStatus vtkPlusConfig::SaveApplicationConfigurationToFile()
+ //----------------------------------------------------------------------------
+ std::string vtkPlusConfig::GetApplicationConfigurationFilePath() const
+ {
++  std::string xdgConfigFilePath = GetXdgConfigFilePath();
++  if (!xdgConfigFilePath.empty())
++  {
++    return xdgConfigFilePath;
++  }
+   return vtksys::SystemTools::CollapseFullPath(APPLICATION_CONFIGURATION_FILE_NAME, this->ProgramDirectory.c_str());
+ }
+ 
+-- 
+2.52.0
+

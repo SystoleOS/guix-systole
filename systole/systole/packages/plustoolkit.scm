@@ -109,7 +109,9 @@ data by the PlusLib test suite.
 (define %pluslib-version "2.9.0-0c75fc0")
 (define %pluslib-patches
   (list (search-patch
-         "plustoolkit/0001-COMP-Find-vtkAddon-for-transitively-required-headers.patch")))
+         "plustoolkit/0001-COMP-Find-vtkAddon-for-transitively-required-headers.patch")
+        (search-patch
+         "plustoolkit/0002-COMP-Read-write-PlusConfig.xml-from-XDG_CONFIG_HOME-.patch")))
 
 (define-public pluslib
   (package
