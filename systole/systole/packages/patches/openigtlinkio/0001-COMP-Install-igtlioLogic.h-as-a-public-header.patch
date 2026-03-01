@@ -1,0 +1,29 @@
+From 5eac0b3a8cd311b53b98e205c4bf634bf16a6e8e Mon Sep 17 00:00:00 2001
+From: SystoleOS <systole@example.org>
+Date: Sun, 1 Mar 2026 09:32:34 +0100
+Subject: [PATCH] COMP: Install igtlioLogic.h as a public header
+
+igtlioLogic.h was accidentally omitted from the igtlioLogic_HDRS
+install list in Logic/CMakeLists.txt.  The corresponding source file
+igtlioLogic.cxx is built and the library installed, but without this
+header downstream consumers (e.g. PlusApp/PlusServerLauncher) fail to
+compile with 'igtlioLogic.h: No such file or directory'.
+---
+ Logic/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Logic/CMakeLists.txt b/Logic/CMakeLists.txt
+index cf2cfda..640cf2d 100644
+--- a/Logic/CMakeLists.txt
++++ b/Logic/CMakeLists.txt
+@@ -42,6 +42,7 @@ set(${PROJECT_NAME}_HDRS
+   igtlioCircularSectionBuffer.h
+   igtlioConnector.h
+   igtlioSession.h
++  igtlioLogic.h
+   igtlioCommand.h
+   )
+ 
+-- 
+2.52.0
+

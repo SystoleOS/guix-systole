@@ -1,0 +1,96 @@
+From 859d2a722ffd4c8ce1834512e350798cab33700c Mon Sep 17 00:00:00 2001
+From: SystoleOS <systole@example.org>
+Date: Sun, 1 Mar 2026 08:04:33 +0100
+Subject: [PATCH] COMP: Find vtkAddon for transitively-required headers
+
+igsioVideoFrame.h (installed by IGSIO) includes
+<vtkStreamingVolumeFrame.h> which lives in vtkAddon.  IGSIO's cmake
+config does not propagate the vtkAddon include directory, so we must
+find vtkAddon explicitly and add its include directory here.
+---
+ src/CMakeLists.txt             |  6 ++++++
+ src/PlusLibConfig.cmake.in     |  4 +++-
+ src/PlusWidgets/CMakeLists.txt | 21 +++++++++++++++++++--
+ 3 files changed, 28 insertions(+), 3 deletions(-)
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 5e7f0ff7..9005ccdd 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -56,6 +56,12 @@ SET(PLUSLIB_QT_COMPONENTS "" CACHE INTERNAL "" FORCE)
+ # Use IGSIO
+ FIND_PACKAGE(IGSIO REQUIRED NO_MODULE)
+ 
++# vtkAddon is required transitively: igsioVideoFrame.h (part of the
++# installed IGSIO headers) includes <vtkStreamingVolumeFrame.h> from
++# vtkAddon.  IGSIO's cmake config does not propagate this include dir.
++FIND_PACKAGE(vtkAddon REQUIRED NO_MODULE)
++INCLUDE_DIRECTORIES(${vtkAddon_INCLUDE_DIRS})
++
+ # --------------------------------------------------------------------------
+ # Options
+ OPTION(BUILD_SHARED_LIBS "Build with shared libraries." ${VTK_BUILD_SHARED_LIBS} ${ITK_BUILD_SHARED_LIBS})
+diff --git a/src/PlusLibConfig.cmake.in b/src/PlusLibConfig.cmake.in
+index c933bcb5..8d2989f0 100644
+--- a/src/PlusLibConfig.cmake.in
++++ b/src/PlusLibConfig.cmake.in
+@@ -157,7 +157,9 @@ IF(@PLUS_USE_OvrvisionPro@)
+ ENDIF()
+ 
+ IF(@PLUS_BUILD_WIDGETS@)
+-  SET(PLUSLIB_WIDGETS_QRC @PLUSLIB_WIDGETS_QRC@)
++  # Use install-relative path rather than baking in the build-tree location.
++  # PLUSLIB_INSTALL_PATH is computed at the top of this file from CMAKE_CURRENT_LIST_FILE.
++  SET(PLUSLIB_WIDGETS_QRC "${PLUSLIB_INSTALL_PATH}/@PLUSLIB_SHARE_INSTALL@/PlusWidgets.qrc")
+ ENDIF()
+ 
+ IF(@PLUS_USE_NDI@)
+diff --git a/src/PlusWidgets/CMakeLists.txt b/src/PlusWidgets/CMakeLists.txt
+index 3acc02e3..5e021513 100644
+--- a/src/PlusWidgets/CMakeLists.txt
++++ b/src/PlusWidgets/CMakeLists.txt
+@@ -25,6 +25,12 @@ SET(_Qt_resource ${PROJECT_NAME}.qrc)
+ SET(PLUSLIB_WIDGETS_QRC ${CMAKE_CURRENT_SOURCE_DIR}/${_Qt_resource} CACHE STRING "Location of the PlusWidgets qrc file" FORCE)
+ MARK_AS_ADVANCED(PLUSLIB_WIDGETS_QRC)
+ 
++# Generate ui_*.h headers into CMAKE_CURRENT_BINARY_DIR so they can be
++# installed alongside public headers.  AUTOUIC generates them too (into
++# _autogen/include/), but that path is an implementation detail of AUTOUIC
++# and cannot be relied upon for installation.
++QT5_WRAP_UI(${PROJECT_NAME}_INSTALLABLE_UI_HDRS ${${PROJECT_NAME}_UI_SRCS})
++
+ # --------------------------------------------------------------------------
+ # Build the library
+ SET(${PROJECT_NAME}_LIBS 
+@@ -59,8 +65,9 @@ ENDIF()
+ GENERATE_EXPORT_DIRECTIVE_FILE(${PROJECT_NAME})
+ ADD_LIBRARY(${PROJECT_NAME}
+   ${${PROJECT_NAME}_SRCS}
+-  ${${PROJECT_NAME}_HDRS} 
+-  ${${PROJECT_NAME}_UI_SRCS} 
++  ${${PROJECT_NAME}_HDRS}
++  ${${PROJECT_NAME}_UI_SRCS}
++  ${${PROJECT_NAME}_INSTALLABLE_UI_HDRS}
+   ${_Qt_resource}
+   )
+ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES 
+@@ -85,6 +92,16 @@ SET(vcProj_${PROJECT_NAME} ${PROJECT_NAME};${PlusLib_BINARY_DIR}/src/PlusWidgets
+ # Install
+ #
+ PlusLibInstallLibrary(${PROJECT_NAME} ${PROJECT_NAME})
++INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${_Qt_resource}
++  DESTINATION "${PLUSLIB_SHARE_INSTALL}"
++  COMPONENT Development)
++INSTALL(FILES ${${PROJECT_NAME}_INSTALLABLE_UI_HDRS}
++  DESTINATION "${PLUSLIB_INCLUDE_INSTALL}"
++  COMPONENT Development)
++INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Resources
++  DESTINATION "${PLUSLIB_SHARE_INSTALL}"
++  COMPONENT Development
++  FILES_MATCHING PATTERN "*.png")
+ 
+ # --------------------------------------------------------------------------
+ # Testing
+-- 
+2.52.0
+

@@ -263,7 +263,10 @@ both industrial and academic developers.")
      (method url-fetch)
      (uri "https://github.com/IGSIO/OpenIGTLinkIO/archive/a262c1f5e63c00831cbf67d5284f4734f8a7b143.tar.gz")
      (sha256
-      (base32 "01y6nhv7c5m57clpql8vg1g43k4k37mvb0bvasl28r90mqm4dvsm"))))
+      (base32 "01y6nhv7c5m57clpql8vg1g43k4k37mvb0bvasl28r90mqm4dvsm"))
+     (patches
+      (search-patches
+       "openigtlinkio/0001-COMP-Install-igtlioLogic.h-as-a-public-header.patch"))))
    (build-system cmake-build-system)
    (arguments
     (list #:tests? #f
