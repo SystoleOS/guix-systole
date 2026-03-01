@@ -638,7 +638,53 @@ Line Interface) modules.  It bundles @code{tclap} and
                          (assoc-ref inputs "vtkaddon") "/lib/cmake:"
                          (or (getenv "CMAKE_PREFIX_PATH") "")))
                 #t))
-))))
+            ;; Python extension modules in lib/Slicer-5.8/ (MRMLCorePython.so,
+            ;; vtkSegmentationCorePython.so, SlicerBaseLogicPython.so, …) are
+            ;; installed with RUNPATH pointing to lib/ (set by CMake's install
+            ;; RPATH mechanism).  The native shared libraries they link against
+            ;; (libMRMLCore.so, libSlicerBaseLogic.so, libvtkSegmentationCore.so,
+            ;; …) live in the same lib/Slicer-5.8/ directory.  Adding $ORIGIN
+            ;; lets the dynamic linker find these sibling libraries when a
+            ;; standalone python3 process dlopen-s the extension, without
+            ;; requiring LD_LIBRARY_PATH.
+            (add-after 'install-slicer-symlink 'patch-python-extension-runpath
+              (lambda* (#:key outputs #:allow-other-keys)
+                (let ((dir (string-append (assoc-ref outputs "out")
+                                          "/lib/Slicer-5.8")))
+                  (for-each
+                   (lambda (lib) (invoke "patchelf" "--add-rpath" "$ORIGIN" lib))
+                   ;; find-files does not support #:max-depth; filter to direct
+                   ;; children of dir by checking the relative path has no '/'.
+                   (find-files dir
+                     (lambda (f stat)
+                       (let ((rel (string-drop f (1+ (string-length dir)))))
+                         (and (string-suffix? ".so" rel)
+                              (not (string-contains rel "/"))))))))))
+            ;; vtkAddonPython.so is installed by the vtkaddon package to its
+            ;; lib/ directory rather than a Python-standard location, so it is
+            ;; not on PYTHONPATH.  Symlink it into lib/Slicer-5.8/ (which IS
+            ;; on PYTHONPATH via the native-search-path declared above) so that
+            ;; `from vtkAddonPython import *` succeeds in a standalone python3
+            ;; session started inside a profile that includes slicer-5.8.
+            (add-after 'patch-python-extension-runpath 'link-vtkaddon-python
+              (lambda* (#:key inputs outputs #:allow-other-keys)
+                (symlink
+                 (string-append (assoc-ref inputs "vtkaddon")
+                                "/lib/vtkAddonPython.so")
+                 (string-append (assoc-ref outputs "out")
+                                "/lib/Slicer-5.8/vtkAddonPython.so"))))
+            ;; In embedded Slicer Python, the C++ startup code adds
+            ;; bin/Python/slicer/ to sys.path so that the `logic` kit in
+            ;; kits.py is importable as a top-level `import logic`.  For
+            ;; standalone python3 that path is not added.  Provide a shim at
+            ;; the top level of bin/Python/ that re-exports from slicer.logic.
+            (add-after 'link-vtkaddon-python 'create-logic-shim
+              (lambda* (#:key outputs #:allow-other-keys)
+                (call-with-output-file
+                    (string-append (assoc-ref outputs "out")
+                                   "/bin/Python/logic.py")
+                  (lambda (port)
+                    (display "from slicer.logic import *\n" port)))))))))
     (inputs
      ;; vtk-slicer, ctk, vtkaddon, and itk-slicer are already Python-enabled
      ;; (canonical names = Python variants after vtk/ctk/itk rename).
