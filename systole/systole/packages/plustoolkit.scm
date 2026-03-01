@@ -47,6 +47,61 @@
   #:use-module (systole packages))
 
 ;;;
+;;; PlusLibData — data files for PlusLib (config files, test images, CAD models)
+;;;
+
+(define %pluslibdata-commit "51dcbb76d9f29fad94cf80788a7a0b7c704fb5dc")
+(define %pluslibdata-version (string-append "2.9.0-" (string-take %pluslibdata-commit 7)))
+
+(define-public pluslibdata
+  (package
+   (name "pluslibdata")
+   (version %pluslibdata-version)
+   (source
+    (origin
+     (method url-fetch)
+     (uri (string-append
+           "https://github.com/PlusToolkit/PlusLibData/archive/"
+           %pluslibdata-commit ".tar.gz"))
+     (sha256
+      (base32 "1zsagn5k74dqsi2l4vayf0qbwqk93i0r66gv2sd1fapi04blj21i"))))
+   (build-system trivial-build-system)
+   (native-inputs (list gzip tar))
+   (arguments
+    (list
+     #:modules '((guix build utils))
+     #:builder
+     #~(begin
+         (use-modules (guix build utils))
+         ;; tar -z invokes gzip as a subprocess; put it on PATH.
+         (setenv "PATH" (string-append #$(this-package-native-input "gzip") "/bin:"
+                                       #$(this-package-native-input "tar") "/bin"))
+         (let ((share (string-append #$output "/share/PlusLib-2.9")))
+           (mkdir-p share)
+           ;; Extract tarball, stripping the top-level archive directory so
+           ;; ConfigFiles/, TestImages/, and CADModels/ land directly under
+           ;; share/PlusLib-2.9/ — the path PlusLib's PlusConfig.xml expects.
+           (invoke "tar" "-xzf" #$source "--strip-components=1" "-C" share)))))
+   (home-page "https://plustoolkit.github.io/")
+   (synopsis "Data files for the PlusLib medical imaging toolkit")
+   (description
+    "PlusLibData provides configuration files, test images, and CAD models
+used by PlusLib (Platform for Ultrasound-guided Intervention Software).
+The data is organized as follows under @file{share/PlusLib-2.9/}:
+
+@table @file
+@item ConfigFiles/
+Device configuration XML files and scene files for a wide range of supported
+ultrasound imagers and tracking systems.
+@item TestImages/
+Medical ultrasound image sequences (@file{.mha} format) used as reference
+data by the PlusLib test suite.
+@item CADModels/
+3-D model files for visualization of phantoms and calibration tools.
+@end table")
+   (license license:bsd-3)))
+
+;;;
 ;;; PlusLib — Platform for Ultrasound-guided Intervention Software core library
 ;;;
 
@@ -115,7 +170,17 @@
                             "/lib/igtl/cmake/igtl-3.1")
              (string-append "-DOpenIGTLinkIO_DIR="
                             #$(this-package-input "openigtlinkio")
-                            "/lib/cmake/igtlio"))))
+                            "/lib/cmake/igtlio")
+             ;; Set the data directory to the pluslibdata store path so that
+             ;; the installed PlusConfig.xml has correct absolute paths for
+             ;; DeviceSetConfigurationDirectory, ImageDirectory, and
+             ;; ModelDirectory.  PlusLib's CMake re-sets PLUSLIB_DATA_DIR to
+             ;; an install-relative ${PLUSLIB_INSTALL_PATH}/share/PlusLib-2.9
+             ;; after configuring PlusConfig.xml, so this flag only affects the
+             ;; XML stamping step and not the installed cmake config.
+             (string-append "-DPLUSLIB_DATA_DIR="
+                            #$(this-package-input "pluslibdata")
+                            "/share/PlusLib-2.9"))))
    (inputs
     (list vtk-slicer
           itk-slicer
@@ -151,7 +216,11 @@
     ;; PlusLibConfig.cmake unconditionally calls find_package(VTK), find_package(ITK),
     ;; find_package(IGSIO), and find_package(OpenIGTLinkIO), so all four must be
     ;; in the closure of any downstream consumer.
-    (list igsio itk-slicer openigtlink openigtlinkio vtk-slicer))
+    ;; pluslibdata is propagated so that the store path baked into PlusConfig.xml
+    ;; (DeviceSetConfigurationDirectory, ImageDirectory, ModelDirectory) remains
+    ;; valid as long as pluslib is in the profile — GC will not collect pluslibdata
+    ;; independently.
+    (list igsio itk-slicer openigtlink openigtlinkio pluslibdata vtk-slicer))
    (home-page "https://plustoolkit.github.io/")
    (synopsis "Platform for Ultrasound-guided Intervention Software — core library")
    (description
@@ -279,63 +348,4 @@ command-line utilities for post-processing.
 
 This build enables OpenIGTLink support and the fCal calibration GUI.
 All device drivers that require proprietary vendor SDKs are disabled.")
-   (license license:bsd-3)))
-
-;;;
-;;; PlusLibData — data files for PlusLib (config files, test images, CAD models)
-;;;
-
-(define %pluslibdata-commit "51dcbb76d9f29fad94cf80788a7a0b7c704fb5dc")
-(define %pluslibdata-version (string-append "2.9.0-" (string-take %pluslibdata-commit 7)))
-
-(define-public pluslibdata
-  (package
-   (name "pluslibdata")
-   (version %pluslibdata-version)
-   (source
-    (origin
-     (method url-fetch)
-     (uri (string-append
-           "https://github.com/PlusToolkit/PlusLibData/archive/"
-           %pluslibdata-commit ".tar.gz"))
-     (sha256
-      (base32 "1zsagn5k74dqsi2l4vayf0qbwqk93i0r66gv2sd1fapi04blj21i"))))
-   (build-system trivial-build-system)
-   (native-inputs (list gzip tar))
-   (arguments
-    (list
-     #:modules '((guix build utils))
-     #:builder
-     #~(begin
-         (use-modules (guix build utils))
-         ;; tar -z invokes gzip as a subprocess; put it on PATH.
-         (setenv "PATH" (string-append #$(this-package-native-input "gzip") "/bin:"
-                                       #$(this-package-native-input "tar") "/bin"))
-         (let ((share (string-append #$output "/share/PlusLib-2.9")))
-           (mkdir-p share)
-           ;; Extract tarball, stripping the top-level archive directory so
-           ;; ConfigFiles/, TestImages/, and CADModels/ land directly under
-           ;; share/PlusLib-2.9/ — the path PlusLib's PlusConfig.xml expects.
-           (invoke "tar" "-xzf" #$source "--strip-components=1" "-C" share)))))
-   (home-page "https://plustoolkit.github.io/")
-   (synopsis "Data files for the PlusLib medical imaging toolkit")
-   (description
-    "PlusLibData provides configuration files, test images, and CAD models
-used by PlusLib (Platform for Ultrasound-guided Intervention Software).
-The data is organized as follows under @file{share/PlusLib-2.9/}:
-
-@table @file
-@item ConfigFiles/
-Device configuration XML files and scene files for a wide range of supported
-ultrasound imagers and tracking systems.
-@item TestImages/
-Medical ultrasound image sequences (@file{.mha} format) used as reference
-data by the PlusLib test suite.
-@item CADModels/
-3-D model files for visualization of phantoms and calibration tools.
-@end table
-
-Install this package alongside @code{pluslib} so that the default
-@file{PlusConfig.xml} paths (@code{DeviceSetConfigurationDirectory},
-@code{ImageDirectory}, @code{ModelDirectory}) resolve correctly at runtime.")
    (license license:bsd-3)))
