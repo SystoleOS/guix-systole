@@ -1690,7 +1690,7 @@ tree."))
 ;;; Meta-package
 ;;;
 
-(define %slicer-5.8-loadable-modules
+(define-public %slicer-5.8-loadable-modules
   ;; All standalone loadable modules for slicer-5.8, in dependency order.
   (list slicer-terminologies-5.8
         slicer-subjecthierarchy-5.8
@@ -2038,7 +2038,7 @@ management, series import, and export.  built from the
 ;;; scripted module list and python meta-package
 ;;;
 
-(define %slicer-5.8-scripted-modules
+(define-public %slicer-5.8-scripted-modules
   ;; all standalone scripted modules for slicer-5.8, in load order.
   (list slicer-sampledata-5.8
         slicer-endoscopy-5.8
@@ -2340,7 +2340,7 @@ source tree."))
 ;;; cli module list and meta-package
 ;;;
 
-(define %slicer-5.8-cli-modules
+(define-public %slicer-5.8-cli-modules
   (list slicer-add-scalar-volumes-5.8
         slicer-cast-scalar-volume-5.8
         slicer-checker-board-filter-5.8
