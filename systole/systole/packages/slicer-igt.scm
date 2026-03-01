@@ -592,7 +592,7 @@ target, and saving/restoring camera positions.  Built from the
 ;;; Module lists and meta-packages
 ;;;
 
-(define %slicer-igt-loadable-modules
+(define-public %slicer-igt-loadable-modules
   ;; Loadable modules (built against slicer-5.8, Python-enabled).
   (list slicer-igt-breachwarning
         slicer-igt-collectpoints
@@ -608,7 +608,7 @@ target, and saving/restoring camera positions.  Built from the
         slicer-igt-volumereconstruction))
 
 
-(define %slicer-igt-scripted-modules
+(define-public %slicer-igt-scripted-modules
   ;; Python scripted modules (Python-only, always Python-enabled).
   (list slicer-igt-fiducialstomodelregistration
         slicer-igt-guidelet
