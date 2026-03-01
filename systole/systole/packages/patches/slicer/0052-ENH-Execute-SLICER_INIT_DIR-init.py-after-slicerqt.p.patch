@@ -1,0 +1,43 @@
+From ae7c72badeba78aceb217a1cbc96ef7e30eeb777 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 1 Mar 2026 12:17:23 +0100
+Subject: [PATCH] ENH: Execute SLICER_INIT_DIR/init.py after slicerqt.py
+ initialization
+
+---
+ Base/QTGUI/qSlicerPythonManager.cxx | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/Base/QTGUI/qSlicerPythonManager.cxx b/Base/QTGUI/qSlicerPythonManager.cxx
+index 9ad8b37b81..a08f68998a 100644
+--- a/Base/QTGUI/qSlicerPythonManager.cxx
++++ b/Base/QTGUI/qSlicerPythonManager.cxx
+@@ -12,6 +12,7 @@
+ 
+ // Qt includes
+ #include <QDebug>
++#include <QFileInfo>
+ #include <QVariant>
+ 
+ // Slicer includes
+@@ -43,6 +44,17 @@ void qSlicerPythonManager::executeInitializationScripts()
+ 
+   // Evaluate application script
+   this->executeFile(app->slicerHome() + "/bin/Python/slicer/slicerqt.py");
++
++  // Execute custom initialization script if SLICER_INIT_DIR/init.py exists.
++  QByteArray initDir = qgetenv("SLICER_INIT_DIR");
++  if (!initDir.isEmpty())
++    {
++    QString initPy = QString::fromLocal8Bit(initDir) + "/init.py";
++    if (QFileInfo::exists(initPy))
++      {
++      this->executeFile(initPy);
++      }
++    }
+ }
+ 
+ //-----------------------------------------------------------------------------
+-- 
+2.52.0
+

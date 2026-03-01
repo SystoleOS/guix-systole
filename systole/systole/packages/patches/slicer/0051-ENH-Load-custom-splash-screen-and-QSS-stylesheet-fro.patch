@@ -1,0 +1,67 @@
+From 84bc764adfe11ce5830b28b2dd6b734dc2075fd6 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 1 Mar 2026 12:17:20 +0100
+Subject: [PATCH] ENH: Load custom splash screen and QSS stylesheet from
+ SLICER_INIT_DIR
+
+---
+ Base/QTApp/qSlicerApplicationHelper.txx | 29 ++++++++++++++++++++++++-
+ 1 file changed, 28 insertions(+), 1 deletion(-)
+
+diff --git a/Base/QTApp/qSlicerApplicationHelper.txx b/Base/QTApp/qSlicerApplicationHelper.txx
+index a0be7626a7..28448311f8 100644
+--- a/Base/QTApp/qSlicerApplicationHelper.txx
++++ b/Base/QTApp/qSlicerApplicationHelper.txx
+@@ -28,6 +28,8 @@
+ #include <QMouseEvent>
+ #include <QSettings>
+ #include <QSplashScreen>
++#include <QFile>
++#include <QTextStream>
+ #include <QTimer>
+ 
+ // CTK includes
+@@ -157,6 +159,20 @@ int qSlicerApplicationHelper::postInitializeApplication(
+     app.installEventFilter(app.style());
+   }
+ 
++  // Apply custom Qt stylesheet if SLICER_INIT_DIR/style.qss exists.
++  {
++    QByteArray initDir = qgetenv("SLICER_INIT_DIR");
++    if (!initDir.isEmpty())
++      {
++      QFile qssFile(QString::fromLocal8Bit(initDir) + "/style.qss");
++      if (qssFile.open(QFile::ReadOnly | QFile::Text))
++        {
++        QTextStream ts(&qssFile);
++        app.setStyleSheet(ts.readAll());
++        }
++      }
++  }
++
+ #ifdef Slicer_USE_QtTesting
+   setEnableQtTesting(); // disabled the native menu bar.
+ #endif
+@@ -182,7 +198,18 @@ int qSlicerApplicationHelper::postInitializeApplication(
+ 
+   if (showSplashScreen)
+   {
+-    QPixmap pixmap(":/SplashScreen.png");
++    QPixmap pixmap;
++    {
++      QByteArray initDir = qgetenv("SLICER_INIT_DIR");
++      if (!initDir.isEmpty())
++        {
++        pixmap.load(QString::fromLocal8Bit(initDir) + "/splash.png");
++        }
++      if (pixmap.isNull())
++        {
++        pixmap.load(":/SplashScreen.png");
++        }
++    }
+ 
+     // The application launcher shows the splash screen without DPI scaling (if the screen resolution is higher
+     // then the splashscreen icon appears smaller).
+-- 
+2.52.0
+
