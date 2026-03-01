@@ -1,4 +1,4 @@
-From 8b76ae2ca3453e282aeb568e42072641da351757 Mon Sep 17 00:00:00 2001
+From e6f75e9a09013db76bbede7e1c3c5f2271f69f0a Mon Sep 17 00:00:00 2001
 From: SystoleOS <systole@example.org>
 Date: Sun, 1 Mar 2026 08:18:27 +0100
 Subject: [PATCH] COMP: Guard CPack inclusion behind PLUSAPP_BUILD_PACKAGING
@@ -10,12 +10,12 @@ not available in a standalone install-tree build.  Guarding the
 INCLUDE behind an option lets downstream packagers skip CPack without
 patching CPackConfig.cmake.
 ---
- CMakeLists.txt     | 72 ++++++++++++++++++++++++++++++++++++++++++++--
- InstallFiles.cmake | 12 +++++---
- 2 files changed, 78 insertions(+), 6 deletions(-)
+ CMakeLists.txt     | 92 ++++++++++++++++++++++++++++++++++++++++++----
+ InstallFiles.cmake | 12 ++++--
+ 2 files changed, 93 insertions(+), 11 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2ac6de7..ccd6b47 100644
+index 2ac6de7..637a1c2 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -10,6 +10,39 @@ INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMake/PlusAppMacros.cmake)
@@ -114,6 +114,33 @@ index 2ac6de7..ccd6b47 100644
  
  # --------------------------------------------------------------------------
  # Qt
+@@ -340,11 +408,21 @@ CONFIGURE_FILE(
+     @ONLY
+   )
+ 
+-# Generate default application configuration file for the install
+-SET(PLUSCONFIG_DEVICESET_CONFIG_DIR "../config")
+-SET(PLUSCONFIG_IMAGE_DIR "../data")
+-SET(PLUSCONFIG_MODEL_DIR "../config")
+-SET(PLUSCONFIG_SCRIPTS_DIR "../scripts")
++# Generate default application configuration file for the install.
++# Allow the build system to override paths via -D flags (e.g. from Guix) by
++# only applying the relative defaults when the variable is not already set.
++IF(NOT PLUSCONFIG_DEVICESET_CONFIG_DIR)
++  SET(PLUSCONFIG_DEVICESET_CONFIG_DIR "../config")
++ENDIF()
++IF(NOT PLUSCONFIG_IMAGE_DIR)
++  SET(PLUSCONFIG_IMAGE_DIR "../data")
++ENDIF()
++IF(NOT PLUSCONFIG_MODEL_DIR)
++  SET(PLUSCONFIG_MODEL_DIR "../config")
++ENDIF()
++IF(NOT PLUSCONFIG_SCRIPTS_DIR)
++  SET(PLUSCONFIG_SCRIPTS_DIR "../scripts")
++ENDIF()
+ 
+ CONFIGURE_FILE(
+   ${CMAKE_CURRENT_SOURCE_DIR}/PlusConfig.xml.in
 diff --git a/InstallFiles.cmake b/InstallFiles.cmake
 index 93e7e59..ff78f1c 100644
 --- a/InstallFiles.cmake

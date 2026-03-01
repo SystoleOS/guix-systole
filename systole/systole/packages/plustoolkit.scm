@@ -298,9 +298,22 @@ require proprietary vendor SDKs.  The virtual and network data sources
                             "/include/python3.11")
              (string-append "-DPython3_LIBRARY="
                             #$(this-package-input "python")
-                            "/lib/libpython3.11.so"))))
+                            "/lib/libpython3.11.so")
+             ;; Override PlusApp's hardcoded relative config paths (../config,
+             ;; ../data) so PlusConfig.xml points to the pluslibdata store
+             ;; path rather than non-existent siblings of the bin/ directory.
+             (string-append "-DPLUSCONFIG_DEVICESET_CONFIG_DIR="
+                            #$(this-package-input "pluslibdata")
+                            "/share/PlusLib-2.9/ConfigFiles")
+             (string-append "-DPLUSCONFIG_IMAGE_DIR="
+                            #$(this-package-input "pluslibdata")
+                            "/share/PlusLib-2.9/TestImages")
+             (string-append "-DPLUSCONFIG_MODEL_DIR="
+                            #$(this-package-input "pluslibdata")
+                            "/share/PlusLib-2.9/CADModels"))))
    (inputs
     (list pluslib
+          pluslibdata
           itk-slicer
           vtkaddon
           python
