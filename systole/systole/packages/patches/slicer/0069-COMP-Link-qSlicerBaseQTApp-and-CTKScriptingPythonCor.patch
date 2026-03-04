@@ -1,0 +1,42 @@
+From ba129b61d2b212d5cb72e4a302ab4e4985a0de8c Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 3 Mar 2026 14:13:19 +0100
+Subject: [PATCH] COMP: Link qSlicerBaseQTApp and CTKScriptingPythonCore in
+ CxxTestDriver
+
+SlicerMacroConfigureModuleCxxTestDriver generates a CxxTests executable
+that links the module and TARGET_LIBRARIES. The test sources include
+qSlicerApplicationHelper.h, which requires qSlicerApplicationHelper
+(qSlicerBaseQTApp) and ctkAbstractPythonManager (CTKScriptingPythonCore).
+
+In a superbuild Slicer_GUI_LIBRARY=qSlicerBaseQTApp is transitively
+resolved. In an install-tree extension build the module only links
+qSlicerBaseQTCore/qSlicerBaseQTGUI, leaving those symbols undefined.
+Add qSlicerBaseQTApp and CTKScriptingPythonCore to the link line.
+---
+ CMake/SlicerMacroConfigureModuleCxxTestDriver.cmake | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/CMake/SlicerMacroConfigureModuleCxxTestDriver.cmake b/CMake/SlicerMacroConfigureModuleCxxTestDriver.cmake
+index d7d34faf99..1e884d8ad3 100644
+--- a/CMake/SlicerMacroConfigureModuleCxxTestDriver.cmake
++++ b/CMake/SlicerMacroConfigureModuleCxxTestDriver.cmake
+@@ -108,9 +108,15 @@ macro(SlicerMacroConfigureModuleCxxTestDriver)
+       PROPERTIES
+         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${Slicer_BIN_DIR}
+       )
++    # Test drivers include qSlicerApplicationHelper.h which requires
++    # qSlicerBaseQTApp and CTKScriptingPythonCore. In a superbuild these come
++    # transitively through Slicer_GUI_LIBRARY; in an install-tree build they
++    # must be listed explicitly.
+     target_link_libraries(${SLICER_TEST_DRIVER_NAME}CxxTests
+       ${SLICER_TEST_DRIVER_NAME}
+       ${SLICER_TEST_DRIVER_TARGET_LIBRARIES}
++      qSlicerBaseQTApp
++      CTKScriptingPythonCore
+       )
+     if(NOT DEFINED SLICER_TEST_DRIVER_FOLDER AND DEFINED MODULE_NAME)
+       set(SLICER_TEST_DRIVER_FOLDER "Module-${MODULE_NAME}")
+-- 
+2.52.0
+

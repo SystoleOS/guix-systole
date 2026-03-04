@@ -64,7 +64,10 @@
        (uri (string-append "https://github.com/Slicer/VTK/archive/"
                            "59ec450206012e86d4855bc669800499254bfc77.tar.gz"))
        (sha256
-        (base32 "0dmibmx170aj59qqqfgh28dhlvkakpdfnzgh4zn4hvn24i9j0id9"))))
+        (base32 "0dmibmx170aj59qqqfgh28dhlvkakpdfnzgh4zn4hvn24i9j0id9"))
+       (patches
+        (search-patches
+         "0001-COMP-Install-vtkOpenGLResourceFreeCallback-header.patch"))))
     (arguments
      `(#:tests? #f
        #:build-type "Release"

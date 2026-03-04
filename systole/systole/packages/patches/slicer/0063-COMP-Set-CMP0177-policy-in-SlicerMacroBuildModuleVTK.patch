@@ -1,0 +1,30 @@
+From f4187ff272f08c450be92536cefb5062cb3d0ee3 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 3 Mar 2026 06:01:47 +0100
+Subject: [PATCH] COMP: Set CMP0177 policy in SlicerMacroBuildModuleVTKLibrary
+
+CMake 4.x introduced CMP0177 to normalize install() DESTINATION paths.
+Without explicitly setting this policy, CMake 4.x emits dev warnings for
+every SlicerMacroBuildModuleVTKLibrary() call. Guard with if(POLICY ...)
+so the file remains compatible with CMake < 3.31.
+---
+ CMake/SlicerMacroBuildModuleVTKLibrary.cmake | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/CMake/SlicerMacroBuildModuleVTKLibrary.cmake b/CMake/SlicerMacroBuildModuleVTKLibrary.cmake
+index 376355b527..c5f4896ba8 100644
+--- a/CMake/SlicerMacroBuildModuleVTKLibrary.cmake
++++ b/CMake/SlicerMacroBuildModuleVTKLibrary.cmake
+@@ -151,6 +151,9 @@ macro(SlicerMacroBuildModuleVTKLibrary)
+   # --------------------------------------------------------------------------
+   # Install library
+   # --------------------------------------------------------------------------
++  if(POLICY CMP0177)
++    cmake_policy(SET CMP0177 NEW)
++  endif()
+   if(NOT MY_NO_INSTALL)
+     install(TARGETS ${lib_name}
+       RUNTIME DESTINATION ${Slicer_INSTALL_QTLOADABLEMODULES_BIN_DIR} COMPONENT RuntimeLibraries
+-- 
+2.52.0
+

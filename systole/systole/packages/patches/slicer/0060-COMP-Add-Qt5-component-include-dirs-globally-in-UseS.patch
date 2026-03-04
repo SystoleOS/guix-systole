@@ -1,0 +1,41 @@
+From 8a4e04533efdb11e59c1ddd81f014e13676236c0 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Mon, 2 Mar 2026 13:03:47 +0100
+Subject: [PATCH] COMP: Add Qt5 component include dirs globally in
+ UseSlicer.cmake
+
+CTK's cmake targets link Qt5::Xml, Qt5::Widgets, Qt5::Network, Qt5::Svg
+privately, so headers like <QDomDocument> (from ctkLayoutManager.h),
+<QWidget>, <QNetworkReply> etc. are not transitively visible to extension
+code that only links against CTK or Slicer targets.
+
+In a full Slicer superbuild these include dirs are set globally by the
+top-level CMakeLists.txt; in standalone/install-tree builds they are not.
+Add them via include_directories() in UseSlicer.cmake, mirroring the
+existing pattern used for PYTHONQT_INCLUDE_DIR (patch 0040).
+---
+ CMake/UseSlicer.cmake.in | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/CMake/UseSlicer.cmake.in b/CMake/UseSlicer.cmake.in
+index 15ba2a933e..231ad12c79 100644
+--- a/CMake/UseSlicer.cmake.in
++++ b/CMake/UseSlicer.cmake.in
+@@ -175,6 +175,14 @@ if(Slicer_USE_PYTHONQT)
+   if(PYTHONQT_INCLUDE_DIR)
+     include_directories(${PYTHONQT_INCLUDE_DIR})
+   endif()
++  # Qt5 component headers are not transitively propagated through CTK's cmake
++  # targets (CTK links Qt5::Xml privately).  CTK public headers include e.g.
++  # <QDomDocument> which requires the QtXml include path to be globally visible.
++  foreach(_qt5_comp Xml Widgets Network Svg)
++    if(Qt5${_qt5_comp}_INCLUDE_DIRS)
++      include_directories(${Qt5${_qt5_comp}_INCLUDE_DIRS})
++    endif()
++  endforeach()
+   # Bridge modern Python3 CMake variables/targets to the legacy names expected
+   # by CTK macros (ctkMacroBuildLibWrapper, ctkMacroWrapPythonQt, etc.).
+   # find_package(PythonInterp) and find_package(PythonLibs) were removed in
+-- 
+2.52.0
+

@@ -1,0 +1,29 @@
+From 5c5efac81b6e47848340bf76b281638050d96a1f Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Mon, 2 Mar 2026 14:48:21 +0100
+Subject: [PATCH] COMP: Fix vtkAddon_LIB_DIR in install-tree
+ Slicer_Libs_LIBRARY_DIRS
+
+Replace hard-coded ${Slicer_HOME}/lib/vtkAddon in Slicer_Libs_LIBRARY_DIRS
+with @vtkAddon_LIB_DIR@ so the linker finds libvtkAddon.so in its actual Guix
+store path rather than searching a non-existent directory under Slicer_HOME.
+---
+ CMake/SlicerInstallConfig.cmake.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMake/SlicerInstallConfig.cmake.in b/CMake/SlicerInstallConfig.cmake.in
+index 5c61cd5d32..92d54ec90b 100644
+--- a/CMake/SlicerInstallConfig.cmake.in
++++ b/CMake/SlicerInstallConfig.cmake.in
+@@ -102,7 +102,7 @@ set(Slicer_Libs_LIBRARY_DIRS
+   "${Slicer_HOME}/lib/ModuleDescriptionParser"
+   "${Slicer_HOME}/lib/Qdec"
+   "${Slicer_HOME}/lib/tclap"
+-  "${Slicer_HOME}/lib/vtkAddon"
++  "@vtkAddon_LIB_DIR@"
+   "${Slicer_HOME}/lib/vtkITK"
+   "${Slicer_HOME}/lib/vtkSegmentationCore"
+   "${Slicer_HOME}/lib/vtkTeem"
+-- 
+2.52.0
+

@@ -1,0 +1,59 @@
+From f60e5cecb3af1fb54ff2a22265f6e2a641335daa Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Mon, 2 Mar 2026 09:15:16 +0100
+Subject: [PATCH] COMP: Install CXX test templates and expose
+ Slicer_CXX_MODULE_TEST_TEMPLATES_DIR
+
+SlicerMacroBuildLoadableModule invokes SlicerMacroConfigureGenericCxxModuleTests
+when BUILD_TESTING=ON, which requires Slicer_CXX_MODULE_TEST_TEMPLATES_DIR to
+point to the directory containing qSlicerModuleGenericTest.cxx.in and
+qSlicerModuleWidgetGenericTest.cxx.in.
+
+In a build tree the variable is set (as CACHE INTERNAL) by
+Base/QTGUI/Testing/Cxx/CMakeLists.txt, but the templates were never installed
+and the variable was never exported to the install-tree SlicerConfig.cmake.
+
+Install both .cxx.in files to share/Slicer-5.8/test-templates/ (parallel to
+the Python template already placed there by patch 0033) and set
+Slicer_CXX_MODULE_TEST_TEMPLATES_DIR to that installed path in
+SlicerInstallConfig.cmake.in.
+---
+ Base/QTGUI/Testing/Cxx/CMakeLists.txt | 12 ++++++++++++
+ CMake/SlicerInstallConfig.cmake.in    |  1 +
+ 2 files changed, 13 insertions(+)
+
+diff --git a/Base/QTGUI/Testing/Cxx/CMakeLists.txt b/Base/QTGUI/Testing/Cxx/CMakeLists.txt
+index 2a55e085c9..64f3dbeec0 100644
+--- a/Base/QTGUI/Testing/Cxx/CMakeLists.txt
++++ b/Base/QTGUI/Testing/Cxx/CMakeLists.txt
+@@ -122,3 +122,15 @@ endif()
+ 
+ set(Slicer_CXX_MODULE_TEST_TEMPLATES_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+   CACHE INTERNAL "Path to cxx test templates directory.")
++
++# Install the CXX test templates so that projects building against the
++# installed tree (e.g. Guix-packaged extensions) can find them.
++# Use CMAKE_CURRENT_SOURCE_DIR — the .cxx.in files are plain sources and
++# are never copied to the binary directory when BUILD_TESTING is OFF.
++if(NOT Slicer_INSTALL_NO_DEVELOPMENT)
++  install(FILES
++    ${CMAKE_CURRENT_SOURCE_DIR}/qSlicerModuleGenericTest.cxx.in
++    ${CMAKE_CURRENT_SOURCE_DIR}/qSlicerModuleWidgetGenericTest.cxx.in
++    DESTINATION ${Slicer_INSTALL_SHARE_DIR}/test-templates COMPONENT Development
++    )
++endif()
+diff --git a/CMake/SlicerInstallConfig.cmake.in b/CMake/SlicerInstallConfig.cmake.in
+index 34ec6aa430..8ccabf931e 100644
+--- a/CMake/SlicerInstallConfig.cmake.in
++++ b/CMake/SlicerInstallConfig.cmake.in
+@@ -161,6 +161,7 @@ set(Slicer_INSTALL_LIB_DIR "@Slicer_INSTALL_LIB_DIR@")
+ set(Slicer_INSTALL_INCLUDE_DIR "@Slicer_INSTALL_INCLUDE_DIR@")
+ set(Slicer_INSTALL_SHARE_DIR "@Slicer_INSTALL_SHARE_DIR@")
+ set(Slicer_QRCC_SCRIPT "${Slicer_HOME}/${Slicer_INSTALL_SHARE_DIR}/Scripts/qrcc.py")
++set(Slicer_CXX_MODULE_TEST_TEMPLATES_DIR "${Slicer_HOME}/${Slicer_INSTALL_SHARE_DIR}/test-templates")
+ set(Slicer_INSTALL_ITKFACTORIES_DIR "@Slicer_INSTALL_ITKFACTORIES_DIR@")
+ 
+ set(Slicer_INSTALL_CLIMODULES_BIN_DIR "@Slicer_INSTALL_CLIMODULES_BIN_DIR@")
+-- 
+2.52.0
+
