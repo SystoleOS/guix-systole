@@ -173,6 +173,29 @@ development tools, code search, and documentation generation.")
                  "0050-COMP-Fall-back-to-no-module-when-saved-home-module-i.patch"
                  "0051-ENH-Load-custom-splash-screen-and-QSS-stylesheet-fro.patch"
                  "0052-ENH-Execute-SLICER_INIT_DIR-init.py-after-slicerqt.p.patch"
+                 "0053-COMP-Expose-extension-build-vars-in-install-tree-Sli.patch"
+                 "0054-ENH-Auto-discover-Guix-installed-modules-via-GUIX_EN.patch"
+                 "0055-ENH-Bake-GLEW-store-paths-into-install-tree-SlicerIn.patch"
+                 "0056-COMP-Install-CXX-test-templates-and-expose-Slicer_CX.patch"
+                 "0057-ENH-Add-slicer-launch-wrapper-and-set-Slicer_LAUNCH_.patch"
+                 "0058-COMP-Expose-Slicer_PYTHON_MODULE_TEST_TEMPLATES_DIR-.patch"
+                 "0059-COMP-Install-CMake-.cmake.in-templates-to-developmen.patch"
+                 "0060-COMP-Add-Qt5-component-include-dirs-globally-in-UseS.patch"
+                 "0061-COMP-Fix-vtkAddon_LIB_DIR-in-install-tree-Slicer_Lib.patch"
+                 "0062-COMP-Add-D_STL_RELOPS_H-to-moc_options-for-GCC-15-co.patch"
+                 "0063-COMP-Set-CMP0177-policy-in-SlicerMacroBuildModuleVTK.patch"
+                 "0064-COMP-Fix-Slicer_Base_INCLUDE_DIRS-in-install-tree-Sl.patch"
+                 "0065-COMP-Install-.txx-template-files-alongside-.h-in-Bas.patch"
+                 "0066-COMP-Bake-PYTHONQT_INSTALL_DIR-into-install-tree-Sli.patch"
+                 "0067-COMP-Link-qSlicerBaseQTApp-and-CTKScriptingPythonCor.patch"
+                 "0068-COMP-Guard-vtkWin32OutputWindow.h-include-behind-WIN.patch"
+                 "0069-COMP-Link-qSlicerBaseQTApp-and-CTKScriptingPythonCor.patch"
+                 "0070-COMP-Install-.txx-template-files-in-MRMLCore-develop.patch"
+                 "0071-COMP-Expose-Slicer_QTLOADABLEMODULES_-SUBDIR-BIN-LIB.patch"
+                 "0072-COMP-Register-Slicer-qMRML-designer-plugins-dir-so-Q.patch"
+                 "0073-COMP-Export-Slicer_BUILD_QT_DESIGNER_PLUGINS-in-inst.patch"
+                 "0074-COMP-Fix-designer-plugin-build-dir-and-install-path-.patch"
+                 "0075-COMP-Install-Slicer-VTK-hierarchy-files-and-expose-p.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -216,7 +239,7 @@ development tools, code search, and documentation generation.")
               ;; QT
               "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=OFF"
               "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"
-              "-DSlicer_BUILD_QT_DESIGNER_PLUGINS:BOOL=OFF" ;Turn ON?
+              "-DSlicer_BUILD_QT_DESIGNER_PLUGINS:BOOL=ON"
               "-DSlicer_USE_QtTesting:BOOL=OFF"
               "-DSlicer_USE_SlicerITK:BOOL=ON"
               "-DSlicer_USE_CTKAPPLAUNCHER:BOOL=OFF"
@@ -295,17 +318,70 @@ development tools, code search, and documentation generation.")
                                                          "$ORIGIN/../lib/Slicer-5.8/qt-loadable-modules")
                                           bin))))
                             (add-after 'patch-runpath 'install-slicer-symlink
-                              ;; Expose the binary as bin/Slicer (on PATH).
-                              ;; bin/SlicerApp-real keeps its original name for
-                              ;; compatibility (e.g. gdb bin/SlicerApp-real).
+                              ;; Install bin/Slicer as a wrapper script rather than
+                              ;; a plain symlink to SlicerApp-real.  The wrapper
+                              ;; pre-populates LD_LIBRARY_PATH from
+                              ;; SLICER_ADDITIONAL_MODULE_PATHS before exec-ing
+                              ;; SlicerApp-real.  This is necessary because glibc
+                              ;; caches LD_LIBRARY_PATH at process startup; setting
+                              ;; it via putenv() inside the running process (patch
+                              ;; 0046) is too late for dlopen() to pick it up.
                               (lambda* (#:key outputs #:allow-other-keys)
                                 (let* ((out (assoc-ref outputs "out"))
-                                       (link (string-append out "/bin/Slicer")))
-                                  ;; The CTK launcher was installed as bin/Slicer;
-                                  ;; replace it with a symlink to the real binary.
-                                  (when (file-exists? link)
-                                    (delete-file link))
-                                  (symlink "SlicerApp-real" link)))))))
+                                       (wrapper (string-append out "/bin/Slicer")))
+                                  (when (file-exists? wrapper)
+                                    (delete-file wrapper))
+                                  (call-with-output-file wrapper
+                                    (lambda (port)
+                                      (display "#!/bin/sh\n" port)
+                                      (display "# Slicer launcher: set LD_LIBRARY_PATH from\n" port)
+                                      (display "# SLICER_ADDITIONAL_MODULE_PATHS then exec SlicerApp-real.\n" port)
+                                      (display "IFS=:\n" port)
+                                      (display "for _d in $SLICER_ADDITIONAL_MODULE_PATHS; do\n" port)
+                                      (display "  LD_LIBRARY_PATH=\"$_d${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"\n" port)
+                                      (display "done\n" port)
+                                      (display "unset IFS\n" port)
+                                      ;; When running inside a Guix shell, $GUIX_ENVIRONMENT points to the
+                                      ;; merged profile.  Unconditionally add the merged qt-loadable-modules
+                                      ;; dir so that built-in module .so files are found even when the caller
+                                      ;; has set SLICER_ADDITIONAL_MODULE_PATHS to only extension paths.
+                                      (display "if [ -n \"$GUIX_ENVIRONMENT\" ]; then\n" port)
+                                      (display "  _guix_mods=\"$GUIX_ENVIRONMENT/lib/Slicer-5.8/qt-loadable-modules\"\n" port)
+                                      (display "  if [ -d \"$_guix_mods\" ]; then\n" port)
+                                      (display "    LD_LIBRARY_PATH=\"$_guix_mods${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"\n" port)
+                                      (display "  fi\n" port)
+                                      (display "fi\n" port)
+                                      (display "export LD_LIBRARY_PATH\n" port)
+                                      (display "_dir=\"$(dirname \"$(readlink -f \"$0\")\")\"\n" port)
+                                      (display "exec \"$_dir/SlicerApp-real\" \"$@\"\n" port)))
+                                  (chmod wrapper #o755))))
+                            (add-after 'install-slicer-symlink 'install-slicer-launch
+                              ;; Install bin/slicer-launch: a minimal launcher script
+                              ;; that populates LD_LIBRARY_PATH from the colon-separated
+                              ;; SLICER_ADDITIONAL_MODULE_PATHS entries and then execs
+                              ;; its arguments.  Used as Slicer_LAUNCH_COMMAND in the
+                              ;; install-tree SlicerConfig.cmake so that extension builds
+                              ;; can define and run CTest tests without CTK applauncher.
+                              ;; Before running ctest, the developer exports
+                              ;; SLICER_ADDITIONAL_MODULE_PATHS to include their
+                              ;; extension build directory.
+                              (lambda* (#:key outputs #:allow-other-keys)
+                                (let* ((out (assoc-ref outputs "out"))
+                                       (script (string-append out "/bin/slicer-launch")))
+                                  (call-with-output-file script
+                                    (lambda (port)
+                                      (display "#!/bin/sh\n" port)
+                                      (display "# slicer-launch: extend LD_LIBRARY_PATH from\n" port)
+                                      (display "# SLICER_ADDITIONAL_MODULE_PATHS then exec args.\n" port)
+                                      (display "IFS=:\n" port)
+                                      (display "for _d in $SLICER_ADDITIONAL_MODULE_PATHS; do\n" port)
+                                      (display "  LD_LIBRARY_PATH=\"$_d${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"\n" port)
+                                      (display "done\n" port)
+                                      (display "unset IFS\n" port)
+                                      (display "export LD_LIBRARY_PATH\n" port)
+                                      (display "exec \"$@\"\n" port)))
+                                  (chmod script #o755))))
+                            )))
     (inputs
      (list libxt
            dcmtk
@@ -718,12 +794,45 @@ Line Interface) modules.  It bundles @code{tclap} and
     ;; SLICER_PYTHONPATH (native-search-path) then collects all three via its
     ;; `lib/python3.11/site-packages` and `bin/Python` patterns, and Slicer
     ;; prepends SLICER_PYTHONPATH to PYTHONPATH at startup (patch 0046/0048).
-    (propagated-inputs (list vtk-slicer ctk vtkaddon))
+    ;;
+    ;; Qt component packages are propagated so their cmake configs are
+    ;; discoverable via PATH-derived prefix search when building extensions.
+    ;; UseSlicer.cmake calls find_package(Qt5 COMPONENTS ... UiTools XmlPatterns
+    ;; Svg Multimedia X11Extras Qml LinguistTools ...) for all modules baked into
+    ;; Slicer_REQUIRED_QT_MODULES at build time.  Each component lives in a
+    ;; separate Guix package, so all must be in GUIX_ENVIRONMENT.
+    ;; VTK_DIR, ITK_DIR, CTK_DIR, vtkAddon_DIR, Qt5_DIR, GLEW_* and Python3_*
+    ;; are baked as absolute store paths in SlicerConfig.cmake and resolve
+    ;; directly without needing those packages in the profile.
+    ;; hdf5-1.10 IS propagated: cmake 4.x FindHDF5.cmake validates C/CXX/HL
+    ;; components via find_library(), so HDF5 must be discoverable in PATH.
+    ;; libxml2 is propagated so that extension builds (e.g. Slicer-Liver)
+    ;; inherit libxml2.so.16 in their guix shell profile.  VTK's cmake config
+    ;; exposes VTK::libxml2 → LibXml2::LibXml2, which extensions link against
+    ;; directly; without libxml2 in the profile the resulting .so files get
+    ;; a DT_NEEDED on libxml2.so.16 but no corresponding RUNPATH entry,
+    ;; causing dlopen failures at runtime.
+    (propagated-inputs (list vtk-slicer ctk vtkaddon hdf5-1.10 libtheora
+                             netcdf-slicer proj jsoncpp libharu gl2ps eigen
+                             openmpi double-conversion lz4 libxml2
+                             qtbase-5 qttools-5 qtxmlpatterns-5 qtsvg-5
+                             qtmultimedia-5 qtx11extras qtdeclarative-5))
+
     ;; Extend the base search-path to include qt-scripted-modules so that
     ;; standalone scripted-module packages (installed to that subdirectory)
     ;; are discovered when sharing a profile with slicer-5.8.
     (native-search-paths
-     (list (search-path-specification
+     (list ;; Accumulate every package in the profile as a cmake prefix.
+           ;; cmake's module-mode finders (FindHDF5, FindGLEW, FindZLIB …)
+           ;; derive find_path/find_library search roots from CMAKE_PREFIX_PATH,
+           ;; so transitive deps re-discovered by find_package(ITK)/find_package(VTK)
+           ;; inside UseSlicer.cmake resolve without baking every store path into
+           ;; SlicerConfig.cmake.  Pattern follows the upstream cmake package's own
+           ;; CMAKE_PREFIX_PATH native-search-path declaration (files: "").
+           (search-path-specification
+            (variable "CMAKE_PREFIX_PATH")
+            (files '("")))
+           (search-path-specification
             (variable "SLICER_ADDITIONAL_MODULE_PATHS")
             (files '("lib/Slicer-5.8/qt-loadable-modules"
                      "lib/Slicer-5.8/qt-scripted-modules"
