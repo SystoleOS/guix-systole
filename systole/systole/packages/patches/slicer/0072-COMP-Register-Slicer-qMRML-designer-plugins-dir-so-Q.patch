@@ -1,0 +1,53 @@
+From a6024f2fddb688d62fe8f6b93b0ef6ff25be601e Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 3 Mar 2026 20:54:18 +0100
+Subject: [PATCH] COMP: Register Slicer qMRML designer plugins dir so QUiLoader
+ finds them
+
+Add Slicer_PLUGIN_DIR (CMAKE_INSTALL_PREFIX/lib, baked in at compile
+time) to vtkSlicerConfigure.h.in, and call addLibraryPath() for it in
+preInitializeApplication() alongside the existing CTK_LIBRARY_DIR call.
+
+Qt's QUiLoader searches registered library paths for a 'designer/'
+subdirectory when loading custom widgets from .ui files.  Without this,
+scripted modules that call slicer.util.loadUI() get QWidget fallbacks
+instead of qMRMLWidget, qMRMLNodeComboBox, etc., breaking MRML signals.
+---
+ Base/QTApp/qSlicerApplicationHelper.cxx | 6 ++++++
+ CMake/vtkSlicerConfigure.h.in           | 3 +++
+ 2 files changed, 9 insertions(+)
+
+diff --git a/Base/QTApp/qSlicerApplicationHelper.cxx b/Base/QTApp/qSlicerApplicationHelper.cxx
+index c9af820487..9d92af49bb 100644
+--- a/Base/QTApp/qSlicerApplicationHelper.cxx
++++ b/Base/QTApp/qSlicerApplicationHelper.cxx
+@@ -101,6 +101,12 @@ void qSlicerApplicationHelper::preInitializeApplication(
+   // CTK_LIBRARY_DIR is baked in at compile time via vtkSlicerConfigure.h.
+   QCoreApplication::addLibraryPath(
+     QDir::cleanPath(QString::fromLatin1(CTK_LIBRARY_DIR)));
++  // Also register Slicer's own Qt designer plugins (qMRMLWidgetsPlugin, …)
++  // so that QUiLoader can instantiate qMRMLWidget, qMRMLNodeComboBox, etc.
++  // when scripted modules load their .ui files at runtime.
++  // Slicer_PLUGIN_DIR is CMAKE_INSTALL_PREFIX/lib, baked in at compile time.
++  QCoreApplication::addLibraryPath(
++    QDir::cleanPath(QString::fromLatin1(Slicer_PLUGIN_DIR)));
+ 
+   // Disable the QtWebEngine sandbox in environments that do not support
+   // unprivileged user namespaces (e.g. Docker, most HPC systems).
+diff --git a/CMake/vtkSlicerConfigure.h.in b/CMake/vtkSlicerConfigure.h.in
+index 6f9b32067b..674d88fa1f 100644
+--- a/CMake/vtkSlicerConfigure.h.in
++++ b/CMake/vtkSlicerConfigure.h.in
+@@ -126,6 +126,9 @@
+ #define CTK_DIR "@CTK_DIR@"
+ #define CTK_LIBRARY_DIR "@CTK_LIBRARY_DIR@"
+ #define vtkAddon_LIB_DIR "@vtkAddon_LIB_DIR@"
++// Qt plugin root for Slicer's own designer plugins (qMRMLWidgetsPlugin, …).
++// These are installed to Slicer_PLUGIN_DIR/designer/ at install time.
++#define Slicer_PLUGIN_DIR "@CMAKE_INSTALL_PREFIX@/lib"
+ //#define Teem_DIR "@Teem_DIR@"
+ 
+ #define Slicer_QM_DIR "@Slicer_QM_DIR@"
+-- 
+2.52.0
+

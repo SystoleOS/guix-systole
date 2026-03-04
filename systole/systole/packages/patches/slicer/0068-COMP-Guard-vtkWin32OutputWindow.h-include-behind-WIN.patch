@@ -1,0 +1,39 @@
+From 026e3d907b7f0e18837d2c5ff872e7baa8137032 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 3 Mar 2026 13:20:58 +0100
+Subject: [PATCH] COMP: Guard vtkWin32OutputWindow.h include behind WIN32 in
+ test driver
+
+SlicerMacroConfigureModuleCxxTestDriver unconditionally added
+vtkWin32OutputWindow.h to EXTRA_INCLUDE, causing the generated
+CxxTests.cxx driver to include it on all platforms. The header does
+not exist in the VTK install on Linux, so the build fails immediately.
+
+The WIN32-specific vtkWin32OutputWindow usage in CMAKE_TESTDRIVER_BEFORE_TESTMAIN
+is already wrapped in #ifdef WIN32; guard the include the same way by
+only adding it to EXTRA_INCLUDE when building on WIN32.
+---
+ CMake/SlicerMacroConfigureModuleCxxTestDriver.cmake | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/CMake/SlicerMacroConfigureModuleCxxTestDriver.cmake b/CMake/SlicerMacroConfigureModuleCxxTestDriver.cmake
+index df4f2ded6f..d7d34faf99 100644
+--- a/CMake/SlicerMacroConfigureModuleCxxTestDriver.cmake
++++ b/CMake/SlicerMacroConfigureModuleCxxTestDriver.cmake
+@@ -55,7 +55,12 @@ macro(SlicerMacroConfigureModuleCxxTestDriver)
+     set(CMAKE_TESTDRIVER_BEFORE_TESTMAIN "")
+     set(CMAKE_TESTDRIVER_AFTER_TESTMAIN "")
+ 
+-    set(EXTRA_INCLUDE "vtkWin32OutputWindow.h\"\n\#include \"vtkVersionMacros.h")
++    # vtkWin32OutputWindow.h is a Windows-only header; only include it on WIN32.
++    if(WIN32)
++      set(EXTRA_INCLUDE "vtkWin32OutputWindow.h\"\n\#include \"vtkVersionMacros.h")
++    else()
++      set(EXTRA_INCLUDE "vtkVersionMacros.h")
++    endif()
+ 
+     if(SLICER_TEST_DRIVER_WITH_VTK_ERROR_OUTPUT_CHECK)
+       set(CMAKE_TESTDRIVER_BEFORE_TESTMAIN
+-- 
+2.52.0
+

@@ -1,0 +1,27 @@
+From: SystoleOS <systole@example.org>
+Date: Mon, 2 Mar 2026 00:00:00 +0000
+Subject: [PATCH] COMP: Install vtkOpenGLResourceFreeCallback header
+
+vtkOpenGLResourceFreeCallback.h is a public template utility used by
+Slicer extensions (e.g. Slicer-Liver).  It was present in the source
+tree but not listed in the cmake module's CLASSES, HEADERS, or
+NOWRAP_HEADERS, so it was not installed as part of vtk_module_add_module.
+
+Add it to NOWRAP_HEADERS (it is a template, so no Python wrapping is
+possible or desired).
+---
+ Rendering/OpenGL2/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Rendering/OpenGL2/CMakeLists.txt b/Rendering/OpenGL2/CMakeLists.txt
+index 1234567..abcdef0 100644
+--- a/Rendering/OpenGL2/CMakeLists.txt
++++ b/Rendering/OpenGL2/CMakeLists.txt
+@@ -103,6 +103,7 @@ set(headers
+
+ set(nowrap_headers
+   vtkCompositeMapperHelper2.h
++  vtkOpenGLResourceFreeCallback.h
+ )
+
+ # add opengl support test executable on windows

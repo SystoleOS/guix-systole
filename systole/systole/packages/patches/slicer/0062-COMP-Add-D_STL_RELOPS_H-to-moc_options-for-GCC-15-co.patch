@@ -1,0 +1,77 @@
+From f2291a52b78d0c52908a01abdc3375cc3193adc6 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 3 Mar 2026 06:01:20 +0100
+Subject: [PATCH] COMP: Add -D_STL_RELOPS_H to moc_options for GCC 15
+ compatibility
+
+Qt5 5.15.x MOC (built with GCC 14) queries the system compiler for
+include paths at invocation time. When the active compiler is GCC 15,
+its stl_relops.h contains a deprecated namespace attribute:
+
+  namespace rel_ops _GLIBCXX20_DEPRECATED_SUGGEST("<=>")
+
+Qt5 MOC cannot parse [[deprecated]] on namespace declarations, causing
+a parse error. Passing -D_STL_RELOPS_H suppresses stl_relops.h via its
+include guard, preventing MOC from encountering the problematic syntax.
+---
+ CMake/SlicerMacroBuildApplication.cmake     | 2 +-
+ CMake/SlicerMacroBuildBaseQtLibrary.cmake   | 2 +-
+ CMake/SlicerMacroBuildLoadableModule.cmake  | 2 +-
+ CMake/SlicerMacroBuildModuleQtLibrary.cmake | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/CMake/SlicerMacroBuildApplication.cmake b/CMake/SlicerMacroBuildApplication.cmake
+index e754be7290..d542994d90 100644
+--- a/CMake/SlicerMacroBuildApplication.cmake
++++ b/CMake/SlicerMacroBuildApplication.cmake
+@@ -141,7 +141,7 @@ macro(slicerMacroBuildAppLibrary)
+   #-----------------------------------------------------------------------------
+   # Sources
+   # --------------------------------------------------------------------------
+-    set(_moc_options OPTIONS -DSlicer_HAVE_QT5)
++    set(_moc_options OPTIONS -DSlicer_HAVE_QT5 -D_STL_RELOPS_H)
+     QT5_WRAP_CPP(SLICERAPPLIB_MOC_OUTPUT ${SLICERAPPLIB_MOC_SRCS} ${_moc_options})
+     QT5_WRAP_UI(SLICERAPPLIB_UI_CXX ${SLICERAPPLIB_UI_SRCS})
+     if(DEFINED SLICERAPPLIB_RESOURCES)
+diff --git a/CMake/SlicerMacroBuildBaseQtLibrary.cmake b/CMake/SlicerMacroBuildBaseQtLibrary.cmake
+index 308c64099e..e53bdff92b 100644
+--- a/CMake/SlicerMacroBuildBaseQtLibrary.cmake
++++ b/CMake/SlicerMacroBuildBaseQtLibrary.cmake
+@@ -138,7 +138,7 @@ macro(SlicerMacroBuildBaseQtLibrary)
+   #-----------------------------------------------------------------------------
+   # Sources
+   # --------------------------------------------------------------------------
+-    set(_moc_options OPTIONS -DSlicer_HAVE_QT5)
++    set(_moc_options OPTIONS -DSlicer_HAVE_QT5 -D_STL_RELOPS_H)
+     QT5_WRAP_CPP(SLICERQTBASELIB_MOC_OUTPUT ${SLICERQTBASELIB_MOC_SRCS} ${_moc_options})
+     QT5_WRAP_UI(SLICERQTBASELIB_UI_CXX ${SLICERQTBASELIB_UI_SRCS})
+     if(DEFINED SLICERQTBASELIB_RESOURCES)
+diff --git a/CMake/SlicerMacroBuildLoadableModule.cmake b/CMake/SlicerMacroBuildLoadableModule.cmake
+index 7e2d0bf4b3..05ca54ce26 100644
+--- a/CMake/SlicerMacroBuildLoadableModule.cmake
++++ b/CMake/SlicerMacroBuildLoadableModule.cmake
+@@ -144,7 +144,7 @@ macro(slicerMacroBuildLoadableModule)
+     message("Warning, Slicer_LOGOS_RESOURCE doesn't exist: ${Slicer_LOGOS_RESOURCE}")
+   endif()
+ 
+-    set(_moc_options OPTIONS -DSlicer_HAVE_QT5)
++    set(_moc_options OPTIONS -DSlicer_HAVE_QT5 -D_STL_RELOPS_H)
+     QT5_WRAP_CPP(LOADABLEMODULE_MOC_OUTPUT ${LOADABLEMODULE_MOC_SRCS} ${_moc_options})
+     QT5_WRAP_UI(LOADABLEMODULE_UI_CXX ${LOADABLEMODULE_UI_SRCS})
+     if(DEFINED LOADABLEMODULE_RESOURCES)
+diff --git a/CMake/SlicerMacroBuildModuleQtLibrary.cmake b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+index f9fb6fd941..23f60f51d2 100644
+--- a/CMake/SlicerMacroBuildModuleQtLibrary.cmake
++++ b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+@@ -189,7 +189,7 @@ macro(SlicerMacroBuildModuleQtLibrary)
+     message("Warning, Slicer_LOGOS_RESOURCE doesn't exist: ${Slicer_LOGOS_RESOURCE}")
+   endif()
+ 
+-    set(_moc_options OPTIONS -DSlicer_HAVE_QT5)
++    set(_moc_options OPTIONS -DSlicer_HAVE_QT5 -D_STL_RELOPS_H)
+     QT5_WRAP_CPP(MODULEQTLIBRARY_MOC_OUTPUT ${MODULEQTLIBRARY_MOC_SRCS} ${_moc_options})
+     QT5_WRAP_UI(MODULEQTLIBRARY_UI_CXX ${MODULEQTLIBRARY_UI_SRCS})
+     if(DEFINED MODULEQTLIBRARY_RESOURCES AND NOT MODULEQTLIBRARY_RESOURCES STREQUAL "")
+-- 
+2.52.0
+
