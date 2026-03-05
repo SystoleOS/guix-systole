@@ -1,4 +1,4 @@
-From c777e69cf92e8e497bd661398b9eeb58f6703d88 Mon Sep 17 00:00:00 2001
+From 43b0a1fbaefab19b3efd7fb0bc191853dbbfe569 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sun, 1 Mar 2026 18:14:06 +0100
 Subject: [PATCH] ENH: Auto-discover Guix-installed modules via

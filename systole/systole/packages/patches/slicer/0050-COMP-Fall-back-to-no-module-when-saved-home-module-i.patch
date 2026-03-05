@@ -1,4 +1,4 @@
-From 64ed1cbe5c1f3a96cc8a8c4ab6e8384536cc4c83 Mon Sep 17 00:00:00 2001
+From d5401658454a3c697f42c273e48cb0fca369f14a Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 28 Feb 2026 14:52:02 +0100
 Subject: [PATCH] COMP: Fall back to no module when saved home module is not

@@ -1,4 +1,4 @@
-From 27ee30ee2d7d7e05a6d1a1095c981f2b06b369b4 Mon Sep 17 00:00:00 2001
+From cabc5d87a21c2ef5f3be38277e2c7bf4969588e8 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Mon, 2 Mar 2026 09:54:29 +0100
 Subject: [PATCH] ENH: Add slicer-launch wrapper and set Slicer_LAUNCH_COMMAND

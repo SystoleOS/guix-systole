@@ -1,4 +1,4 @@
-From f2291a52b78d0c52908a01abdc3375cc3193adc6 Mon Sep 17 00:00:00 2001
+From 0b6216537f5b061e4abd2942b5593251baf25485 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 3 Mar 2026 06:01:20 +0100
 Subject: [PATCH] COMP: Add -D_STL_RELOPS_H to moc_options for GCC 15

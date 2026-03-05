@@ -1,4 +1,4 @@
-From f60e5cecb3af1fb54ff2a22265f6e2a641335daa Mon Sep 17 00:00:00 2001
+From 89d01761bd3e0b1666a23b2aa9cff3d2a5a7b775 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Mon, 2 Mar 2026 09:15:16 +0100
 Subject: [PATCH] COMP: Install CXX test templates and expose

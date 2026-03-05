@@ -1,4 +1,4 @@
-From 3de88b586bc3b4ecb128e21358ec1f17e23c5f2c Mon Sep 17 00:00:00 2001
+From 6603fa8698cef8a45381237280210d47897f34ab Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sun, 1 Mar 2026 19:59:30 +0100
 Subject: [PATCH] ENH: Bake GLEW store paths into install-tree
