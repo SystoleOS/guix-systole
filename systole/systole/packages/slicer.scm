@@ -38,6 +38,7 @@
   #:use-module (gnu packages perl)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
+  #:use-module (gnu packages python-build)
   #:use-module (gnu packages python-science)
   #:use-module (gnu packages python-web)
   #:use-module (gnu packages python-xyz)
@@ -196,6 +197,7 @@ development tools, code search, and documentation generation.")
                  "0073-COMP-Export-Slicer_BUILD_QT_DESIGNER_PLUGINS-in-inst.patch"
                  "0074-COMP-Fix-designer-plugin-build-dir-and-install-path-.patch"
                  "0075-COMP-Install-Slicer-VTK-hierarchy-files-and-expose-p.patch"
+                 "0076-ENH-Redirect-pip_install-to-user-home-and-update-sys.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
@@ -352,6 +354,14 @@ development tools, code search, and documentation generation.")
                                       (display "  fi\n" port)
                                       (display "fi\n" port)
                                       (display "export LD_LIBRARY_PATH\n" port)
+                                      ;; Direct pip to install to the user home (~/.local) so that
+                                      ;; slicer.util.pip_install works from an immutable Guix store.
+                                      ;; PIP_USER=1 is equivalent to passing --user to every pip
+                                      ;; invocation.  Packages are installed to
+                                      ;; ~/.local/lib/pythonX.Y/site-packages which Python's site
+                                      ;; module adds to sys.path automatically (Py_NoUserSiteDirectory
+                                      ;; defaults to 0 in qSlicerCorePythonManager).
+                                      (display "export PIP_USER=1\n" port)
                                       (display "_dir=\"$(dirname \"$(readlink -f \"$0\")\")\"\n" port)
                                       (display "exec \"$_dir/SlicerApp-real\" \"$@\"\n" port)))
                                   (chmod wrapper #o755))))
@@ -379,6 +389,7 @@ development tools, code search, and documentation generation.")
                                       (display "done\n" port)
                                       (display "unset IFS\n" port)
                                       (display "export LD_LIBRARY_PATH\n" port)
+                                      (display "export PIP_USER=1\n" port)
                                       (display "exec \"$@\"\n" port)))
                                   (chmod script #o755))))
                             )))
@@ -2489,7 +2500,8 @@ source tree."))
      ;; slicer-5.8's own propagated-inputs.
      (append (list slicer-5.8
                    python-numpy python-requests python-pydicom python-scipy
-                   python-dicomweb-client)
+                   python-dicomweb-client
+                   python-pip)  ; needed by slicer.util.pip_install
              %slicer-5.8-loadable-modules
              %slicer-5.8-scripted-modules
              %slicer-5.8-cli-modules))
