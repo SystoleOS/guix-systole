@@ -1,0 +1,152 @@
+From 698440eee5f45eaf033d60b127bfd05f00ead575 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 4 Mar 2026 14:51:50 +0100
+Subject: [PATCH] ENH: Redirect pip_install to user home and update sys.path
+ for Guix
+
+In immutable store environments (Guix, Nix), pip cannot write to
+Slicer's bundled site-packages directory.  The bin/Slicer wrapper
+sets PIP_USER=1 so that every pip invocation targets the user's
+~/.local prefix.  After installation, ensure the user site-packages
+directory is in sys.path so the freshly installed package is
+importable in the current Slicer session without a restart.
+
+This handles the case where ~/.local/lib/pythonX.Y/site-packages did
+not exist when Python was initialised (site.py skips non-existent
+directories), which would cause imports to fail even though pip
+reported success.
+---
+ Base/Python/slicer/util.py | 92 +++++++++++++++++++++++++++++++++++---
+ 1 file changed, 85 insertions(+), 7 deletions(-)
+
+diff --git a/Base/Python/slicer/util.py b/Base/Python/slicer/util.py
+index d558bee945..1b18d5ca91 100644
+--- a/Base/Python/slicer/util.py
++++ b/Base/Python/slicer/util.py
+@@ -3870,29 +3870,88 @@ def _executePythonModule(module, args):
+     :raises RuntimeError: in case of failure
+     """
+     # Determine pythonSlicerExecutablePath
++    import sys
++    _pipEnvOverride = None
+     try:
+         from slicer import app  # noqa: F401
+ 
+-        # If we get to this line then import from "app" is succeeded,
+-        # which means that we run this function from Slicer Python interpreter.
+-        # PythonSlicer is added to PATH environment variable in Slicer
+-        # therefore shutil.which will be able to find it.
++        # Running inside Slicer's embedded Python interpreter.
++        # Prefer PythonSlicer on PATH (standard Slicer bundle).
++        # In Guix/Nix immutable environments there is no PythonSlicer wrapper.
++        # We find the correct interpreter by tracing back from site.__file__
++        # (e.g. /gnu/store/.../python-3.11.14/lib/python3.11/site.py) to the
++        # Python prefix in the store.  This avoids picking up a different
++        # Python installation (e.g. ~/.guix-home/profile) whose pip version
++        # may be incompatible.
++        # Note: sys.executable is the host application binary in embedded mode,
++        # not the Python interpreter, so it cannot be used as a fallback.
++        import os
+         import shutil
+ 
+         pythonSlicerExecutablePath = shutil.which("PythonSlicer")
+         if not pythonSlicerExecutablePath:
+-            raise RuntimeError("PythonSlicer executable not found")
++            import site as _site
++            _pyver = f"{sys.version_info.major}.{sys.version_info.minor}"
++            # site.__file__: .../python-X.Y.Z/lib/pythonX.Y/site.py
++            # two dirname()s give us the Python installation prefix.
++            _pylib = os.path.dirname(getattr(_site, "__file__", ""))
++            _prefix = os.path.dirname(os.path.dirname(_pylib)) if _pylib else ""
++            _candidate = os.path.join(_prefix, "bin", f"python{_pyver}") if _prefix else ""
++            if _candidate and os.path.isfile(_candidate):
++                pythonSlicerExecutablePath = _candidate
++                # Build a clean environment for the pip subprocess so that
++                # Guix's sitecustomize.py (which reads GUIX_PYTHONPATH and
++                # inserts those paths into sys.path) does not pick up packages
++                # from other profiles (e.g. ~/.guix-home/profile) that may
++                # carry an incompatible pip version.
++                #
++                # Strategy: restrict both PYTHONPATH and GUIX_PYTHONPATH to
++                # the active guix shell profile ($GUIX_ENVIRONMENT) only.
++                # The profile's merged lib/pythonX.Y/site-packages dir
++                # contains symlinks to all profile packages (including
++                # python-pip), so pip and its dependencies are all accessible
++                # without including external profile paths.
++                _base_site = os.path.join(_pylib, "site-packages")
++                _guix_env = os.environ.get("GUIX_ENVIRONMENT", "")
++                _profile_site = (
++                    os.path.join(_guix_env, "lib", f"python{_pyver}", "site-packages")
++                    if _guix_env else ""
++                )
++                if _profile_site and os.path.isdir(os.path.join(_profile_site, "pip")):
++                    # Profile has pip: use profile site-packages exclusively.
++                    _clean_path = ":".join(filter(None, [_base_site, _profile_site]))
++                    _pipEnvOverride = {
++                        "PYTHONPATH": _clean_path,
++                        "GUIX_PYTHONPATH": _profile_site,
++                    }
++                else:
++                    # Fallback: prepend base site to inherited PYTHONPATH.
++                    _existing = os.environ.get("PYTHONPATH", "")
++                    _pipEnvOverride = {
++                        "PYTHONPATH": _base_site + (":" + _existing if _existing else "")
++                    }
++        if not pythonSlicerExecutablePath:
++            _pyver = f"{sys.version_info.major}.{sys.version_info.minor}"
++            pythonSlicerExecutablePath = (
++                shutil.which(f"python{_pyver}")
++                or shutil.which("python3")
++                or shutil.which("python")
++            )
++        if not pythonSlicerExecutablePath:
++            raise RuntimeError("No Python interpreter found (tried PythonSlicer, site prefix, PATH)")
+     except ImportError:
+         # Running from console
+         import os
+-        import sys
+ 
+         pythonSlicerExecutablePath = os.path.dirname(sys.executable) + "/PythonSlicer"
+         if os.name == "nt":
+             pythonSlicerExecutablePath += ".exe"
++        if not os.path.isfile(pythonSlicerExecutablePath):
++            pythonSlicerExecutablePath = sys.executable
+ 
+     commandLine = [pythonSlicerExecutablePath, "-m", module, *args]
+-    proc = launchConsoleProcess(commandLine, useStartupEnvironment=False)
++    proc = launchConsoleProcess(commandLine, useStartupEnvironment=False,
++                                updateEnvironment=_pipEnvOverride)
+     logProcessOutput(proc)
+ 
+ 
+@@ -3939,8 +3998,27 @@ def pip_install(requirements):
+     else:
+         raise ValueError("pip_install requirement input must be string or list")
+ 
++    # In immutable store environments (Guix, Nix) the Python prefix is
++    # read-only, so pip cannot install to the default site-packages directory.
++    # Inject --user unless the caller has already included it or a target
++    # directory / prefix override that indicates they know what they are doing.
++    _no_user_flags = {"--user", "--target", "-t", "--prefix", "--root"}
++    if not any(a in _no_user_flags for a in args):
++        args = args[0:1] + ("--user",) + args[1:]
++
+     _executePythonModule("pip", args)
+ 
++    # pip installs to ~/.local/lib/pythonX.Y/site-packages with --user.
++    # If that directory did not exist when Python was initialised, site.py
++    # will not have added it to sys.path.  Ensure it is present so the newly
++    # installed package is importable without restarting Slicer.
++    import sys
++    import site
++    if getattr(site, "ENABLE_USER_SITE", False):
++        user_site = site.getusersitepackages()
++        if user_site not in sys.path:
++            sys.path.insert(0, user_site)
++
+ 
+ def pip_uninstall(requirements):
+     """Uninstall python packages.
+-- 
+2.52.0
+
