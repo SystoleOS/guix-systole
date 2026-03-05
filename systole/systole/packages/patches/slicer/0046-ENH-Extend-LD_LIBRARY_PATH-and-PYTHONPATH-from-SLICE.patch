@@ -5,14 +5,14 @@ Subject: [PATCH] ENH: Extend LD_LIBRARY_PATH and PYTHONPATH from
  SLICER_ADDITIONAL_MODULE_PATHS/SLICER_PYTHONPATH on startup
 
 ---
- Base/QTCore/qSlicerCoreApplication.cxx | 58 ++++++++++++++++++++++++++
- 1 file changed, 58 insertions(+)
+ Base/QTCore/qSlicerCoreApplication.cxx | 83 ++++++++++++++++++++++++++
+ 1 file changed, 83 insertions(+)
 
 diff --git a/Base/QTCore/qSlicerCoreApplication.cxx b/Base/QTCore/qSlicerCoreApplication.cxx
 index 81f06086af..22e51fd106 100644
 --- a/Base/QTCore/qSlicerCoreApplication.cxx
 +++ b/Base/QTCore/qSlicerCoreApplication.cxx
-@@ -346,6 +346,64 @@ void qSlicerCoreApplicationPrivate::init()
+@@ -346,6 +346,89 @@ void qSlicerCoreApplicationPrivate::init()
      q->setEnvironmentVariable(key, value);
    }
  
@@ -42,6 +42,31 @@ index 81f06086af..22e51fd106 100644
 +      }
 +    if (!newPaths.isEmpty())
 +      {
++      QString existing = this->Environment.value("LD_LIBRARY_PATH");
++      if (!existing.isEmpty())
++        newPaths << existing.split(QLatin1Char(':'));
++      newPaths.removeDuplicates();
++      q->setEnvironmentVariable("LD_LIBRARY_PATH", newPaths.join(QLatin1Char(':')));
++      }
++    }
++  }
++
++  // When running inside a Guix shell, also add the merged profile's
++  // qt-loadable-modules directory so that built-in module .so files are
++  // found even if SLICER_ADDITIONAL_MODULE_PATHS covers only extension paths.
++  {
++  QByteArray guixEnv = qgetenv("GUIX_ENVIRONMENT");
++  if (!guixEnv.isEmpty())
++    {
++    QString guixMods = QString::fromLocal8Bit(guixEnv)
++      + QStringLiteral("/lib/Slicer-")
++      + QString::number(Slicer_VERSION_MAJOR)
++      + QStringLiteral(".") + QString::number(Slicer_VERSION_MINOR)
++      + QStringLiteral("/qt-loadable-modules");
++    if (QDir(guixMods).exists())
++      {
++      QStringList newPaths;
++      newPaths.prepend(guixMods);
 +      QString existing = this->Environment.value("LD_LIBRARY_PATH");
 +      if (!existing.isEmpty())
 +        newPaths << existing.split(QLatin1Char(':'));

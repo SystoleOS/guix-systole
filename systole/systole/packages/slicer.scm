@@ -320,51 +320,18 @@ development tools, code search, and documentation generation.")
                                                          "$ORIGIN/../lib/Slicer-5.8/qt-loadable-modules")
                                           bin))))
                             (add-after 'patch-runpath 'install-slicer-symlink
-                              ;; Install bin/Slicer as a wrapper script rather than
-                              ;; a plain symlink to SlicerApp-real.  The wrapper
-                              ;; pre-populates LD_LIBRARY_PATH from
-                              ;; SLICER_ADDITIONAL_MODULE_PATHS before exec-ing
-                              ;; SlicerApp-real.  This is necessary because glibc
-                              ;; caches LD_LIBRARY_PATH at process startup; setting
-                              ;; it via putenv() inside the running process (patch
-                              ;; 0046) is too late for dlopen() to pick it up.
+                              ;; Replace Slicer's upstream launcher script with a plain
+                              ;; symlink to SlicerApp-real.  All startup behaviors
+                              ;; (LD_LIBRARY_PATH from SLICER_ADDITIONAL_MODULE_PATHS,
+                              ;; GUIX_ENVIRONMENT qt-loadable-modules, PYTHONPATH, PIP_USER)
+                              ;; are handled by C++ patches 0046/0047 at init() time,
+                              ;; before any dlopen() of loadable modules occurs.
                               (lambda* (#:key outputs #:allow-other-keys)
                                 (let* ((out (assoc-ref outputs "out"))
-                                       (wrapper (string-append out "/bin/Slicer")))
-                                  (when (file-exists? wrapper)
-                                    (delete-file wrapper))
-                                  (call-with-output-file wrapper
-                                    (lambda (port)
-                                      (display "#!/bin/sh\n" port)
-                                      (display "# Slicer launcher: set LD_LIBRARY_PATH from\n" port)
-                                      (display "# SLICER_ADDITIONAL_MODULE_PATHS then exec SlicerApp-real.\n" port)
-                                      (display "IFS=:\n" port)
-                                      (display "for _d in $SLICER_ADDITIONAL_MODULE_PATHS; do\n" port)
-                                      (display "  LD_LIBRARY_PATH=\"$_d${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"\n" port)
-                                      (display "done\n" port)
-                                      (display "unset IFS\n" port)
-                                      ;; When running inside a Guix shell, $GUIX_ENVIRONMENT points to the
-                                      ;; merged profile.  Unconditionally add the merged qt-loadable-modules
-                                      ;; dir so that built-in module .so files are found even when the caller
-                                      ;; has set SLICER_ADDITIONAL_MODULE_PATHS to only extension paths.
-                                      (display "if [ -n \"$GUIX_ENVIRONMENT\" ]; then\n" port)
-                                      (display "  _guix_mods=\"$GUIX_ENVIRONMENT/lib/Slicer-5.8/qt-loadable-modules\"\n" port)
-                                      (display "  if [ -d \"$_guix_mods\" ]; then\n" port)
-                                      (display "    LD_LIBRARY_PATH=\"$_guix_mods${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"\n" port)
-                                      (display "  fi\n" port)
-                                      (display "fi\n" port)
-                                      (display "export LD_LIBRARY_PATH\n" port)
-                                      ;; Direct pip to install to the user home (~/.local) so that
-                                      ;; slicer.util.pip_install works from an immutable Guix store.
-                                      ;; PIP_USER=1 is equivalent to passing --user to every pip
-                                      ;; invocation.  Packages are installed to
-                                      ;; ~/.local/lib/pythonX.Y/site-packages which Python's site
-                                      ;; module adds to sys.path automatically (Py_NoUserSiteDirectory
-                                      ;; defaults to 0 in qSlicerCorePythonManager).
-                                      (display "export PIP_USER=1\n" port)
-                                      (display "_dir=\"$(dirname \"$(readlink -f \"$0\")\")\"\n" port)
-                                      (display "exec \"$_dir/SlicerApp-real\" \"$@\"\n" port)))
-                                  (chmod wrapper #o755))))
+                                       (launcher (string-append out "/bin/Slicer")))
+                                  (when (file-exists? launcher)
+                                    (delete-file launcher))
+                                  (symlink "SlicerApp-real" launcher))))
                             (add-after 'install-slicer-symlink 'install-slicer-launch
                               ;; Install bin/slicer-launch: a minimal launcher script
                               ;; that populates LD_LIBRARY_PATH from the colon-separated
