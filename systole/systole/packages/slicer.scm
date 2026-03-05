@@ -198,6 +198,7 @@ development tools, code search, and documentation generation.")
                  "0074-COMP-Fix-designer-plugin-build-dir-and-install-path-.patch"
                  "0075-COMP-Install-Slicer-VTK-hierarchy-files-and-expose-p.patch"
                  "0076-ENH-Redirect-pip_install-to-user-home-and-update-sys.patch"
+                 "0077-COMP-Add-missing-Slicer_EXTENSION_CPACK-to-install-t.patch"
                  ))))
     (build-system cmake-build-system)
     (arguments
