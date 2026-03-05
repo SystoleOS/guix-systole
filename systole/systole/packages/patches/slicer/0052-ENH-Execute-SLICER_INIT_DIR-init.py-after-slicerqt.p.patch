@@ -1,4 +1,4 @@
-From ae7c72badeba78aceb217a1cbc96ef7e30eeb777 Mon Sep 17 00:00:00 2001
+From 9e6cc1244b7e61bcff67208898c0fa5a6e026afc Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sun, 1 Mar 2026 12:17:23 +0100
 Subject: [PATCH] ENH: Execute SLICER_INIT_DIR/init.py after slicerqt.py

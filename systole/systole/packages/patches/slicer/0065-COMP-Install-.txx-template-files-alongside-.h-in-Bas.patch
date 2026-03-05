@@ -1,4 +1,4 @@
-From fe26bc00b7b7274a30e802cb9c341d361ab3460d Mon Sep 17 00:00:00 2001
+From e95ba50ca860d99dd852b8d13e76b5cc2e302fc6 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 3 Mar 2026 09:23:17 +0100
 Subject: [PATCH] COMP: Install .txx template files alongside .h in

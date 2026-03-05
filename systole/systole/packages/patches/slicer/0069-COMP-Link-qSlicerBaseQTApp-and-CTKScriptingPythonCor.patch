@@ -1,4 +1,4 @@
-From ba129b61d2b212d5cb72e4a302ab4e4985a0de8c Mon Sep 17 00:00:00 2001
+From c1f17538c96fe461b132deac4f281dac56df8eb1 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 3 Mar 2026 14:13:19 +0100
 Subject: [PATCH] COMP: Link qSlicerBaseQTApp and CTKScriptingPythonCore in

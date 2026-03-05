@@ -1,4 +1,4 @@
-From 167f5bfbe13f8cb5c2281b3c5bc126ebd86b72d1 Mon Sep 17 00:00:00 2001
+From 2194cd1dc1e1f544b4a04f337302fa3a22b2d24e Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sun, 1 Mar 2026 18:14:02 +0100
 Subject: [PATCH] COMP: Expose extension build vars in install-tree

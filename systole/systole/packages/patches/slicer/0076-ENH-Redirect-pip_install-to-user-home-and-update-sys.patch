@@ -1,4 +1,4 @@
-From 698440eee5f45eaf033d60b127bfd05f00ead575 Mon Sep 17 00:00:00 2001
+From ff08b0d650b093f092b115a5d602ce6940debc04 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Wed, 4 Mar 2026 14:51:50 +0100
 Subject: [PATCH] ENH: Redirect pip_install to user home and update sys.path
