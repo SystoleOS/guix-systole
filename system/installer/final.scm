@@ -230,7 +230,32 @@ or #f.  Return #t on success and #f on failure."
                        (with-input-from-file (%installer-configuration-file)
                          read-lines))
 
-             (set! ret (run-command install-command #:tty? #t)))
+             (set! ret (run-command install-command #:tty? #t))
+
+             ;; On EFI systems, grub-install can silently produce an EFI stub
+             ;; without copying its modules when the installer runs from a
+             ;; chainloaded environment (e.g. Ventoy "normal mode").  The stub
+             ;; exists but normal.mod is absent, causing "normal.mod not found"
+             ;; on first boot.  Detect this and re-run grub-install with
+             ;; --recheck so that module paths are probed fresh.
+             (when (and ret (file-exists? "/sys/firmware/efi"))
+               (let* ((target     (%installer-target-dir))
+                      (normal-mod (string-append target
+                                                 "/boot/grub/x86_64-efi/normal.mod")))
+                 (unless (file-exists? normal-mod)
+                   (installer-log-line
+                    "EFI GRUB modules missing — re-running grub-install --recheck")
+                   (let ((rc (system* "grub-install"
+                                      "--target=x86_64-efi"
+                                      (string-append "--efi-directory="
+                                                     target "/boot/efi")
+                                      (string-append "--boot-directory="
+                                                     target "/boot")
+                                      "--recheck"
+                                      "--no-nvram")))
+                     (unless (zero? rc)
+                       (installer-log-line
+                        "WARNING: grub-install --recheck exited ~a" rc)))))))
            (lambda ()
              ;; Stop guix-daemon so that it does no keep the MNT namespace
              ;; alive.
