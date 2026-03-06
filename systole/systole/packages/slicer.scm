@@ -196,11 +196,8 @@ development tools, code search, and documentation generation.")
                  "0072-COMP-Register-Slicer-qMRML-designer-plugins-dir-so-Q.patch"
                  "0073-COMP-Export-Slicer_BUILD_QT_DESIGNER_PLUGINS-in-inst.patch"
                  "0074-COMP-Fix-designer-plugin-build-dir-and-install-path-.patch"
-                 "0075-COMP-Install-Slicer-VTK-hierarchy-files-and-expose-p.patch"
-                 ;; "0076-ENH-Redirect-pip_install-to-user-home-and-update-sys.patch"
-                 "0077-COMP-Add-missing-Slicer_EXTENSION_CPACK-to-install-t.patch"
-                 "0078-COMP-Bake-Slicer_REVISION-Slicer_OS-Slicer_ARCHITECT.patch"
-                 ))))
+                 "0075-COMP-Install-Slicer-VTK-hierarchy-files-and-expose-p.patch"))))
+
     (build-system cmake-build-system)
     (arguments
      (list #:tests? #f
