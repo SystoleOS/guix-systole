@@ -149,10 +149,13 @@ Examples:
              #:guix-source? #t
              #:channels (and channels-file
                              (file-exists? channels-file)
-                             ;; Evaluate in the (guix channels) module context
-                             ;; so that 'channel', 'make-channel-introduction', etc. are bound
-                             (eval (call-with-input-file channels-file read)
-                                   (resolve-module '(guix channels)))))
+                             ;; Load the whole file: channels-lock files often start with
+                             ;; (define-module ...) so reading only the first form would
+                             ;; return a module object instead of the channels list.
+                             ;; primitive-load evaluates all forms and returns the last value.
+                             (save-module-excursion
+                              (lambda ()
+                                (primitive-load channels-file)))))
             (systole-transformation-linux #:initrd base-initrd))
 
    (operating-system
