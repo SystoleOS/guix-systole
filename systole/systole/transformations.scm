@@ -101,7 +101,11 @@ FIXME: GUIX-SOURCE? is disabled by default due to performance issue."
                         (let ((configured-channels
                                (guix-configuration-channels config)))
                           (append (list %nonguix-channel %guix-systole-channel)
-                                  (or configured-channels %default-channels))))
+                                  ;; Guard against newer Guix returning a module
+                                  ;; object rather than a list from this field.
+                                  (if (list? configured-channels)
+                                      configured-channels
+                                      %default-channels))))
                        ;; channel? is #f, use configured channels as-is
                        (else (guix-configuration-channels config))))
                      (guix
@@ -111,9 +115,12 @@ FIXME: GUIX-SOURCE? is disabled by default due to performance issue."
                           (guix-for-channels
                            (or channels  ; Use provided channels if available
                                ;; Otherwise use default: nonguix + guix-systole
-                               (append (list %nonguix-channel %guix-systole-channel)
-                                       (or (guix-configuration-channels config)
-                                           %default-channels))))
+                               (let ((configured-channels
+                                      (guix-configuration-channels config)))
+                                 (append (list %nonguix-channel %guix-systole-channel)
+                                         (if (list? configured-channels)
+                                             configured-channels
+                                             %default-channels)))))
                           (guix-configuration-guix config)))
                      (authorized-keys
                       (cons %nonguix-signing-key
