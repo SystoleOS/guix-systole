@@ -1,18 +1,18 @@
-From e4ba3a7223e1ee9e45ca6fa02dbda77b2e91b678 Mon Sep 17 00:00:00 2001
+From 26c34ae1d8c30bb65bb1ae24101032c578552914 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Thu, 26 Feb 2026 15:30:38 +0100
-Subject: [PATCH] ENH: Extend LD_LIBRARY_PATH and PYTHONPATH from
+Subject: [PATCH 46/75] ENH: Extend LD_LIBRARY_PATH and PYTHONPATH from
  SLICER_ADDITIONAL_MODULE_PATHS/SLICER_PYTHONPATH on startup
 
 ---
- Base/QTCore/qSlicerCoreApplication.cxx | 58 ++++++++++++++++++++++++++
- 1 file changed, 58 insertions(+)
+ Base/QTCore/qSlicerCoreApplication.cxx | 53 ++++++++++++++++++++++++++
+ 1 file changed, 53 insertions(+)
 
 diff --git a/Base/QTCore/qSlicerCoreApplication.cxx b/Base/QTCore/qSlicerCoreApplication.cxx
-index 81f06086af..22e51fd106 100644
+index 81f06086af..3a89b20100 100644
 --- a/Base/QTCore/qSlicerCoreApplication.cxx
 +++ b/Base/QTCore/qSlicerCoreApplication.cxx
-@@ -346,6 +346,64 @@ void qSlicerCoreApplicationPrivate::init()
+@@ -346,6 +346,59 @@ void qSlicerCoreApplicationPrivate::init()
      q->setEnvironmentVariable(key, value);
    }
  
@@ -68,11 +68,6 @@ index 81f06086af..22e51fd106 100644
 +    q->setEnvironmentVariable("PYTHONPATH", paths.join(QLatin1Char(':')));
 +    }
 +  }
-+
-+  // Direct pip to install to ~/.local so slicer.util.pip_install works
-+  // from an immutable Guix store.  Equivalent to passing --user to pip.
-+  if (qgetenv("PIP_USER").isEmpty())
-+    q->setEnvironmentVariable("PIP_USER", "1");
 +
  #ifdef Slicer_USE_PYTHONQT_WITH_OPENSSL
    if (!QSslSocket::supportsSsl())

@@ -1,8 +1,8 @@
-From 3c24cebabb422f436d98798bc6b41369a826b95a Mon Sep 17 00:00:00 2001
+From 2d5bb6051207e6c2d01fbb46cdd00a11785338f8 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 28 Feb 2026 13:33:50 +0100
-Subject: [PATCH] COMP: Guard Windows 11 numpy/scipy preload workaround behind
- sys.platform check
+Subject: [PATCH 49/75] COMP: Guard Windows 11 numpy/scipy preload workaround
+ behind sys.platform check
 
 The numpy/scipy eager-import block exists solely to work around an
 application hang on Windows 11 (Slicer issue #5945).  On Linux and

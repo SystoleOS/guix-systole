@@ -1,7 +1,7 @@
-From 44e77be9a7bdc70346427001d95859c792846059 Mon Sep 17 00:00:00 2001
+From 434c4721fd1d95fd9df83d0ab3147f74b743b31d Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Thu, 26 Feb 2026 16:09:24 +0100
-Subject: [PATCH] ENH: Prepend CTK and vtkAddon lib dirs to PYTHONPATH at
+Subject: [PATCH 48/75] ENH: Prepend CTK and vtkAddon lib dirs to PYTHONPATH at
  startup
 
 ---
@@ -10,10 +10,10 @@ Subject: [PATCH] ENH: Prepend CTK and vtkAddon lib dirs to PYTHONPATH at
  2 files changed, 23 insertions(+), 10 deletions(-)
 
 diff --git a/Base/QTCore/qSlicerCoreApplication.cxx b/Base/QTCore/qSlicerCoreApplication.cxx
-index 22e51fd106..ff89453936 100644
+index 3a89b20100..cad384a165 100644
 --- a/Base/QTCore/qSlicerCoreApplication.cxx
 +++ b/Base/QTCore/qSlicerCoreApplication.cxx
-@@ -406,19 +406,31 @@ void qSlicerCoreApplicationPrivate::init()
+@@ -381,19 +381,31 @@ void qSlicerCoreApplicationPrivate::init()
      }
    }
  

@@ -1,7 +1,7 @@
 From aa53381f7b58b8c2f492169912456d4d5b8ce616 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 24 Feb 2026 09:49:25 +0100
-Subject: [PATCH] COMP: Fix Slicer_BINARY_DIR usage and expose
+Subject: [PATCH 39/75] COMP: Fix Slicer_BINARY_DIR usage and expose
  QTSCRIPTEDMODULES paths for standalone builds
 
 SubjectHierarchyPlugins/CMakeLists.txt used ${Slicer_BINARY_DIR} as the

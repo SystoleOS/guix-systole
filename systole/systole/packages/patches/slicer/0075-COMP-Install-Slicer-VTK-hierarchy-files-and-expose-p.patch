@@ -1,8 +1,8 @@
-From af6dbf6dd10c42a55aff8049c28194c82904fc58 Mon Sep 17 00:00:00 2001
+From 2036aeba1289adaae5b88a74a889168bfa3b3549 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Wed, 4 Mar 2026 09:27:50 +0100
-Subject: [PATCH] COMP: Install Slicer VTK hierarchy files and expose paths in
- install-tree config
+Subject: [PATCH 75/75] COMP: Install Slicer VTK hierarchy files and expose
+ paths in install-tree config
 
 Extension builds need <Kit>_WRAP_HIERARCHY_FILE CMake variables so that
 vtkMacroKitPythonWrap can pass --types hierarchy files to vtkWrapPython.

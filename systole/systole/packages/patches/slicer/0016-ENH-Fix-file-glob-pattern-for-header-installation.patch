@@ -1,7 +1,7 @@
 From 6f99d51848c597fe9c03fd9a12c2fa8eec4403df Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Fri, 20 Feb 2026 19:23:47 +0100
-Subject: [PATCH] ENH: Fix file glob pattern for header installation
+Subject: [PATCH 16/75] ENH: Fix file glob pattern for header installation
 
 Replace invalid regex-style glob pattern `*.(h|txx)` with separate
 patterns `*.h` and `*.txx` in vtkITK, vtkSegmentationCore, and vtkTeem

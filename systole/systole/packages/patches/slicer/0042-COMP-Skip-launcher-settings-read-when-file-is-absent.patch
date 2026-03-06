@@ -1,7 +1,7 @@
 From ef3579cd1ebaa6bbff95f3c4fc9b4f53114556ef Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Wed, 25 Feb 2026 08:18:43 +0100
-Subject: [PATCH] COMP: Skip launcher settings read when file is absent
+Subject: [PATCH 42/75] COMP: Skip launcher settings read when file is absent
 
 When Slicer is deployed without the CTK app launcher (e.g. using a
 plain shell wrapper that sets all required environment variables

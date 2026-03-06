@@ -1,8 +1,8 @@
 From b53826da83b1a02c44d4cb994de96a15473d5e76 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 24 Feb 2026 08:55:34 +0100
-Subject: [PATCH] COMP: Bridge Python3 target to legacy PYTHON_LIBRARIES in
- UseSlicer
+Subject: [PATCH 38/75] COMP: Bridge Python3 target to legacy PYTHON_LIBRARIES
+ in UseSlicer
 
 ctkMacroBuildLibWrapper calls ctkFunctionExtractOptimizedLibrary(PYTHON_LIBRARIES ...)
 which fails when PYTHON_LIBRARIES is empty.  On CMake >= 3.27 find_package(PythonLibs)

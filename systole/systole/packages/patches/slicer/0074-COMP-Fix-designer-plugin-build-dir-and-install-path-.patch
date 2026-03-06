@@ -1,8 +1,8 @@
-From 75fd30076af403166efe183936bae12048813786 Mon Sep 17 00:00:00 2001
+From 787fcdd77ef2d4b8164f1f6401c01a736c26721c Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Wed, 4 Mar 2026 07:43:27 +0100
-Subject: [PATCH] COMP: Fix designer-plugin build dir and install path for
- standalone modules
+Subject: [PATCH 74/75] COMP: Fix designer-plugin build dir and install path
+ for standalone modules
 
 ctkMacroBuildQtPlugin sets LIBRARY_OUTPUT_DIRECTORY to
 ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/designer.  In standalone module builds

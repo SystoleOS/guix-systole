@@ -1,8 +1,8 @@
 From 2d39fdc345a3cab5dcaa9f201d08c23a19999ef2 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 23:33:37 +0100
-Subject: [PATCH] COMP: Add Slicer_INSTALL_LIB_DIR to QtLibrary link search
- paths
+Subject: [PATCH 32/75] COMP: Add Slicer_INSTALL_LIB_DIR to QtLibrary link
+ search paths
 
 ---
  CMake/SlicerMacroBuildModuleQtLibrary.cmake | 1 +

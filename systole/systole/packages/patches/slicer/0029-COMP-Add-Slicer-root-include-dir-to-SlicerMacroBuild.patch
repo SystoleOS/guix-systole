@@ -1,7 +1,7 @@
 From 7af31c0bcbd7754375b40998dcdf6fba0144ed41 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 16:35:23 +0100
-Subject: [PATCH] COMP: Add Slicer root include dir to
+Subject: [PATCH 29/75] COMP: Add Slicer root include dir to
  SlicerMacroBuildModuleMRML
 
 vtkSlicerVersionConfigureMinimal.h lives in include/Slicer-X.Y/ which

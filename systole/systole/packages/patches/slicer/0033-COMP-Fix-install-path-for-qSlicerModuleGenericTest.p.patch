@@ -1,8 +1,8 @@
 From 812a86aa286f1040ed311acfb237e8253a1cd7a9 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sun, 22 Feb 2026 15:45:16 +0100
-Subject: [PATCH] COMP: Fix install path for qSlicerModuleGenericTest.py.in
- template
+Subject: [PATCH 33/75] COMP: Fix install path for
+ qSlicerModuleGenericTest.py.in template
 
 The install(FILES ...) rule referenced ${CMAKE_CURRENT_BINARY_DIR}/
 qSlicerModuleGenericTest.py.in, but this file is a plain source template

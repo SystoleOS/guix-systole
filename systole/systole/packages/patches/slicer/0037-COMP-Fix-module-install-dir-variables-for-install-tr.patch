@@ -1,7 +1,7 @@
 From 3244f79e4f3e359731c1df130e30e3b3cbcebcea Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 24 Feb 2026 06:16:11 +0100
-Subject: [PATCH] COMP: Fix module install-dir variables for install-tree
+Subject: [PATCH 37/75] COMP: Fix module install-dir variables for install-tree
  standalone builds
 
 SlicerInstallConfig.cmake.in guarded Slicer_INSTALL_QTLOADABLEMODULES_*

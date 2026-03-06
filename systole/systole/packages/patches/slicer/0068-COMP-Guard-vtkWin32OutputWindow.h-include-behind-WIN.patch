@@ -1,8 +1,8 @@
-From 50dc3004d601d6806577639c91e719c9aa46b357 Mon Sep 17 00:00:00 2001
+From 026e3d907b7f0e18837d2c5ff872e7baa8137032 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 3 Mar 2026 13:20:58 +0100
-Subject: [PATCH] COMP: Guard vtkWin32OutputWindow.h include behind WIN32 in
- test driver
+Subject: [PATCH 68/75] COMP: Guard vtkWin32OutputWindow.h include behind WIN32
+ in test driver
 
 SlicerMacroConfigureModuleCxxTestDriver unconditionally added
 vtkWin32OutputWindow.h to EXTRA_INCLUDE, causing the generated

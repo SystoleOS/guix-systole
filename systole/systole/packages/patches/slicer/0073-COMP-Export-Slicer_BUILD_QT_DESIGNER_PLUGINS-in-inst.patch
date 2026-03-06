@@ -1,8 +1,8 @@
-From e98bc7d39d08d9d15c8568b95b5fa420c23e6236 Mon Sep 17 00:00:00 2001
+From b5375b85e51444a452d60f6c8f4c493fd33819ac Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Wed, 4 Mar 2026 07:06:58 +0100
-Subject: [PATCH] COMP: Export Slicer_BUILD_QT_DESIGNER_PLUGINS in install-tree
- SlicerConfig
+Subject: [PATCH 73/75] COMP: Export Slicer_BUILD_QT_DESIGNER_PLUGINS in
+ install-tree SlicerConfig
 
 Expose Slicer_BUILD_QT_DESIGNER_PLUGINS in SlicerInstallConfig.cmake.in
 so that standalone module builds (e.g. slicer-segmentations-5.8,

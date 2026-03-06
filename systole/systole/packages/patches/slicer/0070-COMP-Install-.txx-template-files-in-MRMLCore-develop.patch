@@ -1,8 +1,8 @@
-From 1f731b7fde1ca07de245300524d00d7aa25dbc09 Mon Sep 17 00:00:00 2001
+From e871299867e043b44c609f832c07482a996853ab Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 3 Mar 2026 14:49:33 +0100
-Subject: [PATCH] COMP: Install .txx template files in MRMLCore development
- headers
+Subject: [PATCH 70/75] COMP: Install .txx template files in MRMLCore
+ development headers
 
 vtkMRMLCoreTestingUtilities.h includes vtkMRMLCoreTestingUtilities.txx
 via a relative #include. The MRMLCore install glob only captured *.h,

@@ -1,7 +1,7 @@
-From 2ae1d824bc8208bdc6373d683a73e18b69b072f4 Mon Sep 17 00:00:00 2001
+From 05f0f7949a9c8b9736517d57c2043389ed971e94 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Mon, 2 Mar 2026 10:30:28 +0100
-Subject: [PATCH] COMP: Expose Slicer_PYTHON_MODULE_TEST_TEMPLATES_DIR in
+Subject: [PATCH 58/75] COMP: Expose Slicer_PYTHON_MODULE_TEST_TEMPLATES_DIR in
  install-tree SlicerConfig
 
 SlicerMacroBuildScriptedModule invokes SlicerMacroConfigureGenericPythonModuleTests

@@ -1,8 +1,8 @@
-From 13bd85d4a16019505e53dcf7cf752ea3398596bd Mon Sep 17 00:00:00 2001
+From de83574334f4d7399f6409d77856b699b237e54d Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 3 Mar 2026 11:58:06 +0100
-Subject: [PATCH] COMP: Link qSlicerBaseQTApp and CTKScriptingPythonCore for
- GenericCxxTests
+Subject: [PATCH 67/75] COMP: Link qSlicerBaseQTApp and CTKScriptingPythonCore
+ for GenericCxxTests
 
 The generic CXX test template (qSlicerFooModuleGenericTest.cxx) includes
 qSlicerApplicationHelper.h, which references:
