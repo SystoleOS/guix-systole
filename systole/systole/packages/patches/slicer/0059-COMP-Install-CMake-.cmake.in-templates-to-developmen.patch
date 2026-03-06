@@ -1,7 +1,8 @@
-From 8e28408e9fff98b63802a01dbdd06483bff89ca0 Mon Sep 17 00:00:00 2001
+From 67eb36624a104ae3342a2e4aaec4cd7b65abfb9f Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Mon, 2 Mar 2026 11:31:45 +0100
-Subject: [PATCH] COMP: Install CMake/*.cmake.in templates to development tree
+Subject: [PATCH 59/75] COMP: Install CMake/*.cmake.in templates to development
+ tree
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit

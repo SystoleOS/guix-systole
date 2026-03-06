@@ -1,7 +1,7 @@
-From ae014af3472bd52701ce1a1ff8e39a1b38dc5eb8 Mon Sep 17 00:00:00 2001
+From 8a4e04533efdb11e59c1ddd81f014e13676236c0 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Mon, 2 Mar 2026 13:03:47 +0100
-Subject: [PATCH] COMP: Add Qt5 component include dirs globally in
+Subject: [PATCH 60/75] COMP: Add Qt5 component include dirs globally in
  UseSlicer.cmake
 
 CTK's cmake targets link Qt5::Xml, Qt5::Widgets, Qt5::Network, Qt5::Svg

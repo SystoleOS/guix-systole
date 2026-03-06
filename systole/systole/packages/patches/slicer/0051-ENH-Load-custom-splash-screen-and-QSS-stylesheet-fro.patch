@@ -1,7 +1,7 @@
-From 22cf2e28f2bb95e814f35f4543e45193637eae10 Mon Sep 17 00:00:00 2001
+From 84bc764adfe11ce5830b28b2dd6b734dc2075fd6 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sun, 1 Mar 2026 12:17:20 +0100
-Subject: [PATCH] ENH: Load custom splash screen and QSS stylesheet from
+Subject: [PATCH 51/75] ENH: Load custom splash screen and QSS stylesheet from
  SLICER_INIT_DIR
 
 ---

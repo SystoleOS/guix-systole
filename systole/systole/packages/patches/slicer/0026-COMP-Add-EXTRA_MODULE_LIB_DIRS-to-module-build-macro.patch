@@ -1,8 +1,8 @@
 From 23328670048cf47fd0faad6ba78beaa1581dcd98 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 14:43:49 +0100
-Subject: [PATCH] COMP: Add EXTRA_MODULE_LIB_DIRS to module build macros for
- inter-module deps
+Subject: [PATCH 26/75] COMP: Add EXTRA_MODULE_LIB_DIRS to module build macros
+ for inter-module deps
 
 Allow callers to inject extra library search paths via EXTRA_MODULE_LIB_DIRS
 cmake variable. This feeds into target_link_directories(PUBLIC ...) which is

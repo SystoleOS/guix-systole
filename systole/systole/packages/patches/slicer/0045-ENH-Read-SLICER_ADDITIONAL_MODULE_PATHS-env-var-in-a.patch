@@ -1,7 +1,7 @@
 From 0763aaf2a077c7c921923b1203610ad320597381 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Thu, 26 Feb 2026 15:30:35 +0100
-Subject: [PATCH] ENH: Read SLICER_ADDITIONAL_MODULE_PATHS env var in
+Subject: [PATCH 45/75] ENH: Read SLICER_ADDITIONAL_MODULE_PATHS env var in
  additionalModulePaths()
 
 ---

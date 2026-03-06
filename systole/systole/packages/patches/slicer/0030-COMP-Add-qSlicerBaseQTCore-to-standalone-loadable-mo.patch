@@ -1,8 +1,8 @@
 From c09c5f9c01fb36eaf588850e0ba51472ab6282a8 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 22:25:40 +0100
-Subject: [PATCH] COMP: Add qSlicerBaseQTCore to standalone loadable module
- link deps
+Subject: [PATCH 30/75] COMP: Add qSlicerBaseQTCore to standalone loadable
+ module link deps
 
 ---
  CMake/SlicerMacroBuildLoadableModule.cmake | 4 +++-

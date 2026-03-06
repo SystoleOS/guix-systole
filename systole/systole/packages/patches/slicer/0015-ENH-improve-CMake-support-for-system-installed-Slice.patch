@@ -1,7 +1,7 @@
 From be7ac24975e648ab466a389f2a2a26dff844bf64 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Fri, 20 Feb 2026 17:45:13 +0100
-Subject: [PATCH] [ENH] improve CMake support for system-installed Slicer
+Subject: [PATCH 15/75] [ENH] improve CMake support for system-installed Slicer
  builds
 
 - Add qt-loadable-modules lib directories to link paths for external builds

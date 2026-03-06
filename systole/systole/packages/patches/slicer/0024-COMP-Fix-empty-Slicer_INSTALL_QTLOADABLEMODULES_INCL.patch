@@ -1,8 +1,8 @@
 From 932907d1481586fa452c90ef364b9d926620c954 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Sat, 21 Feb 2026 13:23:26 +0100
-Subject: [PATCH] COMP: Fix empty Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR
- in standalone builds
+Subject: [PATCH 24/75] COMP: Fix empty
+ Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR in standalone builds
 
 UseSlicer.cmake resets Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR to
 an empty string when Slicer_QTLOADABLEMODULES_INCLUDE_DIR is not set

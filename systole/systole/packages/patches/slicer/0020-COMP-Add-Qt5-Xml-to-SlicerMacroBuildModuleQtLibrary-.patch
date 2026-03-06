@@ -1,8 +1,8 @@
 From 0a31e7aeacd4fa547f7776f2bc00bd8a730affad Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Fri, 20 Feb 2026 22:50:09 +0100
-Subject: [PATCH] COMP: Add Qt5::Xml to SlicerMacroBuildModuleQtLibrary target
- libraries
+Subject: [PATCH 20/75] COMP: Add Qt5::Xml to SlicerMacroBuildModuleQtLibrary
+ target libraries
 
 CTK headers (ctkLayoutManager.h) include QDomDocument which lives in
 Qt5::Xml.  In system-install builds Qt5 include dirs only propagate

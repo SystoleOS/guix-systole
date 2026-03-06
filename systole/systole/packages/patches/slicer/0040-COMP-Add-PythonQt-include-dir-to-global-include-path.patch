@@ -1,8 +1,8 @@
 From 3a6dd6889363e3edb215e2de214bd189143177f6 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 24 Feb 2026 12:45:33 +0100
-Subject: [PATCH] COMP: Add PythonQt include dir to global include path in
- UseSlicer
+Subject: [PATCH 40/75] COMP: Add PythonQt include dir to global include path
+ in UseSlicer
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
