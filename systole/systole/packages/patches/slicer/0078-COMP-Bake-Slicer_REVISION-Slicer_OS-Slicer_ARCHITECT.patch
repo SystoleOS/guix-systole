@@ -1,0 +1,36 @@
+From 7b9ff61649714b5091a94ea9aac1f35f90c4a99c Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 5 Mar 2026 21:05:59 +0100
+Subject: [PATCH] COMP: Bake Slicer_REVISION, Slicer_OS, Slicer_ARCHITECTURE
+ into install-tree SlicerConfig
+
+SlicerExtensionCPack.cmake validates these three variables as nonempty
+at configure time.  Without them the CPack setup step fails with:
+  error: Slicer_REVISION is either NOT defined or empty.
+
+Bake the values at Slicer build time via @...@ substitution in
+SlicerInstallConfig.cmake.in, matching the build-tree SlicerConfig.cmake.in.
+---
+ CMake/SlicerInstallConfig.cmake.in | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/CMake/SlicerInstallConfig.cmake.in b/CMake/SlicerInstallConfig.cmake.in
+index 841f87f709..00a7098985 100644
+--- a/CMake/SlicerInstallConfig.cmake.in
++++ b/CMake/SlicerInstallConfig.cmake.in
+@@ -228,6 +228,12 @@ endif()
+ set(Slicer_EXTENSION_GENERATE_CONFIG "${Slicer_CMAKE_DIR}/SlicerExtensionGenerateConfig.cmake")
+ set(Slicer_EXTENSION_CPACK "${Slicer_CMAKE_DIR}/SlicerExtensionCPack.cmake")
+ 
++# Revision/platform info required by SlicerExtensionCPack.cmake
++# (it validates these as nonempty before creating a CPack configuration).
++set(Slicer_REVISION "@Slicer_REVISION@")
++set(Slicer_OS "@Slicer_OS@")
++set(Slicer_ARCHITECTURE "@Slicer_ARCHITECTURE@")
++
+ # Launch command used by SlicerMacroSimpleTest and SlicerMacroBuildLoadableModule
+ # when defining CTest tests.  Replaces the CTK applauncher (absent in Guix):
+ # slicer-launch extends LD_LIBRARY_PATH from SLICER_ADDITIONAL_MODULE_PATHS and
+-- 
+2.52.0
+
