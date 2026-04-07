@@ -1,0 +1,38 @@
+From 73c737f2e45610fc20a8582f4df1bac56c666f58 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 3 Mar 2026 15:34:35 +0100
+Subject: [PATCH] COMP: Expose Slicer_QTLOADABLEMODULES_{SUBDIR,BIN,LIB}_DIR in
+ install-tree
+
+Without these non-INSTALL variants, SlicerMacroBuildLoadableModule sets
+LIBRARY_OUTPUT_DIRECTORY to ${CMAKE_BINARY_DIR}/ (empty suffix) and all
+built .so files land flat in the build root rather than in the expected
+lib/Slicer-5.8/qt-loadable-modules/ subdirectory.
+
+Add the three vars alongside the existing Slicer_INSTALL_QTLOADABLEMODULES_*
+block so that extension builds work correctly against an installed Slicer.
+---
+ CMake/SlicerInstallConfig.cmake.in | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/CMake/SlicerInstallConfig.cmake.in b/CMake/SlicerInstallConfig.cmake.in
+index 10a9a0d72b..687d1a6abc 100644
+--- a/CMake/SlicerInstallConfig.cmake.in
++++ b/CMake/SlicerInstallConfig.cmake.in
+@@ -179,6 +179,13 @@ set(Slicer_INSTALL_CLIMODULES_BIN_DIR "@Slicer_INSTALL_CLIMODULES_BIN_DIR@")
+ set(Slicer_INSTALL_CLIMODULES_LIB_DIR "@Slicer_INSTALL_CLIMODULES_LIB_DIR@")
+ set(Slicer_INSTALL_CLIMODULES_SHARE_DIR "@Slicer_INSTALL_CLIMODULES_SHARE_DIR@")
+ 
++# Non-install relative paths needed by extension builds: SlicerMacroBuildLoadableModule
++# uses these as LIBRARY_OUTPUT_DIRECTORY / RUNTIME_OUTPUT_DIRECTORY relative to
++# CMAKE_BINARY_DIR.  Without them the .so files land flat in the build root.
++set(Slicer_QTLOADABLEMODULES_SUBDIR "@Slicer_QTLOADABLEMODULES_SUBDIR@")
++set(Slicer_QTLOADABLEMODULES_BIN_DIR "@Slicer_QTLOADABLEMODULES_BIN_DIR@")
++set(Slicer_QTLOADABLEMODULES_LIB_DIR "@Slicer_QTLOADABLEMODULES_LIB_DIR@")
++
+ # Always expose install dirs so external projects can build loadable and scripted
+ # modules against an installed Slicer even when Slicer_BUILD_QTLOADABLEMODULES=OFF.
+ set(Slicer_INSTALL_QTLOADABLEMODULES_BIN_DIR "@Slicer_INSTALL_QTLOADABLEMODULES_BIN_DIR@")
+-- 
+2.52.0
+

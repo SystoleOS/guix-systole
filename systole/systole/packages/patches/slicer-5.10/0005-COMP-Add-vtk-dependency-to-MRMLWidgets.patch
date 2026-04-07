@@ -1,0 +1,25 @@
+From b7cf922dcdc10bb7cd6b1b9632acb13256897f86 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 6 May 2025 10:14:00 +0200
+Subject: [PATCH] COMP: Add vtk dependency to MRMLWidgets
+
+Co-authored-by: Khai Duong <duongkhai@gmail.com>
+---
+ Libs/MRML/Widgets/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Libs/MRML/Widgets/CMakeLists.txt b/Libs/MRML/Widgets/CMakeLists.txt
+index 937d8d406d..fbb9877ea1 100644
+--- a/Libs/MRML/Widgets/CMakeLists.txt
++++ b/Libs/MRML/Widgets/CMakeLists.txt
+@@ -363,6 +363,7 @@ set_target_properties(${lib_name} PROPERTIES
+ set(MRMLWidgets_LIBRARIES
+   ${QT_LIBRARIES}
+   ${CTK_LIBRARIES}
++  VTK::IOExportGL2PS
+   MRMLLogic
+   MRMLDisplayableManager
+   VTK::RenderingQt
+-- 
+2.52.0
+

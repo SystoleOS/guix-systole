@@ -1,0 +1,65 @@
+From 2b3559a0037f1821ae7fbcfc135c31c9e0f458fc Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 20 Feb 2026 19:23:47 +0100
+Subject: [PATCH] ENH: Fix file glob pattern for header installation
+
+Replace invalid regex-style glob pattern `*.(h|txx)` with separate
+patterns `*.h` and `*.txx` in vtkITK, vtkSegmentationCore, and vtkTeem
+CMakeLists files.
+---
+ Libs/vtkITK/CMakeLists.txt              | 5 ++++-
+ Libs/vtkSegmentationCore/CMakeLists.txt | 5 ++++-
+ Libs/vtkTeem/CMakeLists.txt             | 5 ++++-
+ 3 files changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/Libs/vtkITK/CMakeLists.txt b/Libs/vtkITK/CMakeLists.txt
+index 9b3762e030..fbddbcea63 100644
+--- a/Libs/vtkITK/CMakeLists.txt
++++ b/Libs/vtkITK/CMakeLists.txt
+@@ -97,7 +97,10 @@ if(NOT DEFINED ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+   set(${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT ON)
+ endif()
+ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+-  file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.(h|hxx)")
++  file(GLOB headers
++    "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
++    "${CMAKE_CURRENT_SOURCE_DIR}/*.hxx"
++    "${CMAKE_CURRENT_SOURCE_DIR}/*.txx")
+   install(
+     FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
+     DESTINATION include/${PROJECT_NAME} COMPONENT Development)
+diff --git a/Libs/vtkSegmentationCore/CMakeLists.txt b/Libs/vtkSegmentationCore/CMakeLists.txt
+index be3c0116cb..2682f6f30d 100644
+--- a/Libs/vtkSegmentationCore/CMakeLists.txt
++++ b/Libs/vtkSegmentationCore/CMakeLists.txt
+@@ -23,7 +23,10 @@ if(NOT DEFINED ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+   set(${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT ON)
+ endif()
+ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+-  file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.(h|hxx)")
++  file(GLOB headers
++    "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
++    "${CMAKE_CURRENT_SOURCE_DIR}/*.hxx"
++    "${CMAKE_CURRENT_SOURCE_DIR}/*.txx")
+   install(
+     FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
+     DESTINATION include/${PROJECT_NAME} COMPONENT Development)
+diff --git a/Libs/vtkTeem/CMakeLists.txt b/Libs/vtkTeem/CMakeLists.txt
+index 8906f694fd..43c6ff7493 100644
+--- a/Libs/vtkTeem/CMakeLists.txt
++++ b/Libs/vtkTeem/CMakeLists.txt
+@@ -60,7 +60,10 @@ if(NOT DEFINED ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+   set(${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT ON)
+ endif()
+ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+-  file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.(h|hxx)")
++  file(GLOB headers
++    "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
++    "${CMAKE_CURRENT_SOURCE_DIR}/*.hxx"
++    "${CMAKE_CURRENT_SOURCE_DIR}/*.txx")
+   install(
+     FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
+     DESTINATION include/${PROJECT_NAME} COMPONENT Development)
+-- 
+2.52.0
+

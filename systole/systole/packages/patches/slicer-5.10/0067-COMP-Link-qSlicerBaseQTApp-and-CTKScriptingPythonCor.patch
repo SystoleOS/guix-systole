@@ -1,0 +1,45 @@
+From e0d142e0e7c70043730c2d24528f206726536658 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 3 Mar 2026 11:58:06 +0100
+Subject: [PATCH] COMP: Link qSlicerBaseQTApp and CTKScriptingPythonCore for
+ GenericCxxTests
+
+The generic CXX test template (qSlicerFooModuleGenericTest.cxx) includes
+qSlicerApplicationHelper.h, which references:
+- qSlicerApplicationHelper::setupModuleFactoryManager (qSlicerBaseQTApp)
+- ctkAbstractPythonManager::pythonErrorOccured (CTKScriptingPythonCore)
+
+In a superbuild, Slicer_GUI_LIBRARY=qSlicerBaseQTApp is transitively
+available through the module library. In an install-tree extension build
+the module links qSlicerBaseQTCore/qSlicerBaseQTGUI instead, so the
+symbols are not transitively resolved. Add qSlicerBaseQTApp and
+CTKScriptingPythonCore explicitly to the GenericCxxTests link line.
+---
+ CMake/SlicerMacroBuildLoadableModule.cmake | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/CMake/SlicerMacroBuildLoadableModule.cmake b/CMake/SlicerMacroBuildLoadableModule.cmake
+index 9db42dd63b..b672c898ac 100644
+--- a/CMake/SlicerMacroBuildLoadableModule.cmake
++++ b/CMake/SlicerMacroBuildLoadableModule.cmake
+@@ -363,7 +363,16 @@ macro(slicerMacroBuildLoadableModule)
+ 
+     ctk_add_executable_utf8(${KIT}GenericCxxTests ${Tests})
+     set_target_properties(${KIT}GenericCxxTests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${Slicer_BIN_DIR})
+-    target_link_libraries(${KIT}GenericCxxTests ${KIT})
++    # GenericCxxTests includes qSlicerApplicationHelper.h (via the generic test
++    # template) which requires qSlicerBaseQTApp and CTKScriptingPythonCore.
++    # In a superbuild, Slicer_GUI_LIBRARY (= qSlicerBaseQTApp) is already
++    # transitively available through ${KIT}; in an install-tree build the
++    # module links qSlicerBaseQTCore/GUI instead, so link them explicitly here.
++    target_link_libraries(${KIT}GenericCxxTests
++      ${KIT}
++      qSlicerBaseQTApp
++      CTKScriptingPythonCore
++      )
+     if(NOT "${LOADABLEMODULE_FOLDER}" STREQUAL "")
+       set_target_properties(${KIT}GenericCxxTests PROPERTIES FOLDER ${LOADABLEMODULE_FOLDER})
+     endif()
+-- 
+2.52.0
+

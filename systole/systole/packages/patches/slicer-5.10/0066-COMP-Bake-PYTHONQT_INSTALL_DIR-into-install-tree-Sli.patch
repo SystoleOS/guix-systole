@@ -1,0 +1,36 @@
+From be390306d59dd8ecd9c33dc3fd041abadc2232dc Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 3 Mar 2026 10:25:37 +0100
+Subject: [PATCH] COMP: Bake PYTHONQT_INSTALL_DIR into install-tree
+ SlicerInstallConfig
+
+When building an extension against an installed Slicer, UseSlicer.cmake
+calls find_package(PythonQt). FindPythonQt.cmake searches for PythonQt.h
+using PYTHONQT_INSTALL_DIR as a hint. Without this variable set, the
+search fails and PYTHONQT_INCLUDE_DIR remains empty, causing compilation
+errors for any header that transitively includes PythonQtPythonInclude.h
+(e.g. ctkAbstractPythonManager.h pulled in via qSlicerCorePythonManager.h).
+
+Bake the build-time PYTHONQT_INSTALL_DIR store path into the installed
+SlicerConfig.cmake so extension builds automatically locate PythonQt.
+---
+ CMake/SlicerInstallConfig.cmake.in | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/CMake/SlicerInstallConfig.cmake.in b/CMake/SlicerInstallConfig.cmake.in
+index 26a758d47a..10a9a0d72b 100644
+--- a/CMake/SlicerInstallConfig.cmake.in
++++ b/CMake/SlicerInstallConfig.cmake.in
+@@ -188,6 +188,9 @@ set(Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR "@Slicer_INSTALL_QTLOADABLEMODU
+ set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR "@Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR@")
+ 
+ if(Slicer_USE_PYTHONQT)
++  # PythonQt location — needed so that find_package(PythonQt) in UseSlicer.cmake
++  # can set PYTHONQT_INCLUDE_DIR for any extension build.
++  set(PYTHONQT_INSTALL_DIR "@PYTHONQT_INSTALL_DIR@")
+   # Non-install relative paths needed by standalone module builds (e.g. for
+   # ctkMacroCompilePythonScript DESTINATION_DIR which is relative to CMAKE_BINARY_DIR).
+   set(Slicer_QTSCRIPTEDMODULES_SUBDIR "@Slicer_QTSCRIPTEDMODULES_SUBDIR@")
+-- 
+2.52.0
+

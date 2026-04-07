@@ -1,0 +1,28 @@
+From 75ae6e2e06c4bbabf6764f75223bdb403538e9ff Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 24 Jan 2023 09:55:32 +0100
+Subject: [PATCH] COMP: Find Eigen (required)
+
+---
+ CMakeLists.txt | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 90c082da20..2aa6f53d2e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -965,6 +965,11 @@ if(NOT TARGET ${VTK_GUI_SUPPORT_QT_TARGET_NAME})
+                     "Note that Qt >= ${Slicer_REQUIRED_QT_VERSION} is *required*")
+ endif()
+ 
++#-----------------------------------------------------------------------------
++# Eigen
++#-----------------------------------------------------------------------------
++find_package(Eigen3 3.3 REQUIRED CONFIG)
++
+ #-----------------------------------------------------------------------------
+ # CTK
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+
