@@ -1848,7 +1848,7 @@ tree."))
 ;;   guix-systole-<modulename>-scripted-module-5.8.1
 ;; in ~/src/slicer/slicer-systole, following the same convention as the
 ;; loadable-module branches.  patches are generated with git format-patch and
-;; stored under systole/packages/patches/slicer/<modulename>/.
+;; stored under systole/packages/patches/slicer-5.8/<modulename>/.
 (define* (make-slicer-scripted-module
           #:key
           name            ; package name string, e.g. "slicer-sampledata-5.8"

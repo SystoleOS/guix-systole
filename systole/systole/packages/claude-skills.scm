@@ -226,7 +226,7 @@ BLOCK-CONTENT is a computed-file whose content becomes the body of the
            "\n"
            "# List existing patch subdirectories\n"
            "ls " #$(file-append guix-systole-scm-source)
-           "/systole/systole/packages/patches/slicer/\n"
+           "/systole/systole/packages/patches/slicer-5.8/\n"
            "```\n")
           port)))))
 
