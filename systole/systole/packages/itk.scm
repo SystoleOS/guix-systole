@@ -177,6 +177,29 @@
 without any Guix-specific build patches.  Useful as a read-only reference for
 code search and API exploration.")))
 
+;;
+;; Slicer 5.10 variant — ITK 5.4.4
+;;
+
+;; ITK 5.4.4 for use by the Slicer 5.10 stack.
+;; Inherits all configure flags and remote modules from itk-slicer (5.4.0);
+;; only the source commit and vtk dependency are updated.
+(define-public itk-slicer-5.4.4
+  (package
+    (inherit itk-slicer)
+    (name "itk-slicer")
+    (version "5.4.4")
+    (source
+     (origin
+       (method url-fetch)
+       (uri
+        "https://github.com/Slicer/ITK/archive/e5dd69339bf0c436db3650eadd3c2a940c330b77.tar.gz")
+       (sha256
+        (base32 "1ygqqjncskl56g7yvp42id30kj9wa3b26aazb3cl78cb26hq074q"))))
+    (inputs (modify-inputs (package-inputs itk-slicer)
+              (replace "vtk-slicer" vtk-slicer-9.5)))
+    (home-page "https://github.com/Slicer/ITK/")))
+
 ;; NOTE: itk-slicer uses vtk-slicer (Python-enabled) after the vtk.scm rename.
 ;; ITK Python wrapping (ITK_WRAP_PYTHON) remains OFF because python-pygccxml
 ;; is not packaged in Guix.  Once available, extend itk-slicer with:

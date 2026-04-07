@@ -60,10 +60,12 @@
                          (string-append systole-patches "/igsio")
                          (string-append systole-patches "/qrestapi")
                          (string-append systole-patches "/slicer-5.8")
+                         (string-append systole-patches "/slicer-5.10")
                          (string-append systole-patches "/slicer-igt")
                          (string-append systole-patches "/slicer-openigtlink")
                          (string-append systole-patches "/slicerexecutionmodel")
                          (string-append systole-patches "/vtk")
+                         (string-append systole-patches "/vtk-9.5")
                          ;; Distro-specific ROS 2 patch dirs come FIRST so
                          ;; they override entries in ros2/common.
                          (string-append systole-patches "/ros2/jazzy")
