@@ -1,0 +1,24 @@
+From 6d7206a8a7240ca8153cf970314979ed8188ca46 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 24 Jan 2023 09:51:51 +0100
+Subject: [PATCH] COMP: Add vtk CommonSystem component as requirement
+
+---
+ CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e371efdc71..90c082da20 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -613,6 +613,7 @@ message(STATUS "  Slicer_VTK_MINIMUM_SUPPORTED_VERSION is ${Slicer_VTK_MINIMUM_S
+ # Slicer_VTK_COMPONENTS
+ #-----------------------------------------------------------------------------
+ set(Slicer_VTK_COMPONENTS
++  CommonSystem
+   FiltersExtraction
+   FiltersFlowPaths
+   FiltersGeometry
+-- 
+2.52.0
+

@@ -1,0 +1,79 @@
+From b08e2bc4799e993777ec7177f45df599139397f3 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 9 May 2025 23:04:34 +0200
+Subject: [PATCH] ENH: Fix installation of development files
+
+---
+ CMake/SlicerInstallConfig.cmake.in           | 15 ++++++++++++++-
+ CMake/SlicerMacroBuildModuleQtLibrary.cmake  |  4 ++--
+ CMake/SlicerMacroBuildModuleVTKLibrary.cmake |  4 ++--
+ 3 files changed, 18 insertions(+), 5 deletions(-)
+
+diff --git a/CMake/SlicerInstallConfig.cmake.in b/CMake/SlicerInstallConfig.cmake.in
+index f5313944c9..a9b6707530 100644
+--- a/CMake/SlicerInstallConfig.cmake.in
++++ b/CMake/SlicerInstallConfig.cmake.in
+@@ -77,6 +77,17 @@ endif()
+ set(Slicer_EXPORT_HEADER_TEMPLATE "@Slicer_INSTALL_TEMPLATES_DIR@/qSlicerExport.h.in")
+ 
+ set(Slicer_BUILD_CLI_SUPPORT "@Slicer_BUILD_CLI_SUPPORT@")
++# Slicer Core library
++set(Slicer_CORE_LIBRARY "@Slicer_CORE_LIBRARY_CONFIG@")
++
++# Slicer GUI library
++set(Slicer_GUI_LIBRARY "@Slicer_GUI_LIBRARY_CONFIG@")
++
++# MRML libraries - This variable regroup all related MRML libraries
++set(MRML_LIBRARIES "@MRML_LIBRARIES@")
++
++# Slicer Libs VTK wrapped libraries
++set(Slicer_Libs_VTK_WRAPPED_LIBRARIES "@Slicer_Libs_VTK_WRAPPED_LIBRARIES@")
+ 
+ # Slicer Libs library directories.
+ set(Slicer_Libs_LIBRARY_DIRS
+@@ -109,7 +120,9 @@ set(Slicer_Libs_INCLUDE_DIRS
+   "${Slicer_HOME}/include/vtkITK"
+   "${Slicer_HOME}/include/vtkSegmentationCore"
+   "${Slicer_HOME}/include/vtkTeem"
+-  "${Slicer_HOME}/include/qSlicerBaseQTGUI"
++  "${Slicer_HOME}/include/Slicer-5.8/qSlicerBaseQTGUI"
++  "${Slicer_HOME}/include/Slicer-5.8/qSlicerBaseQTCore"
++
+   "@vtkAddon_INCLUDE_DIRS@"
+   )
+ 
+diff --git a/CMake/SlicerMacroBuildModuleQtLibrary.cmake b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+index c68ceb841f..dc5c084251 100644
+--- a/CMake/SlicerMacroBuildModuleQtLibrary.cmake
++++ b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+@@ -214,9 +214,9 @@ macro(SlicerMacroBuildModuleQtLibrary)
+   # --------------------------------------------------------------------------
+   # Install headers
+   # --------------------------------------------------------------------------
+-  if(DEFINED Slicer_DEVELOPMENT_INSTALL)
++  if(DEFINED Slicer_INSTALL_DEVELOPMENT)
+     if(NOT DEFINED ${MODULEQTLIBRARY_NAME}_DEVELOPMENT_INSTALL)
+-      set(${MODULEQTLIBRARY_NAME}_DEVELOPMENT_INSTALL ${Slicer_DEVELOPMENT_INSTALL})
++      set(${MODULEQTLIBRARY_NAME}_DEVELOPMENT_INSTALL ${Slicer_INSTALL_DEVELOPMENT})
+     endif()
+   else()
+     if(NOT DEFINED ${MODULEQTLIBRARY_NAME}_DEVELOPMENT_INSTALL)
+diff --git a/CMake/SlicerMacroBuildModuleVTKLibrary.cmake b/CMake/SlicerMacroBuildModuleVTKLibrary.cmake
+index a08ebefbd5..9e7246a936 100644
+--- a/CMake/SlicerMacroBuildModuleVTKLibrary.cmake
++++ b/CMake/SlicerMacroBuildModuleVTKLibrary.cmake
+@@ -155,9 +155,9 @@ macro(SlicerMacroBuildModuleVTKLibrary)
+   # --------------------------------------------------------------------------
+   # Install headers
+   # --------------------------------------------------------------------------
+-  if(DEFINED Slicer_DEVELOPMENT_INSTALL)
++  if(DEFINED Slicer_INSTALL_DEVELOPMENT)
+     if(NOT DEFINED ${MODULEVTKLIBRARY_NAME}_DEVELOPMENT_INSTALL)
+-      set(${MODULEVTKLIBRARY_NAME}_DEVELOPMENT_INSTALL ${Slicer_DEVELOPMENT_INSTALL})
++      set(${MODULEVTKLIBRARY_NAME}_DEVELOPMENT_INSTALL ${Slicer_INSTALL_DEVELOPMENT})
+     endif()
+   else()
+     if(NOT DEFINED ${MODULEVTKLIBRARY_NAME}_DEVELOPMENT_INSTALL)
+-- 
+2.52.0
+

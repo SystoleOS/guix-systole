@@ -1,0 +1,213 @@
+From 88f8fb61a65bc27c9019c5a56ccb331c749c2b7d Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Fri, 20 Feb 2026 17:45:13 +0100
+Subject: [PATCH] [ENH] improve CMake support for system-installed Slicer
+ builds
+
+- Add qt-loadable-modules lib directories to link paths for external builds
+- Fallback to qSlicerBaseQTGUI when Slicer_GUI_LIBRARY is unset
+- Add CTK library dirs and explicit CTKVisualizationVTKCore linking
+- Include per-module subdirectories in qt-loadable include paths
+- Make Terminologies module buildable standalone with proper Slicer find_package
+- Skip Python wrapping when Slicer_USE_PYTHONQT is disabled
+---
+ CMake/SlicerMacroBuildLoadableModule.cmake    | 16 ++++++++++-
+ CMake/SlicerMacroBuildModuleLogic.cmake       |  5 ++++
+ CMake/SlicerMacroBuildModuleQtLibrary.cmake   | 27 ++++++++++++++-----
+ CMake/SlicerMacroBuildModuleWidgets.cmake     | 23 +++++++++++++---
+ Modules/Loadable/Terminologies/CMakeLists.txt | 13 +++++++++
+ .../Terminologies/Logic/CMakeLists.txt        |  6 +++++
+ 6 files changed, 80 insertions(+), 10 deletions(-)
+
+diff --git a/CMake/SlicerMacroBuildLoadableModule.cmake b/CMake/SlicerMacroBuildLoadableModule.cmake
+index 60ac4b0ad2..152d3b4139 100644
+--- a/CMake/SlicerMacroBuildLoadableModule.cmake
++++ b/CMake/SlicerMacroBuildLoadableModule.cmake
+@@ -131,6 +131,11 @@ macro(slicerMacroBuildLoadableModule)
+       ${Slicer_Libs_LIBRARY_DIRS}
+       ${Slicer_Base_LIBRARY_DIRS}
+       )
++    if(DEFINED Slicer_HOME AND DEFINED Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++      list(APPEND LOADABLEMODULE_LINK_DIRECTORIES
++        "${Slicer_HOME}/${Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR}"
++        )
++    endif()
+   endif()
+ 
+   #-----------------------------------------------------------------------------
+@@ -238,14 +243,23 @@ macro(slicerMacroBuildLoadableModule)
+     )
+   set_target_properties(${lib_name} PROPERTIES LABELS ${lib_name})
+ 
++  # In the superbuild Slicer_GUI_LIBRARY is set (e.g. qSlicerBaseQTApp).
++  # In a system install it is empty; fall back to qSlicerBaseQTGUI directly.
++  if(Slicer_GUI_LIBRARY)
++    set(_slicer_gui_lib ${Slicer_GUI_LIBRARY})
++  else()
++    set(_slicer_gui_lib qSlicerBaseQTGUI)
++  endif()
++
+   target_link_libraries(${lib_name}
+     # The two PUBLIC keywords are not a duplication, they allow developers to
+     # include PRIVATE/INTERFACE keywords in their library list
+     PUBLIC
+       ${LOADABLEMODULE_TARGET_LIBRARIES}
+     PUBLIC
+-      ${Slicer_GUI_LIBRARY}
++      ${_slicer_gui_lib}
+     )
++  unset(_slicer_gui_lib)
+ 
+   if(LOADABLEMODULE_LINK_DIRECTORIES)
+     target_link_directories(${lib_name}
+diff --git a/CMake/SlicerMacroBuildModuleLogic.cmake b/CMake/SlicerMacroBuildModuleLogic.cmake
+index 324b0e9f20..3c0e6d2218 100644
+--- a/CMake/SlicerMacroBuildModuleLogic.cmake
++++ b/CMake/SlicerMacroBuildModuleLogic.cmake
+@@ -66,6 +66,11 @@ macro(SlicerMacroBuildModuleLogic)
+       ${Slicer_Libs_LIBRARY_DIRS}
+       ${Slicer_Base_LIBRARY_DIRS}
+       )
++    if(DEFINED Slicer_HOME AND DEFINED Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++      list(APPEND MODULELOGIC_LINK_DIRECTORIES
++        "${Slicer_HOME}/${Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR}"
++        )
++    endif()
+   endif()
+ 
+   # Every module logic inherits from vtkSlicerModuleLogic -> vtkMRMLAbstractLogic
+diff --git a/CMake/SlicerMacroBuildModuleQtLibrary.cmake b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+index 8bc673a1da..d0864f99ac 100644
+--- a/CMake/SlicerMacroBuildModuleQtLibrary.cmake
++++ b/CMake/SlicerMacroBuildModuleQtLibrary.cmake
+@@ -75,16 +75,31 @@ macro(SlicerMacroBuildModuleQtLibrary)
+     Qt5::Widgets
+     )
+ 
+-  # When building against an installed (non-superbuild) Slicer, headers from
+-  # installed qt-loadable modules (e.g. qSlicerSubjectHierarchyAbstractPlugin.h)
+-  # are not covered by any Slicer_*_INCLUDE_DIRS variable. Add the installed
+-  # qt-loadable-modules include tree so they are found.
++  # When building against an installed (non-superbuild) Slicer, headers and
++  # libraries from installed qt-loadable modules (SubjectHierarchy, Colors,
++  # etc.) are not covered by any Slicer_*_INCLUDE_DIRS / _LIBRARY_DIRS
++  # variable and per-module <Name>_INCLUDE_DIRS / <Name>_LIBRARY_DIRS cache
++  # vars are empty. Add the installed qt-loadable-modules trees directly:
++  #  - include: root + every per-module subdirectory for flat #include lookups
++  #  - lib:     the shared library directory so the linker can find them
+   if(NOT Slicer_SUPERBUILD
+       AND DEFINED Slicer_HOME
+-      AND DEFINED Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR)
++      AND DEFINED Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR
++      AND DEFINED Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++    set(_qt_inc_root "${Slicer_HOME}/${Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR}")
++    file(GLOB _qt_loadable_subdirs
++      LIST_DIRECTORIES true
++      "${_qt_inc_root}/*"
++      )
+     list(APPEND MODULEQTLIBRARY_INCLUDE_DIRECTORIES
+-      "${Slicer_HOME}/${Slicer_INSTALL_QTLOADABLEMODULES_INCLUDE_DIR}"
++      "${_qt_inc_root}"
++      ${_qt_loadable_subdirs}
++      )
++    list(APPEND MODULEQTLIBRARY_LINK_DIRECTORIES
++      "${Slicer_HOME}/${Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR}"
+       )
++    unset(_qt_inc_root)
++    unset(_qt_loadable_subdirs)
+   endif()
+ 
+   # --------------------------------------------------------------------------
+diff --git a/CMake/SlicerMacroBuildModuleWidgets.cmake b/CMake/SlicerMacroBuildModuleWidgets.cmake
+index e358b38bd0..a1c84c39cb 100644
+--- a/CMake/SlicerMacroBuildModuleWidgets.cmake
++++ b/CMake/SlicerMacroBuildModuleWidgets.cmake
+@@ -60,15 +60,32 @@ macro(SlicerMacroBuildModuleWidgets)
+     ${Slicer_ModuleWidgets_INCLUDE_DIRS}
+     )
+ 
+-  list(APPEND MODULEWIDGETS_TARGET_LIBRARIES
+-    ${Slicer_GUI_LIBRARY}
+-    )
++  # In the superbuild Slicer_GUI_LIBRARY is set (e.g. qSlicerBaseQTApp) and
++  # carries CTK transitively. In a system install it is empty; fall back to
++  # the actual provider of qSlicerWidget and add CTKVisualizationVTKCore
++  # explicitly since the transitive chain is broken.
++  if(Slicer_GUI_LIBRARY)
++    list(APPEND MODULEWIDGETS_TARGET_LIBRARIES
++      ${Slicer_GUI_LIBRARY}
++      )
++  else()
++    list(APPEND MODULEWIDGETS_TARGET_LIBRARIES
++      qSlicerBaseQTGUI
++      CTKVisualizationVTKCore
++      )
++  endif()
+ 
+   if(NOT Slicer_SUPERBUILD)
+     list(APPEND MODULEWIDGETS_LINK_DIRECTORIES
+       ${Slicer_Libs_LIBRARY_DIRS}
+       ${Slicer_Base_LIBRARY_DIRS}
++      ${CTK_LIBRARY_DIRS}
+       )
++    if(DEFINED Slicer_HOME AND DEFINED Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++      list(APPEND MODULEWIDGETS_LINK_DIRECTORIES
++        "${Slicer_HOME}/${Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR}"
++        )
++    endif()
+   endif()
+ 
+   if(NOT DEFINED MODULEWIDGETS_FOLDER AND DEFINED MODULE_NAME)
+diff --git a/Modules/Loadable/Terminologies/CMakeLists.txt b/Modules/Loadable/Terminologies/CMakeLists.txt
+index 44fbea3497..22ab82186f 100644
+--- a/Modules/Loadable/Terminologies/CMakeLists.txt
++++ b/Modules/Loadable/Terminologies/CMakeLists.txt
+@@ -1,8 +1,21 @@
++#-----------------------------------------------------------------------------
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
++#-----------------------------------------------------------------------------
++project(Terminologies)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME "Terminologies")
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++
++#-----------------------------------------------------------------------------
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ add_subdirectory(Widgets)
+diff --git a/Modules/Loadable/Terminologies/Logic/CMakeLists.txt b/Modules/Loadable/Terminologies/Logic/CMakeLists.txt
+index 752f4ad2f2..e1501f65af 100644
+--- a/Modules/Loadable/Terminologies/Logic/CMakeLists.txt
++++ b/Modules/Loadable/Terminologies/Logic/CMakeLists.txt
+@@ -24,6 +24,11 @@ set(${KIT}_TARGET_LIBRARIES
+   RapidJSON
+   )
+ 
++set(DISABLE_WRAP_PYTHON)
++if(NOT Slicer_USE_PYTHONQT)
++  set(DISABLE_WRAP_PYTHON DISABLE_WRAP_PYTHON)
++endif()
++
+ #-----------------------------------------------------------------------------
+ SlicerMacroBuildModuleLogic(
+   NAME ${KIT}
+@@ -31,6 +36,7 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  ${DISABLE_WRAP_PYTHON}
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+

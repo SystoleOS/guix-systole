@@ -1,0 +1,27 @@
+From e9069c0460653a3881fc185f8d9609e423e3a806 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Sun, 1 Mar 2026 18:14:02 +0100
+Subject: [PATCH] COMP: Expose extension build vars in install-tree
+ SlicerConfig
+
+---
+ CMake/SlicerInstallConfig.cmake.in | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/CMake/SlicerInstallConfig.cmake.in b/CMake/SlicerInstallConfig.cmake.in
+index f9c5f0ef9d..240ed7ec12 100644
+--- a/CMake/SlicerInstallConfig.cmake.in
++++ b/CMake/SlicerInstallConfig.cmake.in
+@@ -187,6 +187,9 @@ if(Slicer_USE_PYTHONQT)
+   set(Slicer_INSTALL_QTSCRIPTEDMODULES_SHARE_DIR "@Slicer_INSTALL_QTSCRIPTEDMODULES_SHARE_DIR@")
+ endif()
+ 
++# Extension build support (required when building extensions against an installed Slicer)
++set(Slicer_EXTENSION_GENERATE_CONFIG "${Slicer_CMAKE_DIR}/SlicerExtensionGenerateConfig.cmake")
++
+ # Components needed to build modules from outside a Slicer build tree or
+ # from outside a Slicer installation tree
+ # set(TCLAP_DIR "${Slicer_HOME}/lib/tclap")
+-- 
+2.52.0
+

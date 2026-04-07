@@ -1,0 +1,39 @@
+From 66d9935632020a069d76bd7c77beb50464060532 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 24 Jan 2023 10:01:23 +0100
+Subject: [PATCH] COMP: Adapt to new qRestAPI cmake
+
+This removes the use of the old `qRestAPI_USE_FILE`. As of today, this
+is a SystoleOS adaptation that should not reach the official Slicer
+repository until commontk/qRestAPI#25 gets merged.
+---
+ Base/QTCore/CMakeLists.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/Base/QTCore/CMakeLists.txt b/Base/QTCore/CMakeLists.txt
+index feadfbdcc6..06e08d4217 100644
+--- a/Base/QTCore/CMakeLists.txt
++++ b/Base/QTCore/CMakeLists.txt
+@@ -39,9 +39,8 @@ include(${ITK_USE_FILE})
+ # qRestAPI
+ #
+ if(Slicer_BUILD_EXTENSIONMANAGER_SUPPORT OR Slicer_BUILD_APPLICATIONUPDATE_SUPPORT)
+-  find_package(qRestAPI REQUIRED)
+-  include(${qRestAPI_USE_FILE})
+-endif()
++ find_package(qRestAPI REQUIRED)
++ endif()
+ 
+ #
+ # CTKAppLauncherLib
+@@ -60,6 +59,7 @@ set(KIT_include_directories
+   ${MRMLDisplayableManager_INCLUDE_DIRS}
+   ${ModuleDescriptionParser_INCLUDE_DIRS}
+   ${MRMLCLI_INCLUDE_DIRS}
++  ${qRestAPI_INCLUDE_DIRS}
+   )
+ 
+ # Source files
+-- 
+2.52.0
+

@@ -1,0 +1,33 @@
+From e24acbf3a31ee9e30be2b2f9c2862665751585d4 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Mon, 2 Mar 2026 11:31:45 +0100
+Subject: [PATCH] COMP: Install CMake/*.cmake.in templates to development tree
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+SlicerExtensionGenerateConfig.cmake calls configure_file() on
+SlicerExtensionConfig.cmake.in from ${Slicer_CMAKE_DIR}, but the install
+rule only globbed *.cmake, *.h.in, and *.cxx.in — missing *.cmake.in files.
+Add *.cmake.in to the glob so that SlicerExtensionConfig.cmake.in and other
+template files (SlicerConfig.cmake.in, UseSlicer.cmake.in, etc.) are installed
+to lib/Slicer-5.8/CMake/ and available when building extensions.
+---
+ CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b5c3f31eb2..db4cb6dacb 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1381,6 +1381,7 @@ if(NOT Slicer_INSTALL_NO_DEVELOPMENT)
+ 
+   file(GLOB cmake_files
+     "${CMAKE_CURRENT_SOURCE_DIR}/CMake/*.cmake"
++    "${CMAKE_CURRENT_SOURCE_DIR}/CMake/*.cmake.in"
+     "${CMAKE_CURRENT_SOURCE_DIR}/CMake/*.h.in"
+     "${CMAKE_CURRENT_SOURCE_DIR}/CMake/*.cxx.in")
+   install(
+-- 
+2.52.0
+

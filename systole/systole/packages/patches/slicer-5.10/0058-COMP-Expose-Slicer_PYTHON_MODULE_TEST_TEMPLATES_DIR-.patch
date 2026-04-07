@@ -1,0 +1,30 @@
+From 603a5985932643f8d25b2bab1286a728f31ef13c Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Mon, 2 Mar 2026 10:30:28 +0100
+Subject: [PATCH] COMP: Expose Slicer_PYTHON_MODULE_TEST_TEMPLATES_DIR in
+ install-tree SlicerConfig
+
+SlicerMacroBuildScriptedModule invokes SlicerMacroConfigureGenericPythonModuleTests
+which requires Slicer_PYTHON_MODULE_TEST_TEMPLATES_DIR to point to the directory
+containing qSlicerModuleGenericTest.py.in.  The template is already installed by
+patch 0033 to share/Slicer-5.8/test-templates/, but the variable was never set
+in the install-tree SlicerConfig.cmake.  Mirror the CXX variable added in patch 0056.
+---
+ CMake/SlicerInstallConfig.cmake.in | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/CMake/SlicerInstallConfig.cmake.in b/CMake/SlicerInstallConfig.cmake.in
+index 4ac529a41f..01d42c097f 100644
+--- a/CMake/SlicerInstallConfig.cmake.in
++++ b/CMake/SlicerInstallConfig.cmake.in
+@@ -165,6 +165,7 @@ set(Slicer_INSTALL_INCLUDE_DIR "@Slicer_INSTALL_INCLUDE_DIR@")
+ set(Slicer_INSTALL_SHARE_DIR "@Slicer_INSTALL_SHARE_DIR@")
+ set(Slicer_QRCC_SCRIPT "${Slicer_HOME}/${Slicer_INSTALL_SHARE_DIR}/Scripts/qrcc.py")
+ set(Slicer_CXX_MODULE_TEST_TEMPLATES_DIR "${Slicer_HOME}/${Slicer_INSTALL_SHARE_DIR}/test-templates")
++set(Slicer_PYTHON_MODULE_TEST_TEMPLATES_DIR "${Slicer_HOME}/${Slicer_INSTALL_SHARE_DIR}/test-templates")
+ set(Slicer_INSTALL_ITKFACTORIES_DIR "@Slicer_INSTALL_ITKFACTORIES_DIR@")
+ 
+ set(Slicer_INSTALL_CLIMODULES_BIN_DIR "@Slicer_INSTALL_CLIMODULES_BIN_DIR@")
+-- 
+2.52.0
+

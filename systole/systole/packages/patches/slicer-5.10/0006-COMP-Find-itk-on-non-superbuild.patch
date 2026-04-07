@@ -1,0 +1,31 @@
+From bb75c9c83ce8d1aec0f3a83180b4c312391fa39b Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 6 May 2025 10:14:46 +0200
+Subject: [PATCH] COMP: Find itk on non-superbuild
+
+Co-authored-by: Khai Duong <duongkhai@gmail.com>
+---
+ CMakeLists.txt | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2aa6f53d2e..1025ef29d5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -111,6 +111,13 @@ option(Slicer_SUPERBUILD "Build ${PROJECT_NAME} and the projects it depends on."
+ mark_as_advanced(Slicer_SUPERBUILD)
+ set(Slicer_BINARY_INNER_SUBDIR Slicer-build)
+ 
++#-----------------------------------------------------------------------------
++# Include essential packages in non-superbuild
++#-----------------------------------------------------------------------------
++if(NOT SLICER_SUPERBUILD)
++    find_package(ITK REQUIRED)
++endif()
++
+ #-----------------------------------------------------------------------------
+ include(CTestUseLaunchers OPTIONAL)
+ if(${CTEST_USE_LAUNCHERS})
+-- 
+2.52.0
+

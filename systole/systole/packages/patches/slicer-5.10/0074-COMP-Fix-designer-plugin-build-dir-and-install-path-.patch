@@ -1,0 +1,84 @@
+From 124608389df5aa615d2b1c412151952cb30640cd Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 4 Mar 2026 07:43:27 +0100
+Subject: [PATCH] COMP: Fix designer-plugin build dir and install path for
+ standalone modules
+
+ctkMacroBuildQtPlugin sets LIBRARY_OUTPUT_DIRECTORY to
+${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/designer.  In standalone module builds
+CMAKE_LIBRARY_OUTPUT_DIRECTORY is unset, so the path resolves to the
+root-filesystem /designer/ and the linker fails to create the file.
+
+Fix by setting CMAKE_LIBRARY_OUTPUT_DIRECTORY to
+${CMAKE_BINARY_DIR}/${Slicer_QTLOADABLEMODULES_LIB_DIR} when not already
+set, so the build-time output lands under the module's binary directory.
+
+Also redirect CTK_INSTALL_QTPLUGIN_DIR from the default 'lib' to
+Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR so each module package installs
+its designer plugins alongside its loadable-module libraries.  At runtime
+Slicer now adds every SLICER_ADDITIONAL_MODULE_PATHS entry (qt-loadable-
+modules/ dirs) to Qt's library-path search list, so Qt's QUiLoader finds
+the designer/libq*Plugins.so files there via the merged Guix profile.
+---
+ Base/QTApp/qSlicerApplicationHelper.cxx | 15 +++++++++++++++
+ CMake/UseSlicer.cmake.in                | 18 ++++++++++++++++++
+ 2 files changed, 33 insertions(+)
+
+diff --git a/Base/QTApp/qSlicerApplicationHelper.cxx b/Base/QTApp/qSlicerApplicationHelper.cxx
+index a8474d473d..72bdab4dc8 100644
+--- a/Base/QTApp/qSlicerApplicationHelper.cxx
++++ b/Base/QTApp/qSlicerApplicationHelper.cxx
+@@ -105,6 +105,21 @@ void qSlicerApplicationHelper::preInitializeApplication(const char* argv0, ctkPr
+   // Slicer_PLUGIN_DIR is CMAKE_INSTALL_PREFIX/lib, baked in at compile time.
+   QCoreApplication::addLibraryPath(
+     QDir::cleanPath(QString::fromLatin1(Slicer_PLUGIN_DIR)));
++  // Register Qt designer plugins from loadable-module packages.  Each entry in
++  // SLICER_ADDITIONAL_MODULE_PATHS points to a qt-loadable-modules/ directory;
++  // module packages install their designer plugins in a designer/ subdirectory
++  // there so that they end up in the merged Guix profile and are found by Qt.
++  {
++    const QByteArray additionalPaths = qgetenv("SLICER_ADDITIONAL_MODULE_PATHS");
++    if (!additionalPaths.isEmpty())
++    {
++      for (const QString& path :
++           QString::fromLocal8Bit(additionalPaths).split(":", QString::SkipEmptyParts))
++      {
++        QCoreApplication::addLibraryPath(QDir::cleanPath(path));
++      }
++    }
++  }
+ 
+   // Disable the QtWebEngine sandbox in environments that do not support
+   // unprivileged user namespaces (e.g. Docker, most HPC systems).
+diff --git a/CMake/UseSlicer.cmake.in b/CMake/UseSlicer.cmake.in
+index 8bee954f19..609f403bad 100644
+--- a/CMake/UseSlicer.cmake.in
++++ b/CMake/UseSlicer.cmake.in
+@@ -409,6 +409,24 @@ if(Slicer_USE_PYTHONQT)
+   endif()
+ endif()
+ 
++# In standalone module builds CMAKE_LIBRARY_OUTPUT_DIRECTORY is not set, which
++# causes ctkMacroBuildQtPlugin to resolve the designer plugin build path as the
++# root-filesystem "/designer/" directory (empty string + "/designer").  Set a
++# reasonable default so the build succeeds.
++# Also redirect CTK_INSTALL_QTPLUGIN_DIR so that each module package's designer
++# plugins install alongside its loadable-module libraries.  At runtime Slicer
++# adds every SLICER_ADDITIONAL_MODULE_PATHS entry (which points to the merged
++# qt-loadable-modules/ profile directory) as a Qt library-path, so Qt will scan
++# qt-loadable-modules/designer/ and find these plugins there.
++if(NOT DEFINED Slicer_SOURCE_DIR)
++  if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
++    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${Slicer_QTLOADABLEMODULES_LIB_DIR}")
++  endif()
++  if(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++    set(CTK_INSTALL_QTPLUGIN_DIR "${Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR}")
++  endif()
++endif()
++
+ # These variables can be used when configuring extension external projects in
+ # two different scenarios: (1) bundled extensions and (2) regular extensions.
+ #
+-- 
+2.52.0
+
