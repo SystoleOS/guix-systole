@@ -133,6 +133,12 @@ test_package "(systole packages ros2 jazzy)" "ros-rosidl-typesupport-introspecti
 test_package "(systole packages ros2 jazzy)" "ros-rosidl-typesupport-introspection-cpp-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rosidl-dynamic-typesupport-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rmw-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-typesupport-c-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-typesupport-cpp-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-core-generators-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-core-runtime-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-default-generators-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-default-runtime-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-jazzy"
 
 if [ $FAILED -eq 0 ]; then

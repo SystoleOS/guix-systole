@@ -219,6 +219,15 @@ of monorepos such as ament_cmake or rcl_interfaces)."
     (native-inputs (cons (ros-distro-python distro) extra-native-inputs))
     (inputs extra-inputs)
     (propagated-inputs propagated-inputs)
+    ;; Every ROS 2 package contributes share/ament_index/resource_index/
+    ;; entries.  Declaring AMENT_PREFIX_PATH as a native-search-path makes
+    ;; Guix populate the variable from inputs at build time, which is
+    ;; required for ament_index_get_resources() lookups in cmake-time
+    ;; helpers like rosidl_typesupport_c's get_used_typesupports.cmake.
+    (native-search-paths
+     (list (search-path-specification
+            (variable "AMENT_PREFIX_PATH")
+            (files '(".")))))
     (synopsis synopsis)
     (description description)
     (home-page home-page)

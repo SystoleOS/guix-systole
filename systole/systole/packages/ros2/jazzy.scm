@@ -710,6 +710,162 @@ implementations.  Concrete middleware bindings such as
 @code{rmw_cyclonedds_cpp} implement this interface."))
 
 ;;;
+;;; rosidl_typesupport — generic typesupport implementations.
+;;;
+
+(define %rosidl-typesupport-repo "https://github.com/ros2/rosidl_typesupport")
+(define %rosidl-typesupport-commit
+  "b43c9455e6120c71c70c8c774471628728919a7b")
+(define %rosidl-typesupport-hash
+  (base32 "1p8lczzri6zqy1limk42vl1b921b03yy3kgdxg3vfpn7xasx7xsp"))
+(define %rosidl-typesupport-version "3.2.2")
+
+(define-public ros-rosidl-typesupport-c-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rosidl_typesupport_c"
+   #:version %rosidl-typesupport-version
+   #:repo %rosidl-typesupport-repo
+   #:commit %rosidl-typesupport-commit
+   #:hash %rosidl-typesupport-hash
+   #:module-subdir "rosidl_typesupport_c"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-rcutils-jazzy
+                             ros-rcpputils-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-rosidl-typesupport-interface-jazzy
+                             ros-rosidl-typesupport-introspection-c-jazzy)
+   #:home-page "https://github.com/ros2/rosidl_typesupport"
+   #:synopsis "Generic C typesupport for ROS 2 messages"
+   #:description
+   "Multiplexes between concrete C typesupport implementations
+(introspection, fastrtps, ...) at runtime via the AMENT resource index."))
+
+(define-public ros-rosidl-typesupport-cpp-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rosidl_typesupport_cpp"
+   #:version %rosidl-typesupport-version
+   #:repo %rosidl-typesupport-repo
+   #:commit %rosidl-typesupport-commit
+   #:hash %rosidl-typesupport-hash
+   #:module-subdir "rosidl_typesupport_cpp"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-rcutils-jazzy
+                             ros-rcpputils-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-rosidl-typesupport-c-jazzy
+                             ros-rosidl-typesupport-introspection-cpp-jazzy)
+   #:home-page "https://github.com/ros2/rosidl_typesupport"
+   #:synopsis "Generic C++ typesupport for ROS 2 messages"
+   #:description
+   "C++ counterpart to @code{rosidl_typesupport_c}."))
+
+;;;
+;;; rosidl_core / rosidl_defaults — meta-packages declaring which
+;;; generators and typesupports a ROS 2 distribution provides.  Their
+;;; -extras.cmake files use ament_index_get_resources to discover
+;;; installed implementations dynamically, so missing optional pieces
+;;; (e.g. fastrtps, generator_py) are silently skipped.
+;;;
+
+(define %rosidl-core-repo "https://github.com/ros2/rosidl_core")
+(define %rosidl-core-commit "c6eb22b0e77cf57b19e9c6ffd114a00749404215")
+(define %rosidl-core-hash
+  (base32 "0xv2xv13y30q4cai72fs946zh0al8902i5mmjr7jalf37ifd3lw3"))
+(define %rosidl-core-version "0.2.1")
+
+(define-public ros-rosidl-core-generators-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rosidl_core_generators"
+   #:version %rosidl-core-version
+   #:repo %rosidl-core-repo
+   #:commit %rosidl-core-commit
+   #:hash %rosidl-core-hash
+   #:module-subdir "rosidl_core_generators"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-rosidl-cmake-jazzy
+                             ros-rosidl-generator-c-jazzy
+                             ros-rosidl-generator-cpp-jazzy
+                             ros-rosidl-typesupport-c-jazzy
+                             ros-rosidl-typesupport-cpp-jazzy
+                             ros-rosidl-typesupport-introspection-c-jazzy
+                             ros-rosidl-typesupport-introspection-cpp-jazzy)
+   #:home-page "https://github.com/ros2/rosidl_core"
+   #:synopsis "Meta-package declaring core ROS 2 rosidl generators"
+   #:description
+   "Pulls in the C and C++ rosidl generators and typesupports that any
+ROS 2 distribution must provide.  Optional generators (Python, Rust,
+Fast DDS) are discovered at consumer build time via the AMENT resource
+index and are silently skipped if absent."))
+
+(define-public ros-rosidl-core-runtime-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rosidl_core_runtime"
+   #:version %rosidl-core-version
+   #:repo %rosidl-core-repo
+   #:commit %rosidl-core-commit
+   #:hash %rosidl-core-hash
+   #:module-subdir "rosidl_core_runtime"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-rosidl-runtime-cpp-jazzy
+                             ros-rosidl-typesupport-c-jazzy
+                             ros-rosidl-typesupport-cpp-jazzy
+                             ros-rosidl-typesupport-introspection-c-jazzy
+                             ros-rosidl-typesupport-introspection-cpp-jazzy)
+   #:home-page "https://github.com/ros2/rosidl_core"
+   #:synopsis "Meta-package declaring core ROS 2 rosidl runtime support"
+   #:description
+   "Runtime counterpart to @code{rosidl_core_generators}: pulls in the
+C/C++ rosidl runtime and typesupport libraries used at message
+serialization time."))
+
+(define %rosidl-defaults-repo "https://github.com/ros2/rosidl_defaults")
+(define %rosidl-defaults-commit
+  "95834cca83ee0d3d783bb68e4932cffd6673274c")
+(define %rosidl-defaults-hash
+  (base32 "1z0hy3mkam6hh82fikpmzd0rykrqq8j01sj5lg7nkc3ssa29h6sd"))
+(define %rosidl-defaults-version "1.6.0")
+
+(define-public ros-rosidl-default-generators-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rosidl_default_generators"
+   #:version %rosidl-defaults-version
+   #:repo %rosidl-defaults-repo
+   #:commit %rosidl-defaults-commit
+   #:hash %rosidl-defaults-hash
+   #:module-subdir "rosidl_default_generators"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-rosidl-core-generators-jazzy)
+   #:home-page "https://github.com/ros2/rosidl_defaults"
+   #:synopsis "Meta-package: default rosidl generators for ROS 2"
+   #:description
+   "Adds @code{action_msgs} and @code{service_msgs} on top of
+@code{rosidl_core_generators}, allowing interface packages to declare a
+single buildtool dependency that brings in everything needed to generate
+messages, services, and actions."))
+
+(define-public ros-rosidl-default-runtime-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rosidl_default_runtime"
+   #:version %rosidl-defaults-version
+   #:repo %rosidl-defaults-repo
+   #:commit %rosidl-defaults-commit
+   #:hash %rosidl-defaults-hash
+   #:module-subdir "rosidl_default_runtime"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-rosidl-core-runtime-jazzy)
+   #:home-page "https://github.com/ros2/rosidl_defaults"
+   #:synopsis "Meta-package: default rosidl runtime support for ROS 2"
+   #:description
+   "Runtime counterpart to @code{rosidl_default_generators}."))
+
+;;;
 ;;; Aggregation meta-package.
 ;;;
 ;;; Phase 1 will grow this package's propagated-inputs tier by tier until
