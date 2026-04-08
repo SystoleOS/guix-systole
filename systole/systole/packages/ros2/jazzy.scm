@@ -593,6 +593,79 @@ generation pipeline from interface (.msg/.srv/.action) source files,
 including @code{rosidl_generate_interfaces} and the templates used by
 language-specific generator packages."))
 
+;;; rosidl Tier C: code generators and introspection typesupport.
+
+(define-public ros-rosidl-generator-type-description-jazzy
+  (rosidl-cmake-subpkg
+   "rosidl_generator_type_description"
+   #:propagated-inputs (list ros-ament-cmake-python-jazzy
+                             ros-ament-cmake-ros-jazzy
+                             ros-rosidl-cli-jazzy
+                             ros-rosidl-parser-jazzy
+                             ros-rosidl-pycommon-jazzy)
+   #:synopsis "Generate type description hashes for ROS 2 interfaces"
+   #:description
+   "Computes type-hash and type-description metadata for ROS 2 interface
+packages.  Used by other generators (C, C++) to embed stable type IDs."))
+
+(define-public ros-rosidl-generator-c-jazzy
+  (rosidl-cmake-subpkg
+   "rosidl_generator_c"
+   #:propagated-inputs (list ros-ament-cmake-python-jazzy
+                             ros-ament-cmake-ros-jazzy
+                             ros-rcutils-jazzy
+                             ros-rosidl-cmake-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-rosidl-typesupport-interface-jazzy
+                             ros-rosidl-generator-type-description-jazzy)
+   #:synopsis "C code generator for ROS 2 interface packages"
+   #:description
+   "Generates C structs, message-init/destroy functions, and the C
+typesupport glue for ROS 2 messages, services, and actions."))
+
+(define-public ros-rosidl-generator-cpp-jazzy
+  (rosidl-cmake-subpkg
+   "rosidl_generator_cpp"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-python-jazzy
+                             ros-rosidl-cmake-jazzy
+                             ros-rosidl-runtime-cpp-jazzy
+                             ros-rosidl-generator-type-description-jazzy)
+   #:synopsis "C++ code generator for ROS 2 interface packages"
+   #:description
+   "Generates C++ message classes for ROS 2 messages, services, and
+actions, on top of the C generator's output."))
+
+(define-public ros-rosidl-typesupport-introspection-c-jazzy
+  (rosidl-cmake-subpkg
+   "rosidl_typesupport_introspection_c"
+   #:propagated-inputs (list ros-ament-cmake-python-jazzy
+                             ros-ament-cmake-ros-jazzy
+                             ros-rosidl-cmake-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-rosidl-typesupport-interface-jazzy
+                             ros-rosidl-generator-c-jazzy)
+   #:synopsis "Runtime introspection typesupport (C) for ROS 2 messages"
+   #:description
+   "Generates C type-introspection metadata used by middlewares such as
+@code{rmw_cyclonedds_cpp} to (de)serialize ROS 2 messages without
+language-binding-specific typesupport."))
+
+(define-public ros-rosidl-typesupport-introspection-cpp-jazzy
+  (rosidl-cmake-subpkg
+   "rosidl_typesupport_introspection_cpp"
+   #:propagated-inputs (list ros-ament-cmake-python-jazzy
+                             ros-ament-cmake-ros-jazzy
+                             ros-rosidl-cmake-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-rosidl-runtime-cpp-jazzy
+                             ros-rosidl-typesupport-interface-jazzy
+                             ros-rosidl-generator-cpp-jazzy
+                             ros-rosidl-typesupport-introspection-c-jazzy)
+   #:synopsis "Runtime introspection typesupport (C++) for ROS 2 messages"
+   #:description
+   "C++ counterpart to @code{rosidl_typesupport_introspection_c}."))
+
 ;;;
 ;;; Aggregation meta-package.
 ;;;

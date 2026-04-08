@@ -126,6 +126,11 @@ test_package "(systole packages ros2 jazzy)" "ros-rosidl-adapter-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rosidl-parser-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rosidl-pycommon-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rosidl-cmake-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-generator-type-description-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-generator-c-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-generator-cpp-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-typesupport-introspection-c-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-typesupport-introspection-cpp-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-jazzy"
 
 if [ $FAILED -eq 0 ]; then
