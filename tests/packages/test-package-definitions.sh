@@ -89,6 +89,7 @@ test_package "(systole packages openigtlink)" "slicer-openigtlink"
 # Test ROS 2 helpers
 test_package "(systole packages ros2-helpers)" "python-catkin-pkg"
 test_package "(systole packages ros2-helpers)" "python-osrf-pycommon"
+test_package "(systole packages ros2-helpers)" "eclipse-cyclonedds"
 
 # Test ROS 2 Jazzy packages
 test_package "(systole packages ros2 jazzy)" "ros-ament-package-jazzy"

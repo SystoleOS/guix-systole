@@ -24,13 +24,17 @@
 
 (define-module (systole packages ros2-helpers)
   #:use-module ((guix licenses) #:prefix license:)
+  #:use-module (guix build-system cmake)
   #:use-module (guix build-system pyproject)
   #:use-module (guix build-system python)
   #:use-module (guix download)
+  #:use-module (guix gexp)
+  #:use-module (guix git-download)
   #:use-module (guix packages)
   #:use-module (gnu packages check)
   #:use-module (gnu packages python-build)
   #:use-module (gnu packages python-xyz)
+  #:use-module (gnu packages tls)        ; openssl
   #:use-module (gnu packages time))
 
 (define-public python-catkin-pkg
@@ -80,3 +84,40 @@ ament build system.")
 by software developed at the Open Source Robotics Foundation, including
 ROS 2 build tooling.")
     (license license:asl2.0)))
+
+(define-public eclipse-cyclonedds
+  ;; Pinned to ros2/jazzy's ros2.repos: branch releases/0.10.x.
+  (let ((commit "5041f3560c088c99e5088b2b8520b69169621196"))
+    (package
+      (name "eclipse-cyclonedds")
+      (version "0.10.5")
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference
+               (url "https://github.com/eclipse-cyclonedds/cyclonedds")
+               (commit commit)))
+         (file-name (git-file-name name commit))
+         (sha256
+          (base32 "0jj0l92v01rj236yig2xdvw841b8wrjxw6lhsz7y4cs78yad457r"))))
+      (build-system cmake-build-system)
+      (arguments
+       (list #:tests? #f
+             #:configure-flags
+             #~(list "-DCMAKE_BUILD_TYPE=Release"
+                     "-DBUILD_TESTING=OFF"
+                     ;; Skip the iceoryx-based shared-memory transport so we
+                     ;; don't need to package iceoryx_binding_c.
+                     "-DENABLE_SHM=OFF"
+                     "-DENABLE_SECURITY=OFF"
+                     "-DENABLE_SSL=OFF"
+                     "-DBUILD_IDLC=ON"
+                     "-DBUILD_DDSPERF=OFF")))
+      (home-page "https://cyclonedds.io/")
+      (synopsis "Eclipse Cyclone DDS — OMG DDS implementation in C")
+      (description
+       "Eclipse Cyclone DDS is an open-source implementation of the
+Object Management Group's Data Distribution Service (DDS).  It is the
+default middleware behind @code{rmw_cyclonedds_cpp} in the ROS 2 Jazzy
+distribution provided by guix-systole.")
+      (license license:epl2.0))))
