@@ -33,7 +33,7 @@
   #:use-module (guix packages)
   #:use-module (gnu packages check)        ; python-pytest
   #:use-module (gnu packages python)
-  #:use-module (gnu packages python-xyz)   ; python-empy
+  #:use-module (gnu packages python-xyz)   ; python-empy, python-pyyaml, python-lark
   #:use-module (systole packages ros2)
   #:use-module (systole packages ros2-helpers)
   #:export (jazzy-distro))
@@ -527,6 +527,71 @@ support helpers."))
    #:description
    "Header-only C++ runtime support for ROS 2 generated message types:
 traits, bounded sequences and strings, message initializers."))
+
+;;; rosidl Tier B: Python tooling.
+
+(define-public ros-rosidl-cli-jazzy
+  (rosidl-python-subpkg
+   "rosidl_cli"
+   #:propagated-inputs (list python-argcomplete
+                             python-importlib-metadata
+                             python-pyyaml)
+   #:synopsis "Command-line entry points for rosidl tooling"
+   #:description
+   "@code{rosidl_cli} is the @code{rosidl} command-line dispatcher used
+to invoke language-specific generators (C, C++, Python, ...) and the
+@code{translate} sub-command for converting between IDL formats."))
+
+;; rosidl_adapter and rosidl_parser ship a CMakeLists.txt and install
+;; their Python code via ament_cmake_python — they are not pure-Python
+;; setuptools packages.
+(define-public ros-rosidl-adapter-jazzy
+  (rosidl-cmake-subpkg
+   "rosidl_adapter"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-python-jazzy
+                             python-empy
+                             ros-rosidl-cli-jazzy)
+   #:synopsis "Translate ROS-style .msg/.srv/.action files into IDL"
+   #:description
+   "@code{rosidl_adapter} converts the ROS @file{.msg}, @file{.srv}, and
+@file{.action} interface definition formats into the OMG IDL files
+consumed by the rest of the rosidl pipeline."))
+
+(define-public ros-rosidl-parser-jazzy
+  (rosidl-cmake-subpkg
+   "rosidl_parser"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-python-jazzy
+                             python-lark
+                             ros-rosidl-adapter-jazzy)
+   #:synopsis "Parser for OMG IDL used by ROS 2 rosidl"
+   #:description
+   "@code{rosidl_parser} parses OMG IDL files into a structured
+representation that the rosidl generators consume to emit
+language-specific bindings."))
+
+(define-public ros-rosidl-pycommon-jazzy
+  (rosidl-python-subpkg
+   "rosidl_pycommon"
+   #:propagated-inputs (list ros-rosidl-parser-jazzy)
+   #:synopsis "Common Python utilities shared by rosidl generators"
+   #:description
+   "Helper module providing path resolution, file generation, and CMake
+import-file writing utilities used by the rosidl C/C++/Python generators."))
+
+(define-public ros-rosidl-cmake-jazzy
+  (rosidl-cmake-subpkg
+   "rosidl_cmake"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-python-jazzy
+                             ros-rosidl-pycommon-jazzy)
+   #:synopsis "CMake macros and templates for the rosidl pipeline"
+   #:description
+   "@code{rosidl_cmake} provides the CMake macros that drive the rosidl
+generation pipeline from interface (.msg/.srv/.action) source files,
+including @code{rosidl_generate_interfaces} and the templates used by
+language-specific generator packages."))
 
 ;;;
 ;;; Aggregation meta-package.
