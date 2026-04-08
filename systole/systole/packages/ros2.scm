@@ -107,8 +107,14 @@ COMMON-PATCH-SUBDIR which defaults to \"ros2/common\"."
 
 (define (ros-package-name distro ros-name)
   "Build the guix-systole public package name for ROS-NAME in DISTRO.
-E.g. (ros-package-name jazzy-distro \"rcutils\") => \"ros-rcutils-jazzy\"."
-  (string-append "ros-" ros-name "-" (ros-distro-suffix distro)))
+Underscores in ROS-NAME are converted to hyphens to match Guix's package
+naming convention.
+E.g. (ros-package-name jazzy-distro \"ament_package\")
+     => \"ros-ament-package-jazzy\"."
+  (string-append "ros-"
+                 (string-map (lambda (c) (if (char=? c #\_) #\- c)) ros-name)
+                 "-"
+                 (ros-distro-suffix distro)))
 
 ;;;
 ;;; Source helper.
@@ -207,7 +213,9 @@ of monorepos such as ament_cmake or rcl_interfaces)."
                                       configure-flags)
                                (chdir "build")))))
                       #~()))))
-    (native-inputs extra-native-inputs)
+    ;; Python is needed at configure time by virtually every ament_cmake
+    ;; package (cmake/core/python.cmake calls find_package(Python3)).
+    (native-inputs (cons (ros-distro-python distro) extra-native-inputs))
     (inputs extra-inputs)
     (propagated-inputs propagated-inputs)
     (synopsis synopsis)

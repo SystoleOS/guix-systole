@@ -86,7 +86,13 @@ test_package "(systole packages qrestapi)" "qrestapi"
 test_package "(systole packages openigtlink)" "openigtlink"
 test_package "(systole packages openigtlink)" "slicer-openigtlink"
 
-# Test ROS 2 Jazzy meta-package
+# Test ROS 2 helpers
+test_package "(systole packages ros2-helpers)" "python-catkin-pkg"
+test_package "(systole packages ros2-helpers)" "python-osrf-pycommon"
+
+# Test ROS 2 Jazzy packages
+test_package "(systole packages ros2 jazzy)" "ros-ament-package-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-ament-cmake-core-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-jazzy"
 
 if [ $FAILED -eq 0 ]; then
