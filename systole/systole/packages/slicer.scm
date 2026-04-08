@@ -978,7 +978,8 @@ Line Interface) modules.  It bundles @code{tclap} and
                  "5.10-0081-COMP-Guard-ui_qSlicerWebWidget.h-install-on-WEBENGIN.patch"
                  "5.10-0082-COMP-Install-AUTOUIC-generated-ui_-.h-from-qSlicerBa.patch"
                  "5.10-0083-COMP-Add-qMRMLWidgets-to-standalone-loadable-module-.patch"
-                 "5.10-0084-COMP-Fix-missing-endif-for-Slicer_BUILD_CLI_SUPPORT-.patch"))))
+                 "5.10-0084-COMP-Fix-missing-endif-for-Slicer_BUILD_CLI_SUPPORT-.patch"
+                 "5.10-0085-COMP-Fix-MOC-processing-for-qSlicerIconEnginePlugin.patch"))))
 
     (build-system cmake-build-system)
     (arguments
@@ -1500,7 +1501,8 @@ the Slicer 5.10 source tree."))
   (make-slicer-loadable-module-5.10
    #:name "slicer-data-5.10"
    #:module-subdir "Data"
-   #:patches (list "data/5.10-0001-ENH-Add-standalone-build-support-for-Data-module-5.1.patch")
+   #:patches (list "data/5.10-0001-ENH-Add-standalone-build-support-for-Data-module-5.1.patch"
+                  "data/5.10-0002-COMP-Pass-LINK_DIRECTORIES-to-slicerMacroBuildLoadab.patch")
    #:synopsis "3D Slicer Data loadable module (5.10)"
    #:description
    "The Data loadable module extracted from 3D Slicer 5.10.  It provides
@@ -1544,7 +1546,10 @@ with per-node unit definitions and a settings panel.  Built from the
   (make-slicer-loadable-module-5.10
    #:name "slicer-colors-5.10"
    #:module-subdir "Colors"
-   #:patches (list "colors/5.10-0001-ENH-Add-standalone-build-support-for-Colors-module-5.patch")
+   #:patches (list "colors/5.10-0001-ENH-Add-standalone-build-support-for-Colors-module-5.patch"
+                  "colors/5.10-0002-COMP-Link-VTK-RenderingAnnotation-and-RenderingCore-.patch"
+                  "colors/5.10-0003-COMP-Add-vtkSlicerTerminologiesModuleLogic-include-d.patch"
+                  "colors/5.10-0004-COMP-Link-vtkSlicerTerminologiesModuleLogic-in-Color.patch")
    #:synopsis "3D Slicer Colors loadable module (5.10)"
    #:description
    "The Colors loadable module extracted from 3D Slicer 5.10.  It provides
@@ -1577,6 +1582,35 @@ integration for color overlays.  Built from the
        #$slicer-subjecthierarchy-5.10
        "/lib/Slicer-5.10/qt-loadable-modules;"
        #$slicer-terminologies-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules"))))
+
+(define-public slicer-annotations-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-annotations-5.10"
+   #:module-subdir "Annotations"
+   #:patches (list "annotations/5.10-0001-ENH-Add-standalone-build-support-for-Annotations-mod.patch"
+                  "annotations/5.10-0002-COMP-Add-ITK-Common-to-Annotations-MRML-link-librari.patch")
+   #:synopsis "3D Slicer Annotations loadable module (5.10)"
+   #:description
+   "The Annotations loadable module extracted from 3D Slicer 5.10.  It provides
+legacy annotation support for fiducials, rulers, and ROIs with backward
+compatibility for older Slicer scenes.  Built from the
+@file{Modules/Loadable/Annotations} subtree of the Slicer 5.10 source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.10)
+   #:propagated-inputs (list slicer-subjecthierarchy-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.10
        "/lib/Slicer-5.10/qt-loadable-modules"))))
 
 ;;;

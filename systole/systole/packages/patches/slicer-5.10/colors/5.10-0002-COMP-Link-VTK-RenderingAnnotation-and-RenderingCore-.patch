@@ -1,0 +1,29 @@
+From bec70a3fb992e196ef8e16fef06be51dd354737c Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 19:57:02 +0200
+Subject: [PATCH] COMP: Link VTK RenderingAnnotation and RenderingCore in
+ Colors VTKWidgets
+
+vtkSlicerScalarBarActor inherits from vtkScalarBarActor and uses
+vtkTextActor/vtkTextProperty; without explicit TARGET_LIBRARIES these
+symbols are undefined at link time in a standalone module build.
+---
+ Modules/Loadable/Colors/VTKWidgets/CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Modules/Loadable/Colors/VTKWidgets/CMakeLists.txt b/Modules/Loadable/Colors/VTKWidgets/CMakeLists.txt
+index 50b06726e3..a5f21365b6 100644
+--- a/Modules/Loadable/Colors/VTKWidgets/CMakeLists.txt
++++ b/Modules/Loadable/Colors/VTKWidgets/CMakeLists.txt
+@@ -13,6 +13,8 @@ set(${KIT}_SRCS
+   )
+ 
+ set(${KIT}_TARGET_LIBRARIES
++  VTK::RenderingAnnotation
++  VTK::RenderingCore
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+
