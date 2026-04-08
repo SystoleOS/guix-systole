@@ -31,7 +31,9 @@
   #:use-module (guix build-system trivial)
   #:use-module (guix gexp)
   #:use-module (guix packages)
+  #:use-module (gnu packages check)        ; python-pytest
   #:use-module (gnu packages python)
+  #:use-module (gnu packages python-xyz)   ; python-empy
   #:use-module (systole packages ros2)
   #:use-module (systole packages ros2-helpers)
   #:export (jazzy-distro))
@@ -262,6 +264,19 @@ installing Python modules from ament_cmake-based packages."))
    "Generates @code{<package>/version.h} headers from package.xml at
 configure time."))
 
+(define-public ros-ament-cmake-pytest-jazzy
+  (ament-cmake-subpkg
+   "ament_cmake_pytest"
+   ;; pytest is propagated because consumers (e.g. rcutils tests) call
+   ;; find_package(ament_cmake_pytest) which transitively requires it.
+   #:propagated-inputs (list ros-ament-cmake-core-jazzy
+                             ros-ament-cmake-test-jazzy
+                             python-pytest)
+   #:synopsis "ament_cmake helper for declaring pytest tests"
+   #:description
+   "Provides @code{ament_add_pytest_test} for ament_cmake-based ROS 2
+packages."))
+
 (define-public ros-ament-cmake-vendor-package-jazzy
   (ament-cmake-subpkg
    "ament_cmake_vendor_package"
@@ -342,6 +357,92 @@ by tools like @code{ros2cli} and @code{rclpy}."))
    "@code{ament_index_cpp} reads the AMENT resource index installed by
 ament_cmake-based ROS 2 packages, exposing it through a C++ API used by
 @code{rcl} and other client libraries."))
+
+;;;
+;;; ament_cmake_ros — adds ROS-specific test fixtures on top of ament_cmake.
+;;;
+
+(define %ament-cmake-ros-repo "https://github.com/ros2/ament_cmake_ros")
+(define %ament-cmake-ros-commit "4656ed1c514fa12503a0c01d33fd13d406a5fb74")
+(define %ament-cmake-ros-hash
+  (base32 "1q64b972skw70xbsn398jjjrd27hazfs4gzhs9whzal65ph12b8i"))
+(define %ament-cmake-ros-version "0.12.0")
+
+(define-public ros-domain-coordinator-jazzy
+  (make-ros2-ament-python-package
+   #:distro jazzy-distro
+   #:ros-name "domain_coordinator"
+   #:version %ament-cmake-ros-version
+   #:repo %ament-cmake-ros-repo
+   #:commit %ament-cmake-ros-commit
+   #:hash %ament-cmake-ros-hash
+   #:module-subdir "domain_coordinator"
+   #:home-page "https://github.com/ros2/ament_cmake_ros"
+   #:synopsis "ROS 2 helper for coordinating DDS domain IDs in tests"
+   #:description
+   "@code{domain_coordinator} is a small Python helper used by ROS 2 test
+suites to allocate non-overlapping DDS domain IDs across parallel test
+runs."))
+
+(define-public ros-ament-cmake-ros-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "ament_cmake_ros"
+   #:version %ament-cmake-ros-version
+   #:repo %ament-cmake-ros-repo
+   #:commit %ament-cmake-ros-commit
+   #:hash %ament-cmake-ros-hash
+   #:module-subdir "ament_cmake_ros"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-gtest-jazzy
+                             ros-ament-cmake-gmock-jazzy
+                             ros-ament-cmake-pytest-jazzy
+                             ros-domain-coordinator-jazzy)
+   #:home-page "https://github.com/ros2/ament_cmake_ros"
+   #:synopsis "ament_cmake helpers for ROS 2-specific test fixtures"
+   #:description
+   "@code{ament_cmake_ros} layers ROS 2-specific helpers (notably DDS
+domain coordination via @code{domain_coordinator}) on top of the generic
+ament_cmake test helpers."))
+
+;;;
+;;; Tier 3a — core C/C++ libraries.
+;;;
+
+(define-public ros-rcutils-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rcutils"
+   #:version "6.7.5"
+   #:repo "https://github.com/ros2/rcutils"
+   #:commit "2b6bdcc007d4647b57731cbe7a1ff9477569a679"
+   #:hash (base32 "0rk6633kinp7xj10ajr74486mw06skaf28ssq1cvjmlqhj6my7c6")
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy)
+   #:extra-native-inputs (list python-empy)
+   #:home-page "https://github.com/ros2/rcutils"
+   #:synopsis "ROS 2 C-language utility library"
+   #:description
+   "@code{rcutils} provides logging, allocator abstractions, string
+manipulation, time helpers, and other low-level C utilities used by the
+ROS 2 client support library (@code{rcl}) and the rosidl runtime."))
+
+(define-public ros-rcpputils-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rcpputils"
+   #:version "2.11.3"
+   #:repo "https://github.com/ros2/rcpputils"
+   #:commit "d01fd8196881bd35e651fe1b0ea6d5c2585e40c7"
+   #:hash (base32 "1mycffgacx76y98q2wi3ikm60f58r9g31krcxz7l5wpa0iy9x3i3")
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-ament-cmake-gen-version-h-jazzy
+                             ros-rcutils-jazzy)
+   #:home-page "https://github.com/ros2/rcpputils"
+   #:synopsis "ROS 2 C++ utility library"
+   #:description
+   "@code{rcpputils} is the C++ companion to @code{rcutils}, providing
+filesystem helpers, thread-safety primitives, version macros, and other
+C++ utilities used throughout the ROS 2 stack."))
 
 ;;;
 ;;; Aggregation meta-package.
