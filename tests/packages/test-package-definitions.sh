@@ -86,6 +86,9 @@ test_package "(systole packages qrestapi)" "qrestapi"
 test_package "(systole packages openigtlink)" "openigtlink"
 test_package "(systole packages openigtlink)" "slicer-openigtlink"
 
+# Test ROS 2 Jazzy meta-package
+test_package "(systole packages ros2 jazzy)" "ros-jazzy"
+
 if [ $FAILED -eq 0 ]; then
     echo "All package definitions verified successfully!"
     exit 0
