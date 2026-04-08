@@ -33,6 +33,7 @@
   #:use-module (guix packages)
   #:use-module (gnu packages python)
   #:use-module (systole packages ros2)
+  #:use-module (systole packages ros2-helpers)
   #:export (jazzy-distro))
 
 ;;;
@@ -54,6 +55,46 @@
    #:python python
    #:repos-snapshot %ros2-jazzy-repos-snapshot
    #:patch-subdir "ros2/jazzy"))
+
+;;;
+;;; Tier 1 — ament build tooling (first two packages).
+;;;
+
+(define-public ros-ament-package-jazzy
+  (make-ros2-ament-python-package
+   #:distro jazzy-distro
+   #:ros-name "ament_package"
+   #:version "0.16.4"
+   #:repo "https://github.com/ament/ament_package"
+   #:commit "ee3c5eda4fbc4df2c7a135d0ac1385e4a53fa0ee"
+   #:hash (base32 "0nay6winngy4nrv2d708scyimk1jkxcql02awdvnxs9bqifbmx8c")
+   #:propagated-inputs (list python-catkin-pkg)
+   #:home-page "https://github.com/ament/ament_package"
+   #:synopsis "ROS 2 ament package manifest parser"
+   #:description
+   "@code{ament_package} provides the Python parser for ROS 2 package
+manifest files (@file{package.xml}, format 2 and 3) and the helpers used
+by the ament build system to discover sibling packages via the AMENT
+resource index.  It is the first dependency of every other ament-built
+ROS 2 package."))
+
+(define-public ros-ament-cmake-core-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "ament_cmake_core"
+   #:version "2.6.4"
+   #:repo "https://github.com/ament/ament_cmake"
+   #:commit "5741cff5b9f83253bf3521bd8f44108fde3504ad"
+   #:hash (base32 "0sysj073m00i2ji18kr3lg0jvzcmqljyrs640gqg36insql8zvk4")
+   #:module-subdir "ament_cmake_core"
+   #:propagated-inputs (list ros-ament-package-jazzy)
+   #:home-page "https://github.com/ament/ament_cmake"
+   #:synopsis "Core CMake helpers for ROS 2 ament builds"
+   #:description
+   "@code{ament_cmake_core} provides the foundational CMake macros used
+by every other ament_cmake-based ROS 2 package: package registration in
+the AMENT resource index, environment-hook installation, and helpers for
+declaring exported targets, dependencies, and include directories."))
 
 ;;;
 ;;; Aggregation meta-package.

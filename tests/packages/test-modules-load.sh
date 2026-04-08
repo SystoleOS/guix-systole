@@ -20,6 +20,7 @@ MODULES=(
     "(systole packages qrestapi)"
     "(systole packages openigtlink)"
     "(systole packages ros2)"
+    "(systole packages ros2-helpers)"
     "(systole packages ros2 jazzy)"
 )
 
