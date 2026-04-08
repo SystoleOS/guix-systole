@@ -155,6 +155,13 @@ test_package "(systole packages ros2 jazzy)" "ros-tracetools-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rmw-implementation-cmake-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rmw-cyclonedds-cpp-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rmw-implementation-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-libyaml-vendor-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rcl-yaml-param-parser-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rcl-logging-interface-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rcl-logging-noop-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rcl-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rcl-lifecycle-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rcl-action-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-jazzy"
 
 if [ $FAILED -eq 0 ]; then
