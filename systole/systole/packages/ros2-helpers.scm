@@ -85,6 +85,36 @@ by software developed at the Open Source Robotics Foundation, including
 ROS 2 build tooling.")
     (license license:asl2.0)))
 
+(define-public console-bridge
+  ;; Tiny C++ logging shim used by class_loader/urdfdom/...  Not in
+  ;; upstream Guix at the time of writing; track upstream master.
+  (let ((commit "0828d846f2d4940b4e2b5075c6c724991d0cd308"))
+    (package
+      (name "console-bridge")
+      (version "1.0.2")
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference (url "https://github.com/ros/console_bridge")
+                             (commit commit)))
+         (file-name (git-file-name name commit))
+         (sha256
+          (base32 "18rjjzkg1ml2p4aa41kvfgamkxc88g0iv3fd94vxr8917mqshw9k"))))
+      (build-system cmake-build-system)
+      (arguments
+       (list #:tests? #f
+             #:configure-flags
+             #~(list "-DCMAKE_BUILD_TYPE=Release"
+                     "-DBUILD_SHARED_LIBS=ON")))
+      (home-page "https://github.com/ros/console_bridge")
+      (synopsis "Lightweight C++ console-output abstraction")
+      (description
+       "@code{console_bridge} provides a tiny logging facade used by
+ROS-adjacent libraries (notably @code{class_loader}, @code{urdfdom},
+@code{kdl_parser}) so they can emit log messages without hard-coding a
+specific logging back-end.")
+      (license license:bsd-3))))
+
 (define-public eclipse-cyclonedds
   ;; Pinned to ros2/jazzy's ros2.repos: branch releases/0.10.x.
   (let ((commit "5041f3560c088c99e5088b2b8520b69169621196"))

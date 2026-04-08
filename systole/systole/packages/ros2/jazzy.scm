@@ -38,6 +38,7 @@
   #:use-module (gnu packages python-science) ; python-numpy
   #:use-module (gnu packages python-xyz)   ; python-empy, python-pyyaml, python-lark
   #:use-module (gnu packages serialization) ; libyaml
+  #:use-module (gnu packages xml)          ; tinyxml2
   #:use-module (systole packages ros2)
   #:use-module (systole packages ros2-helpers)
   #:use-module (srfi srfi-1)               ; delete-duplicates, append-map
@@ -1718,6 +1719,98 @@ built."))
 @code{rclpy.Node}, executors, publishers, subscribers, services,
 clients, parameters, and timers via a pybind11 C++ extension built on
 top of @code{rcl}."))
+
+;;;
+;;; ============================================================
+;;; Phase 2 — ros_base components.
+;;; ============================================================
+;;; Everything below is layered on top of the Phase 1 ros_core stack.
+;;; ============================================================
+
+;;;
+;;; tinyxml2_vendor and console_bridge_vendor — vendor wrappers around
+;;; system libraries used by class_loader / urdf / kdl_parser.
+;;;
+
+(define-public ros-tinyxml2-vendor-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "tinyxml2_vendor"
+   #:version "0.9.2"
+   #:repo "https://github.com/ros2/tinyxml2_vendor"
+   #:commit "576ca46707b6e183911daac625910ee6d6be2f45"
+   #:hash (base32 "1wzsaf0nsf5d4fpazi5dspg5rwz8yqpmxgmly3gbyb6sa56i274l")
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             tinyxml2)
+   #:home-page "https://github.com/ros2/tinyxml2_vendor"
+   #:synopsis "ROS 2 vendor wrapper around system tinyxml2"
+   #:description
+   "Thin shim that lets ROS 2 packages depend on @code{tinyxml2_vendor}
+and have @code{find_package(TinyXML2)} succeed via the upstream
+@code{tinyxml2} library shipped by Guix."))
+
+(define-public ros-console-bridge-vendor-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "console_bridge_vendor"
+   #:version "1.7.0"
+   #:repo "https://github.com/ros2/console_bridge_vendor"
+   #:commit "611ceb78391dd89ed41061b3d72e391b763b78c3"
+   #:hash (base32 "0n8rmg8j1d5b8b38s50g0c3nizywdmyx1wlqfvjz2kyaqzprd20y")
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-vendor-package-jazzy
+                             console-bridge)
+   #:home-page "https://github.com/ros2/console_bridge_vendor"
+   #:synopsis "ROS 2 vendor wrapper around console_bridge"
+   #:description
+   "Vendor wrapper around the upstream @code{console_bridge} logging
+shim.  Resolved via @code{find_package(console_bridge)} against the
+package shipped by guix-systole."))
+
+;;;
+;;; class_loader / pluginlib — runtime plugin loading framework.
+;;;
+
+(define-public ros-class-loader-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "class_loader"
+   #:version "2.7.0"
+   #:repo "https://github.com/ros/class_loader"
+   #:commit "e06532188f4d79629866a08ee89e9203686a46ee"
+   #:hash (base32 "1vi6fbmn4034xf7m3kalflss4hbvr3pgzbak70r77p5fzmw55jfc")
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-console-bridge-vendor-jazzy
+                             console-bridge
+                             ros-rcpputils-jazzy)
+   #:home-page "https://github.com/ros/class_loader"
+   #:synopsis "Runtime C++ class loader (foundation of pluginlib)"
+   #:description
+   "ROS-independent C++ library for loading plugins via dlopen at
+runtime.  Used as the foundation of @code{pluginlib} and the wider
+@code{rclcpp_components} infrastructure."))
+
+(define-public ros-pluginlib-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "pluginlib"
+   #:version "5.4.5"
+   #:repo "https://github.com/ros/pluginlib"
+   #:commit "ddb1163d79932739ddf184328352e2a8e973ee29"
+   #:hash (base32 "1ndsh17n82aqqhhmwc0fyyi6mv4rl1n6kgxhws0x6pmxjd3gm3nl")
+   #:module-subdir "pluginlib"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-index-cpp-jazzy
+                             ros-class-loader-jazzy
+                             ros-rcutils-jazzy
+                             ros-rcpputils-jazzy
+                             ros-tinyxml2-vendor-jazzy)
+   #:home-page "https://github.com/ros/pluginlib"
+   #:synopsis "ROS 2 plugin loading library"
+   #:description
+   "@code{pluginlib} is the higher-level ROS 2 plugin loading library
+built on top of @code{class_loader}, used for runtime discovery and
+loading of plugins declared via @file{plugin_description.xml} files."))
 
 ;;;
 ;;; Aggregation meta-package.
