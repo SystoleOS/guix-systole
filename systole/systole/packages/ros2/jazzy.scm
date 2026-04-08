@@ -32,8 +32,10 @@
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (gnu packages check)        ; python-pytest
+  #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-xyz)   ; python-empy, python-pyyaml, python-lark
+  #:use-module (gnu packages serialization) ; libyaml
   #:use-module (systole packages ros2)
   #:use-module (systole packages ros2-helpers)
   #:export (jazzy-distro))
@@ -1146,6 +1148,183 @@ guix-systole ROS 2 Jazzy distribution; users select it by setting
    "Resolves the @env{RMW_IMPLEMENTATION} environment variable to one of
 the installed @code{rmw_*} libraries (Cyclone DDS, Fast DDS, ...) and
 forwards every rmw call to it."))
+
+;;;
+;;; rcl tier — ROS 2 client support library and its prerequisites.
+;;;
+
+(define-public ros-libyaml-vendor-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "libyaml_vendor"
+   #:version "1.6.3"
+   #:repo "https://github.com/ros2/libyaml_vendor"
+   #:commit "a54a952b730921146dc422d5e5beef5563df0fac"
+   #:hash (base32 "14zjp6gp4g59378l17nb2jqq341hygr7dkvryy7ch1jh81w2d5br")
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-vendor-package-jazzy
+                             pkg-config
+                             libyaml)
+   #:home-page "https://github.com/ros2/libyaml_vendor"
+   #:synopsis "Vendor wrapper around libyaml for ROS 2"
+   #:description
+   "Provides @code{find_package(libyaml_vendor)} that downstream ROS 2
+packages use to depend on libyaml.  In guix-systole the system libyaml
+is detected via pkg-config and re-used (no external project build)."))
+
+;;; rcl is a sub-package of the ros2/rcl monorepo.
+
+(define %rcl-repo "https://github.com/ros2/rcl")
+(define %rcl-commit "128547b52218f0856c84bb1640b9339a7fddc5ff")
+(define %rcl-hash
+  (base32 "0zn2g8x8m61fq9xjbp21r1vy0qlfp2md7498sqiv79dfzbrlyz30"))
+(define %rcl-version "9.2.9")
+
+(define-public ros-rcl-yaml-param-parser-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rcl_yaml_param_parser"
+   #:version %rcl-version
+   #:repo %rcl-repo
+   #:commit %rcl-commit
+   #:hash %rcl-hash
+   #:module-subdir "rcl_yaml_param_parser"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-ament-cmake-gen-version-h-jazzy
+                             ros-libyaml-vendor-jazzy
+                             ros-rcutils-jazzy
+                             ros-rmw-jazzy)
+   #:home-page "https://github.com/ros2/rcl"
+   #:synopsis "Parse ROS 2 parameter YAML files"
+   #:description
+   "C library used by @code{rcl} to parse parameter files
+(@file{*.yaml}) at node initialisation time."))
+
+;;; rcl_logging from ros2/rcl_logging.
+
+(define %rcl-logging-repo "https://github.com/ros2/rcl_logging")
+(define %rcl-logging-commit "727920c2592be6deb6983f0fe1b57cbc929cbb70")
+(define %rcl-logging-hash
+  (base32 "1s9j3641sw2mknnx41r8fv2d4bd8m8vsng945g3ghm5cdsqx2f4n"))
+(define %rcl-logging-version "3.1.1")
+
+(define-public ros-rcl-logging-interface-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rcl_logging_interface"
+   #:version %rcl-logging-version
+   #:repo %rcl-logging-repo
+   #:commit %rcl-logging-commit
+   #:hash %rcl-logging-hash
+   #:module-subdir "rcl_logging_interface"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-rcutils-jazzy)
+   #:home-page "https://github.com/ros2/rcl_logging"
+   #:synopsis "Interface header for ROS 2 logging back-ends"
+   #:description
+   "Defines the C ABI shared between @code{rcl} and concrete logging
+back-end implementations (@code{rcl_logging_noop},
+@code{rcl_logging_spdlog}, ...)."))
+
+(define-public ros-rcl-logging-noop-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rcl_logging_noop"
+   #:version %rcl-logging-version
+   #:repo %rcl-logging-repo
+   #:commit %rcl-logging-commit
+   #:hash %rcl-logging-hash
+   #:module-subdir "rcl_logging_noop"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-rcl-logging-interface-jazzy
+                             ros-rcutils-jazzy)
+   #:extra-native-inputs (list python-empy)
+   #:home-page "https://github.com/ros2/rcl_logging"
+   #:synopsis "No-op logging back-end for ROS 2"
+   #:description
+   "@code{rcl_logging_noop} discards every log message it receives.
+Used here as the default rcl logging back-end so we can avoid pulling
+in spdlog for the Phase 1 ros_core build."))
+
+(define-public ros-rcl-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rcl"
+   #:version %rcl-version
+   #:repo %rcl-repo
+   #:commit %rcl-commit
+   #:hash %rcl-hash
+   #:module-subdir "rcl"
+   #:extra-configure-flags
+   #~(list "-DRCL_LOGGING_IMPLEMENTATION=rcl_logging_noop")
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-ament-cmake-gen-version-h-jazzy
+                             ros-libyaml-vendor-jazzy
+                             ros-rcl-interfaces-jazzy
+                             ros-rcl-logging-interface-jazzy
+                             ros-rcl-logging-noop-jazzy
+                             ros-rcl-yaml-param-parser-jazzy
+                             ros-rcutils-jazzy
+                             ros-rmw-jazzy
+                             ros-rmw-implementation-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-service-msgs-jazzy
+                             ros-tracetools-jazzy
+                             ros-type-description-interfaces-jazzy)
+   #:home-page "https://github.com/ros2/rcl"
+   #:synopsis "ROS 2 client support library"
+   #:description
+   "@code{rcl} is the C client support library for ROS 2: it sits
+between the higher-level client libraries (@code{rclcpp}, @code{rclpy})
+and the @code{rmw} middleware abstraction.  Provides nodes, publishers,
+subscribers, services, clients, timers, parameter handling and the main
+event loop primitives.  Built with @code{rcl_logging_noop} as the
+default logging back-end."))
+
+(define-public ros-rcl-lifecycle-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rcl_lifecycle"
+   #:version %rcl-version
+   #:repo %rcl-repo
+   #:commit %rcl-commit
+   #:hash %rcl-hash
+   #:module-subdir "rcl_lifecycle"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-ament-cmake-gen-version-h-jazzy
+                             ros-lifecycle-msgs-jazzy
+                             ros-rcl-jazzy
+                             ros-rcutils-jazzy
+                             ros-rmw-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-tracetools-jazzy)
+   #:home-page "https://github.com/ros2/rcl"
+   #:synopsis "Lifecycle (managed-node) state machine for rcl"
+   #:description
+   "Implements the ROS 2 managed-node state machine on top of @code{rcl},
+exposing it via @file{lifecycle_msgs} services."))
+
+(define-public ros-rcl-action-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rcl_action"
+   #:version %rcl-version
+   #:repo %rcl-repo
+   #:commit %rcl-commit
+   #:hash %rcl-hash
+   #:module-subdir "rcl_action"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-ament-cmake-gen-version-h-jazzy
+                             ros-action-msgs-jazzy
+                             ros-rcl-jazzy
+                             ros-rcutils-jazzy
+                             ros-rmw-jazzy
+                             ros-rosidl-runtime-c-jazzy)
+   #:home-page "https://github.com/ros2/rcl"
+   #:synopsis "Action (long-running RPC) support for rcl"
+   #:description
+   "Implements the ROS 2 action server and client primitives on top of
+@code{rcl}, using @file{action_msgs} for goal/feedback/result delivery."))
 
 ;;;
 ;;; Aggregation meta-package.
