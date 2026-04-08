@@ -866,6 +866,151 @@ messages, services, and actions."))
    "Runtime counterpart to @code{rosidl_default_generators}."))
 
 ;;;
+;;; Interface packages — first real users of the rosidl pipeline.
+;;;
+;;; The rcl_interfaces monorepo hosts most of the base messages; std_msgs
+;;; lives in common_interfaces; unique_identifier_msgs has its own repo.
+
+(define %rcl-interfaces-repo "https://github.com/ros2/rcl_interfaces")
+(define %rcl-interfaces-commit "6ec02e7341db2258e1c1a36fb79701c5af5b138e")
+(define %rcl-interfaces-hash
+  (base32 "13md36vilpahr2zp0g695zgszp983pxw4g4p7sxah5wzv7h59x8g"))
+(define %rcl-interfaces-version "2.0.3")
+
+(define* (rcl-interfaces-msg ros-name #:key
+                             (message-deps '())
+                             synopsis description)
+  "Helper for sub-packages of ros2/rcl_interfaces (jazzy)."
+  (make-ros2-rosidl-interface-package
+   #:distro jazzy-distro
+   #:ros-name ros-name
+   #:version %rcl-interfaces-version
+   #:repo %rcl-interfaces-repo
+   #:commit %rcl-interfaces-commit
+   #:hash %rcl-interfaces-hash
+   #:module-subdir ros-name
+   #:message-deps (cons ros-rosidl-default-runtime-jazzy
+                        (cons ros-rosidl-default-generators-jazzy
+                              message-deps))
+   #:home-page "https://github.com/ros2/rcl_interfaces"
+   #:synopsis synopsis
+   #:description description))
+
+(define-public ros-builtin-interfaces-jazzy
+  (rcl-interfaces-msg
+   "builtin_interfaces"
+   #:synopsis "Built-in primitive interfaces (Time, Duration) for ROS 2"
+   #:description
+   "@code{builtin_interfaces} provides the @code{Time} and
+@code{Duration} message types used throughout ROS 2."))
+
+(define-public ros-service-msgs-jazzy
+  (rcl-interfaces-msg
+   "service_msgs"
+   #:message-deps (list ros-builtin-interfaces-jazzy)
+   #:synopsis "Service-related metadata message types for ROS 2"
+   #:description
+   "@code{service_msgs} provides @code{ServiceEventInfo} and related
+metadata types used by ROS 2 service introspection."))
+
+(define-public ros-type-description-interfaces-jazzy
+  (rcl-interfaces-msg
+   "type_description_interfaces"
+   #:message-deps (list ros-builtin-interfaces-jazzy
+                        ros-service-msgs-jazzy)
+   #:synopsis "Type description interfaces for ROS 2"
+   #:description
+   "Provides @code{TypeDescription}, @code{TypeSource}, and the
+@code{GetTypeDescription} service used by ROS 2 type introspection."))
+
+(define-public ros-rosgraph-msgs-jazzy
+  (rcl-interfaces-msg
+   "rosgraph_msgs"
+   #:message-deps (list ros-builtin-interfaces-jazzy)
+   #:synopsis "ROS computation graph message types"
+   #:description
+   "Messages such as @code{Clock} used by tools that interact with the
+ROS computation graph."))
+
+(define-public ros-rcl-interfaces-jazzy
+  (rcl-interfaces-msg
+   "rcl_interfaces"
+   #:message-deps (list ros-builtin-interfaces-jazzy
+                        ros-service-msgs-jazzy)
+   #:synopsis "rcl-level message and service definitions"
+   #:description
+   "Interfaces consumed directly by @code{rcl}: parameter
+descriptors, log messages, list-parameters service definitions, etc."))
+
+(define-public ros-statistics-msgs-jazzy
+  (rcl-interfaces-msg
+   "statistics_msgs"
+   #:message-deps (list ros-builtin-interfaces-jazzy)
+   #:synopsis "Statistics message types for ROS 2 monitoring"
+   #:description
+   "Message types used by @code{libstatistics_collector} to publish
+runtime metrics from ROS 2 nodes."))
+
+(define-public ros-lifecycle-msgs-jazzy
+  (rcl-interfaces-msg
+   "lifecycle_msgs"
+   ;; lifecycle_msgs declares services (e.g. ChangeState), so service_msgs
+   ;; must be available at code-generation time.  Upstream's package.xml
+   ;; under-declares this — it relies on rosidl_default_generators
+   ;; transitively providing it.
+   #:message-deps (list ros-service-msgs-jazzy)
+   #:synopsis "Lifecycle node state and transition messages"
+   #:description
+   "Message and service definitions used by ROS 2 managed (lifecycle)
+nodes."))
+
+(define-public ros-unique-identifier-msgs-jazzy
+  (make-ros2-rosidl-interface-package
+   #:distro jazzy-distro
+   #:ros-name "unique_identifier_msgs"
+   #:version "2.5.0"
+   #:repo "https://github.com/ros2/unique_identifier_msgs"
+   #:commit "51ec3931400feba6cc0ef0ebd045b5866f63fdd1"
+   #:hash (base32 "1jx7z6101lg9q51rrizv3apjrsl2vvbf55nqakfm25zifms9fd5g")
+   #:message-deps (list ros-rosidl-default-generators-jazzy
+                        ros-rosidl-default-runtime-jazzy)
+   #:home-page "https://github.com/ros2/unique_identifier_msgs"
+   #:synopsis "Unique identifier (UUID) message types for ROS 2"
+   #:description
+   "Provides the @code{UUID} message used by ROS 2 actions and other
+APIs that need stable globally unique identifiers."))
+
+(define-public ros-action-msgs-jazzy
+  (rcl-interfaces-msg
+   "action_msgs"
+   #:message-deps (list ros-builtin-interfaces-jazzy
+                        ros-service-msgs-jazzy
+                        ros-unique-identifier-msgs-jazzy)
+   #:synopsis "Generic action server / client message types"
+   #:description
+   "Generic messages and services used by ROS 2 action server and
+client implementations: goal info, goal status, cancel goal."))
+
+(define-public ros-std-msgs-jazzy
+  (make-ros2-rosidl-interface-package
+   #:distro jazzy-distro
+   #:ros-name "std_msgs"
+   #:version "5.4.0"
+   #:repo "https://github.com/ros2/common_interfaces"
+   #:commit "81e2f6baa6eb9ac734d4c174dfd231b54d5fa1ef"
+   #:hash (base32 "0ni0x7fm0fxcyvvmj479s656fnrynhn4a6whfy3d272fni2kvzd4")
+   #:module-subdir "std_msgs"
+   #:message-deps (list ros-rosidl-default-generators-jazzy
+                        ros-rosidl-default-runtime-jazzy
+                        ros-builtin-interfaces-jazzy)
+   #:home-page "https://github.com/ros2/common_interfaces"
+   #:synopsis "Standard primitive message types for ROS 2"
+   #:description
+   "Standard messages: @code{String}, @code{Bool}, @code{Int32},
+@code{Float64}, @code{Header}, etc.  These are the most commonly used
+message types in ROS 2 demonstration code."))
+
+;;;
 ;;; Aggregation meta-package.
 ;;;
 ;;; Phase 1 will grow this package's propagated-inputs tier by tier until
