@@ -1,0 +1,29 @@
+From eb9984b7dd80873c50967680830939491def979c Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 19:11:27 +0200
+Subject: [PATCH] COMP: Fix MOC processing for qSlicerIconEnginePlugin
+
+ctkMacroBuildQtIconEnginesPlugin does not use AUTOMOC, so Q_OBJECT
+headers must be listed in MOC_SRCS, not SRCS. Without this the vtable
+for qSlicerIconEnginePlugin is undefined at link time.
+---
+ Base/QTGUI/CMakeLists.txt | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/Base/QTGUI/CMakeLists.txt b/Base/QTGUI/CMakeLists.txt
+index 9b4cde515a..7133b992b2 100644
+--- a/Base/QTGUI/CMakeLists.txt
++++ b/Base/QTGUI/CMakeLists.txt
+@@ -310,7 +310,8 @@ ctkMacroBuildQtIconEnginesPlugin(
+   NAME qSlicerIconEnginePlugin
+   EXPORT_DIRECTIVE "Q_SLICER_BASE_QTGUI_ICON_ENGINE_EXPORT"
+   FOLDER "Core-Base"
+-  SRCS qSlicerIconEnginePlugin.cxx qSlicerIconEnginePlugin.h
++  SRCS qSlicerIconEnginePlugin.cxx
++  MOC_SRCS qSlicerIconEnginePlugin.h
+   TARGET_LIBRARIES ${QT_LIBRARIES} ${CTK_LIBRARIES}
+   )
+ 
+-- 
+2.52.0
+
