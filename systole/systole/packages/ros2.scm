@@ -199,9 +199,11 @@ of monorepos such as ament_cmake or rcl_interfaces)."
                     ;; Many ROS 2 packages install a family of co-located
                     ;; shared libraries that dlopen each other at runtime
                     ;; (rosidl typesupports, rmw bindings, ...).  Adding
-                    ;; $ORIGIN to the install RPATH lets them find their
-                    ;; siblings without LD_LIBRARY_PATH gymnastics.
-                    "-DCMAKE_INSTALL_RPATH=$ORIGIN"
+                    ;; $ORIGIN and $ORIGIN/.. to the install RPATH lets
+                    ;; both libraries in lib/ and binaries nested under
+                    ;; lib/<pkg>/ find their siblings without
+                    ;; LD_LIBRARY_PATH gymnastics.
+                    "-DCMAKE_INSTALL_RPATH=$ORIGIN;$ORIGIN/.."
                     "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON")
               #$extra-configure-flags)
            #:phases

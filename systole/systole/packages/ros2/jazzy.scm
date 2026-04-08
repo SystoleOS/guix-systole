@@ -1040,6 +1040,114 @@ message types and C++ helpers used by every DDS-based @code{rmw}
 implementation (Cyclone DDS, Fast DDS, ...)."))
 
 ;;;
+;;; tracetools — instrumentation API used by rclcpp/rcl/rmw_*.
+;;; Built with LTTng support disabled in Phase 1 (TRACETOOLS_DISABLED=ON).
+;;;
+
+(define-public ros-tracetools-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "tracetools"
+   #:version "8.2.5"
+   #:repo "https://github.com/ros2/ros2_tracing"
+   #:commit "00f7331e33886372957e88466e224c9c9f514a8c"
+   #:hash (base32 "0syxr3kmjd1c4z9qiznvqjvbhqj5cpgqd0ahyv3jaj92z2a0fzw7")
+   #:module-subdir "tracetools"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-ament-cmake-gen-version-h-jazzy)
+   #:extra-configure-flags
+   #~(list "-DTRACETOOLS_DISABLED=ON")
+   #:home-page "https://github.com/ros2/ros2_tracing"
+   #:synopsis "ROS 2 instrumentation API (LTTng support disabled)"
+   #:description
+   "@code{tracetools} provides the C/C++ instrumentation API used by
+@code{rclcpp}, @code{rcl}, and the rmw implementations to emit trace
+events.  Built here with @code{TRACETOOLS_DISABLED=ON}, so the
+tracepoints become no-ops and we avoid pulling in @code{lttng-ust}."))
+
+;;;
+;;; rmw_implementation_cmake — small CMake helper from the rmw repo.
+;;;
+
+(define-public ros-rmw-implementation-cmake-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rmw_implementation_cmake"
+   #:version "7.3.3"
+   #:repo "https://github.com/ros2/rmw"
+   #:commit "9f42ff0f18c8c4fd2a84a7c27d11ec8371e968ea"
+   #:hash (base32 "0pgv9zzgckaffpf72wbpq2mnbv1lap7cla10sswn40f1kcl6a9l0")
+   #:module-subdir "rmw_implementation_cmake"
+   #:propagated-inputs (list ros-ament-cmake-jazzy ros-rmw-jazzy)
+   #:home-page "https://github.com/ros2/rmw"
+   #:synopsis "CMake helpers for selecting an rmw implementation"
+   #:description
+   "Provides @code{find_package(rmw_implementation_cmake)} hooks used by
+@code{rmw_implementation} and downstream consumers to discover the
+installed @code{rmw} bindings via the AMENT resource index."))
+
+;;;
+;;; rmw_cyclonedds_cpp — Cyclone DDS rmw binding.
+;;;
+
+(define-public ros-rmw-cyclonedds-cpp-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rmw_cyclonedds_cpp"
+   #:version "2.2.3"
+   #:repo "https://github.com/ros2/rmw_cyclonedds"
+   #:commit "3022e057cde9fc164377fca05536ecdfcc0c5ace"
+   #:hash (base32 "1zrhsx3c1xy41794sw0vrbsszsg9zwaajr2gzyy7qy0mrmqg3kkx")
+   #:module-subdir "rmw_cyclonedds_cpp"
+   ;; cyclonedds must be propagated, not just an input: rmw_cyclonedds_cpp's
+   ;; exported -extras.cmake calls find_package(CycloneDDS) at consumer
+   ;; build time (e.g. from rmw_implementation).
+   #:propagated-inputs (list eclipse-cyclonedds
+                             ros-ament-cmake-ros-jazzy
+                             ros-rcutils-jazzy
+                             ros-rcpputils-jazzy
+                             ros-rmw-jazzy
+                             ros-rmw-dds-common-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-rosidl-typesupport-introspection-c-jazzy
+                             ros-rosidl-typesupport-introspection-cpp-jazzy
+                             ros-tracetools-jazzy)
+   #:home-page "https://github.com/ros2/rmw_cyclonedds"
+   #:synopsis "Eclipse Cyclone DDS implementation of the ROS 2 rmw API"
+   #:description
+   "@code{rmw_cyclonedds_cpp} implements the @code{rmw} C interface on
+top of Eclipse Cyclone DDS.  This is the default DDS middleware in the
+guix-systole ROS 2 Jazzy distribution; users select it by setting
+@env{RMW_IMPLEMENTATION=rmw_cyclonedds_cpp}."))
+
+;;;
+;;; rmw_implementation — runtime dispatcher between installed rmw bindings.
+;;;
+
+(define-public ros-rmw-implementation-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rmw_implementation"
+   #:version "2.15.6"
+   #:repo "https://github.com/ros2/rmw_implementation"
+   #:commit "23fe893a860545da06ec98d0a22fdc8554d5c0ac"
+   #:hash (base32 "07s1fnzv64634c3dgm6wr98az78ldrvbq5dk4c5s0j7i7nj0v5a3")
+   #:module-subdir "rmw_implementation"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-index-cpp-jazzy
+                             ros-rcpputils-jazzy
+                             ros-rcutils-jazzy
+                             ros-rmw-jazzy
+                             ros-rmw-implementation-cmake-jazzy
+                             ros-rmw-cyclonedds-cpp-jazzy)
+   #:home-page "https://github.com/ros2/rmw_implementation"
+   #:synopsis "ROS 2 runtime dispatcher between rmw implementations"
+   #:description
+   "Resolves the @env{RMW_IMPLEMENTATION} environment variable to one of
+the installed @code{rmw_*} libraries (Cyclone DDS, Fast DDS, ...) and
+forwards every rmw call to it."))
+
+;;;
 ;;; Aggregation meta-package.
 ;;;
 ;;; Phase 1 will grow this package's propagated-inputs tier by tier until
