@@ -48,6 +48,7 @@
   #:use-module (guix search-paths)
   #:use-module (guix utils)
   #:use-module (gnu packages python)
+  #:use-module (gnu packages python-build)
   #:use-module (systole packages)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
@@ -258,7 +259,10 @@ of monorepos such as ament_cmake or rcl_interfaces)."
                            (lambda _
                              (chdir #$module-subdir))))
                       #~()))))
-    (native-inputs extra-native-inputs)
+    ;; setuptools + wheel are required by every pyproject-build-system
+    ;; build via setuptools.build_meta.
+    (native-inputs (append (list python-setuptools python-wheel)
+                           extra-native-inputs))
     (inputs extra-inputs)
     (propagated-inputs propagated-inputs)
     (synopsis synopsis)
