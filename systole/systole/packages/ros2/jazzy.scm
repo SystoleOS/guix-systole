@@ -1580,10 +1580,112 @@ top of @code{rcl}."))
 ;;; carries the native-search-paths so downstream profiles are correctly
 ;;; configured from day one.
 
+;;;
+;;; Phase 1 ros_core package list — every public ROS 2 Jazzy package
+;;; defined above.  ros-jazzy propagates this set so installing the
+;;; meta-package gives you a complete usable ROS 2 environment.
+
+(define %ros-core-jazzy-packages
+  (list
+   ;; ament tooling
+   ros-ament-package-jazzy
+   ros-ament-cmake-core-jazzy
+   ros-ament-cmake-export-definitions-jazzy
+   ros-ament-cmake-export-dependencies-jazzy
+   ros-ament-cmake-export-include-directories-jazzy
+   ros-ament-cmake-export-interfaces-jazzy
+   ros-ament-cmake-export-libraries-jazzy
+   ros-ament-cmake-export-link-flags-jazzy
+   ros-ament-cmake-export-targets-jazzy
+   ros-ament-cmake-include-directories-jazzy
+   ros-ament-cmake-libraries-jazzy
+   ros-ament-cmake-target-dependencies-jazzy
+   ros-ament-cmake-version-jazzy
+   ros-ament-cmake-python-jazzy
+   ros-ament-cmake-gtest-jazzy
+   ros-ament-cmake-gmock-jazzy
+   ros-ament-cmake-test-jazzy
+   ros-ament-cmake-pytest-jazzy
+   ros-ament-cmake-gen-version-h-jazzy
+   ros-ament-cmake-vendor-package-jazzy
+   ros-ament-cmake-jazzy
+   ros-ament-index-python-jazzy
+   ros-ament-index-cpp-jazzy
+   ros-domain-coordinator-jazzy
+   ros-ament-cmake-ros-jazzy
+
+   ;; core C/C++ utility libraries
+   ros-rcutils-jazzy
+   ros-rcpputils-jazzy
+
+   ;; rosidl pipeline
+   ros-rosidl-typesupport-interface-jazzy
+   ros-rosidl-runtime-c-jazzy
+   ros-rosidl-runtime-cpp-jazzy
+   ros-rosidl-cli-jazzy
+   ros-rosidl-adapter-jazzy
+   ros-rosidl-parser-jazzy
+   ros-rosidl-pycommon-jazzy
+   ros-rosidl-cmake-jazzy
+   ros-rosidl-generator-type-description-jazzy
+   ros-rosidl-generator-c-jazzy
+   ros-rosidl-generator-cpp-jazzy
+   ros-rosidl-typesupport-introspection-c-jazzy
+   ros-rosidl-typesupport-introspection-cpp-jazzy
+   ros-rosidl-dynamic-typesupport-jazzy
+   ros-rosidl-typesupport-c-jazzy
+   ros-rosidl-typesupport-cpp-jazzy
+   ros-rosidl-core-generators-jazzy
+   ros-rosidl-core-runtime-jazzy
+   ros-rosidl-default-generators-jazzy
+   ros-rosidl-default-runtime-jazzy
+
+   ;; rmw + DDS middleware
+   ros-rmw-jazzy
+   ros-rmw-implementation-cmake-jazzy
+   ros-rmw-dds-common-jazzy
+   ros-tracetools-jazzy
+   ros-rmw-cyclonedds-cpp-jazzy
+   ros-rmw-implementation-jazzy
+
+   ;; base interface messages
+   ros-builtin-interfaces-jazzy
+   ros-service-msgs-jazzy
+   ros-type-description-interfaces-jazzy
+   ros-rosgraph-msgs-jazzy
+   ros-rcl-interfaces-jazzy
+   ros-statistics-msgs-jazzy
+   ros-lifecycle-msgs-jazzy
+   ros-unique-identifier-msgs-jazzy
+   ros-action-msgs-jazzy
+   ros-std-msgs-jazzy
+
+   ;; rcl tier
+   ros-libyaml-vendor-jazzy
+   ros-rcl-yaml-param-parser-jazzy
+   ros-rcl-logging-interface-jazzy
+   ros-rcl-logging-noop-jazzy
+   ros-rcl-jazzy
+   ros-rcl-lifecycle-jazzy
+   ros-rcl-action-jazzy
+
+   ;; rclcpp tier
+   ros-libstatistics-collector-jazzy
+   ros-rclcpp-jazzy
+   ros-rclcpp-lifecycle-jazzy
+   ros-rclcpp-action-jazzy
+
+   ;; rclpy tier
+   ros-python-cmake-module-jazzy
+   ros-pybind11-vendor-jazzy
+   ros-rpyutils-jazzy
+   ros-rosidl-generator-py-jazzy
+   ros-rclpy-jazzy))
+
 (define-public ros-jazzy
   (package
     (name "ros-jazzy")
-    (version "0.0.0-dev")
+    (version "0.1.0")
     (source #f)
     (build-system trivial-build-system)
     (arguments
@@ -1591,15 +1693,25 @@ top of @code{rcl}."))
            #~(begin
                (mkdir #$output)
                #t)))
+    (propagated-inputs %ros-core-jazzy-packages)
     (native-search-paths (ros2-native-search-paths jazzy-distro))
     (synopsis "ROS 2 Jazzy Jalisco meta-package (guix-systole)")
     (description
      "Aggregation meta-package for the ROS 2 Jazzy Jalisco distribution
-provided by the guix-systole channel.  Installing this package pulls in
-the full @code{ros_core} stack (and eventually @code{ros_base}) and
-configures the relevant search paths (@env{AMENT_PREFIX_PATH},
-@env{CMAKE_PREFIX_PATH}, @env{ROS_PACKAGE_PATH}, @env{PYTHONPATH},
-@env{LD_LIBRARY_PATH}) so downstream packages discover ROS components via
-the Guix profile.")
+provided by the guix-systole channel.  Installing @code{ros-jazzy}
+pulls in the full @code{ros_core} stack — ament build tooling, the
+rosidl C/C++/Python interface generators, the rmw middleware abstraction
+plus an Eclipse Cyclone DDS implementation, the @code{rcl} client
+support library, and both @code{rclcpp} (C++) and @code{rclpy} (Python)
+client libraries.
+
+The package configures the relevant search paths
+(@env{AMENT_PREFIX_PATH}, @env{CMAKE_PREFIX_PATH},
+@env{ROS_PACKAGE_PATH}, @env{PYTHONPATH}, @env{LD_LIBRARY_PATH}) so
+downstream packages discover ROS components via the Guix profile.
+
+Set @env{RMW_IMPLEMENTATION=rmw_cyclonedds_cpp} to select the bundled
+DDS middleware (this is currently the only @code{rmw} implementation
+provided by guix-systole).")
     (home-page "https://docs.ros.org/en/jazzy/")
     (license license:asl2.0)))
