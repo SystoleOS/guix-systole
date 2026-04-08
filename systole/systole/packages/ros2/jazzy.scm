@@ -1071,24 +1071,156 @@ APIs that need stable globally unique identifiers."))
    "Generic messages and services used by ROS 2 action server and
 client implementations: goal info, goal status, cancel goal."))
 
-(define-public ros-std-msgs-jazzy
+;;;
+;;; ros2/common_interfaces — std_msgs (Phase 1) plus the larger
+;;; common-interface message families that ros_base needs (Phase 2).
+;;;
+
+(define %common-interfaces-repo "https://github.com/ros2/common_interfaces")
+(define %common-interfaces-commit "81e2f6baa6eb9ac734d4c174dfd231b54d5fa1ef")
+(define %common-interfaces-hash
+  (base32 "0ni0x7fm0fxcyvvmj479s656fnrynhn4a6whfy3d272fni2kvzd4"))
+(define %common-interfaces-version "5.3.7")
+
+(define* (common-interfaces-msg ros-name #:key
+                                (message-deps '())
+                                synopsis description)
+  "Helper for sub-packages of ros2/common_interfaces (jazzy)."
   (make-ros2-rosidl-interface-package
    #:distro jazzy-distro
-   #:ros-name "std_msgs"
-   #:version "5.4.0"
-   #:repo "https://github.com/ros2/common_interfaces"
-   #:commit "81e2f6baa6eb9ac734d4c174dfd231b54d5fa1ef"
-   #:hash (base32 "0ni0x7fm0fxcyvvmj479s656fnrynhn4a6whfy3d272fni2kvzd4")
-   #:module-subdir "std_msgs"
-   #:message-deps (list ros-rosidl-default-generators-jazzy
-                        ros-rosidl-default-runtime-jazzy
-                        ros-builtin-interfaces-jazzy)
-   #:home-page "https://github.com/ros2/common_interfaces"
+   #:ros-name ros-name
+   #:version %common-interfaces-version
+   #:repo %common-interfaces-repo
+   #:commit %common-interfaces-commit
+   #:hash %common-interfaces-hash
+   #:module-subdir ros-name
+   #:message-deps (cons ros-rosidl-default-runtime-jazzy
+                        (cons ros-rosidl-default-generators-jazzy
+                              message-deps))
+   #:home-page %common-interfaces-repo
+   #:synopsis synopsis
+   #:description description))
+
+(define-public ros-std-msgs-jazzy
+  (common-interfaces-msg
+   "std_msgs"
+   #:message-deps (list ros-builtin-interfaces-jazzy)
    #:synopsis "Standard primitive message types for ROS 2"
    #:description
    "Standard messages: @code{String}, @code{Bool}, @code{Int32},
 @code{Float64}, @code{Header}, etc.  These are the most commonly used
 message types in ROS 2 demonstration code."))
+
+(define-public ros-std-srvs-jazzy
+  (common-interfaces-msg
+   "std_srvs"
+   #:message-deps (list ros-service-msgs-jazzy)
+   #:synopsis "Standard primitive service types for ROS 2"
+   #:description
+   "Standard services: @code{Empty}, @code{SetBool}, @code{Trigger}.
+The minimal service set ROS 2 nodes use for simple control APIs."))
+
+(define-public ros-geometry-msgs-jazzy
+  (common-interfaces-msg
+   "geometry_msgs"
+   #:message-deps (list ros-builtin-interfaces-jazzy
+                        ros-std-msgs-jazzy)
+   #:synopsis "Geometric primitive messages for ROS 2"
+   #:description
+   "Vector, Point, Quaternion, Pose, Twist, Wrench, Transform and the
+stamped/covariance variants used by tf2 and most navigation stacks."))
+
+(define-public ros-actionlib-msgs-jazzy
+  (common-interfaces-msg
+   "actionlib_msgs"
+   #:message-deps (list ros-builtin-interfaces-jazzy
+                        ros-std-msgs-jazzy)
+   #:synopsis "Legacy actionlib message types"
+   #:description
+   "Legacy message types from ROS 1 actionlib, kept for compatibility
+with ports that haven't migrated to the new ROS 2 actions API."))
+
+(define-public ros-shape-msgs-jazzy
+  (common-interfaces-msg
+   "shape_msgs"
+   #:message-deps (list ros-geometry-msgs-jazzy
+                        ros-std-msgs-jazzy)
+   #:synopsis "Geometric shape messages for ROS 2"
+   #:description
+   "Plane, SolidPrimitive, Mesh, MeshTriangle — used by motion planners
+and collision-checking libraries."))
+
+(define-public ros-trajectory-msgs-jazzy
+  (common-interfaces-msg
+   "trajectory_msgs"
+   #:message-deps (list ros-builtin-interfaces-jazzy
+                        ros-geometry-msgs-jazzy
+                        ros-std-msgs-jazzy)
+   #:synopsis "Trajectory messages (joint and multi-DOF) for ROS 2"
+   #:description
+   "JointTrajectory, MultiDOFJointTrajectory and their @code{*Point}
+companions, used by motion controllers and trajectory planners."))
+
+(define-public ros-sensor-msgs-jazzy
+  (common-interfaces-msg
+   "sensor_msgs"
+   #:message-deps (list ros-builtin-interfaces-jazzy
+                        ros-geometry-msgs-jazzy
+                        ros-service-msgs-jazzy
+                        ros-std-msgs-jazzy)
+   #:synopsis "Sensor message types (Image, IMU, LaserScan, ...) for ROS 2"
+   #:description
+   "The standard ROS 2 sensor messages: @code{Image}, @code{Imu},
+@code{LaserScan}, @code{PointCloud2}, @code{CameraInfo}, @code{Joy},
+plus a small set of services like @code{SetCameraInfo}."))
+
+(define-public ros-stereo-msgs-jazzy
+  (common-interfaces-msg
+   "stereo_msgs"
+   #:message-deps (list ros-sensor-msgs-jazzy
+                        ros-std-msgs-jazzy)
+   #:synopsis "Stereo-vision messages for ROS 2"
+   #:description
+   "@code{DisparityImage} and the small set of stereo-vision-specific
+messages used by stereo cameras."))
+
+(define-public ros-nav-msgs-jazzy
+  (common-interfaces-msg
+   "nav_msgs"
+   #:message-deps (list ros-builtin-interfaces-jazzy
+                        ros-geometry-msgs-jazzy
+                        ros-service-msgs-jazzy
+                        ros-std-msgs-jazzy)
+   #:synopsis "Navigation message types for ROS 2"
+   #:description
+   "@code{OccupancyGrid}, @code{Odometry}, @code{Path}, @code{MapMetaData},
+plus the @code{GetMap} / @code{GetPlan} services used by navigation
+stacks."))
+
+(define-public ros-diagnostic-msgs-jazzy
+  (common-interfaces-msg
+   "diagnostic_msgs"
+   #:message-deps (list ros-builtin-interfaces-jazzy
+                        ros-service-msgs-jazzy
+                        ros-std-msgs-jazzy)
+   #:synopsis "Diagnostic message and service types for ROS 2"
+   #:description
+   "@code{DiagnosticStatus}, @code{DiagnosticArray}, @code{KeyValue},
+plus the @code{AddDiagnostics} / @code{SelfTest} services used by
+the @code{diagnostics} stack."))
+
+(define-public ros-visualization-msgs-jazzy
+  (common-interfaces-msg
+   "visualization_msgs"
+   #:message-deps (list ros-builtin-interfaces-jazzy
+                        ros-geometry-msgs-jazzy
+                        ros-sensor-msgs-jazzy
+                        ros-service-msgs-jazzy
+                        ros-std-msgs-jazzy)
+   #:synopsis "Visualization message types (Marker, MarkerArray, ...) for ROS 2"
+   #:description
+   "@code{Marker}, @code{MarkerArray}, @code{InteractiveMarker} and
+related types used by RViz and other visualization tools."))
 
 ;;;
 ;;; rmw_dds_common — shared helpers and common message types for DDS
