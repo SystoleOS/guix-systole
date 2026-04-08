@@ -1011,6 +1011,35 @@ client implementations: goal info, goal status, cancel goal."))
 message types in ROS 2 demonstration code."))
 
 ;;;
+;;; rmw_dds_common — shared helpers and common message types for DDS
+;;; based rmw implementations.
+;;;
+
+(define-public ros-rmw-dds-common-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rmw_dds_common"
+   #:version "3.1.1"
+   #:repo "https://github.com/ros2/rmw_dds_common"
+   #:commit "2e3ebf31850a8b05430fb44230ead2d566b8ff1d"
+   #:hash (base32 "1fgjim663jhpp59xjkvynwfdalxv7cpk4d2bp7c33686789qck55")
+   #:module-subdir "rmw_dds_common"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-rcutils-jazzy
+                             ros-rcpputils-jazzy
+                             ros-rmw-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-rosidl-runtime-cpp-jazzy
+                             ros-rosidl-default-generators-jazzy
+                             ros-rosidl-default-runtime-jazzy)
+   #:home-page "https://github.com/ros2/rmw_dds_common"
+   #:synopsis "Common helpers and message types for DDS-based rmw"
+   #:description
+   "Provides @code{Gid}, @code{ParticipantEntitiesInfo}, and other shared
+message types and C++ helpers used by every DDS-based @code{rmw}
+implementation (Cyclone DDS, Fast DDS, ...)."))
+
+;;;
 ;;; Aggregation meta-package.
 ;;;
 ;;; Phase 1 will grow this package's propagated-inputs tier by tier until

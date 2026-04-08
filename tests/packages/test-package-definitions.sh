@@ -149,6 +149,7 @@ test_package "(systole packages ros2 jazzy)" "ros-lifecycle-msgs-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-unique-identifier-msgs-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-action-msgs-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-std-msgs-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rmw-dds-common-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-jazzy"
 
 if [ $FAILED -eq 0 ]; then

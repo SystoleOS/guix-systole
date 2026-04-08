@@ -195,7 +195,14 @@ of monorepos such as ament_cmake or rcl_interfaces)."
            #:configure-flags
            #~(append
               (list "-DCMAKE_BUILD_TYPE=Release"
-                    "-DBUILD_TESTING=OFF")
+                    "-DBUILD_TESTING=OFF"
+                    ;; Many ROS 2 packages install a family of co-located
+                    ;; shared libraries that dlopen each other at runtime
+                    ;; (rosidl typesupports, rmw bindings, ...).  Adding
+                    ;; $ORIGIN to the install RPATH lets them find their
+                    ;; siblings without LD_LIBRARY_PATH gymnastics.
+                    "-DCMAKE_INSTALL_RPATH=$ORIGIN"
+                    "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON")
               #$extra-configure-flags)
            #:phases
            #~(modify-phases %standard-phases
@@ -299,12 +306,7 @@ of monorepos such as ament_cmake or rcl_interfaces)."
   "Build a ROS 2 interface package whose sources are .msg/.srv/.action
 files processed by the rosidl generators at build time.  MESSAGE-DEPS are
 interface packages this one depends on and are both propagated (for
-downstream consumers) and added to inputs (for build-time header access).
-
-An interface package emits a family of co-located typesupport libraries
-that dlopen each other at runtime.  We force CMAKE_INSTALL_RPATH to
-include @code{$ORIGIN} so the install-tree libraries can find their
-siblings without relying on @env{LD_LIBRARY_PATH}."
+downstream consumers) and added to inputs (for build-time header access)."
   (make-ros2-ament-cmake-package
    #:distro distro
    #:ros-name ros-name
@@ -318,8 +320,5 @@ siblings without relying on @env{LD_LIBRARY_PATH}."
    #:patches patches
    #:extra-inputs (append message-deps extra-inputs)
    #:extra-native-inputs extra-native-inputs
-   #:extra-configure-flags
-   #~(append (list "-DCMAKE_INSTALL_RPATH=$ORIGIN"
-                   "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON")
-             #$extra-configure-flags)
+   #:extra-configure-flags extra-configure-flags
    #:propagated-inputs message-deps))
