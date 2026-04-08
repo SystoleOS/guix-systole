@@ -40,6 +40,8 @@
   #:use-module (gnu packages serialization) ; libyaml
   #:use-module (systole packages ros2)
   #:use-module (systole packages ros2-helpers)
+  #:use-module (srfi srfi-1)               ; delete-duplicates, append-map
+  #:use-module (ice-9 match)               ; match-lambda
   #:export (jazzy-distro))
 
 ;;;
@@ -779,6 +781,76 @@ implementations.  Concrete middleware bindings such as
   (base32 "0xv2xv13y30q4cai72fs946zh0al8902i5mmjr7jalf37ifd3lw3"))
 (define %rosidl-core-version "0.2.1")
 
+;;;
+;;; Python-side rosidl generator (must come before rosidl_core_generators
+;;; because the latter's propagated-inputs reference it).
+;;;
+
+(define-public ros-python-cmake-module-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "python_cmake_module"
+   #:version "0.11.1"
+   #:repo "https://github.com/ros2/python_cmake_module"
+   #:commit "25a28a647061476c78dd6d46eeac87a9bc5db888"
+   #:hash (base32 "0ylywl19rzl5ln7q6lwwakk0c3506r4sk50zwnlrdyvssga9wp1a")
+   #:propagated-inputs (list ros-ament-cmake-jazzy)
+   #:home-page "https://github.com/ros2/python_cmake_module"
+   #:synopsis "CMake helpers for finding Python in ROS 2 packages"
+   #:description
+   "Provides @code{find_package(python_cmake_module)}, a small wrapper
+that locates a usable Python 3 development environment for cmake-based
+ROS 2 packages that ship Python extensions."))
+
+(define-public ros-rpyutils-jazzy
+  (make-ros2-ament-python-package
+   #:distro jazzy-distro
+   #:ros-name "rpyutils"
+   #:version "0.4.2"
+   #:repo "https://github.com/ros2/rpyutils"
+   #:commit "973dbcc0a0a18299d840d089e47372d569264c31"
+   #:hash (base32 "0h3i9pv3p06ys7rrb4pjcxsx21x1ci35vkxd11kqnhmazvhrhv6m")
+   #:home-page "https://github.com/ros2/rpyutils"
+   #:synopsis "Common Python utilities for ROS 2 Python packages"
+   #:description
+   "Small collection of Python helpers used by @code{rclpy} and other
+Python ROS 2 packages: dynamic library loading, attribute import."))
+
+(define-public ros-rosidl-generator-py-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rosidl_generator_py"
+   #:version "0.22.2"
+   #:repo "https://github.com/ros2/rosidl_python"
+   #:commit "fe4e01f2007d3451bf73c0cb334b96a7de759ef2"
+   #:hash (base32 "1vlkd0yqsx3p1q82m467j6gm57whk7dql0svn27brhsi4g4ysv8g")
+   #:module-subdir "rosidl_generator_py"
+   ;; rmw is build_export_depend upstream: rosidl_generator_py's
+   ;; ament_cmake_export_dependencies-extras.cmake calls find_package(rmw)
+   ;; at consumer build time.
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-python-jazzy
+                             ros-ament-index-python-jazzy
+                             ros-python-cmake-module-jazzy
+                             ros-rmw-jazzy
+                             ros-rosidl-cli-jazzy
+                             ros-rosidl-cmake-jazzy
+                             ros-rosidl-generator-c-jazzy
+                             ros-rosidl-parser-jazzy
+                             ros-rosidl-pycommon-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-rosidl-typesupport-c-jazzy
+                             ros-rosidl-typesupport-interface-jazzy
+                             ros-rpyutils-jazzy
+                             python-numpy)
+   #:home-page "https://github.com/ros2/rosidl_python"
+   #:synopsis "Python code generator for ROS 2 interface packages"
+   #:description
+   "Generates Python message classes and (de)serialisation glue from
+ROS 2 @file{.msg}, @file{.srv}, and @file{.action} files.  Used by
+interface packages whose buildtool_depend list includes
+@code{rosidl_default_generators}."))
+
 (define-public ros-rosidl-core-generators-jazzy
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
@@ -788,10 +860,14 @@ implementations.  Concrete middleware bindings such as
    #:commit %rosidl-core-commit
    #:hash %rosidl-core-hash
    #:module-subdir "rosidl_core_generators"
+   ;; rosidl_generator_py is a buildtool_export_depend of
+   ;; rosidl_core_generators upstream; propagate it so interface packages
+   ;; get Python bindings generated in addition to C/C++.
    #:propagated-inputs (list ros-ament-cmake-jazzy
                              ros-rosidl-cmake-jazzy
                              ros-rosidl-generator-c-jazzy
                              ros-rosidl-generator-cpp-jazzy
+                             ros-rosidl-generator-py-jazzy
                              ros-rosidl-typesupport-c-jazzy
                              ros-rosidl-typesupport-cpp-jazzy
                              ros-rosidl-typesupport-introspection-c-jazzy
@@ -1444,25 +1520,9 @@ class."))
 action servers and clients."))
 
 ;;;
-;;; Python helpers needed by rclpy: python_cmake_module, pybind11_vendor,
-;;; rpyutils, and rosidl_generator_py.
+;;; Python helpers needed downstream (rclpy, interface Python generation).
+;;; pybind11_vendor lives with rclpy since only rclpy uses it.
 ;;;
-
-(define-public ros-python-cmake-module-jazzy
-  (make-ros2-ament-cmake-package
-   #:distro jazzy-distro
-   #:ros-name "python_cmake_module"
-   #:version "0.11.1"
-   #:repo "https://github.com/ros2/python_cmake_module"
-   #:commit "25a28a647061476c78dd6d46eeac87a9bc5db888"
-   #:hash (base32 "0ylywl19rzl5ln7q6lwwakk0c3506r4sk50zwnlrdyvssga9wp1a")
-   #:propagated-inputs (list ros-ament-cmake-jazzy)
-   #:home-page "https://github.com/ros2/python_cmake_module"
-   #:synopsis "CMake helpers for finding Python in ROS 2 packages"
-   #:description
-   "Provides @code{find_package(python_cmake_module)}, a small wrapper
-that locates a usable Python 3 development environment for cmake-based
-ROS 2 packages that ship Python extensions."))
 
 (define-public ros-pybind11-vendor-jazzy
   (make-ros2-ament-cmake-package
@@ -1482,51 +1542,6 @@ ROS 2 packages that ship Python extensions."))
 @code{pybind11} version.  In guix-systole the upstream pybind11 is used
 directly via @code{find_package(pybind11)}; no external project is
 built."))
-
-(define-public ros-rpyutils-jazzy
-  (make-ros2-ament-python-package
-   #:distro jazzy-distro
-   #:ros-name "rpyutils"
-   #:version "0.4.2"
-   #:repo "https://github.com/ros2/rpyutils"
-   #:commit "973dbcc0a0a18299d840d089e47372d569264c31"
-   #:hash (base32 "0h3i9pv3p06ys7rrb4pjcxsx21x1ci35vkxd11kqnhmazvhrhv6m")
-   #:home-page "https://github.com/ros2/rpyutils"
-   #:synopsis "Common Python utilities for ROS 2 Python packages"
-   #:description
-   "Small collection of Python helpers used by @code{rclpy} and other
-Python ROS 2 packages: dynamic library loading, attribute import."))
-
-(define-public ros-rosidl-generator-py-jazzy
-  (make-ros2-ament-cmake-package
-   #:distro jazzy-distro
-   #:ros-name "rosidl_generator_py"
-   #:version "0.22.2"
-   #:repo "https://github.com/ros2/rosidl_python"
-   #:commit "fe4e01f2007d3451bf73c0cb334b96a7de759ef2"
-   #:hash (base32 "1vlkd0yqsx3p1q82m467j6gm57whk7dql0svn27brhsi4g4ysv8g")
-   #:module-subdir "rosidl_generator_py"
-   #:propagated-inputs (list ros-ament-cmake-jazzy
-                             ros-ament-cmake-python-jazzy
-                             ros-ament-index-python-jazzy
-                             ros-python-cmake-module-jazzy
-                             ros-rosidl-cli-jazzy
-                             ros-rosidl-cmake-jazzy
-                             ros-rosidl-generator-c-jazzy
-                             ros-rosidl-parser-jazzy
-                             ros-rosidl-pycommon-jazzy
-                             ros-rosidl-runtime-c-jazzy
-                             ros-rosidl-typesupport-c-jazzy
-                             ros-rosidl-typesupport-interface-jazzy
-                             ros-rpyutils-jazzy
-                             python-numpy)
-   #:home-page "https://github.com/ros2/rosidl_python"
-   #:synopsis "Python code generator for ROS 2 interface packages"
-   #:description
-   "Generates Python message classes and (de)serialisation glue from
-ROS 2 @file{.msg}, @file{.srv}, and @file{.action} files.  Used by
-interface packages whose buildtool_depend list includes
-@code{rosidl_default_generators} when the Python pipeline is desired."))
 
 ;;;
 ;;; rclpy — Python client library.
@@ -1682,6 +1697,27 @@ top of @code{rcl}."))
    ros-rosidl-generator-py-jazzy
    ros-rclpy-jazzy))
 
+;;;
+;;; ros-jazzy aggregation meta-package.
+;;;
+;;; Implemented as a trivial-build-system package that symlinks every
+;;; ros_core component into a single output directory via union-build.
+;;; This matters for UX: we intentionally do NOT use `propagated-inputs'
+;;; because Guix's `guix shell' builds the profile via hooks that call
+;;; `manifest-inputs', which walks the propagated-inputs DAG without
+;;; memoization.  For a dense graph like ros_core, that visit is
+;;; quadratic-ish in the number of edges and produces hundreds of MB of
+;;; allocations per hook invocation — `guix shell ros-jazzy' turns into
+;;; a multi-minute, multi-GB ordeal.
+;;;
+;;; By shipping ros-jazzy as a single store output (a union of all 80
+;;; component prefixes), the profile manifest has exactly one entry for
+;;; ros-jazzy and the hooks walk it once.  The downside is an extra
+;;; copy-on-build step, but union-build is symlink-only and runs in
+;;; seconds.  Individual components remain independently installable
+;;; (ros-rclcpp-jazzy, ros-rclpy-jazzy, ...) for users who don't want
+;;; the full stack.
+
 (define-public ros-jazzy
   (package
     (name "ros-jazzy")
@@ -1689,21 +1725,45 @@ top of @code{rcl}."))
     (source #f)
     (build-system trivial-build-system)
     (arguments
-     (list #:builder
-           #~(begin
-               (mkdir #$output)
-               #t)))
-    (propagated-inputs %ros-core-jazzy-packages)
+     (list #:modules '((guix build union)
+                       (guix build utils)
+                       (srfi srfi-1))
+           #:builder
+           (with-imported-modules '((guix build union)
+                                    (guix build utils))
+             #~(begin
+                 (use-modules (guix build union)
+                              (guix build utils)
+                              (srfi srfi-1)
+                              (ice-9 match))
+                 (let ((out #$output)
+                       (inputs (map cdr %build-inputs)))
+                   (union-build out inputs
+                                #:create-all-directories? #t)
+                   #t)))))
+    ;; inputs = direct ros_core packages + the union of their transitive
+    ;; propagated-inputs, so the resulting union contains every runtime
+    ;; dependency (python, numpy, pyyaml, glibc, gcc-lib, ...) of each
+    ;; ROS component.  `packages->inputs' deduplicates by package object.
+    (inputs
+     (delete-duplicates
+      (append %ros-core-jazzy-packages
+              (append-map
+               (lambda (pkg)
+                 (map (match-lambda ((_ p . _) p))
+                      (package-transitive-propagated-inputs pkg)))
+               %ros-core-jazzy-packages))
+      eq?))
     (native-search-paths (ros2-native-search-paths jazzy-distro))
     (synopsis "ROS 2 Jazzy Jalisco meta-package (guix-systole)")
     (description
      "Aggregation meta-package for the ROS 2 Jazzy Jalisco distribution
 provided by the guix-systole channel.  Installing @code{ros-jazzy}
-pulls in the full @code{ros_core} stack — ament build tooling, the
-rosidl C/C++/Python interface generators, the rmw middleware abstraction
-plus an Eclipse Cyclone DDS implementation, the @code{rcl} client
-support library, and both @code{rclcpp} (C++) and @code{rclpy} (Python)
-client libraries.
+yields a single store output that is a symlink-union of the full
+@code{ros_core} stack — ament build tooling, the rosidl C/C++/Python
+interface generators, the rmw middleware abstraction plus an Eclipse
+Cyclone DDS implementation, the @code{rcl} client support library, and
+both @code{rclcpp} (C++) and @code{rclpy} (Python) client libraries.
 
 The package configures the relevant search paths
 (@env{AMENT_PREFIX_PATH}, @env{CMAKE_PREFIX_PATH},
