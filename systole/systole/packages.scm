@@ -64,9 +64,11 @@
                          (string-append systole-patches "/slicer-openigtlink")
                          (string-append systole-patches "/slicerexecutionmodel")
                          (string-append systole-patches "/vtk")
-                         (string-append systole-patches "/ros2")
+                         ;; Distro-specific ROS 2 patch dirs come FIRST so
+                         ;; they override entries in ros2/common.
+                         (string-append systole-patches "/ros2/jazzy")
                          (string-append systole-patches "/ros2/common")
-                         (string-append systole-patches "/ros2/jazzy"))
+                         (string-append systole-patches "/ros2"))
                    ((module-ref (resolve-module '(gnu packages)) '%patch-path)))))
 
 ;; Define search-patch functio

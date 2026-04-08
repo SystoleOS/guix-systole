@@ -19,6 +19,8 @@ MODULES=(
     "(systole packages libarchive)"
     "(systole packages qrestapi)"
     "(systole packages openigtlink)"
+    "(systole packages ros2)"
+    "(systole packages ros2 jazzy)"
 )
 
 FAILED=0
