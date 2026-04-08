@@ -666,6 +666,49 @@ language-binding-specific typesupport."))
    #:description
    "C++ counterpart to @code{rosidl_typesupport_introspection_c}."))
 
+(define-public ros-rosidl-dynamic-typesupport-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rosidl_dynamic_typesupport"
+   #:version "0.1.2"
+   #:repo "https://github.com/ros2/rosidl_dynamic_typesupport"
+   #:commit "cb8c54d12c678daa70410bb0626ed8626f561e45"
+   #:hash (base32 "0m8bsr9vbjkxiik4ylmyknmph4vx0yxda5wnzj24kxiy1yyy7a50")
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-rcutils-jazzy
+                             ros-rosidl-runtime-c-jazzy)
+   #:home-page "https://github.com/ros2/rosidl_dynamic_typesupport"
+   #:synopsis "Dynamic (runtime-built) typesupport for ROS 2 messages"
+   #:description
+   "Provides the C ABI used by ROS 2 middlewares to handle messages whose
+type description is only known at runtime (deferred / dynamic types)."))
+
+;;;
+;;; rmw — middleware abstraction layer.
+;;;
+
+(define-public ros-rmw-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rmw"
+   #:version "7.3.3"
+   #:repo "https://github.com/ros2/rmw"
+   #:commit "9f42ff0f18c8c4fd2a84a7c27d11ec8371e968ea"
+   #:hash (base32 "0pgv9zzgckaffpf72wbpq2mnbv1lap7cla10sswn40f1kcl6a9l0")
+   #:module-subdir "rmw"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-ament-cmake-version-jazzy
+                             ros-rcutils-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-rosidl-dynamic-typesupport-jazzy)
+   #:home-page "https://github.com/ros2/rmw"
+   #:synopsis "ROS 2 middleware abstraction interface"
+   #:description
+   "@code{rmw} defines the C ABI shared between the ROS 2 client support
+library (@code{rcl}) and the underlying DDS-based middleware
+implementations.  Concrete middleware bindings such as
+@code{rmw_cyclonedds_cpp} implement this interface."))
+
 ;;;
 ;;; Aggregation meta-package.
 ;;;
