@@ -36,7 +36,7 @@ index 3c0e6d2218..30e0fd1535 100644
 +    VTK::CommonCore
      )
  
-   if(Slicer_BUILD_CLI_SUPPORT)
+   # Note: Linking against qSlicerBaseQTCLI provides logic with
 -- 
 2.52.0
 

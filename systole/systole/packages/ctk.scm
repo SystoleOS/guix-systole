@@ -213,12 +213,25 @@ code search and API exploration.")))
     "Simple and small program allowing to set the environment of any executable.")
    (license license:asl2.0)))
 
-;; Python-enabled CTK.  Uses pythonqt-commontk for PythonQt bindings
-;; and enables all Qt-module wrappings except QtWebKit (absent in Qt 5.6+).
-;; The VTK PythonQt bridge (PYTHONQT_USE_VTK) is ON so that
-;; ctkVTKPythonQtWrapperFactory is compiled into libCTKVisualizationVTKCore —
-;; Slicer's qSlicerCorePythonManager unconditionally references this symbol.
-(define-public ctk
+;;;
+;;; Factory
+;;;
+
+;; make-ctk generates a Python-enabled CTK package linked against a specific
+;; VTK, ITK, Python, and PythonQt combination.  All variant deps are captured
+;; directly in gexps via #$pkg instead of this-package-input so that spawning
+;; new variants requires only changing the keyword arguments.
+;;
+;; The VTK PythonQt bridge (PYTHONQT_USE_VTK) is always ON:
+;; ctkVTKPythonQtWrapperFactory is compiled into libCTKVisualizationVTKCore
+;; and Slicer's qSlicerCorePythonManager unconditionally references this symbol.
+(define* (make-ctk
+          #:key
+          (vtk-pkg vtk-slicer)
+          (itk-pkg itk-slicer)
+          (python-pkg python)
+          (python-version "3.11")
+          (pythonqt-pkg pythonqt-commontk))
   (package
     (inherit %ctk)
     (name "ctk")
@@ -264,26 +277,44 @@ code search and API exploration.")))
               "-DCTK_LIB_Scripting/Python/Core_PYTHONQT_WRAP_QTWEBKIT:BOOL=OFF"
               "-DCTK_LIB_Scripting/Python/Widgets:BOOL=ON"
               "-DCTK_ENABLE_Python_Wrapping:BOOL=ON"
-              ;; PythonQt location (CTK uses PYTHONQT_INSTALL_DIR, not PythonQt_DIR)
-              (string-append "-DPYTHONQT_INSTALL_DIR="
-                             #$(this-package-input "pythonqt-commontk"))
-              ;; Guix Python 3.11
-              (string-append "-DPython3_EXECUTABLE="
-                             #$(this-package-input "python") "/bin/python3")
-              (string-append "-DPython3_INCLUDE_DIR="
-                             #$(this-package-input "python") "/include/python3.11")
-              (string-append "-DPython3_LIBRARY="
-                             #$(this-package-input "python") "/lib/libpython3.11.so")
-              ;; DCMTK (same as %ctk)
+              ;; PythonQt location — captured directly from factory arg
+              (string-append "-DPYTHONQT_INSTALL_DIR=" #$pythonqt-pkg)
+              ;; Python — captured directly from factory arg
+              (string-append "-DPython3_EXECUTABLE=" #$python-pkg "/bin/python3")
+              (string-append "-DPython3_INCLUDE_DIR=" #$python-pkg "/include/python" #$python-version)
+              (string-append "-DPython3_LIBRARY=" #$python-pkg "/lib/libpython" #$python-version ".so")
+              ;; DCMTK — still uses this-package-input (always "dcmtk", never varies)
               (string-append "-DDCMTK_DIR:PATH="
                              #$(this-package-input "dcmtk")
                              "/lib/cmake/dcmtk"))))
     (inputs
-     (modify-inputs (package-inputs %ctk)
-       ;; vtk-slicer and itk-slicer are already Python-enabled after the vtk/itk rename.
-       ;; Add PythonQt and Qt multimedia for the scripting layer.
-       (prepend pythonqt-commontk
-                qtmultimedia-5)))
+     (list qtbase-5
+           qttools-5
+           qtsvg-5
+           dcmtk
+           vtk-pkg
+           itk-pkg
+           hdf5-1.10
+           python-pkg
+           glew
+           libtheora
+           netcdf-slicer
+           proj
+           jsoncpp
+           libxml2
+           libharu
+           gl2ps
+           libpng-apng
+           eigen
+           mpich
+           expat
+           double-conversion
+           lz4
+           libjpeg-turbo
+           freetype
+           tbb
+           pythonqt-pkg
+           qtmultimedia-5))
     ;; bin/Python/ contains ctk/__init__.py and qt/__init__.py used by Slicer's
     ;; Python environment.  Collected into SLICER_PYTHONPATH (merged into
     ;; PYTHONPATH by Slicer at startup, patch 0046).
@@ -291,3 +322,28 @@ code search and API exploration.")))
      (list (search-path-specification
             (variable "SLICER_PYTHONPATH")
             (files '("bin/Python")))))))
+
+;;;
+;;; Public instances
+;;;
+
+;; Default CTK — VTK 9.2, ITK 5.4.0, Python 3.11 (Slicer 5.8 stack)
+(define-public ctk
+  (make-ctk))
+
+;; Slicer 5.10 variant — VTK 9.5, ITK 5.4.4, Python 3.12
+(define-public ctk-for-slicer-5.10
+  (let ((base (make-ctk #:vtk-pkg vtk-slicer-9.5
+                        #:itk-pkg itk-slicer-5.4.4
+                        #:python-pkg python-next
+                        #:python-version "3.12"
+                        #:pythonqt-pkg pythonqt-commontk-for-slicer-5.10)))
+    (package
+      (inherit base)
+      (name "ctk-for-slicer-5.10")
+      (source
+       (origin
+         (inherit (package-source base))
+         (patches (append (origin-patches (package-source base))
+                          (list (search-patch
+                                 "0004-COMP-Fix-vtkStdString-to-QString-conversion-for-VTK-9.5.patch")))))))))

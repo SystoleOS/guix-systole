@@ -1,0 +1,26 @@
+From 2e88f38a5ae59b02e625e16f48c9478557e280aa Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 09:22:08 +0200
+Subject: [PATCH] COMP: Install AUTOUIC-generated ui_*.h from
+ qMRMLWidgets_autogen dir
+
+---
+ Libs/MRML/Widgets/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Libs/MRML/Widgets/CMakeLists.txt b/Libs/MRML/Widgets/CMakeLists.txt
+index 5bfb6adfb5..98b38743be 100644
+--- a/Libs/MRML/Widgets/CMakeLists.txt
++++ b/Libs/MRML/Widgets/CMakeLists.txt
+@@ -313,7 +313,7 @@ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+   foreach(_ui_src ${MRMLWidgets_UI_SRCS})
+     get_filename_component(_ui_name "${_ui_src}" NAME_WE)
+     install(FILES
+-      "${CMAKE_CURRENT_BINARY_DIR}/ui_${_ui_name}.h"
++      "${CMAKE_CURRENT_BINARY_DIR}/qMRMLWidgets_autogen/include/ui_${_ui_name}.h"
+       DESTINATION include/${PROJECT_NAME} COMPONENT Development)
+   endforeach()
+ endif()
+-- 
+2.52.0
+

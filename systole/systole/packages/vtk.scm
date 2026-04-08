@@ -241,6 +241,17 @@ code search and API exploration.")))
 ;; Slicer 5.10 variants — VTK 9.5.2 + matching vtkAddon
 ;;
 
+;; Pinned Python 3.12 alias.  python-next drifts over time; this alias asserts
+;; the major/minor at module load so a silent upgrade to 3.13 fails loudly
+;; instead of mysteriously breaking the Slicer 5.10 PYTHONPATH (which scans
+;; lib/python3.12/site-packages).
+(define-public python-3.12
+  (let ((p python-next))
+    (unless (string-prefix? "3.12." (package-version p))
+      (error "python-next is no longer 3.12.x; update systole/packages accordingly"
+             (package-version p)))
+    p))
+
 ;; Private non-Python base for VTK 9.5 — used only for (inherit) in vtk-slicer-9.5.
 (define %vtk-slicer-9.5
   (package
@@ -267,7 +278,7 @@ code search and API exploration.")))
                (delete "-DVTK_WRAP_PYTHON:BOOL=OFF" ,flags)))))
     (inputs
      (modify-inputs (package-inputs %vtk-slicer-9.5)
-       (prepend python)))))
+       (prepend python-3.12)))))
 
 ;; Private non-Python base for vtkAddon (Slicer 5.10).
 (define %vtkaddon-9.5
@@ -300,4 +311,4 @@ code search and API exploration.")))
     (inputs
      (modify-inputs (package-inputs %vtkaddon-9.5)
        (replace "vtk-slicer" vtk-slicer-9.5)
-       (prepend python)))))
+       (prepend python-3.12)))))

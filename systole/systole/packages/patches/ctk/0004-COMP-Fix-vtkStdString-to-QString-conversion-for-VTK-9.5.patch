@@ -1,0 +1,25 @@
+From: SystoleOS <systole@example.org>
+Date: Mon, 7 Apr 2026 00:00:00 +0000
+Subject: [PATCH] COMP: Fix vtkStdString-to-QString conversion for VTK 9.5
+
+In VTK 9.5, vtkStdString became a plain typedef for std::string.
+QString has no constructor from std::string, so the implicit conversion
+that worked in earlier VTK versions no longer compiles.  Use
+QString::fromStdString() instead.
+---
+ Libs/Visualization/VTK/Widgets/ctkVTKChartView.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Libs/Visualization/VTK/Widgets/ctkVTKChartView.cpp b/Libs/Visualization/VTK/Widgets/ctkVTKChartView.cpp
+index 1111111..2222222 100644
+--- a/Libs/Visualization/VTK/Widgets/ctkVTKChartView.cpp
++++ b/Libs/Visualization/VTK/Widgets/ctkVTKChartView.cpp
+@@ -226,7 +226,7 @@ void ctkVTKChartView::setTitle(const QString& newTitle)
+ QString ctkVTKChartView::title()const
+ {
+   Q_D(const ctkVTKChartView);
+-  return QString(d->Chart->GetTitle());
++  return QString::fromStdString(d->Chart->GetTitle());
+ }
+
+ // ----------------------------------------------------------------------------
