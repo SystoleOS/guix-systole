@@ -63,7 +63,10 @@
                          (string-append systole-patches "/slicer-igt")
                          (string-append systole-patches "/slicer-openigtlink")
                          (string-append systole-patches "/slicerexecutionmodel")
-                         (string-append systole-patches "/vtk"))
+                         (string-append systole-patches "/vtk")
+                         (string-append systole-patches "/ros2")
+                         (string-append systole-patches "/ros2/common")
+                         (string-append systole-patches "/ros2/jazzy"))
                    ((module-ref (resolve-module '(gnu packages)) '%patch-path)))))
 
 ;; Define search-patch functio
