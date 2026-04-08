@@ -198,12 +198,15 @@ of monorepos such as ament_cmake or rcl_interfaces)."
                     "-DBUILD_TESTING=OFF"
                     ;; Many ROS 2 packages install a family of co-located
                     ;; shared libraries that dlopen each other at runtime
-                    ;; (rosidl typesupports, rmw bindings, ...).  Adding
-                    ;; $ORIGIN and $ORIGIN/.. to the install RPATH lets
-                    ;; both libraries in lib/ and binaries nested under
-                    ;; lib/<pkg>/ find their siblings without
-                    ;; LD_LIBRARY_PATH gymnastics.
-                    "-DCMAKE_INSTALL_RPATH=$ORIGIN;$ORIGIN/.."
+                    ;; (rosidl typesupports, rmw bindings, ...).  The
+                    ;; install RPATH must let each .so find its siblings
+                    ;; in the package's own lib/ directory, regardless of
+                    ;; how deeply nested the .so itself is:
+                    ;;   lib/foo.so                       -> $ORIGIN
+                    ;;   lib/<pkg>/bar.so                 -> $ORIGIN/..
+                    ;;   lib/python3.X/site-packages/<pkg>/baz.so
+                    ;;                                    -> $ORIGIN/../../..
+                    "-DCMAKE_INSTALL_RPATH=$ORIGIN;$ORIGIN/..;$ORIGIN/../../.."
                     "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON")
               #$extra-configure-flags)
            #:phases
