@@ -32,8 +32,10 @@
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (gnu packages check)        ; python-pytest
+  #:use-module (gnu packages cpp)          ; pybind11
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
+  #:use-module (gnu packages python-science) ; python-numpy
   #:use-module (gnu packages python-xyz)   ; python-empy, python-pyyaml, python-lark
   #:use-module (gnu packages serialization) ; libyaml
   #:use-module (systole packages ros2)
@@ -1440,6 +1442,135 @@ class."))
    #:description
    "Higher-level wrappers around @code{rcl_action} for writing C++ ROS 2
 action servers and clients."))
+
+;;;
+;;; Python helpers needed by rclpy: python_cmake_module, pybind11_vendor,
+;;; rpyutils, and rosidl_generator_py.
+;;;
+
+(define-public ros-python-cmake-module-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "python_cmake_module"
+   #:version "0.11.1"
+   #:repo "https://github.com/ros2/python_cmake_module"
+   #:commit "25a28a647061476c78dd6d46eeac87a9bc5db888"
+   #:hash (base32 "0ylywl19rzl5ln7q6lwwakk0c3506r4sk50zwnlrdyvssga9wp1a")
+   #:propagated-inputs (list ros-ament-cmake-jazzy)
+   #:home-page "https://github.com/ros2/python_cmake_module"
+   #:synopsis "CMake helpers for finding Python in ROS 2 packages"
+   #:description
+   "Provides @code{find_package(python_cmake_module)}, a small wrapper
+that locates a usable Python 3 development environment for cmake-based
+ROS 2 packages that ship Python extensions."))
+
+(define-public ros-pybind11-vendor-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "pybind11_vendor"
+   #:version "3.1.3"
+   #:repo "https://github.com/ros2/pybind11_vendor"
+   #:commit "f67c58969e6033c737f1bbd0edd1fe018fd1d9ad"
+   #:hash (base32 "0zg8svvhcbjv7y8zh61pcglaghwq9lvmn258rm7xlh5yb17alr1m")
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-vendor-package-jazzy
+                             pybind11)
+   #:home-page "https://github.com/ros2/pybind11_vendor"
+   #:synopsis "ROS 2 vendor wrapper around pybind11"
+   #:description
+   "Thin wrapper that lets ROS 2 packages depend on a known-good
+@code{pybind11} version.  In guix-systole the upstream pybind11 is used
+directly via @code{find_package(pybind11)}; no external project is
+built."))
+
+(define-public ros-rpyutils-jazzy
+  (make-ros2-ament-python-package
+   #:distro jazzy-distro
+   #:ros-name "rpyutils"
+   #:version "0.4.2"
+   #:repo "https://github.com/ros2/rpyutils"
+   #:commit "973dbcc0a0a18299d840d089e47372d569264c31"
+   #:hash (base32 "0h3i9pv3p06ys7rrb4pjcxsx21x1ci35vkxd11kqnhmazvhrhv6m")
+   #:home-page "https://github.com/ros2/rpyutils"
+   #:synopsis "Common Python utilities for ROS 2 Python packages"
+   #:description
+   "Small collection of Python helpers used by @code{rclpy} and other
+Python ROS 2 packages: dynamic library loading, attribute import."))
+
+(define-public ros-rosidl-generator-py-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rosidl_generator_py"
+   #:version "0.22.2"
+   #:repo "https://github.com/ros2/rosidl_python"
+   #:commit "fe4e01f2007d3451bf73c0cb334b96a7de759ef2"
+   #:hash (base32 "1vlkd0yqsx3p1q82m467j6gm57whk7dql0svn27brhsi4g4ysv8g")
+   #:module-subdir "rosidl_generator_py"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-python-jazzy
+                             ros-ament-index-python-jazzy
+                             ros-python-cmake-module-jazzy
+                             ros-rosidl-cli-jazzy
+                             ros-rosidl-cmake-jazzy
+                             ros-rosidl-generator-c-jazzy
+                             ros-rosidl-parser-jazzy
+                             ros-rosidl-pycommon-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-rosidl-typesupport-c-jazzy
+                             ros-rosidl-typesupport-interface-jazzy
+                             ros-rpyutils-jazzy
+                             python-numpy)
+   #:home-page "https://github.com/ros2/rosidl_python"
+   #:synopsis "Python code generator for ROS 2 interface packages"
+   #:description
+   "Generates Python message classes and (de)serialisation glue from
+ROS 2 @file{.msg}, @file{.srv}, and @file{.action} files.  Used by
+interface packages whose buildtool_depend list includes
+@code{rosidl_default_generators} when the Python pipeline is desired."))
+
+;;;
+;;; rclpy — Python client library.
+;;;
+
+(define-public ros-rclpy-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rclpy"
+   #:version "7.1.11"
+   #:repo "https://github.com/ros2/rclpy"
+   #:commit "baf9d72cfa127e391a89b4ab51ba9e55c37041fd"
+   #:hash (base32 "0ggbnv0rcc9g760gwd1r5zmbvwbd8ml7f7ip2y8q8p0211r9lwgw")
+   #:module-subdir "rclpy"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-index-python-jazzy
+                             ros-action-msgs-jazzy
+                             ros-builtin-interfaces-jazzy
+                             ros-lifecycle-msgs-jazzy
+                             ros-pybind11-vendor-jazzy
+                             ros-python-cmake-module-jazzy
+                             ros-rcl-jazzy
+                             ros-rcl-action-jazzy
+                             ros-rcl-interfaces-jazzy
+                             ros-rcl-lifecycle-jazzy
+                             ros-rcl-logging-interface-jazzy
+                             ros-rcl-yaml-param-parser-jazzy
+                             ros-rcpputils-jazzy
+                             ros-rcutils-jazzy
+                             ros-rmw-jazzy
+                             ros-rmw-implementation-jazzy
+                             ros-rmw-implementation-cmake-jazzy
+                             ros-rosgraph-msgs-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-rpyutils-jazzy
+                             ros-unique-identifier-msgs-jazzy
+                             python-pyyaml)
+   #:home-page "https://github.com/ros2/rclpy"
+   #:synopsis "ROS 2 Python client library"
+   #:description
+   "@code{rclpy} is the Python client library for ROS 2.  It exposes
+@code{rclpy.Node}, executors, publishers, subscribers, services,
+clients, parameters, and timers via a pybind11 C++ extension built on
+top of @code{rcl}."))
 
 ;;;
 ;;; Aggregation meta-package.

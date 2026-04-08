@@ -166,6 +166,11 @@ test_package "(systole packages ros2 jazzy)" "ros-libstatistics-collector-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rclcpp-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rclcpp-lifecycle-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rclcpp-action-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-python-cmake-module-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-pybind11-vendor-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rpyutils-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-generator-py-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rclpy-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-jazzy"
 
 if [ $FAILED -eq 0 ]; then
