@@ -1,4 +1,4 @@
-From 195da9632197915f1291415ea601e012ec1a4960 Mon Sep 17 00:00:00 2001
+From 669d1e3ba33bacf95c62798e9a50d5573f6167eb Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 3 Mar 2026 20:54:18 +0100
 Subject: [PATCH] COMP: Register Slicer qMRML designer plugins dir so QUiLoader

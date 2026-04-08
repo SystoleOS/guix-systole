@@ -1,4 +1,4 @@
-From 3d0bee8b0fba5ad3cecfd0ccea62870a8c589fae Mon Sep 17 00:00:00 2001
+From 53dc7064328d2841f53122a0fe0159632f971910 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 3 Mar 2026 07:29:53 +0100
 Subject: [PATCH] COMP: Fix Slicer_Base_INCLUDE_DIRS in install-tree

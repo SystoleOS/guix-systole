@@ -1,4 +1,4 @@
-From b40b6afe38540eff3967893ba90c09acf420830e Mon Sep 17 00:00:00 2001
+From 0d1197f86c8cc414656bf0c1296cd9c3876a38bb Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Wed, 4 Mar 2026 09:27:50 +0100
 Subject: [PATCH] COMP: Install Slicer VTK hierarchy files and expose paths in

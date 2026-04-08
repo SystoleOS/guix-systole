@@ -1,57 +1,23 @@
-From c9945d61c0f1abc46e045d0362fd611dff74c24a Mon Sep 17 00:00:00 2001
+From b1422798c5071c24d322f3acdda3664e33d40ded Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
-Date: Wed, 8 Apr 2026 10:06:38 +0200
+Date: Wed, 8 Apr 2026 12:17:22 +0200
 Subject: [PATCH] COMP: Install AUTOUIC-generated ui_*.h from
- qSlicerBaseQTGUI_autogen dir
+ qSlicerBaseQTCLI_autogen dir
 
 ---
- Base/QTGUI/CMakeLists.txt | 36 ++++++++++++++++++------------------
- 1 file changed, 18 insertions(+), 18 deletions(-)
+ Base/QTCLI/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/Base/QTGUI/CMakeLists.txt b/Base/QTGUI/CMakeLists.txt
-index bb4eec5b32..79b3aedf79 100644
---- a/Base/QTGUI/CMakeLists.txt
-+++ b/Base/QTGUI/CMakeLists.txt
-@@ -275,24 +275,24 @@ if(NOT DEFINED ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+diff --git a/Base/QTCLI/CMakeLists.txt b/Base/QTCLI/CMakeLists.txt
+index d010eaa95d..2497b52e70 100644
+--- a/Base/QTCLI/CMakeLists.txt
++++ b/Base/QTCLI/CMakeLists.txt
+@@ -113,7 +113,7 @@ if(NOT DEFINED ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
  endif()
  if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
    set(ui_headers
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerWebWidget.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsViewsPanel.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsUserInformationPanel.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsStylesPanel.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsModulesPanel.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsInternationalizationPanel.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsGeneralPanel.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsDeveloperPanel.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSettingsCachePanel.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerSaveDataDialog.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerNodeWriterOptionsWidget.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerModulePanel.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerModuleFinderDialog.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerModelsDialog.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerExportNodeDialog.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerDataDialog.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerActionsDialog.h"
--    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerNodeWriterOptionsWidget.h")
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerWebWidget.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerSettingsViewsPanel.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerSettingsUserInformationPanel.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerSettingsStylesPanel.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerSettingsModulesPanel.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerSettingsInternationalizationPanel.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerSettingsGeneralPanel.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerSettingsDeveloperPanel.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerSettingsCachePanel.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerSaveDataDialog.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerNodeWriterOptionsWidget.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerModulePanel.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerModuleFinderDialog.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerModelsDialog.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerExportNodeDialog.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerDataDialog.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerActionsDialog.h"
-+    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTGUI_autogen/include/ui_qSlicerNodeWriterOptionsWidget.h")
+-    "${CMAKE_CURRENT_BINARY_DIR}/ui_qSlicerCLIModuleWidget.h")
++    "${CMAKE_CURRENT_BINARY_DIR}/qSlicerBaseQTCLI_autogen/include/ui_qSlicerCLIModuleWidget.h")
    install(
      FILES ${ui_headers}
      DESTINATION ${Slicer_INSTALL_INCLUDE_DIR}/${PROJECT_NAME} COMPONENT Development)

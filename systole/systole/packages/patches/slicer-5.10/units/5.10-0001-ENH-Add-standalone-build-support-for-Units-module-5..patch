@@ -1,0 +1,69 @@
+From 651bd4cdc3e219133eb70b2d284f8b71edca3af0 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 18:38:54 +0200
+Subject: [PATCH] ENH: Add standalone build support for Units module (5.10)
+
+---
+ Modules/Loadable/Units/CMakeLists.txt             | 15 +++++++++++++++
+ .../Units/Widgets/DesignerPlugins/CMakeLists.txt  |  7 +++++--
+ 2 files changed, 20 insertions(+), 2 deletions(-)
+
+diff --git a/Modules/Loadable/Units/CMakeLists.txt b/Modules/Loadable/Units/CMakeLists.txt
+index 35f0b88f70..dcc6534a09 100644
+--- a/Modules/Loadable/Units/CMakeLists.txt
++++ b/Modules/Loadable/Units/CMakeLists.txt
+@@ -18,11 +18,26 @@
+ #
+ ################################################################################
+ 
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Units)
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ add_subdirectory(Widgets)
+diff --git a/Modules/Loadable/Units/Widgets/DesignerPlugins/CMakeLists.txt b/Modules/Loadable/Units/Widgets/DesignerPlugins/CMakeLists.txt
+index 71d70e57b7..8002e6931e 100644
+--- a/Modules/Loadable/Units/Widgets/DesignerPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Units/Widgets/DesignerPlugins/CMakeLists.txt
+@@ -7,9 +7,11 @@ set(${KIT}_SRCS
+   qSlicer${MODULE_NAME}ModuleWidgetsAbstractPlugin.cxx
+   qSlicer${MODULE_NAME}ModuleWidgetsAbstractPlugin.h
+   qSlicer${MODULE_NAME}ModuleWidgetsPlugin.cxx
+-  qSlicer${MODULE_NAME}ModuleWidgetsPlugin.h
+-
+   qMRMLUnitWidgetPlugin.cxx
++  )
++
++set(${KIT}_MOC_SRCS
++  qSlicer${MODULE_NAME}ModuleWidgetsPlugin.h
+   qMRMLUnitWidgetPlugin.h
+   )
+ 
+@@ -23,5 +25,6 @@ ctkMacroBuildQtDesignerPlugin(
+   EXPORT_DIRECTIVE ${${KIT}_EXPORT}
+   FOLDER "Module-${MODULE_NAME}"
+   SRCS ${${KIT}_SRCS}
++  MOC_SRCS ${${KIT}_MOC_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   )
+-- 
+2.52.0
+

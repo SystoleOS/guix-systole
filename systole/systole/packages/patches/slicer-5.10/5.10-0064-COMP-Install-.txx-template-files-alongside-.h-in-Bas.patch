@@ -1,4 +1,4 @@
-From 82a6967d683cd5743c408d326f4259c119c23f55 Mon Sep 17 00:00:00 2001
+From 8eb6c8763998eae3502aea6911f726481fc93777 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 3 Mar 2026 09:23:17 +0100
 Subject: [PATCH] COMP: Install .txx template files alongside .h in
@@ -17,10 +17,10 @@ co-installed with their corresponding headers.
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/CMake/SlicerMacroBuildBaseQtLibrary.cmake b/CMake/SlicerMacroBuildBaseQtLibrary.cmake
-index 32ee1e7a5d..c5ad058c39 100644
+index f22f2a4b5d..de49b16e06 100644
 --- a/CMake/SlicerMacroBuildBaseQtLibrary.cmake
 +++ b/CMake/SlicerMacroBuildBaseQtLibrary.cmake
-@@ -270,8 +270,9 @@ macro(SlicerMacroBuildBaseQtLibrary)
+@@ -250,8 +250,9 @@ macro(SlicerMacroBuildBaseQtLibrary)
    # Install headers
    # --------------------------------------------------------------------------
    if(NOT Slicer_INSTALL_NO_DEVELOPMENT)

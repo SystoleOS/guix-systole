@@ -1,4 +1,4 @@
-From 124608389df5aa615d2b1c412151952cb30640cd Mon Sep 17 00:00:00 2001
+From 1c3a6bdb8a898ed23ba709d5f30d76c4e5d5beea Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Wed, 4 Mar 2026 07:43:27 +0100
 Subject: [PATCH] COMP: Fix designer-plugin build dir and install path for

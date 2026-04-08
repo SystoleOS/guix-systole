@@ -956,28 +956,29 @@ Line Interface) modules.  It bundles @code{tclap} and
                  "5.10-0059-COMP-Install-CMake-.cmake.in-templates-to-developmen.patch"
                  "5.10-0060-COMP-Add-Qt5-component-include-dirs-globally-in-UseS.patch"
                  "5.10-0061-COMP-Fix-vtkAddon_LIB_DIR-in-install-tree-Slicer_Lib.patch"
-                 "5.10-0063-COMP-Set-CMP0177-policy-in-SlicerMacroBuildModuleVTK.patch"
-                 "5.10-0064-COMP-Fix-Slicer_Base_INCLUDE_DIRS-in-install-tree-Sl.patch"
-                 "5.10-0065-COMP-Install-.txx-template-files-alongside-.h-in-Bas.patch"
-                 "5.10-0066-COMP-Bake-PYTHONQT_INSTALL_DIR-into-install-tree-Sli.patch"
-                 "5.10-0067-COMP-Link-qSlicerBaseQTApp-and-CTKScriptingPythonCor.patch"
-                 "5.10-0068-COMP-Guard-vtkWin32OutputWindow.h-include-behind-WIN.patch"
-                 "5.10-0069-COMP-Link-qSlicerBaseQTApp-and-CTKScriptingPythonCor.patch"
-                 "5.10-0070-COMP-Install-.txx-template-files-in-MRMLCore-develop.patch"
-                 "5.10-0071-COMP-Expose-Slicer_QTLOADABLEMODULES_-SUBDIR-BIN-LIB.patch"
-                 "5.10-0072-COMP-Register-Slicer-qMRML-designer-plugins-dir-so-Q.patch"
-                 "5.10-0073-COMP-Export-Slicer_BUILD_QT_DESIGNER_PLUGINS-in-inst.patch"
-                 "5.10-0074-COMP-Fix-designer-plugin-build-dir-and-install-path-.patch"
-                 "5.10-0075-COMP-Install-Slicer-VTK-hierarchy-files-and-expose-p.patch"
-                 "5.10-0076-COMP-Fix-MOC-processing-for-qSlicerIconEnginePlugin.patch"
-                 "5.10-0077-COMP-Use-lowercase-rapidjson-target-in-MRMLCore.patch"
-                 "5.10-0078-COMP-Move-Q_OBJECT-headers-to-MOC_SRCS-in-qMRMLWidge.patch"
-                 "5.10-0079-COMP-Move-qSlicerStylePlugin-Q_OBJECT-header-to-MOC_.patch"
-                 "5.10-0080-COMP-Move-Q_OBJECT-headers-to-MOC_SRCS-in-QTGUI-QTCL.patch"
-                 "5.10-0081-COMP-Install-AUTOUIC-generated-ui_-.h-from-qMRMLWidg.patch"
+                 "5.10-0062-COMP-Set-CMP0177-policy-in-SlicerMacroBuildModuleVTK.patch"
+                 "5.10-0063-COMP-Fix-Slicer_Base_INCLUDE_DIRS-in-install-tree-Sl.patch"
+                 "5.10-0064-COMP-Install-.txx-template-files-alongside-.h-in-Bas.patch"
+                 "5.10-0065-COMP-Bake-PYTHONQT_INSTALL_DIR-into-install-tree-Sli.patch"
+                 "5.10-0066-COMP-Link-qSlicerBaseQTApp-and-CTKScriptingPythonCor.patch"
+                 "5.10-0067-COMP-Guard-vtkWin32OutputWindow.h-include-behind-WIN.patch"
+                 "5.10-0068-COMP-Link-qSlicerBaseQTApp-and-CTKScriptingPythonCor.patch"
+                 "5.10-0069-COMP-Install-.txx-template-files-in-MRMLCore-develop.patch"
+                 "5.10-0070-COMP-Expose-Slicer_QTLOADABLEMODULES_-SUBDIR-BIN-LIB.patch"
+                 "5.10-0071-COMP-Register-Slicer-qMRML-designer-plugins-dir-so-Q.patch"
+                 "5.10-0072-COMP-Export-Slicer_BUILD_QT_DESIGNER_PLUGINS-in-inst.patch"
+                 "5.10-0073-COMP-Fix-designer-plugin-build-dir-and-install-path-.patch"
+                 "5.10-0074-COMP-Install-Slicer-VTK-hierarchy-files-and-expose-p.patch"
+                 "5.10-0075-COMP-Use-lowercase-rapidjson-target-in-MRMLCore.patch"
+                 "5.10-0076-COMP-Move-Q_OBJECT-headers-to-MOC_SRCS-in-qMRMLWidge.patch"
+                 "5.10-0077-COMP-Move-qSlicerStylePlugin-Q_OBJECT-header-to-MOC_.patch"
+                 "5.10-0078-COMP-Move-Q_OBJECT-headers-to-MOC_SRCS-in-QTGUI-QTCL.patch"
+                 "5.10-0079-COMP-Install-AUTOUIC-generated-ui_-.h-from-qMRMLWidg.patch"
+                 "5.10-0080-COMP-Install-AUTOUIC-generated-ui_-.h-from-qSlicerBa.patch"
+                 "5.10-0081-COMP-Guard-ui_qSlicerWebWidget.h-install-on-WEBENGIN.patch"
                  "5.10-0082-COMP-Install-AUTOUIC-generated-ui_-.h-from-qSlicerBa.patch"
-                 "5.10-0083-COMP-Guard-ui_qSlicerWebWidget.h-install-on-WEBENGIN.patch"
-                 "5.10-0084-COMP-Install-AUTOUIC-generated-ui_-.h-from-qSlicerBa.patch"))))
+                 "5.10-0083-COMP-Add-qMRMLWidgets-to-standalone-loadable-module-.patch"
+                 "5.10-0084-COMP-Fix-missing-endif-for-Slicer_BUILD_CLI_SUPPORT-.patch"))))
 
     (build-system cmake-build-system)
     (arguments
@@ -1282,6 +1283,301 @@ visualization and medical image computing.")
                      "lib/Slicer-5.10"
                      "lib/Slicer-5.10/qt-loadable-modules"
                      "lib/python3.12/site-packages")))))))
+
+;;;
+;;; Slicer 5.10 — standalone loadable/scripted module factories
+;;;
+
+(define* (make-slicer-loadable-module-5.10
+          #:key
+          name
+          module-subdir
+          patches
+          synopsis
+          description
+          (extra-inputs '())
+          (extra-configure-flags #~'())
+          (propagated-inputs '()))
+  (package
+   (name name)
+   (version (package-version slicer-5.10))
+   (source
+    (origin
+     (inherit (package-source slicer-5.10))
+     (patches (map search-patch patches))))
+   (build-system cmake-build-system)
+   (arguments
+    (list #:tests? #f
+          #:validate-runpath? #f
+          #:out-of-source? #t
+          #:configure-flags
+          #~(append
+             (list "-DCMAKE_BUILD_TYPE:STRING=Release"
+                   "-DBUILD_TESTING:BOOL=OFF"
+                   "-DSlicer_INSTALL_DEVELOPMENT:BOOL=ON"
+                   (string-append "-DSlicer_DIR="
+                                  #$slicer-5.10
+                                  "/lib/Slicer-5.10")
+                   (string-append "-DPYTHONQT_INSTALL_DIR="
+                                  #$pythonqt-commontk-for-slicer-5.10))
+             #$extra-configure-flags)
+          #:phases
+          #~(modify-phases %standard-phases
+              (replace 'configure
+                (lambda* (#:key inputs outputs configure-flags #:allow-other-keys)
+                  (let* ((source (getcwd))
+                         (out (assoc-ref outputs "out")))
+                    (apply invoke "cmake"
+                           "-S" (string-append source "/Modules/Loadable/"
+                                               #$module-subdir)
+                           "-B" "build"
+                           (string-append "-DCMAKE_INSTALL_PREFIX=" out)
+                           configure-flags)
+                    (chdir "build")
+                    #t))))))
+   (inputs (fold (lambda (pkg acc)
+                   (modify-inputs acc (prepend pkg)))
+                 (modify-inputs (package-inputs slicer-5.10)
+                   (prepend slicer-5.10))
+                 extra-inputs))
+   (propagated-inputs (cons slicer-5.10 propagated-inputs))
+   (home-page (package-home-page slicer-5.10))
+   (synopsis synopsis)
+   (description description)
+   (license (package-license slicer-5.10))))
+
+(define* (make-slicer-scripted-module-5.10
+          #:key
+          name
+          module-subdir
+          patches
+          synopsis
+          description
+          (extra-inputs '())
+          (extra-configure-flags #~'())
+          (propagated-inputs '()))
+  (package
+   (name name)
+   (version (package-version slicer-5.10))
+   (source
+    (origin
+     (inherit (package-source slicer-5.10))
+     (patches (map search-patch patches))))
+   (build-system cmake-build-system)
+   (arguments
+    (list #:tests? #f
+          #:validate-runpath? #f
+          #:out-of-source? #t
+          #:configure-flags
+          #~(append
+             (list "-DCMAKE_BUILD_TYPE:STRING=Release"
+                   "-DBUILD_TESTING:BOOL=OFF"
+                   (string-append "-DSlicer_DIR="
+                                  #$slicer-5.10
+                                  "/lib/Slicer-5.10"))
+             #$extra-configure-flags)
+          #:phases
+          #~(modify-phases %standard-phases
+              (replace 'configure
+                (lambda* (#:key inputs outputs configure-flags #:allow-other-keys)
+                  (let* ((source (getcwd))
+                         (out (assoc-ref outputs "out")))
+                    (apply invoke "cmake"
+                           "-S" (string-append source "/Modules/Scripted/"
+                                               #$module-subdir)
+                           "-B" "build"
+                           (string-append "-DCMAKE_INSTALL_PREFIX=" out)
+                           configure-flags)
+                    (chdir "build")
+                    #t))))))
+   (inputs (fold (lambda (pkg acc)
+                   (modify-inputs acc (prepend pkg)))
+                 (modify-inputs (package-inputs slicer-5.10)
+                   (prepend slicer-5.10))
+                 extra-inputs))
+   (propagated-inputs (cons slicer-5.10 propagated-inputs))
+   (home-page (package-home-page slicer-5.10))
+   (synopsis synopsis)
+   (description description)
+   (license (package-license slicer-5.10))))
+
+;;;
+;;; Slicer 5.10 — standalone loadable/scripted module packages
+;;;
+
+(define-public slicer-terminologies-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-terminologies-5.10"
+   #:module-subdir "Terminologies"
+   #:patches (list "terminologies/5.10-0001-ENH-Add-standalone-build-support-for-Terminologies-m.patch")
+   #:synopsis "3D Slicer Terminologies loadable module (5.10)"
+   #:description
+   "The Terminologies loadable module extracted from 3D Slicer 5.10.  It provides
+DICOM-based anatomical and segmentation terminology support (category, type,
+modifier look-ups backed by JSON terminology files) and is built from the
+@file{Modules/Loadable/Terminologies} subtree of the Slicer 5.10 source tree."
+   #:extra-configure-flags
+   #~(list (string-append "-DRapidJSON_DIR="
+                          #$rapidjson
+                          "/lib/cmake/RapidJSON"))))
+
+(define-public slicer-subjecthierarchy-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-subjecthierarchy-5.10"
+   #:module-subdir "SubjectHierarchy"
+   #:patches (list "subjecthierarchy/5.10-0001-ENH-Add-standalone-build-support-for-SubjectHierarch.patch"
+                  "subjecthierarchy/5.10-0002-COMP-Move-Q_OBJECT-headers-to-MOC_SRCS-in-SubjectHie.patch")
+   #:synopsis "3D Slicer SubjectHierarchy loadable module (5.10)"
+   #:description
+   "The SubjectHierarchy loadable module extracted from 3D Slicer 5.10.  It
+provides a hierarchical data model for MRML scene items together with a subject
+hierarchy tree view, plugin infrastructure for per-node context menus, and
+default plugins for cloning, folding, opacity, visibility, and registration
+actions.  Built from the @file{Modules/Loadable/SubjectHierarchy} subtree of
+the Slicer 5.10 source tree."
+   #:extra-inputs (list slicer-terminologies-5.10)
+   #:propagated-inputs (list slicer-terminologies-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerTerminologiesModuleWidgets_INCLUDE_DIRS="
+       #$slicer-terminologies-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerTerminologiesModuleWidgets")
+      (string-append
+       "-DvtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS="
+       #$slicer-terminologies-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerTerminologiesModuleLogic")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-terminologies-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules"))))
+
+(define-public slicer-tables-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-tables-5.10"
+   #:module-subdir "Tables"
+   #:patches (list "tables/5.10-0001-ENH-Add-standalone-build-support-for-Tables-module-5.patch")
+   #:synopsis "3D Slicer Tables loadable module (5.10)"
+   #:description
+   "The Tables loadable module extracted from 3D Slicer 5.10.  It provides
+tabular data display and editing with MRML table nodes and subject hierarchy
+integration.  Built from the @file{Modules/Loadable/Tables} subtree of
+the Slicer 5.10 source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.10)
+   #:propagated-inputs (list slicer-subjecthierarchy-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DvtkSlicerTablesModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules"))))
+
+(define-public slicer-cameras-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-cameras-5.10"
+   #:module-subdir "Cameras"
+   #:patches (list "cameras/5.10-0001-ENH-Add-standalone-build-support-for-Cameras-module-.patch")
+   #:synopsis "3D Slicer Cameras loadable module (5.10)"
+   #:description
+   "The Cameras loadable module extracted from 3D Slicer 5.10.  It provides
+management of camera nodes in the MRML scene with per-layout camera
+persistence.  Built from the @file{Modules/Loadable/Cameras} subtree of
+the Slicer 5.10 source tree."))
+
+(define-public slicer-data-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-data-5.10"
+   #:module-subdir "Data"
+   #:patches (list "data/5.10-0001-ENH-Add-standalone-build-support-for-Data-module-5.1.patch")
+   #:synopsis "3D Slicer Data loadable module (5.10)"
+   #:description
+   "The Data loadable module extracted from 3D Slicer 5.10.  It provides
+MRML scene management, scene reader/writer, and subject hierarchy tree view
+integration.  Built from the @file{Modules/Loadable/Data} subtree of
+the Slicer 5.10 source tree."
+   #:extra-inputs (list slicer-cameras-5.10
+                        slicer-subjecthierarchy-5.10)
+   #:propagated-inputs (list slicer-cameras-5.10
+                             slicer-subjecthierarchy-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DvtkSlicerCamerasModuleLogic_INCLUDE_DIRS="
+       #$slicer-cameras-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerCamerasModuleLogic")
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-cameras-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-subjecthierarchy-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules"))))
+
+(define-public slicer-units-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-units-5.10"
+   #:module-subdir "Units"
+   #:patches (list "units/5.10-0001-ENH-Add-standalone-build-support-for-Units-module-5..patch")
+   #:synopsis "3D Slicer Units loadable module (5.10)"
+   #:description
+   "The Units loadable module extracted from 3D Slicer 5.10.  It provides
+unit management (length, time, frequency, velocity, temperature, angle)
+with per-node unit definitions and a settings panel.  Built from the
+@file{Modules/Loadable/Units} subtree of the Slicer 5.10 source tree."))
+
+(define-public slicer-colors-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-colors-5.10"
+   #:module-subdir "Colors"
+   #:patches (list "colors/5.10-0001-ENH-Add-standalone-build-support-for-Colors-module-5.patch")
+   #:synopsis "3D Slicer Colors loadable module (5.10)"
+   #:description
+   "The Colors loadable module extracted from 3D Slicer 5.10.  It provides
+color table management, color legend display nodes, and subject hierarchy
+integration for color overlays.  Built from the
+@file{Modules/Loadable/Colors} subtree of the Slicer 5.10 source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.10
+                        slicer-terminologies-5.10)
+   #:propagated-inputs (list slicer-subjecthierarchy-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DqSlicerTerminologiesModuleWidgets_INCLUDE_DIRS="
+       #$slicer-terminologies-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerTerminologiesModuleWidgets")
+      (string-append
+       "-DvtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS="
+       #$slicer-terminologies-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerTerminologiesModuleLogic")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-terminologies-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules"))))
 
 ;;;
 ;;; Factory for standalone Slicer loadable-module packages

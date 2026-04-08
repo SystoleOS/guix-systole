@@ -1,4 +1,4 @@
-From 1cc32c99471dd059415d946f1158d7244267d9af Mon Sep 17 00:00:00 2001
+From f4cbaa18757f51d550ca2a9e73f7afd7e012d22d Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Wed, 8 Apr 2026 05:54:26 +0200
 Subject: [PATCH] COMP: Use lowercase rapidjson target in MRMLCore
