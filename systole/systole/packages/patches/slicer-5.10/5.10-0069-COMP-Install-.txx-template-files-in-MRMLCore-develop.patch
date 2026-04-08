@@ -1,4 +1,4 @@
-From 1e4aae93c31a8c0e16851fe99139e699a54e912f Mon Sep 17 00:00:00 2001
+From 568b3473b9d2ace826f126f5016279fd25969cc8 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 3 Mar 2026 14:49:33 +0100
 Subject: [PATCH] COMP: Install .txx template files in MRMLCore development

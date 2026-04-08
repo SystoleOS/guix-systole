@@ -1,4 +1,4 @@
-From be390306d59dd8ecd9c33dc3fd041abadc2232dc Mon Sep 17 00:00:00 2001
+From cd0830fb32340399d85b1b4811940f5fd129e128 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 3 Mar 2026 10:25:37 +0100
 Subject: [PATCH] COMP: Bake PYTHONQT_INSTALL_DIR into install-tree

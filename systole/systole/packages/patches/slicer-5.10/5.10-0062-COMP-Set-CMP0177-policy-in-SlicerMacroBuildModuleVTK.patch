@@ -1,4 +1,4 @@
-From 2b6f8f6b35fd1c0eab713cd43b6108013735a22e Mon Sep 17 00:00:00 2001
+From c8f8013e84f3a9cd4c54d5a6195a45dbecfa0ed0 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 3 Mar 2026 06:01:47 +0100
 Subject: [PATCH] COMP: Set CMP0177 policy in SlicerMacroBuildModuleVTKLibrary

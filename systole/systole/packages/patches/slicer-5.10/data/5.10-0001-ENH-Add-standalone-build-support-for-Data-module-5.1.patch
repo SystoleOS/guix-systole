@@ -1,0 +1,51 @@
+From 45d838f58122161262d11a2d924e2bb28efd3a4b Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 18:43:25 +0200
+Subject: [PATCH] ENH: Add standalone build support for Data module (5.10)
+
+---
+ Modules/Loadable/Data/CMakeLists.txt | 18 ++++++++++++++++--
+ 1 file changed, 16 insertions(+), 2 deletions(-)
+
+diff --git a/Modules/Loadable/Data/CMakeLists.txt b/Modules/Loadable/Data/CMakeLists.txt
+index 0fe1f84004..707164c064 100644
+--- a/Modules/Loadable/Data/CMakeLists.txt
++++ b/Modules/Loadable/Data/CMakeLists.txt
+@@ -1,9 +1,24 @@
+ 
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Data)
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ 
+@@ -14,8 +29,7 @@ set(MODULE_EXPORT_DIRECTIVE "Q_SLICER_QTMODULES_${MODULE_NAME_UPPER}_EXPORT")
+ set(MODULE_INCLUDE_DIRECTORIES
+   ${CMAKE_CURRENT_SOURCE_DIR}/Logic
+   ${CMAKE_CURRENT_BINARY_DIR}/Logic
+-  ${vtkSlicerCamerasModuleLogic_SOURCE_DIR}
+-  ${vtkSlicerCamerasModuleLogic_BINARY_DIR}
++  ${vtkSlicerCamerasModuleLogic_INCLUDE_DIRS}
+   ${qSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS}
+   ${qMRMLWidgets_INCLUDE_DIRS}
+   )
+-- 
+2.52.0
+

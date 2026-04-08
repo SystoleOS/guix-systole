@@ -6,11 +6,11 @@ Subject: [PATCH] ENH: Add link directories
 WIP: Add link directories
 ---
  CMake/SlicerMacroBuildLoadableModule.cmake   | 14 ++++++++++++++
- CMake/SlicerMacroBuildModuleLogic.cmake      |  8 ++++++++
+ CMake/SlicerMacroBuildModuleLogic.cmake      | 15 +++++++++++++++
  CMake/SlicerMacroBuildModuleQtLibrary.cmake  |  7 +++++++
  CMake/SlicerMacroBuildModuleVTKLibrary.cmake |  7 +++++++
  CMake/SlicerMacroBuildModuleWidgets.cmake    |  9 +++++++++
- 5 files changed, 45 insertions(+)
+ 5 files changed, 52 insertions(+)
 
 diff --git a/CMake/SlicerMacroBuildLoadableModule.cmake b/CMake/SlicerMacroBuildLoadableModule.cmake
 index 9f47f1f928..60ac4b0ad2 100644
@@ -63,7 +63,7 @@ index ece63f7766..1e82c99d41 100644
      TARGET_LIBRARIES
      )
    cmake_parse_arguments(MODULELOGIC
-@@ -60,6 +61,12 @@ macro(SlicerMacroBuildModuleLogic)
+@@ -60,6 +61,19 @@ macro(SlicerMacroBuildModuleLogic)
    list(APPEND MODULELOGIC_INCLUDE_DIRECTORIES
      ${ModuleDescriptionParser_INCLUDE_DIRS}
      )
@@ -73,10 +73,17 @@ index ece63f7766..1e82c99d41 100644
 +      ${Slicer_Base_LIBRARY_DIRS}
 +      )
 +  endif()
-
++
++  if(Slicer_BUILD_CLI_SUPPORT)
++    # Third-party library
++    find_package(SlicerExecutionModel REQUIRED ModuleDescriptionParser)
++    list(APPEND MODULELOGIC_INCLUDE_DIRECTORIES
++      ${ModuleDescriptionParser_INCLUDE_DIRS}
++      )
+ 
    # Note: Linking against qSlicerBaseQTCLI provides logic with
    #       access to the core application modulemanager. Using the module manager
-@@ -95,6 +102,7 @@ macro(SlicerMacroBuildModuleLogic)
+@@ -95,6 +109,7 @@ macro(SlicerMacroBuildModuleLogic)
      SRCS ${MODULELOGIC_SRCS}
      INCLUDE_DIRECTORIES ${MODULELOGIC_INCLUDE_DIRECTORIES}
      TARGET_LIBRARIES ${MODULELOGIC_TARGET_LIBRARIES}

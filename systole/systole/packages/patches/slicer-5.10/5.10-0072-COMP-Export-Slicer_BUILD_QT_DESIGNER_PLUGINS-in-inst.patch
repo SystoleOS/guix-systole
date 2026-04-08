@@ -1,4 +1,4 @@
-From 640918f97685eac5f9774f08f372655a689fc7b0 Mon Sep 17 00:00:00 2001
+From fc3aa67b74dfa302cf3f8091fe7387038b835379 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Wed, 4 Mar 2026 07:06:58 +0100
 Subject: [PATCH] COMP: Export Slicer_BUILD_QT_DESIGNER_PLUGINS in install-tree

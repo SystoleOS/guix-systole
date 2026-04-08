@@ -1,4 +1,4 @@
-From 38ae27693e3ab71d6a8026a607c92a9332580622 Mon Sep 17 00:00:00 2001
+From f8ba787ecefccc575ca81e0d13d0c47043c5a83e Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 3 Mar 2026 13:20:58 +0100
 Subject: [PATCH] COMP: Guard vtkWin32OutputWindow.h include behind WIN32 in

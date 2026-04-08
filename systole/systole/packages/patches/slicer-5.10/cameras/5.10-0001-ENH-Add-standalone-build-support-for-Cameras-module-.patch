@@ -1,0 +1,41 @@
+From a8b251b74a5a3c50692c29d403caa67582193d74 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 17:33:42 +0200
+Subject: [PATCH] ENH: Add standalone build support for Cameras module (5.10)
+
+---
+ Modules/Loadable/Cameras/CMakeLists.txt | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/Modules/Loadable/Cameras/CMakeLists.txt b/Modules/Loadable/Cameras/CMakeLists.txt
+index 0e4572a76d..f9b416988c 100644
+--- a/Modules/Loadable/Cameras/CMakeLists.txt
++++ b/Modules/Loadable/Cameras/CMakeLists.txt
+@@ -1,9 +1,24 @@
+ 
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Cameras)
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ 
+-- 
+2.52.0
+

@@ -1,4 +1,4 @@
-From 73c737f2e45610fc20a8582f4df1bac56c666f58 Mon Sep 17 00:00:00 2001
+From 39d9e04c175f7a96d79cc2c4c628f0abec0c0572 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Tue, 3 Mar 2026 15:34:35 +0100
 Subject: [PATCH] COMP: Expose Slicer_QTLOADABLEMODULES_{SUBDIR,BIN,LIB}_DIR in

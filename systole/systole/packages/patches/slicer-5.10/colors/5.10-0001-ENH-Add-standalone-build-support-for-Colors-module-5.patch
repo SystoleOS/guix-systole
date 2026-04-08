@@ -1,0 +1,71 @@
+From 61321cd68de0ab56d7df2afcbb665a5c18c8ce67 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 18:40:09 +0200
+Subject: [PATCH] ENH: Add standalone build support for Colors module (5.10)
+
+---
+ Modules/Loadable/Colors/CMakeLists.txt            | 15 +++++++++++++++
+ .../Colors/Widgets/DesignerPlugins/CMakeLists.txt | 10 +++++++---
+ 2 files changed, 22 insertions(+), 3 deletions(-)
+
+diff --git a/Modules/Loadable/Colors/CMakeLists.txt b/Modules/Loadable/Colors/CMakeLists.txt
+index a2c2a59f32..517631795e 100644
+--- a/Modules/Loadable/Colors/CMakeLists.txt
++++ b/Modules/Loadable/Colors/CMakeLists.txt
+@@ -1,8 +1,23 @@
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Colors)
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(MRML)
+ add_subdirectory(VTKWidgets)
+diff --git a/Modules/Loadable/Colors/Widgets/DesignerPlugins/CMakeLists.txt b/Modules/Loadable/Colors/Widgets/DesignerPlugins/CMakeLists.txt
+index e3bed07e37..d3b0e01741 100644
+--- a/Modules/Loadable/Colors/Widgets/DesignerPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Colors/Widgets/DesignerPlugins/CMakeLists.txt
+@@ -7,12 +7,15 @@ set(${KIT}_SRCS
+   qSlicerColorsModuleWidgetsAbstractPlugin.cxx
+   qSlicerColorsModuleWidgetsAbstractPlugin.h
+   qSlicerColorsModuleWidgetsPlugin.cxx
+-  qSlicerColorsModuleWidgetsPlugin.h
+   qMRMLColorLegendDisplayNodeWidgetPlugin.cxx
+-  qMRMLColorLegendDisplayNodeWidgetPlugin.h
+   qMRMLColorListViewPlugin.cxx
+-  qMRMLColorListViewPlugin.h
+   qMRMLColorTableViewPlugin.cxx
++  )
++
++set(${KIT}_MOC_SRCS
++  qSlicerColorsModuleWidgetsPlugin.h
++  qMRMLColorLegendDisplayNodeWidgetPlugin.h
++  qMRMLColorListViewPlugin.h
+   qMRMLColorTableViewPlugin.h
+   )
+ 
+@@ -26,5 +29,6 @@ ctkMacroBuildQtDesignerPlugin(
+   EXPORT_DIRECTIVE ${${KIT}_EXPORT}
+   FOLDER "Module-${MODULE_NAME}"
+   SRCS ${${KIT}_SRCS}
++  MOC_SRCS ${${KIT}_MOC_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   )
+-- 
+2.52.0
+

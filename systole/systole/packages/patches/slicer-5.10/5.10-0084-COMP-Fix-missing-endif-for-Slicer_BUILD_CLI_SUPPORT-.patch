@@ -1,0 +1,25 @@
+From 94da60994e1b57382d9d175394ca1684720ec822 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 19:04:37 +0200
+Subject: [PATCH] COMP: Fix missing endif for Slicer_BUILD_CLI_SUPPORT in
+ SlicerMacroBuildModuleLogic
+
+---
+ CMake/SlicerMacroBuildModuleLogic.cmake | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/CMake/SlicerMacroBuildModuleLogic.cmake b/CMake/SlicerMacroBuildModuleLogic.cmake
+index 30e0fd1535..c992b8429f 100644
+--- a/CMake/SlicerMacroBuildModuleLogic.cmake
++++ b/CMake/SlicerMacroBuildModuleLogic.cmake
+@@ -113,6 +113,7 @@ macro(SlicerMacroBuildModuleLogic)
+       MRMLDisplayableManager
+       )
+   endif()
++  endif() # Slicer_BUILD_CLI_SUPPORT
+ 
+   if(NOT DEFINED MODULELOGIC_FOLDER AND DEFINED MODULE_NAME)
+     set(MODULELOGIC_FOLDER "Module-${MODULE_NAME}")
+-- 
+2.52.0
+
