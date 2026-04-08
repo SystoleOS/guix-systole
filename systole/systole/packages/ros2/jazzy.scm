@@ -1327,6 +1327,121 @@ exposing it via @file{lifecycle_msgs} services."))
 @code{rcl}, using @file{action_msgs} for goal/feedback/result delivery."))
 
 ;;;
+;;; libstatistics_collector and rclcpp.
+;;;
+
+(define-public ros-libstatistics-collector-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "libstatistics_collector"
+   #:version "1.7.4"
+   #:repo "https://github.com/ros-tooling/libstatistics_collector"
+   #:commit "150e1b0e1fbf920a97e4319f98eaf02be27fa892"
+   #:hash (base32 "1q5n6fy857g1gm2pkdpkpgrsmgjz3v9kcd2qmb4ljiqxy2a03w2a")
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-builtin-interfaces-jazzy
+                             ros-rcl-jazzy
+                             ros-rcpputils-jazzy
+                             ros-rmw-jazzy
+                             ros-statistics-msgs-jazzy)
+   #:home-page "https://github.com/ros-tooling/libstatistics_collector"
+   #:synopsis "Collect runtime statistics for ROS 2 nodes"
+   #:description
+   "Library used by @code{rclcpp} to collect and publish runtime
+metrics (message age, period, ...) using the @file{statistics_msgs}
+message types."))
+
+(define %rclcpp-repo "https://github.com/ros2/rclcpp")
+(define %rclcpp-commit "4321b44ef1a3cc7b46e844c6f2bf148ae5ad2869")
+(define %rclcpp-hash
+  (base32 "07yxm9n7w4p7r42524gbdhw9m6dn0cgkqfr81bnchjh969jb818w"))
+(define %rclcpp-version "28.1.18")
+
+(define-public ros-rclcpp-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rclcpp"
+   #:version %rclcpp-version
+   #:repo %rclcpp-repo
+   #:commit %rclcpp-commit
+   #:hash %rclcpp-hash
+   #:module-subdir "rclcpp"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-ament-cmake-gen-version-h-jazzy
+                             ros-ament-index-cpp-jazzy
+                             ros-builtin-interfaces-jazzy
+                             ros-libstatistics-collector-jazzy
+                             ros-rcl-jazzy
+                             ros-rcl-interfaces-jazzy
+                             ros-rcl-logging-interface-jazzy
+                             ros-rcl-yaml-param-parser-jazzy
+                             ros-rcpputils-jazzy
+                             ros-rcutils-jazzy
+                             ros-rmw-jazzy
+                             ros-rosgraph-msgs-jazzy
+                             ros-rosidl-dynamic-typesupport-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-rosidl-runtime-cpp-jazzy
+                             ros-rosidl-typesupport-c-jazzy
+                             ros-rosidl-typesupport-cpp-jazzy
+                             ros-statistics-msgs-jazzy
+                             ros-tracetools-jazzy)
+   #:home-page "https://github.com/ros2/rclcpp"
+   #:synopsis "ROS 2 C++ client library"
+   #:description
+   "@code{rclcpp} is the C++ ROS 2 client library: provides
+@code{rclcpp::Node}, executors, publishers/subscribers, services,
+clients, parameters, and the high-level RAII wrappers used by virtually
+every C++ ROS 2 program."))
+
+(define-public ros-rclcpp-lifecycle-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rclcpp_lifecycle"
+   #:version %rclcpp-version
+   #:repo %rclcpp-repo
+   #:commit %rclcpp-commit
+   #:hash %rclcpp-hash
+   #:module-subdir "rclcpp_lifecycle"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-lifecycle-msgs-jazzy
+                             ros-rcl-jazzy
+                             ros-rcl-interfaces-jazzy
+                             ros-rcl-lifecycle-jazzy
+                             ros-rclcpp-jazzy
+                             ros-rcutils-jazzy
+                             ros-rmw-jazzy
+                             ros-rosidl-typesupport-cpp-jazzy)
+   #:home-page "https://github.com/ros2/rclcpp"
+   #:synopsis "Lifecycle (managed) node helpers for rclcpp"
+   #:description
+   "C++ wrappers around @code{rcl_lifecycle} that expose the ROS 2
+managed-node state machine through the @code{rclcpp_lifecycle::Node}
+class."))
+
+(define-public ros-rclcpp-action-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rclcpp_action"
+   #:version %rclcpp-version
+   #:repo %rclcpp-repo
+   #:commit %rclcpp-commit
+   #:hash %rclcpp-hash
+   #:module-subdir "rclcpp_action"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-action-msgs-jazzy
+                             ros-rcl-jazzy
+                             ros-rcl-action-jazzy
+                             ros-rclcpp-jazzy
+                             ros-rcpputils-jazzy
+                             ros-rosidl-runtime-c-jazzy)
+   #:home-page "https://github.com/ros2/rclcpp"
+   #:synopsis "C++ action server and client helpers for rclcpp"
+   #:description
+   "Higher-level wrappers around @code{rcl_action} for writing C++ ROS 2
+action servers and clients."))
+
+;;;
 ;;; Aggregation meta-package.
 ;;;
 ;;; Phase 1 will grow this package's propagated-inputs tier by tier until

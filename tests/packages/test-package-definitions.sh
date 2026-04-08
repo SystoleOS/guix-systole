@@ -162,6 +162,10 @@ test_package "(systole packages ros2 jazzy)" "ros-rcl-logging-noop-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rcl-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rcl-lifecycle-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rcl-action-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-libstatistics-collector-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rclcpp-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rclcpp-lifecycle-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rclcpp-action-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-jazzy"
 
 if [ $FAILED -eq 0 ]; then
