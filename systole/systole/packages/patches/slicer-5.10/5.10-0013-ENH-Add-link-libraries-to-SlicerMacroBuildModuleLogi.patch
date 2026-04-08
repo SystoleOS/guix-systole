@@ -25,9 +25,9 @@ index 1e82c99d41..324b0e9f20 100644
 +    vtkAddon
 +    )
 +
-   if(Slicer_BUILD_CLI_SUPPORT)
-     # Third-party library
-     find_package(SlicerExecutionModel REQUIRED ModuleDescriptionParser)
+   # Note: Linking against qSlicerBaseQTCLI provides logic with
+   #       access to the core application modulemanager. Using the module manager
+   #       a module logic can then use the services provided by registered
 -- 
 2.52.0
 

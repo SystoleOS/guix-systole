@@ -74,6 +74,9 @@
 (define %slicer-5.8-commit "11eaf62e5a70b828021ff8beebbdd14d10d4f51c")
 (define %slicer-5.8-hash (base32 "05rz797ddci3a2m8297zyzv2g2hp6bd6djmwa1n0gbsla8b175bx"))
 
+(define %slicer-5.10-commit "a2b6d082be04274a849884fbb1e85634a9df90fb")
+(define %slicer-5.10-hash (base32 "0d69b9d4kkm4k4682b0dgwn1d681vd8kzkay5rr9xjic2s9skcvz"))
+
 (define-public slicer-source-5.8
   ;; Upstream Slicer 5.8 source tree, without Guix-specific build patches.
   ;; Suitable as a code-search reference for development tools and skills.
@@ -874,6 +877,411 @@ Line Interface) modules.  It bundles @code{tclap} and
                      "lib/Slicer-5.8"
                      "lib/Slicer-5.8/qt-loadable-modules"
                      "lib/python3.11/site-packages")))))))
+
+;;;
+;;; Slicer 5.10
+;;;
+
+(define %slicer-5.10
+  (package
+    (name "slicer-5.10")
+    (version "5.10.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri
+        (string-append
+         "https://github.com/Slicer/Slicer/archive/"
+         %slicer-5.10-commit ".tar.gz"))
+       (sha256 %slicer-5.10-hash)
+       (patches (search-patches
+                 "5.10-0001-COMP-Add-vtk-CommonSystem-component-as-requirement.patch"
+                 "5.10-0002-COMP-Find-Eigen-required.patch"
+                 "5.10-0003-COMP-Adapt-to-new-qRestAPI-cmake.patch"
+                 "5.10-0004-COMP-Hard-code-path-to-teem-library.patch"
+                 "5.10-0005-COMP-Add-vtk-dependency-to-MRMLWidgets.patch"
+                 "5.10-0006-COMP-Find-itk-on-non-superbuild.patch"
+                 "5.10-0007-COMP-Scope-CPack-blocks.patch"
+                 "5.10-0008-COMP-Remove-LastConfigureStep.patch"
+                 "5.10-0009-COMP-Fix-path-for-SlicerConfig.cmake-and-SlicerConfi.patch"
+                 "5.10-0010-ENH-Fix-installation-of-development-files.patch"
+                 "5.10-0011-ENH-Add-installation-of-Slicer-base-development-file.patch"
+                 "5.10-0012-ENH-Add-link-directories.patch"
+                 "5.10-0013-ENH-Add-link-libraries-to-SlicerMacroBuildModuleLogi.patch"
+                 "5.10-0014-ENH-add-Qt5-and-loadable-modules-includes-for-non-su.patch"
+                 "5.10-0015-ENH-improve-CMake-support-for-system-installed-Slice.patch"
+                 "5.10-0016-ENH-Fix-file-glob-pattern-for-header-installation.patch"
+                 "5.10-0017-ENH-Install-CMake-template-files-.h.in-.cxx.in-along.patch"
+                 "5.10-0018-ENH-Add-LINK_DIRECTORIES-support-to-SlicerMacroBuild.patch"
+                 "5.10-0019-ENH-Add-Slicer_Libs_INCLUDE_DIRS-to-SlicerMacroBuild.patch"
+                 "5.10-0020-COMP-Add-Qt5-Xml-to-SlicerMacroBuildModuleQtLibrary-.patch"
+                 "5.10-0021-COMP-Add-CTKVisualizationVTKWidgets-to-SlicerMacroBu.patch"
+                 "5.10-0022-COMP-Add-VTK-CommonCore-to-SlicerMacroBuildModuleLog.patch"
+                 "5.10-0023-COMP-Add-Qt5-Widgets-Xml-CTK-to-SlicerMacroBuildLoad.patch"
+                 "5.10-0024-COMP-Fix-empty-Slicer_INSTALL_QTLOADABLEMODULES_INCL.patch"
+                 "5.10-0025-COMP-Add-qSlicerBaseQTCore-to-standalone-module-widg.patch"
+                 "5.10-0026-COMP-Add-EXTRA_MODULE_LIB_DIRS-to-module-build-macro.patch"
+                 "5.10-0027-COMP-Add-qMRMLWidgets-to-standalone-module-widgets-l.patch"
+                 "5.10-0028-COMP-Add-Slicer_GUI_LIBRARY-fallback-to-SlicerMacroB.patch"
+                 "5.10-0029-COMP-Add-Slicer-root-include-dir-to-SlicerMacroBuild.patch"
+                 "5.10-0030-COMP-Add-qSlicerBaseQTCore-to-standalone-loadable-mo.patch"
+                 "5.10-0031-ENH-Install-generated-UI-headers-from-qMRMLWidgets-f.patch"
+                 "5.10-0032-COMP-Add-Slicer_INSTALL_LIB_DIR-to-QtLibrary-link-se.patch"
+                 "5.10-0033-COMP-Fix-install-path-for-qSlicerModuleGenericTest.p.patch"
+                 "5.10-0034-COMP-Guard-MRMLCLIPython-import-when-CLI-support-is-.patch"
+                 "5.10-0035-COMP-Install-qrcc.py-and-fix-Slicer_QRCC_SCRIPT-for-.patch"
+                 "5.10-0036-COMP-Ensure-PYTHON_EXECUTABLE-is-set-in-slicerFuncti.patch"
+                 "5.10-0037-COMP-Fix-module-install-dir-variables-for-install-tr.patch"
+                 "5.10-0038-COMP-Bridge-Python3-target-to-legacy-PYTHON_LIBRARIE.patch"
+                 "5.10-0039-COMP-Fix-Slicer_BINARY_DIR-usage-and-expose-QTSCRIPT.patch"
+                 "5.10-0040-COMP-Add-PythonQt-include-dir-to-global-include-path.patch"
+                 "5.10-0041-COMP-Use-abspath-instead-of-realpath-in-SubjectHiera.patch"
+                 "5.10-0042-COMP-Skip-launcher-settings-read-when-file-is-absent.patch"
+                 "5.10-0043-COMP-Bake-SlicerExecutionModel_DIR-into-install-tree.patch"
+                 "5.10-0044-COMP-Expose-MRMLCLI_INCLUDE_DIRS-in-install-tree-Sli.patch"
+                 "5.10-0045-ENH-Read-SLICER_ADDITIONAL_MODULE_PATHS-env-var-in-a.patch"
+                 "5.10-0046-ENH-Extend-LD_LIBRARY_PATH-and-PYTHONPATH-from-SLICE.patch"
+                 "5.10-0047-ENH-Register-CTK-plugin-path-and-disable-QtWebEngine.patch"
+                 "5.10-0048-ENH-Prepend-CTK-and-vtkAddon-lib-dirs-to-PYTHONPATH-.patch"
+                 "5.10-0049-COMP-Guard-Windows-11-numpy-scipy-preload-workaround.patch"
+                 "5.10-0050-COMP-Fall-back-to-no-module-when-saved-home-module-i.patch"
+                 "5.10-0051-ENH-Load-custom-splash-screen-and-QSS-stylesheet-fro.patch"
+                 "5.10-0052-ENH-Execute-SLICER_INIT_DIR-init.py-after-slicerqt.p.patch"
+                 "5.10-0053-COMP-Expose-extension-build-vars-in-install-tree-Sli.patch"
+                 "5.10-0054-ENH-Auto-discover-Guix-installed-modules-via-GUIX_EN.patch"
+                 "5.10-0055-ENH-Bake-GLEW-store-paths-into-install-tree-SlicerIn.patch"
+                 "5.10-0056-COMP-Install-CXX-test-templates-and-expose-Slicer_CX.patch"
+                 "5.10-0057-ENH-Add-slicer-launch-wrapper-and-set-Slicer_LAUNCH_.patch"
+                 "5.10-0058-COMP-Expose-Slicer_PYTHON_MODULE_TEST_TEMPLATES_DIR-.patch"
+                 "5.10-0059-COMP-Install-CMake-.cmake.in-templates-to-developmen.patch"
+                 "5.10-0060-COMP-Add-Qt5-component-include-dirs-globally-in-UseS.patch"
+                 "5.10-0061-COMP-Fix-vtkAddon_LIB_DIR-in-install-tree-Slicer_Lib.patch"
+                 "5.10-0063-COMP-Set-CMP0177-policy-in-SlicerMacroBuildModuleVTK.patch"
+                 "5.10-0064-COMP-Fix-Slicer_Base_INCLUDE_DIRS-in-install-tree-Sl.patch"
+                 "5.10-0065-COMP-Install-.txx-template-files-alongside-.h-in-Bas.patch"
+                 "5.10-0066-COMP-Bake-PYTHONQT_INSTALL_DIR-into-install-tree-Sli.patch"
+                 "5.10-0067-COMP-Link-qSlicerBaseQTApp-and-CTKScriptingPythonCor.patch"
+                 "5.10-0068-COMP-Guard-vtkWin32OutputWindow.h-include-behind-WIN.patch"
+                 "5.10-0069-COMP-Link-qSlicerBaseQTApp-and-CTKScriptingPythonCor.patch"
+                 "5.10-0070-COMP-Install-.txx-template-files-in-MRMLCore-develop.patch"
+                 "5.10-0071-COMP-Expose-Slicer_QTLOADABLEMODULES_-SUBDIR-BIN-LIB.patch"
+                 "5.10-0072-COMP-Register-Slicer-qMRML-designer-plugins-dir-so-Q.patch"
+                 "5.10-0073-COMP-Export-Slicer_BUILD_QT_DESIGNER_PLUGINS-in-inst.patch"
+                 "5.10-0074-COMP-Fix-designer-plugin-build-dir-and-install-path-.patch"
+                 "5.10-0075-COMP-Install-Slicer-VTK-hierarchy-files-and-expose-p.patch"
+                 "5.10-0076-COMP-Fix-MOC-processing-for-qSlicerIconEnginePlugin.patch"
+                 "5.10-0077-COMP-Use-lowercase-rapidjson-target-in-MRMLCore.patch"
+                 "5.10-0078-COMP-Move-Q_OBJECT-headers-to-MOC_SRCS-in-qMRMLWidge.patch"
+                 "5.10-0079-COMP-Move-qSlicerStylePlugin-Q_OBJECT-header-to-MOC_.patch"
+                 "5.10-0080-COMP-Move-Q_OBJECT-headers-to-MOC_SRCS-in-QTGUI-QTCL.patch"
+                 "5.10-0081-COMP-Install-AUTOUIC-generated-ui_-.h-from-qMRMLWidg.patch"
+                 "5.10-0082-COMP-Install-AUTOUIC-generated-ui_-.h-from-qSlicerBa.patch"
+                 "5.10-0083-COMP-Guard-ui_qSlicerWebWidget.h-install-on-WEBENGIN.patch"
+                 "5.10-0084-COMP-Install-AUTOUIC-generated-ui_-.h-from-qSlicerBa.patch"))))
+
+    (build-system cmake-build-system)
+    (arguments
+     (list #:tests? #f
+           #:validate-runpath? #f
+           #:configure-flags
+           #~(list
+              ;; Compiler info
+              "-DCMAKE_BUILD_TYPE:STRING=Release"
+              "-DCMAKE_CXX_COMPILER:STRING=g++"
+              "-DCMAKE_C_COMPILER:STRING=gcc"
+              "-DCMAKE_CXX_STANDARD:STRING=17"
+
+              ;; Compiler flags
+              "-DCMAKE_EXE_LINKER_FLAGS=-pthread"
+              "-DSlicer_SUPERBUILD:BOOL=OFF"
+              "-DBUILD_TESTING:BOOL=OFF"
+              "-DBUILD_SHARED_LIBS:BOOL=ON"
+              "-DSlicer_BUILD_EXTENSIONMANAGER_SUPPORT:BOOL=OFF"
+              "-DSlicer_DONT_USE_EXTENSION:BOOL=ON"
+              "-DSlicer_REQUIRED_QT_VERSION:STRING=5"
+              "-DSlicer_BUILD_ITKPython:BOOL=OFF"
+
+              ;; CLI — support library only
+              "-DSlicer_BUILD_CLI:BOOL=OFF"
+              "-DSlicer_BUILD_CLI_SUPPORT:BOOL=ON"
+              (string-append "-DSlicerExecutionModel_DIR="
+                             #$(this-package-input "slicerexecutionmodel")
+                             "/lib")
+              (string-append "-DGenerateCLP_DIR="
+                             #$(this-package-input "slicerexecutionmodel")
+                             "/lib/GenerateCLP")
+
+              ;; QT
+              "-DSlicer_BUILD_QTLOADABLEMODULES:BOOL=OFF"
+              "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"
+              "-DSlicer_BUILD_QT_DESIGNER_PLUGINS:BOOL=ON"
+              "-DSlicer_USE_QtTesting:BOOL=OFF"
+              "-DSlicer_USE_SlicerITK:BOOL=ON"
+              "-DSlicer_USE_CTKAPPLAUNCHER:BOOL=OFF"
+              "-DSlicer_BUILD_WEBENGINE_SUPPORT:BOOL=OFF"
+              (string-append "-DQt5_DIR:PATH="
+                             #$(this-package-input "qtbase"))
+              "-DSlicer_VTK_VERSION_MAJOR:STRING=9"
+              "-DSlicer_VTK_VERSION_MINOR:STRING=5"
+              "-DSlicer_BUILD_vtkAddon:BOOL=OFF"
+
+              "-DSlicer_INSTALL_DEVELOPMENT:BOOL=ON"
+              "-DSlicer_USE_TBB:BOOL=ON"
+              "-DSlicer_BUILD_DICOM_SUPPORT:BOOL=ON"
+
+              ;; Python (disabled in base variant; enabled in slicer-5.10)
+              "-DVTK_WRAP_PYTHON:BOOL=OFF"
+              "-DSlicer_USE_PYTHONQT:BOOL=OFF"
+              "-DSlicer_USE_SYSTEM_python:BOOL=OFF"
+
+              ;; External dependencies
+              "-DSlicer_USE_SYSTEM_bzip2:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_CTK:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_TBB:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_teem:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_QT:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_curl:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_DCMTK:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_ITK:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_LibArchive:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_LibFFI:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_LZMA:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_RapidJSON:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_sqlite:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_VTK:BOOL=ON"
+              "-DSlicer_USE_SYSTEM_zlib:BOOL=ON"
+
+              ;; Hack to fix "Variable Slicer_WC_LAST_CHANGED_DATE is expected to be defined."
+              "-DSlicer_WC_LAST_CHANGED_DATE:STRING=2025-10-1 00:00:00 -0500")
+           #:out-of-source? #t
+           #:phases
+           #~(modify-phases %standard-phases
+                            (add-before 'configure 'set-cmake-paths
+                                        (lambda* (#:key inputs #:allow-other-keys)
+                                          (setenv "CMAKE_PREFIX_PATH"
+                                                  (string-append (assoc-ref inputs "vtkaddon-9.5")
+                                                                 "/lib/cmake:"
+                                                                 (or (getenv "CMAKE_PREFIX_PATH")
+                                                                     "")))
+                                          #t))
+
+                            (add-after 'install 'patch-runpath
+                              (lambda* (#:key outputs #:allow-other-keys)
+                                (let* ((out (assoc-ref outputs "out"))
+                                       (bin (string-append out "/bin/SlicerApp-real")))
+                                  (invoke "patchelf" "--add-rpath"
+                                          (string-append "$ORIGIN/../lib/Slicer-5.10"
+                                                         ":"
+                                                         "$ORIGIN/../lib/Slicer-5.10/qt-loadable-modules")
+                                          bin))))
+                            (add-after 'patch-runpath 'install-slicer-symlink
+                              (lambda* (#:key outputs #:allow-other-keys)
+                                (let* ((out (assoc-ref outputs "out"))
+                                       (wrapper (string-append out "/bin/Slicer")))
+                                  (when (file-exists? wrapper)
+                                    (delete-file wrapper))
+                                  (call-with-output-file wrapper
+                                    (lambda (port)
+                                      (display "#!/bin/sh\n" port)
+                                      (display "# Slicer launcher: set LD_LIBRARY_PATH from\n" port)
+                                      (display "# SLICER_ADDITIONAL_MODULE_PATHS then exec SlicerApp-real.\n" port)
+                                      (display "IFS=:\n" port)
+                                      (display "for _d in $SLICER_ADDITIONAL_MODULE_PATHS; do\n" port)
+                                      (display "  LD_LIBRARY_PATH=\"$_d${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"\n" port)
+                                      (display "done\n" port)
+                                      (display "unset IFS\n" port)
+                                      (display "if [ -n \"$GUIX_ENVIRONMENT\" ]; then\n" port)
+                                      (display "  _guix_mods=\"$GUIX_ENVIRONMENT/lib/Slicer-5.10/qt-loadable-modules\"\n" port)
+                                      (display "  if [ -d \"$_guix_mods\" ]; then\n" port)
+                                      (display "    LD_LIBRARY_PATH=\"$_guix_mods${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"\n" port)
+                                      (display "  fi\n" port)
+                                      (display "fi\n" port)
+                                      (display "export LD_LIBRARY_PATH\n" port)
+                                      (display "export PIP_USER=1\n" port)
+                                      (display "_dir=\"$(dirname \"$(readlink -f \"$0\")\")\"\n" port)
+                                      (display "exec \"$_dir/SlicerApp-real\" \"$@\"\n" port)))
+                                  (chmod wrapper #o755))))
+                            (add-after 'install-slicer-symlink 'install-slicer-launch
+                              (lambda* (#:key outputs #:allow-other-keys)
+                                (let* ((out (assoc-ref outputs "out"))
+                                       (script (string-append out "/bin/slicer-launch")))
+                                  (call-with-output-file script
+                                    (lambda (port)
+                                      (display "#!/bin/sh\n" port)
+                                      (display "# slicer-launch: extend LD_LIBRARY_PATH from\n" port)
+                                      (display "# SLICER_ADDITIONAL_MODULE_PATHS then exec args.\n" port)
+                                      (display "IFS=:\n" port)
+                                      (display "for _d in $SLICER_ADDITIONAL_MODULE_PATHS; do\n" port)
+                                      (display "  LD_LIBRARY_PATH=\"$_d${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}\"\n" port)
+                                      (display "done\n" port)
+                                      (display "unset IFS\n" port)
+                                      (display "export LD_LIBRARY_PATH\n" port)
+                                      (display "export PIP_USER=1\n" port)
+                                      (display "exec \"$@\"\n" port)))
+                                  (chmod script #o755))))
+                            )))
+    (inputs
+     (list libxt
+           dcmtk
+           eigen
+           expat
+           openssl-3.0
+           git
+           hdf5-1.10
+           libffi
+           libjpeg-turbo
+           libxinerama
+           mesa
+           rapidjson
+           tbb
+
+           ;; QT5
+           qtbase-5
+           qtmultimedia-5
+           qtxmlpatterns-5
+           qtdeclarative-5
+           qtsvg-5
+           qtx11extras
+           qtwebchannel-5
+           qttools-5
+
+           ;; VTK 9.5
+           vtk-slicer-9.5
+           double-conversion
+           freetype
+           gl2ps
+           glew
+           jsoncpp
+           libharu
+           libtheora
+           libxml++
+           lz4
+           mpich
+           netcdf
+           proj
+
+           ;; Other Slicer modules
+           ctk-for-slicer-5.10
+           ctkapplauncher
+           itk-slicer-5.4.4
+           libarchive-slicer
+           teem-slicer
+           vtkaddon-9.5
+           slicerexecutionmodel
+           qrestapi))
+    (native-inputs (list patchelf pkg-config))
+    (native-search-paths
+     (list (search-path-specification
+            (variable "SLICER_ADDITIONAL_MODULE_PATHS")
+            (files '("lib/Slicer-5.10/qt-loadable-modules"
+                     "lib/Slicer-5.10/cli-modules")))
+           (search-path-specification
+            (variable "SLICER_INIT_DIR")
+            (files '("share/slicer-init"))
+            (separator #f))))
+    (synopsis "3D Slicer - Medical visualization and computing environment")
+    (description
+     "3D Slicer is a multi-platform, free and open source software package for
+visualization and medical image computing.")
+    (home-page "https://www.slicer.org/")
+    (license license:bsd-3)))
+
+;; slicer-5.10 is the canonical public Slicer 5.10 package.  Python support is
+;; enabled via python-next (3.12).  VTK 9.5, ITK 5.4.4, and vtkAddon (9.5) are
+;; used.
+(define-public slicer-5.10
+  (package
+    (inherit %slicer-5.10)
+    (name "slicer-5.10")
+    (arguments
+     (substitute-keyword-arguments (package-arguments %slicer-5.10)
+       ((#:configure-flags flags)
+        #~(append
+           (list
+            ;; Python — Guix python-next (3.12)
+            (string-append "-DPython3_EXECUTABLE="
+                           #$(this-package-input "python-next") "/bin/python3")
+            (string-append "-DPython3_INCLUDE_DIR="
+                           #$(this-package-input "python-next") "/include/python3.12")
+            (string-append "-DPython3_LIBRARY="
+                           #$(this-package-input "python-next") "/lib/libpython3.12.so")
+            "-DVTK_WRAP_PYTHON:BOOL=ON"
+            "-DSlicer_USE_PYTHONQT:BOOL=ON"
+            "-DSlicer_USE_SYSTEM_python:BOOL=ON"
+            "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"
+            (string-append "-DPYTHONQT_INSTALL_DIR="
+                           #$(this-package-input "pythonqt-commontk-for-slicer-5.10"))
+            (string-append "-DvtkAddon_CMAKE_DIR="
+                           #$(this-package-input "vtkaddon-9.5") "/lib/cmake"))
+           (filter (lambda (f)
+                     (not (member f '("-DVTK_WRAP_PYTHON:BOOL=OFF"
+                                      "-DSlicer_USE_PYTHONQT:BOOL=OFF"
+                                      "-DSlicer_USE_SYSTEM_python:BOOL=OFF"
+                                      "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"))))
+                   #$flags)))
+       ((#:phases phases)
+        #~(modify-phases #$phases
+            (replace 'set-cmake-paths
+              (lambda* (#:key inputs #:allow-other-keys)
+                (setenv "CMAKE_PREFIX_PATH"
+                        (string-append
+                         (assoc-ref inputs "pythonqt-commontk-for-slicer-5.10") "/lib/cmake:"
+                         (assoc-ref inputs "vtkaddon-9.5") "/lib/cmake:"
+                         (or (getenv "CMAKE_PREFIX_PATH") "")))
+                #t))
+            (add-after 'install-slicer-symlink 'patch-python-extension-runpath
+              (lambda* (#:key outputs #:allow-other-keys)
+                (let ((dir (string-append (assoc-ref outputs "out")
+                                          "/lib/Slicer-5.10")))
+                  (for-each
+                   (lambda (lib) (invoke "patchelf" "--add-rpath" "$ORIGIN" lib))
+                   (find-files dir
+                     (lambda (f stat)
+                       (let ((rel (string-drop f (1+ (string-length dir)))))
+                         (and (string-suffix? ".so" rel)
+                              (not (string-contains rel "/"))))))))))
+            (add-after 'patch-python-extension-runpath 'link-vtkaddon-python
+              (lambda* (#:key inputs outputs #:allow-other-keys)
+                (symlink
+                 (string-append (assoc-ref inputs "vtkaddon-9.5")
+                                "/lib/vtkAddonPython.so")
+                 (string-append (assoc-ref outputs "out")
+                                "/lib/Slicer-5.10/vtkAddonPython.so"))))
+            (add-after 'link-vtkaddon-python 'create-logic-shim
+              (lambda* (#:key outputs #:allow-other-keys)
+                (call-with-output-file
+                    (string-append (assoc-ref outputs "out")
+                                   "/bin/Python/logic.py")
+                  (lambda (port)
+                    (display "from slicer.logic import *\n" port)))))))))
+    (inputs
+     (modify-inputs (package-inputs %slicer-5.10)
+       (prepend python-3.12 pythonqt-commontk-for-slicer-5.10)))
+    (propagated-inputs (list vtk-slicer-9.5 ctk-for-slicer-5.10 vtkaddon-9.5 hdf5-1.10 libtheora
+                             netcdf-slicer proj jsoncpp libharu gl2ps eigen
+                             openmpi double-conversion lz4 libxml2
+                             qtbase-5 qttools-5 qtxmlpatterns-5 qtsvg-5
+                             qtmultimedia-5 qtx11extras qtdeclarative-5))
+    (native-search-paths
+     (list (search-path-specification
+            (variable "CMAKE_PREFIX_PATH")
+            (files '("")))
+           (search-path-specification
+            (variable "SLICER_ADDITIONAL_MODULE_PATHS")
+            (files '("lib/Slicer-5.10/qt-loadable-modules"
+                     "lib/Slicer-5.10/qt-scripted-modules"
+                     "lib/Slicer-5.10/cli-modules")))
+           (search-path-specification
+            (variable "SLICER_PYTHONPATH")
+            (files '("bin/Python"
+                     "lib/Slicer-5.10"
+                     "lib/python3.12/site-packages")))
+           (search-path-specification
+            (variable "PYTHONPATH")
+            (files '("bin/Python"
+                     "lib/Slicer-5.10"
+                     "lib/Slicer-5.10/qt-loadable-modules"
+                     "lib/python3.12/site-packages")))))))
 
 ;;;
 ;;; Factory for standalone Slicer loadable-module packages

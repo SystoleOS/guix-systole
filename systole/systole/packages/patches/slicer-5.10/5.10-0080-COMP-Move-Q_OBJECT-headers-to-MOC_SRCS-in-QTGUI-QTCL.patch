@@ -1,0 +1,82 @@
+From cb346806d50645db5ff11a86b944ddaad2cd556d Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 08:59:59 +0200
+Subject: [PATCH] COMP: Move Q_OBJECT headers to MOC_SRCS in QTGUI/QTCLI
+ DesignerPlugins
+
+---
+ Base/QTCLI/DesignerPlugins/CMakeLists.txt |  8 ++++++--
+ Base/QTGUI/DesignerPlugins/CMakeLists.txt | 16 ++++++++++------
+ 2 files changed, 16 insertions(+), 8 deletions(-)
+
+diff --git a/Base/QTCLI/DesignerPlugins/CMakeLists.txt b/Base/QTCLI/DesignerPlugins/CMakeLists.txt
+index 5efd1413cf..b78c9fed1d 100644
+--- a/Base/QTCLI/DesignerPlugins/CMakeLists.txt
++++ b/Base/QTCLI/DesignerPlugins/CMakeLists.txt
+@@ -11,11 +11,14 @@ set(${KIT}_EXPORT "Q_SLICER_BASE_QTCLI_PLUGINS_EXPORT")
+ # Source files
+ set(${KIT}_SRCS
+   qSlicerQTCLIAbstractPlugin.cxx
+-  qSlicerQTCLIAbstractPlugin.h
+   qSlicerQTCLIPlugins.cxx
+-  qSlicerQTCLIPlugins.h
+ 
+   qSlicerCLIProgressBarPlugin.cxx
++  )
++
++set(${KIT}_MOC_SRCS
++  qSlicerQTCLIAbstractPlugin.h
++  qSlicerQTCLIPlugins.h
+   qSlicerCLIProgressBarPlugin.h
+   )
+ 
+@@ -28,5 +31,6 @@ ctkMacroBuildQtDesignerPlugin(
+   EXPORT_DIRECTIVE ${${KIT}_EXPORT}
+   FOLDER "Core-Base"
+   SRCS ${${KIT}_SRCS}
++  MOC_SRCS ${${KIT}_MOC_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   )
+diff --git a/Base/QTGUI/DesignerPlugins/CMakeLists.txt b/Base/QTGUI/DesignerPlugins/CMakeLists.txt
+index ce08141941..ee84b1501c 100644
+--- a/Base/QTGUI/DesignerPlugins/CMakeLists.txt
++++ b/Base/QTGUI/DesignerPlugins/CMakeLists.txt
+@@ -11,19 +11,22 @@ set(${KIT}_EXPORT "Q_SLICER_DESIGNER_PLUGINS_EXPORT")
+ # Source files
+ set(${KIT}_SRCS
+   qSlicerQTGUIAbstractPlugin.cxx
+-  qSlicerQTGUIAbstractPlugin.h
+   qSlicerQTGUIPlugins.cxx
+-  qSlicerQTGUIPlugins.h
+ 
+   qSlicerDirectoryListViewPlugin.cxx
+-  qSlicerDirectoryListViewPlugin.h
+   qSlicerModulePanelPlugin.cxx
+-  qSlicerModulePanelPlugin.h
+   qSlicerModulesListViewPlugin.cxx
+-  qSlicerModulesListViewPlugin.h
+   qSlicerMouseModeToolBarPlugin.cxx
+-  qSlicerMouseModeToolBarPlugin.h
+   qSlicerWidgetPlugin.cxx
++  )
++
++set(${KIT}_MOC_SRCS
++  qSlicerQTGUIAbstractPlugin.h
++  qSlicerQTGUIPlugins.h
++  qSlicerDirectoryListViewPlugin.h
++  qSlicerModulePanelPlugin.h
++  qSlicerModulesListViewPlugin.h
++  qSlicerMouseModeToolBarPlugin.h
+   qSlicerWidgetPlugin.h
+   )
+ 
+@@ -37,5 +40,6 @@ ctkMacroBuildQtDesignerPlugin(
+   EXPORT_DIRECTIVE ${${KIT}_EXPORT}
+   FOLDER "Core-Base"
+   SRCS ${${KIT}_SRCS}
++  MOC_SRCS ${${KIT}_MOC_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   )
+-- 
+2.52.0
+

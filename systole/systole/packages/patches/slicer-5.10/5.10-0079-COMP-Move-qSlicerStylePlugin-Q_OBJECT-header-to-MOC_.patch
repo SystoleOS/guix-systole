@@ -1,0 +1,33 @@
+From 636d88f8ac43b4a7ef408b2ccbc8a0a28f4c346d Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 07:28:49 +0200
+Subject: [PATCH] COMP: Move qSlicerStylePlugin Q_OBJECT header to MOC_SRCS
+
+---
+ Base/QTGUI/StylePlugins/CMakeLists.txt | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Base/QTGUI/StylePlugins/CMakeLists.txt b/Base/QTGUI/StylePlugins/CMakeLists.txt
+index bf91821a77..b7bcde71b9 100644
+--- a/Base/QTGUI/StylePlugins/CMakeLists.txt
++++ b/Base/QTGUI/StylePlugins/CMakeLists.txt
+@@ -11,6 +11,9 @@ set(${KIT}_EXPORT "Q_SLICER_STYLES_PLUGINS_EXPORT")
+ # Source files
+ set(${KIT}_SRCS
+   qSlicerStylePlugin.cxx
++  )
++
++set(${KIT}_MOC_SRCS
+   qSlicerStylePlugin.h
+   )
+ 
+@@ -23,5 +26,6 @@ ctkMacroBuildQtStylesPlugin(
+   EXPORT_DIRECTIVE ${${KIT}_EXPORT}
+   FOLDER "Core-Base"
+   SRCS ${${KIT}_SRCS}
++  MOC_SRCS ${${KIT}_MOC_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   )
+-- 
+2.52.0
+

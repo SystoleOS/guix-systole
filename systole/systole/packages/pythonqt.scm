@@ -26,9 +26,25 @@
   #:use-module ((guix licenses)
                 #:prefix license:))
 
-(define-public pythonqt-commontk
+;;;
+;;; Factory
+;;;
+
+;; make-pythonqt-commontk generates a PythonQt package linked against a
+;; specific Python interpreter.  The python-pkg argument must be the Guix
+;; package object; python-version is the "X.Y" string used to construct
+;; include/library paths (defaults match python 3.11).
+;;
+;; The python package is captured directly in the gexp via #$python-pkg
+;; instead of this-package-input, which avoids hard-coding the input key
+;; and makes variant generation trivial.
+(define* (make-pythonqt-commontk
+          #:key
+          (name "pythonqt-commontk")
+          (python-pkg python)
+          (python-version "3.11"))
   (package
-    (name "pythonqt-commontk")
+    (name name)
     (version "0.1")
     (source
      (origin
@@ -42,7 +58,7 @@
     (inputs (list qtbase-5
                   qtmultimedia-5
                   qttools-5
-                  python))
+                  python-pkg))
     (arguments
      (list
       #:configure-flags
@@ -55,15 +71,24 @@
          "-DPythonQt_Wrap_Qtnetwork:BOOL=ON"
          "-DPythonQt_Wrap_Qtmultimedia:BOOL=ON"
          ;; QtWebKit is absent from Qt 5.6+ → keep OFF
-         (string-append "-DPython3_EXECUTABLE="
-                        #$(this-package-input "python") "/bin/python3")
-         (string-append "-DPython3_INCLUDE_DIR="
-                        #$(this-package-input "python") "/include/python3.11")
-         (string-append "-DPython3_LIBRARY="
-                        #$(this-package-input "python") "/lib/libpython3.11.so"))
+         (string-append "-DPython3_EXECUTABLE=" #$python-pkg "/bin/python3")
+         (string-append "-DPython3_INCLUDE_DIR=" #$python-pkg "/include/python" #$python-version)
+         (string-append "-DPython3_LIBRARY=" #$python-pkg "/lib/libpython" #$python-version ".so"))
       #:tests? #f))
     (home-page "https://github.com/commontk/PythonQt")
     (synopsis "CMake-ified version of PythonQt")
     (description
      "PythonQt is a dynamic Python binding for Qt. It offers an easy way to embed the Python scripting language into your Qt applications.")
     (license license:lgpl2.1)))
+
+;;;
+;;; Public instances
+;;;
+
+(define-public pythonqt-commontk
+  (make-pythonqt-commontk))                     ; python 3.11 (Guix default)
+
+(define-public pythonqt-commontk-for-slicer-5.10
+  (make-pythonqt-commontk #:name "pythonqt-commontk-for-slicer-5.10"
+                           #:python-pkg python-next
+                           #:python-version "3.12"))

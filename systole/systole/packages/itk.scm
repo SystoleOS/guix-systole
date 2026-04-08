@@ -197,7 +197,8 @@ code search and API exploration.")))
        (sha256
         (base32 "1ygqqjncskl56g7yvp42id30kj9wa3b26aazb3cl78cb26hq074q"))))
     (inputs (modify-inputs (package-inputs itk-slicer)
-              (replace "vtk-slicer" vtk-slicer-9.5)))
+              (replace "vtk-slicer" vtk-slicer-9.5)
+              (prepend python-3.12)))
     (home-page "https://github.com/Slicer/ITK/")))
 
 ;; NOTE: itk-slicer uses vtk-slicer (Python-enabled) after the vtk.scm rename.
