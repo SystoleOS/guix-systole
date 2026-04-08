@@ -445,6 +445,90 @@ filesystem helpers, thread-safety primitives, version macros, and other
 C++ utilities used throughout the ROS 2 stack."))
 
 ;;;
+;;; rosidl — interface generation framework.  All sub-packages share a
+;;; common source archive (ros2/rosidl).
+;;;
+
+(define %rosidl-repo "https://github.com/ros2/rosidl")
+(define %rosidl-commit "59c1cefa98edfb764fbeb09704d7f5e48a7af0c1")
+(define %rosidl-hash
+  (base32 "1jma93py5yj66kc3s9a9x7x8g4jgzqjqpnn9a25q00f2lnx9d4kd"))
+(define %rosidl-version "4.6.7")
+
+(define* (rosidl-cmake-subpkg ros-name #:key
+                              (propagated-inputs '())
+                              (extra-inputs '())
+                              (extra-native-inputs '())
+                              synopsis description)
+  "Helper for cmake-built sub-packages of ros2/rosidl (jazzy)."
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name ros-name
+   #:version %rosidl-version
+   #:repo %rosidl-repo
+   #:commit %rosidl-commit
+   #:hash %rosidl-hash
+   #:module-subdir ros-name
+   #:propagated-inputs propagated-inputs
+   #:extra-inputs extra-inputs
+   #:extra-native-inputs extra-native-inputs
+   #:home-page "https://github.com/ros2/rosidl"
+   #:synopsis synopsis
+   #:description description))
+
+(define* (rosidl-python-subpkg ros-name #:key
+                               (propagated-inputs '())
+                               (extra-native-inputs '())
+                               synopsis description)
+  "Helper for pure-python sub-packages of ros2/rosidl (jazzy)."
+  (make-ros2-ament-python-package
+   #:distro jazzy-distro
+   #:ros-name ros-name
+   #:version %rosidl-version
+   #:repo %rosidl-repo
+   #:commit %rosidl-commit
+   #:hash %rosidl-hash
+   #:module-subdir ros-name
+   #:propagated-inputs propagated-inputs
+   #:extra-native-inputs extra-native-inputs
+   #:home-page "https://github.com/ros2/rosidl"
+   #:synopsis synopsis
+   #:description description))
+
+;;; rosidl Tier A: small C/C++ runtime leaves.
+
+(define-public ros-rosidl-typesupport-interface-jazzy
+  (rosidl-cmake-subpkg
+   "rosidl_typesupport_interface"
+   #:propagated-inputs (list ros-ament-cmake-jazzy)
+   #:synopsis "Interface header for the rosidl typesupport ABI"
+   #:description
+   "Header-only interface library defining the C ABI shared between
+generated rosidl typesupport implementations and their consumers."))
+
+(define-public ros-rosidl-runtime-c-jazzy
+  (rosidl-cmake-subpkg
+   "rosidl_runtime_c"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-rcutils-jazzy
+                             ros-rosidl-typesupport-interface-jazzy)
+   #:synopsis "ROS 2 rosidl C runtime support library"
+   #:description
+   "Runtime support library for ROS 2 message types in C: type
+descriptions, primitives sequence functions, message and service type
+support helpers."))
+
+(define-public ros-rosidl-runtime-cpp-jazzy
+  (rosidl-cmake-subpkg
+   "rosidl_runtime_cpp"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-rosidl-runtime-c-jazzy)
+   #:synopsis "ROS 2 rosidl C++ runtime support library"
+   #:description
+   "Header-only C++ runtime support for ROS 2 generated message types:
+traits, bounded sequences and strings, message initializers."))
+
+;;;
 ;;; Aggregation meta-package.
 ;;;
 ;;; Phase 1 will grow this package's propagated-inputs tier by tier until

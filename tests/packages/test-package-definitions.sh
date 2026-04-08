@@ -118,6 +118,9 @@ test_package "(systole packages ros2 jazzy)" "ros-domain-coordinator-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-ament-cmake-ros-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rcutils-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-rcpputils-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-typesupport-interface-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-runtime-c-jazzy"
+test_package "(systole packages ros2 jazzy)" "ros-rosidl-runtime-cpp-jazzy"
 test_package "(systole packages ros2 jazzy)" "ros-jazzy"
 
 if [ $FAILED -eq 0 ]; then
