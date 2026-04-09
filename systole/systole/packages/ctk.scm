@@ -346,4 +346,6 @@ code search and API exploration.")))
          (inherit (package-source base))
          (patches (append (origin-patches (package-source base))
                           (list (search-patch
-                                 "0004-COMP-Fix-vtkStdString-to-QString-conversion-for-VTK-9.5.patch")))))))))
+                                 "0004-COMP-Fix-vtkStdString-to-QString-conversion-for-VTK-9.5.patch")
+                                (search-patch
+                                 "0005-COMP-Add-currentComponent-API-to-ctkVTKVolumePropert.patch")))))))))
