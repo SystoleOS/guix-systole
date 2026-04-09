@@ -31,8 +31,10 @@
   #:use-module (guix build-system trivial)
   #:use-module (guix gexp)
   #:use-module (guix packages)
+  #:use-module (gnu packages algebra)      ; eigen
   #:use-module (gnu packages check)        ; python-pytest
   #:use-module (gnu packages cpp)          ; pybind11
+  #:use-module (gnu packages engineering)  ; orocos-kinematics-dynamics
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-science) ; python-numpy
@@ -1861,6 +1863,69 @@ allowing @code{urdf} to dispatch to multiple parser back-ends."))
    "@code{urdf} is the ROS 2 entry point for parsing Unified Robot
 Description Format (URDF) files.  It dispatches to upstream
 @code{urdfdom} via @code{urdf_parser_plugin}."))
+
+;;;
+;;; eigen3_cmake_module / orocos_kdl_vendor / kdl_parser.
+;;;
+
+(define-public ros-eigen3-cmake-module-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "eigen3_cmake_module"
+   #:version "1.0.1"
+   #:repo "https://github.com/ros2/eigen3_cmake_module"
+   #:commit "68eacd252be453560472b326cddebfe09beea0a0"
+   #:hash (base32 "038vv7l96z15csafpb3pzvj0dqxpzvhb9dkqcw7ax4y8llm31bci")
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             eigen)
+   #:home-page "https://github.com/ros2/eigen3_cmake_module"
+   #:synopsis "CMake module for finding Eigen3 in ROS 2 packages"
+   #:description
+   "Thin ament_cmake helper that makes @code{find_package(Eigen3)}
+available to downstream ROS 2 packages via @code{find_package
+(eigen3_cmake_module)} + @code{ament_export_dependencies(Eigen3)}."))
+
+(define-public ros-orocos-kdl-vendor-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "orocos_kdl_vendor"
+   #:version "0.4.2"
+   #:repo "https://github.com/ros2/orocos_kdl_vendor"
+   #:commit "76ee1ce6c49a28a42c433a9b6fd20053605ccaf7"
+   #:hash (base32 "150arbp2hbb8sm9klgi7gd2y57lvdhpwgh9i8fqidx2pakbmrp46")
+   #:module-subdir "orocos_kdl_vendor"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-vendor-package-jazzy
+                             ros-eigen3-cmake-module-jazzy
+                             orocos-kinematics-dynamics
+                             eigen)
+   #:home-page "https://github.com/ros2/orocos_kdl_vendor"
+   #:synopsis "ROS 2 vendor wrapper around Orocos KDL"
+   #:description
+   "Vendor wrapper around the upstream Orocos Kinematics and Dynamics
+Library (KDL).  In guix-systole this resolves to the
+@code{orocos-kinematics-dynamics} package shipped by upstream Guix; no
+external project is built."))
+
+(define-public ros-kdl-parser-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "kdl_parser"
+   #:version "2.11.0"
+   #:repo "https://github.com/ros/kdl_parser"
+   #:commit "c6f0299344afd1afbeb442fe37e073be69dd5e47"
+   #:hash (base32 "0wrczffl4418pp7dklhwnimlh1w1f9mz20f7ym8yr13qakjzkqhq")
+   #:module-subdir "kdl_parser"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-orocos-kdl-vendor-jazzy
+                             ros-rcutils-jazzy
+                             ros-urdf-jazzy
+                             urdfdom-headers)
+   #:home-page "https://github.com/ros/kdl_parser"
+   #:synopsis "Build KDL trees from URDF robot models"
+   #:description
+   "@code{kdl_parser} converts URDF robot descriptions into KDL
+@code{Tree} objects used by motion planners and kinematic solvers."))
 
 ;;;
 ;;; Aggregation meta-package.
