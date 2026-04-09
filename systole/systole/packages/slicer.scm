@@ -2048,6 +2048,20 @@ working with segmentation objects.  Built from the
        #$slicer-markups-5.10
        "/lib/Slicer-5.10/qt-loadable-modules"))))
 
+(define-public slicer-slicerwelcome-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-slicerwelcome-5.10"
+   #:module-subdir "SlicerWelcome"
+   #:patches (list "slicerwelcome/5.10-0001-ENH-Add-standalone-CMake-build-support-for-SlicerWel.patch"
+                   "slicerwelcome/5.10-0002-COMP-Guard-ExtensionUpdatesStatusButton-connection-w.patch")
+   #:synopsis "3D Slicer Welcome loadable module (5.10)"
+   #:description
+   "The Welcome loadable module extracted from 3D Slicer 5.10.  It provides
+the Welcome screen shown to new users, with quick-access buttons for loading
+data, accessing recent files, and linking to online resources.  Built from
+the @file{Modules/Loadable/SlicerWelcome} subtree of the Slicer 5.10 source
+tree."))
+
 ;;;
 ;;; Factory for standalone Slicer loadable-module packages
 ;;;

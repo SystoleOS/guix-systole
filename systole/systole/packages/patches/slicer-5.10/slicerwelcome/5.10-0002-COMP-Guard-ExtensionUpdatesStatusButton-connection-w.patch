@@ -1,0 +1,27 @@
+From 24a9918c053a55a19cd053010bf88fadcd027381 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 9 Apr 2026 08:59:34 +0200
+Subject: [PATCH] COMP: Guard ExtensionUpdatesStatusButton connection with
+ Slicer_BUILD_EXTENSIONMANAGER_SUPPORT 5.10
+
+---
+ Modules/Loadable/SlicerWelcome/qSlicerWelcomeModuleWidget.cxx | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Modules/Loadable/SlicerWelcome/qSlicerWelcomeModuleWidget.cxx b/Modules/Loadable/SlicerWelcome/qSlicerWelcomeModuleWidget.cxx
+index 18bc5607be..9d40c29ce3 100644
+--- a/Modules/Loadable/SlicerWelcome/qSlicerWelcomeModuleWidget.cxx
++++ b/Modules/Loadable/SlicerWelcome/qSlicerWelcomeModuleWidget.cxx
+@@ -286,7 +286,9 @@ void qSlicerWelcomeModuleWidget::setup()
+ 
+     QObject::connect(d->CheckForUpdatesNowButton, SIGNAL(clicked()), this, SLOT(checkForUpdates()));
+ 
++#ifdef Slicer_BUILD_EXTENSIONMANAGER_SUPPORT
+     QObject::connect(d->ExtensionUpdatesStatusButton, SIGNAL(clicked()), qSlicerApplication::application(), SLOT(openExtensionsManagerDialog()));
++#endif
+   }
+ 
+   this->Superclass::setup();
+-- 
+2.52.0
+
