@@ -38,7 +38,10 @@
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-science) ; python-numpy
-  #:use-module (gnu packages python-xyz)   ; python-empy, python-pyyaml, python-lark
+  #:use-module (gnu packages python-build) ; python-packaging
+  #:use-module (gnu packages python-xyz)   ; python-empy, python-pyyaml, python-lark,
+                                           ; python-psutil, python-importlib-metadata,
+                                           ; python-importlib-resources, python-argcomplete
   #:use-module (gnu packages serialization) ; libyaml
   #:use-module (gnu packages xml)          ; tinyxml2
   #:use-module (systole packages ros2)
@@ -853,6 +856,28 @@ Python ROS 2 packages: dynamic library loading, attribute import."))
 ROS 2 @file{.msg}, @file{.srv}, and @file{.action} files.  Used by
 interface packages whose buildtool_depend list includes
 @code{rosidl_default_generators}."))
+
+(define-public ros-rosidl-runtime-py-jazzy
+  (make-ros2-ament-python-package
+   #:distro jazzy-distro
+   #:ros-name "rosidl_runtime_py"
+   #:version "0.13.1"
+   #:repo "https://github.com/ros2/rosidl_runtime_py"
+   #:commit "d37ee331753c62ca17d9e59e2bd247e52661ac0f"
+   #:hash (base32 "0pkzajxxh735imr20dh8ldvggl0i205ycgyhgsqm7kil8m3zknhn")
+   ;; Upstream package.xml under-declares ament_index_python; the code
+   ;; imports it unconditionally at module load time.
+   #:propagated-inputs (list ros-ament-index-python-jazzy
+                             ros-rosidl-parser-jazzy
+                             python-numpy
+                             python-pyyaml)
+   #:home-page "https://github.com/ros2/rosidl_runtime_py"
+   #:synopsis "Runtime Python utilities for rosidl message manipulation"
+   #:description
+   "Python helpers for introspecting and manipulating ROS 2 messages
+at runtime: YAML (de)serialization, dict conversion, field walking.
+Used by @code{ros2topic}, @code{ros2interface}, and friends to
+pretty-print messages."))
 
 (define-public ros-rosidl-core-generators-jazzy
   (make-ros2-ament-cmake-package
@@ -2372,6 +2397,205 @@ test framework."))
    #:description
    "Extends @code{launch} with ROS-aware actions for spawning ROS 2
 nodes, lifecycle nodes, and composable components."))
+
+;;;
+;;; ros2cli suite (ros2/ros2cli@2d90ccd).
+;;;
+
+(define %ros2cli-repo "https://github.com/ros2/ros2cli")
+(define %ros2cli-commit "2d90ccddf59905831ab20763792a43a62411a5d5")
+(define %ros2cli-hash
+  (base32 "1jly5ikw29rkm07piwhsihrqd6ksz92b0hf486dwlkg7axpf02dx"))
+(define %ros2cli-version "0.32.9")
+
+(define* (ros2cli-subpkg ros-name #:key
+                         (propagated-inputs '())
+                         synopsis description)
+  (make-ros2-ament-python-package
+   #:distro jazzy-distro
+   #:ros-name ros-name
+   #:version %ros2cli-version
+   #:repo %ros2cli-repo
+   #:commit %ros2cli-commit
+   #:hash %ros2cli-hash
+   #:module-subdir ros-name
+   #:propagated-inputs propagated-inputs
+   #:home-page %ros2cli-repo
+   #:synopsis synopsis
+   #:description description))
+
+(define-public ros-ros2cli-jazzy
+  (ros2cli-subpkg
+   "ros2cli"
+   #:propagated-inputs (list python-argcomplete
+                             python-importlib-metadata
+                             python-packaging
+                             python-psutil
+                             ros-rclpy-jazzy)
+   #:synopsis "ROS 2 command-line tool and plugin framework"
+   #:description
+   "@code{ros2cli} provides the @command{ros2} command and the
+plugin framework that every @code{ros2 <subcommand>} package hooks
+into."))
+
+(define-public ros-ros2pkg-jazzy
+  (ros2cli-subpkg
+   "ros2pkg"
+   #:propagated-inputs (list ros-ament-index-python-jazzy
+                             ros-ros2cli-jazzy
+                             python-catkin-pkg
+                             python-empy
+                             python-importlib-resources)
+   #:synopsis "ros2 pkg — list / find / create ROS 2 packages"
+   #:description
+   "Implements @command{ros2 pkg list}, @command{ros2 pkg prefix},
+@command{ros2 pkg xml}, and @command{ros2 pkg create}."))
+
+(define-public ros-ros2run-jazzy
+  (ros2cli-subpkg
+   "ros2run"
+   #:propagated-inputs (list ros-ros2cli-jazzy
+                             ros-ros2pkg-jazzy)
+   #:synopsis "ros2 run — execute a package's installed binaries"
+   #:description
+   "Implements @command{ros2 run <pkg> <executable>}."))
+
+(define-public ros-ros2node-jazzy
+  (ros2cli-subpkg
+   "ros2node"
+   #:propagated-inputs (list ros-rclpy-jazzy
+                             ros-ros2cli-jazzy)
+   #:synopsis "ros2 node — introspect running ROS 2 nodes"
+   #:description
+   "Implements @command{ros2 node list} and @command{ros2 node info}."))
+
+(define-public ros-ros2topic-jazzy
+  (ros2cli-subpkg
+   "ros2topic"
+   #:propagated-inputs (list ros-rclpy-jazzy
+                             ros-ros2cli-jazzy
+                             ros-rosidl-runtime-py-jazzy
+                             python-numpy
+                             python-pyyaml)
+   #:synopsis "ros2 topic — introspect and interact with ROS 2 topics"
+   #:description
+   "Implements @command{ros2 topic list}, @command{ros2 topic echo},
+@command{ros2 topic pub}, @command{ros2 topic hz}, ..."))
+
+(define-public ros-ros2service-jazzy
+  (ros2cli-subpkg
+   "ros2service"
+   #:propagated-inputs (list ros-rclpy-jazzy
+                             ros-ros2cli-jazzy
+                             ros-ros2topic-jazzy
+                             ros-rosidl-runtime-py-jazzy
+                             python-pyyaml)
+   #:synopsis "ros2 service — introspect and call ROS 2 services"
+   #:description
+   "Implements @command{ros2 service list}, @command{ros2 service call}
+and friends."))
+
+(define-public ros-ros2param-jazzy
+  (ros2cli-subpkg
+   "ros2param"
+   #:propagated-inputs (list ros-rcl-interfaces-jazzy
+                             ros-rclpy-jazzy
+                             ros-ros2cli-jazzy
+                             ros-ros2node-jazzy
+                             ros-ros2service-jazzy)
+   #:synopsis "ros2 param — interact with ROS 2 parameters"
+   #:description
+   "Implements @command{ros2 param list}, @command{ros2 param get},
+@command{ros2 param set}, @command{ros2 param dump}, and
+@command{ros2 param load}."))
+
+(define-public ros-ros2interface-jazzy
+  (ros2cli-subpkg
+   "ros2interface"
+   #:propagated-inputs (list ros-ament-index-python-jazzy
+                             ros-ros2cli-jazzy
+                             ros-rosidl-adapter-jazzy
+                             ros-rosidl-runtime-py-jazzy)
+   #:synopsis "ros2 interface — inspect message, service and action definitions"
+   #:description
+   "Implements @command{ros2 interface list}, @command{ros2 interface show},
+@command{ros2 interface package}, and @command{ros2 interface proto}."))
+
+(define-public ros-ros2action-jazzy
+  (ros2cli-subpkg
+   "ros2action"
+   #:propagated-inputs (list ros-action-msgs-jazzy
+                             ros-ament-index-python-jazzy
+                             ros-rclpy-jazzy
+                             ros-ros2cli-jazzy
+                             ros-rosidl-runtime-py-jazzy)
+   #:synopsis "ros2 action — interact with ROS 2 actions"
+   #:description
+   "Implements @command{ros2 action list}, @command{ros2 action send_goal},
+@command{ros2 action info}, ..."))
+
+(define-public ros-ros2lifecycle-jazzy
+  (ros2cli-subpkg
+   "ros2lifecycle"
+   #:propagated-inputs (list ros-lifecycle-msgs-jazzy
+                             ros-rclpy-jazzy
+                             ros-ros2cli-jazzy
+                             ros-ros2node-jazzy
+                             ros-ros2service-jazzy)
+   #:synopsis "ros2 lifecycle — manage lifecycle-node state"
+   #:description
+   "Implements @command{ros2 lifecycle list}, @command{ros2 lifecycle get},
+@command{ros2 lifecycle set}."))
+
+(define-public ros-ros2component-jazzy
+  (ros2cli-subpkg
+   "ros2component"
+   #:propagated-inputs (list ros-ament-index-python-jazzy
+                             ros-composition-interfaces-jazzy
+                             ros-rcl-interfaces-jazzy
+                             ros-rclcpp-components-jazzy
+                             ros-rclpy-jazzy
+                             ros-ros2cli-jazzy
+                             ros-ros2node-jazzy
+                             ros-ros2param-jazzy
+                             ros-ros2pkg-jazzy)
+   #:synopsis "ros2 component — load/unload composable nodes at runtime"
+   #:description
+   "Implements @command{ros2 component load}, @command{ros2 component unload},
+@command{ros2 component list}, @command{ros2 component types}."))
+
+(define-public ros-ros2multicast-jazzy
+  (ros2cli-subpkg
+   "ros2multicast"
+   #:propagated-inputs (list ros-ros2cli-jazzy)
+   #:synopsis "ros2 multicast — check multicast UDP connectivity"
+   #:description
+   "Small helper for diagnosing DDS multicast discovery failures."))
+
+;;; ros2launch lives in ros2/launch_ros but depends on ros2cli+ros2pkg,
+;;; so we define it here after the ros2cli stack.
+
+(define-public ros-ros2launch-jazzy
+  (make-ros2-ament-python-package
+   #:distro jazzy-distro
+   #:ros-name "ros2launch"
+   #:version "0.26.11"
+   #:repo "https://github.com/ros2/launch_ros"
+   #:commit "a4580bd3dccf08f93871a32e14bf750c24fb780d"
+   #:hash (base32 "1yyfbcdz145kh82hjaapy4pxl76jf2clpry8y23cz66wnavc2p06")
+   #:module-subdir "ros2launch"
+   #:propagated-inputs (list ros-ament-index-python-jazzy
+                             ros-launch-jazzy
+                             ros-launch-ros-jazzy
+                             ros-launch-xml-jazzy
+                             ros-launch-yaml-jazzy
+                             ros-ros2cli-jazzy
+                             ros-ros2pkg-jazzy)
+   #:home-page "https://github.com/ros2/launch_ros"
+   #:synopsis "ros2 launch — run ROS 2 launch files"
+   #:description
+   "Implements @command{ros2 launch <pkg> <launch-file>} on top of the
+@code{launch} and @code{launch_ros} frameworks."))
 
 ;;;
 ;;; Aggregation meta-package.
