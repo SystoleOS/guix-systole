@@ -160,6 +160,15 @@ drives the 3D Systems Touch.")
               "-DCISST_BUILD_EXAMPLES=OFF"
               "-DCISST_BUILD_APPLICATIONS=OFF"
               "-DCISST_HAS_JSON=ON"
+              ;; cisstNumerical defaults CISST_HAS_CISSTNETLIB to OFF
+              ;; outside catkin builds; without it cisstRobot is
+              ;; silently skipped and downstream saw* packages fail.
+              "-DCISST_HAS_CISSTNETLIB=ON"
+              ;; cisstRobot defaults to building robReflexxes, which
+              ;; ExternalProject-clones ReflexxesTypeII from GitHub.
+              ;; Disable — not used by the sawControllers/
+              ;; sawSensablePhantom code paths we need.
+              "-DCISST_ROB_HAS_REFLEXXES_TYPEII=OFF"
               ;; Use pkg-config to pick up Guix's jsoncpp instead of
               ;; the cisstJSONExternal ExternalProject_Add that would
               ;; clone jsoncpp from GitHub.
@@ -208,4 +217,116 @@ the optional @code{cisstMesh}/@code{cisstStereoVision}/
 @code{cisst3DUserInterface} libraries are all disabled — they are not
 needed for the haptic-device control path and would pull in large
 unused dependencies.")
+    (license license:bsd-3)))
+
+;;;
+;;; sawKeyboard — cisst/SAW keyboard-input component.  Pure cisst,
+;;; no ROS dependency.  Required by sawControllers and beyond.
+;;;
+
+(define-public saw-keyboard
+  (package
+    (name "saw-keyboard")
+    (version "1.4.1")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/jhu-saw/sawKeyboard")
+             (commit "2c254c5cfd9acc86188a76e7b615e526a21e56ac")))
+       (file-name (git-file-name name version))
+       (sha256
+        (base32 "116j5nhgxdxyazlfsyxn710vr3s9fy95raqg1y1yb04qqzri7lq5"))))
+    (build-system cmake-build-system)
+    (arguments
+     (list
+      #:tests? #f
+      #:configure-flags
+      #~(list "-DCMAKE_BUILD_TYPE=Release"
+              (string-append "-Dcisst_DIR="
+                             #$(this-package-input "cisst")
+                             "/share/cisst-1.4/cmake"))
+      #:phases
+      #~(modify-phases %standard-phases
+          (add-before 'configure 'set-install-rpath
+            (lambda _
+              (setenv "CMAKE_INSTALL_RPATH"
+                      "$ORIGIN:$ORIGIN/../lib"))))))
+    (inputs (list cisst cisst-netlib))
+    (home-page "https://github.com/jhu-saw/sawKeyboard")
+    (synopsis "cisst/SAW keyboard-input component")
+    (description
+     "@code{sawKeyboard} is a cisst @code{mtsComponent} that turns
+terminal key presses into cisst events.  It is a build dependency of
+@code{sawControllers} and, transitively, @code{sawSensablePhantom}.")
+    (license license:bsd-3)))
+
+;;;
+;;; sawControllers (core) — cisst/SAW PID, gravity-compensation, and
+;;; teleop controllers.  Required by sawSensablePhantom.
+;;;
+
+(define-public saw-controllers
+  (package
+    (name "saw-controllers")
+    (version "2.3.0")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/jhu-saw/sawControllers")
+             (commit "cc8870e20ef0954745a83cbc4eda7d167e3bda9a")))
+       (file-name (git-file-name name version))
+       (sha256
+        (base32 "0ih28k1b09hnqn4crk0ffpk6rrjxcnnld0y8xcsxyfk0vijnly3n"))))
+    (build-system cmake-build-system)
+    (arguments
+     (list
+      #:tests? #f
+      ;; Build only core/components — core/ also adds_subdirectory
+      ;; (examples) which needs Qt; we don't need those.
+      #:configure-flags
+      #~(list "-DCMAKE_BUILD_TYPE=Release"
+              (string-append "-Dcisst_DIR="
+                             #$(this-package-input "cisst")
+                             "/share/cisst-1.4/cmake")
+              (string-append "-DsawKeyboard_DIR="
+                             #$(this-package-input "saw-keyboard")
+                             "/share/sawKeyboard"))
+      #:phases
+      #~(modify-phases %standard-phases
+          (replace 'configure
+            (lambda* (#:key outputs configure-flags #:allow-other-keys)
+              (let ((source (getcwd))
+                    (out (assoc-ref outputs "out")))
+                (apply invoke "cmake"
+                       "-S" (string-append source "/core/components")
+                       "-B" "build"
+                       (string-append "-DCMAKE_INSTALL_PREFIX=" out)
+                       configure-flags))))
+          (replace 'build
+            (lambda* (#:key parallel-build? #:allow-other-keys)
+              (invoke "cmake" "--build" "build"
+                      "-j" (if parallel-build?
+                               (number->string (parallel-job-count))
+                               "1"))))
+          (replace 'install
+            (lambda _ (invoke "cmake" "--install" "build")))
+          (add-before 'configure 'set-install-rpath
+            (lambda _
+              (setenv "CMAKE_INSTALL_RPATH"
+                      "$ORIGIN:$ORIGIN/../lib"))))))
+    (inputs (list cisst cisst-netlib saw-keyboard
+                  ;; cisst's mtsCommonXML/JSON leaks libjsoncpp.so.26
+                  ;; into downstream link; RUNPATH validation needs it.
+                  jsoncpp))
+    (home-page "https://github.com/jhu-saw/sawControllers")
+    (synopsis "cisst/SAW PID and teleoperation controllers")
+    (description
+     "@code{sawControllers} bundles the cisst implementations of PID
+joint controllers, gravity compensation, and teleoperation components
+used by JHU's haptic-device stack.  This Guix package builds only the
+@code{core/components} subtree (the shared library); the example
+programs in @code{core/examples} are skipped because they pull in Qt
+and are not needed for the Touch demo.")
     (license license:bsd-3)))
