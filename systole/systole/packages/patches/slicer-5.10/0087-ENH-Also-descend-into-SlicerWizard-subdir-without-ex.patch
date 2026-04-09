@@ -1,0 +1,26 @@
+From a9f6fb6ace630a0ff95752cfd753d96302786e25 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 9 Apr 2026 17:06:55 +0200
+Subject: [PATCH] ENH: Also descend into SlicerWizard subdir without extension
+ manager
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0a2325f83e..c9b5549a74 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1163,7 +1163,7 @@ add_subdirectory(Libs)
+ add_subdirectory(Base)
+ add_subdirectory(Resources)
+ add_subdirectory(Utilities/Scripts)
+-if(Slicer_BUILD_EXTENSIONMANAGER_SUPPORT)
++if(Slicer_USE_PYTHONQT)
+   add_subdirectory(Utilities/Scripts/SlicerWizard)
+ endif()
+ 
+-- 
+2.52.0
+

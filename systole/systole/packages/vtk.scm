@@ -19,6 +19,7 @@
   #:use-module ((guix licenses)
                 #:prefix license:)
   #:use-module (guix packages)
+  #:use-module (guix build-system)
   #:use-module (gnu packages algebra)
   #:use-module (gnu packages)
   #:use-module (gnu packages base)
@@ -49,6 +50,7 @@
   #:use-module (gnu packages tbb)
   #:use-module (gnu packages xiph)
   #:use-module (systole packages maths)
+  #:use-module (systole packages python-xyz)
   #:use-module (systole packages))
 
 ;; Private non-Python base — used only for (inherit) in vtk-slicer (Python).
@@ -240,24 +242,6 @@ code search and API exploration.")))
 ;;
 ;; Slicer 5.10 variants — VTK 9.5.2 + matching vtkAddon
 ;;
-
-;; Pinned Python 3.12 alias.  python-next drifts over time; this alias asserts
-;; the major/minor at module load so a silent upgrade to 3.13 fails loudly
-;; instead of mysteriously breaking the Slicer 5.10 PYTHONPATH (which scans
-;; lib/python3.12/site-packages).
-(define-public python-3.12
-  (let ((p python-next))
-    (unless (string-prefix? "3.12." (package-version p))
-      (error "python-next is no longer 3.12.x; update systole/packages accordingly"
-             (package-version p)))
-    p))
-
-;; Python 3.12 wrapper that provides the 'python' binary (symlink to python3),
-;; suitable for use as the #:python argument in pyproject-build-system.
-(define-public python-3.12-wrapper
-  (package
-    (inherit python-sans-pip-wrapper)
-    (propagated-inputs `(("python" ,python-3.12)))))
 
 ;; Private non-Python base for VTK 9.5 — used only for (inherit) in vtk-slicer-9.5.
 (define %vtk-slicer-9.5

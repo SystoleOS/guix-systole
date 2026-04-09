@@ -39,7 +39,8 @@
                 #:prefix license:)
   #:use-module (guix packages)
   #:use-module (systole packages maths)
-  #:use-module (systole packages vtk))
+  #:use-module (systole packages vtk)
+  #:use-module (systole packages python-xyz))
 
 (define-public itk-slicer
   (package

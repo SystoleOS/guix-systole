@@ -1,0 +1,29 @@
+From e57b6bdd0f54c52f2896286c23baf18988766f3f Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 9 Apr 2026 16:24:36 +0200
+Subject: [PATCH] ENH: Install SlicerWizard regardless of extension manager
+ support
+
+The ExtensionWizard scripted module imports SlicerWizard unconditionally,
+so SlicerWizard must be installed even when Slicer_BUILD_EXTENSIONMANAGER_SUPPORT
+is OFF.
+---
+ Utilities/Scripts/SlicerWizard/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Utilities/Scripts/SlicerWizard/CMakeLists.txt b/Utilities/Scripts/SlicerWizard/CMakeLists.txt
+index 6e9ff9ba8b..85c7674710 100644
+--- a/Utilities/Scripts/SlicerWizard/CMakeLists.txt
++++ b/Utilities/Scripts/SlicerWizard/CMakeLists.txt
+@@ -28,7 +28,7 @@ set(SlicerWizard_PYTHON_SCRIPTS
+   WizardHelpFormatter.py
+   )
+ 
+-if(Slicer_BUILD_EXTENSIONMANAGER_SUPPORT AND Slicer_USE_PYTHONQT)
++if(Slicer_USE_PYTHONQT)
+   ctkMacroCompilePythonScript(
+     TARGET_NAME SlicerWizard
+     SCRIPTS "${SlicerWizard_PYTHON_SCRIPTS}"
+-- 
+2.52.0
+
