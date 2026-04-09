@@ -1928,6 +1928,267 @@ external project is built."))
 @code{Tree} objects used by motion planners and kinematic solvers."))
 
 ;;;
+;;; composition_interfaces / rclcpp_components / message_filters.
+;;; composition_interfaces is a sibling of rcl_interfaces in the
+;;; ros2/rcl_interfaces monorepo, deferred from Phase 1.  rclcpp_components
+;;; was deferred from the Phase 1 rclcpp tier because it needs class_loader
+;;; and composition_interfaces.
+;;;
+
+(define-public ros-composition-interfaces-jazzy
+  (rcl-interfaces-msg
+   "composition_interfaces"
+   #:message-deps (list ros-rcl-interfaces-jazzy
+                        ros-service-msgs-jazzy)
+   #:synopsis "Node composition (load/unload component) service definitions"
+   #:description
+   "Service definitions used by @code{rclcpp_components} to manage
+loading, listing, and unloading composable nodes at runtime."))
+
+(define-public ros-rclcpp-components-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "rclcpp_components"
+   #:version %rclcpp-version
+   #:repo %rclcpp-repo
+   #:commit %rclcpp-commit
+   #:hash %rclcpp-hash
+   #:module-subdir "rclcpp_components"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-ament-index-cpp-jazzy
+                             ros-class-loader-jazzy
+                             ros-composition-interfaces-jazzy
+                             ros-rclcpp-jazzy
+                             ros-rcpputils-jazzy)
+   #:home-page "https://github.com/ros2/rclcpp"
+   #:synopsis "Composable-node loader for rclcpp"
+   #:description
+   "@code{rclcpp_components} provides the runtime machinery for
+loading and unloading ROS 2 nodes as plugins at runtime via
+@code{class_loader}, exposed through the
+@file{composition_interfaces} service API."))
+
+(define-public ros-message-filters-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "message_filters"
+   #:version "4.11.12"
+   #:repo "https://github.com/ros2/message_filters"
+   #:commit "b9bca323eaf110a3e2f5b674f7be593de444159d"
+   #:hash (base32 "1jzm8xqvqk09hgy6agkhks41s3m3kfxiy4w6c66wimxxw5vlyxsl")
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-ament-cmake-python-jazzy
+                             ros-python-cmake-module-jazzy
+                             ros-rclcpp-jazzy
+                             ros-rcutils-jazzy
+                             ros-std-msgs-jazzy
+                             ros-builtin-interfaces-jazzy
+                             ros-rclpy-jazzy)
+   #:home-page "https://github.com/ros2/message_filters"
+   #:synopsis "Incoming-message queue filters (synchronizer, cache, ...)"
+   #:description
+   "@code{message_filters} provides filters that operate on ROS 2
+subscription message streams: exact/approximate time synchronisers,
+caches, chainable filters.  Used by @code{tf2_ros} and many
+perception/fusion pipelines."))
+
+;;;
+;;; tf2 stack (ros2/geometry2@dc13549).
+;;;
+
+(define %geometry2-repo "https://github.com/ros2/geometry2")
+(define %geometry2-commit "dc13549ede532461d82cc1f59565c1582e98c830")
+(define %geometry2-hash
+  (base32 "10g82w0nwfyjdyfa5yl6qkhrz3g7rcvmchbrp1m5r1iixqwfjzhw"))
+(define %geometry2-version "0.36.20")
+
+(define* (geometry2-subpkg ros-name #:key
+                           (propagated-inputs '())
+                           synopsis description)
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name ros-name
+   #:version %geometry2-version
+   #:repo %geometry2-repo
+   #:commit %geometry2-commit
+   #:hash %geometry2-hash
+   #:module-subdir ros-name
+   #:propagated-inputs propagated-inputs
+   #:home-page %geometry2-repo
+   #:synopsis synopsis
+   #:description description))
+
+(define-public ros-tf2-msgs-jazzy
+  (make-ros2-rosidl-interface-package
+   #:distro jazzy-distro
+   #:ros-name "tf2_msgs"
+   #:version %geometry2-version
+   #:repo %geometry2-repo
+   #:commit %geometry2-commit
+   #:hash %geometry2-hash
+   #:module-subdir "tf2_msgs"
+   #:message-deps (list ros-rosidl-default-generators-jazzy
+                        ros-rosidl-default-runtime-jazzy
+                        ros-builtin-interfaces-jazzy
+                        ros-geometry-msgs-jazzy
+                        ros-action-msgs-jazzy
+                        ros-service-msgs-jazzy)
+   #:home-page %geometry2-repo
+   #:synopsis "Transform tree message types"
+   #:description
+   "Message and service definitions used by @code{tf2_ros} to
+publish, lookup, and transform coordinate-frame data on the ROS 2
+transform graph."))
+
+(define-public ros-tf2-jazzy
+  (geometry2-subpkg
+   "tf2"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-builtin-interfaces-jazzy
+                             ros-console-bridge-vendor-jazzy
+                             ros-geometry-msgs-jazzy
+                             ros-rcutils-jazzy
+                             ros-rosidl-runtime-cpp-jazzy)
+   #:synopsis "Core C++ transform library"
+   #:description
+   "Core C++ transform library: maintains a buffer of coordinate-frame
+transforms and answers queries for the transform between two frames at
+a given time."))
+
+(define-public ros-tf2-eigen-kdl-jazzy
+  (geometry2-subpkg
+   "tf2_eigen_kdl"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-eigen3-cmake-module-jazzy
+                             ros-orocos-kdl-vendor-jazzy
+                             ros-tf2-jazzy
+                             eigen)
+   #:synopsis "Conversions between Eigen and KDL geometric types"
+   #:description
+   "Conversion utilities between Eigen and Orocos KDL geometric
+types."))
+
+(define-public ros-tf2-ros-jazzy
+  (geometry2-subpkg
+   "tf2_ros"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-builtin-interfaces-jazzy
+                             ros-geometry-msgs-jazzy
+                             ros-message-filters-jazzy
+                             ros-rcl-interfaces-jazzy
+                             ros-rclcpp-jazzy
+                             ros-rclcpp-action-jazzy
+                             ros-rclcpp-components-jazzy
+                             ros-tf2-jazzy
+                             ros-tf2-msgs-jazzy)
+   #:synopsis "ROS 2 client interface for the tf2 transform library"
+   #:description
+   "C++ publisher/listener API for the ROS 2 transform graph on top of
+@code{tf2}, plus the @code{static_transform_publisher} executable."))
+
+(define-public ros-tf2-eigen-jazzy
+  (geometry2-subpkg
+   "tf2_eigen"
+   ;; tf2_eigen's CMakeLists find_package()s tf2_ros REQUIRED even
+   ;; though its package.xml only declares tf2; propagate tf2_ros.
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-eigen3-cmake-module-jazzy
+                             ros-geometry-msgs-jazzy
+                             ros-tf2-jazzy
+                             ros-tf2-ros-jazzy
+                             eigen)
+   #:synopsis "Eigen <-> tf2 conversions"
+   #:description
+   "Conversion utilities between @code{tf2} transforms and Eigen
+geometric types."))
+
+(define-public ros-tf2-geometry-msgs-jazzy
+  (geometry2-subpkg
+   "tf2_geometry_msgs"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-python-jazzy
+                             ros-python-cmake-module-jazzy
+                             ros-geometry-msgs-jazzy
+                             ros-orocos-kdl-vendor-jazzy
+                             ros-tf2-jazzy
+                             ros-tf2-ros-jazzy)
+   #:synopsis "Conversions between tf2 transforms and geometry_msgs types"
+   #:description
+   "Glue code that converts between @code{tf2}'s internal transform
+types and @file{geometry_msgs/PointStamped}, @file{PoseStamped},
+@file{Vector3Stamped}, etc."))
+
+(define-public ros-tf2-kdl-jazzy
+  (geometry2-subpkg
+   "tf2_kdl"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-builtin-interfaces-jazzy
+                             ros-geometry-msgs-jazzy
+                             ros-orocos-kdl-vendor-jazzy
+                             ros-tf2-jazzy
+                             ros-tf2-ros-jazzy)
+   #:synopsis "Conversions between tf2 transforms and KDL types"
+   #:description
+   "Glue code that converts between @code{tf2} internal transforms and
+Orocos KDL geometric types."))
+
+(define-public ros-tf2-py-jazzy
+  (geometry2-subpkg
+   "tf2_py"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-python-jazzy
+                             ros-python-cmake-module-jazzy
+                             ros-pybind11-vendor-jazzy
+                             ros-tf2-jazzy
+                             ros-builtin-interfaces-jazzy
+                             ros-geometry-msgs-jazzy
+                             ros-rclpy-jazzy
+                             ros-rpyutils-jazzy)
+   #:synopsis "Python bindings for tf2"
+   #:description
+   "pybind11-based Python bindings for @code{tf2}."))
+
+(define-public ros-tf2-sensor-msgs-jazzy
+  (geometry2-subpkg
+   "tf2_sensor_msgs"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-python-jazzy
+                             ros-python-cmake-module-jazzy
+                             ros-eigen3-cmake-module-jazzy
+                             ros-geometry-msgs-jazzy
+                             ros-sensor-msgs-jazzy
+                             ros-std-msgs-jazzy
+                             ros-tf2-jazzy
+                             ros-tf2-ros-jazzy
+                             eigen)
+   #:synopsis "Conversions between tf2 transforms and sensor_msgs types"
+   #:description
+   "Glue that transforms @file{sensor_msgs/PointCloud2} and related
+sensor messages between coordinate frames using @code{tf2}."))
+
+(define-public ros-tf2-ros-py-jazzy
+  (make-ros2-ament-python-package
+   #:distro jazzy-distro
+   #:ros-name "tf2_ros_py"
+   #:version %geometry2-version
+   #:repo %geometry2-repo
+   #:commit %geometry2-commit
+   #:hash %geometry2-hash
+   #:module-subdir "tf2_ros_py"
+   #:propagated-inputs (list ros-builtin-interfaces-jazzy
+                             ros-geometry-msgs-jazzy
+                             ros-rclpy-jazzy
+                             ros-sensor-msgs-jazzy
+                             ros-std-msgs-jazzy
+                             ros-tf2-msgs-jazzy
+                             ros-tf2-py-jazzy)
+   #:home-page %geometry2-repo
+   #:synopsis "Python tf2 ROS 2 client library"
+   #:description
+   "Python client library for publishing and listening to the ROS 2
+transform graph, built on top of @code{tf2_py}."))
+
+;;;
 ;;; Aggregation meta-package.
 ;;;
 ;;; Phase 1 will grow this package's propagated-inputs tier by tier until
