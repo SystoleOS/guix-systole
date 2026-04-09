@@ -252,6 +252,13 @@ code search and API exploration.")))
              (package-version p)))
     p))
 
+;; Python 3.12 wrapper that provides the 'python' binary (symlink to python3),
+;; suitable for use as the #:python argument in pyproject-build-system.
+(define-public python-3.12-wrapper
+  (package
+    (inherit python-sans-pip-wrapper)
+    (propagated-inputs `(("python" ,python-3.12)))))
+
 ;; Private non-Python base for VTK 9.5 — used only for (inherit) in vtk-slicer-9.5.
 (define %vtk-slicer-9.5
   (package

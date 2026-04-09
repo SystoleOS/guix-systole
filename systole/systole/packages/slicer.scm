@@ -1277,13 +1277,21 @@ visualization and medical image computing.")
             (variable "SLICER_PYTHONPATH")
             (files '("bin/Python"
                      "lib/Slicer-5.10"
-                     "lib/python3.12/site-packages")))
+                     "lib/python3.12/site-packages"
+                     ;; Pure-Python packages (requests, pydicom, dicomweb-client)
+                     ;; install to lib/python3.11/site-packages in the Guix default
+                     ;; Python builds.  Their .py files are version-independent and
+                     ;; importable from Python 3.12.  Compiled extensions (numpy,
+                     ;; scipy) will still fail to import because the .so files have
+                     ;; cpython-311 in their names, but pure Python packages work.
+                     "lib/python3.11/site-packages")))
            (search-path-specification
             (variable "PYTHONPATH")
             (files '("bin/Python"
                      "lib/Slicer-5.10"
                      "lib/Slicer-5.10/qt-loadable-modules"
-                     "lib/python3.12/site-packages")))))))
+                     "lib/python3.12/site-packages"
+                     "lib/python3.11/site-packages")))))))
 
 ;;;
 ;;; Slicer 5.10 — standalone loadable/scripted module factories
@@ -2329,6 +2337,17 @@ the @file{Modules/Scripted/LineProfile} subtree."))
         slicer-dicomlib-5.10
         slicer-lineprofile-5.10))
 
+;; Runtime Python packages for Slicer 5.10.
+;;
+;; Slicer 5.10 embeds Python 3.12 (lib/python3.12/site-packages).  The default
+;; Guix Python builds install to lib/python3.11/site-packages.
+;;
+;; PYTHONPATH in slicer-5.10 now includes BOTH lib/python3.11/site-packages
+;; AND lib/python3.12/site-packages, so pure-Python packages (requests, pydicom,
+;; dicomweb-client) installed by the default Guix builds are importable from
+;; Python 3.12.  Compiled-extension packages (numpy, scipy) have cpython-311
+;; in their .so filenames and will fail to import; they must be installed via
+;; pip inside Slicer 5.10 if needed.
 (define-public slicer-all-5.10
   (package
     (name "slicer-all-5.10")
@@ -2338,9 +2357,8 @@ the @file{Modules/Scripted/LineProfile} subtree."))
     (arguments (list #:builder #~(mkdir #$output)))
     (propagated-inputs
      (append (list slicer-5.10
-                   python-numpy python-requests python-pydicom python-scipy
-                   python-dicomweb-client
-                   python-pip)
+                   python-numpy python-requests python-pydicom
+                   python-scipy python-dicomweb-client python-pip)
              %slicer-5.10-loadable-modules
              %slicer-5.10-scripted-modules))
     (synopsis "3D Slicer 5.10 with all loadable and scripted modules")
