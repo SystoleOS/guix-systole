@@ -35,7 +35,8 @@
   #:use-module (gnu packages python-build)
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages tls)        ; openssl
-  #:use-module (gnu packages time))
+  #:use-module (gnu packages time)
+  #:use-module (gnu packages xml))       ; tinyxml2
 
 (define-public python-catkin-pkg
   (package
@@ -113,6 +114,63 @@ ROS 2 build tooling.")
 ROS-adjacent libraries (notably @code{class_loader}, @code{urdfdom},
 @code{kdl_parser}) so they can emit log messages without hard-coding a
 specific logging back-end.")
+      (license license:bsd-3))))
+
+(define-public urdfdom-headers
+  ;; Header-only library, plain CMake project (no ament).  Pinned to
+  ;; the jazzy branch tip.
+  (let ((commit "1c364b5f62b5886ae9849909a7add20fab12c218"))
+    (package
+      (name "urdfdom-headers")
+      (version "1.1.2")
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference (url "https://github.com/ros/urdfdom_headers")
+                             (commit commit)))
+         (file-name (git-file-name name commit))
+         (sha256
+          (base32 "1zs3k95n4vnbyhsk5m3wamyba2czrgp08d117a71wc1z0nwhx0rm"))))
+      (build-system cmake-build-system)
+      (arguments
+       (list #:tests? #f
+             #:configure-flags
+             #~(list "-DCMAKE_BUILD_TYPE=Release")))
+      (home-page "https://github.com/ros/urdfdom_headers")
+      (synopsis "URDF parser data structures (headers only)")
+      (description
+       "Header-only C++ data structures shared by every consumer of the
+URDF (Unified Robot Description Format) parser.")
+      (license license:bsd-3))))
+
+(define-public urdfdom
+  ;; Plain CMake project (no ament).  Pinned to the jazzy branch tip.
+  (let ((commit "79f079d1fd403f8102a4053b818719b966b5f49d"))
+    (package
+      (name "urdfdom")
+      (version "4.0.2")
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference (url "https://github.com/ros/urdfdom")
+                             (commit commit)))
+         (file-name (git-file-name name commit))
+         (sha256
+          (base32 "1pv6lzgws5sr4pwzb3gmnchrcck0ppwfbiis5n4z2n0bq084lgpm"))))
+      (build-system cmake-build-system)
+      (arguments
+       (list #:tests? #f
+             #:configure-flags
+             #~(list "-DCMAKE_BUILD_TYPE=Release"
+                     "-DBUILD_SHARED_LIBS=ON"
+                     "-DBUILD_TESTING=OFF")))
+      (propagated-inputs (list urdfdom-headers console-bridge tinyxml2))
+      (home-page "https://github.com/ros/urdfdom")
+      (synopsis "C++ parser for the URDF (Unified Robot Description Format)")
+      (description
+       "@code{urdfdom} parses URDF XML descriptions of robots into the
+in-memory data structures defined by @code{urdfdom_headers}.  Used by
+@code{urdf}, @code{kdl_parser}, and most ROS robot-description tools.")
       (license license:bsd-3))))
 
 (define-public eclipse-cyclonedds
