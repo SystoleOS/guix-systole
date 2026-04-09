@@ -42,6 +42,7 @@
   #:use-module (gnu packages python-science)
   #:use-module (gnu packages python-web)
   #:use-module (gnu packages python-xyz)
+  #:use-module (systole packages python-xyz)
   #:use-module (gnu packages qt)
   #:use-module (gnu packages serialization)
   #:use-module (gnu packages tbb)
@@ -979,7 +980,9 @@ Line Interface) modules.  It bundles @code{tclap} and
                  "0082-COMP-Install-AUTOUIC-generated-ui_-.h-from-qSlicerBa.patch"
                  "0083-COMP-Add-qMRMLWidgets-to-standalone-loadable-module-.patch"
                  "0084-COMP-Fix-missing-endif-for-Slicer_BUILD_CLI_SUPPORT-.patch"
-                 "0085-COMP-Fix-MOC-processing-for-qSlicerIconEnginePlugin.patch")))))
+                 "0085-COMP-Fix-MOC-processing-for-qSlicerIconEnginePlugin.patch"
+                 "0086-ENH-Install-SlicerWizard-regardless-of-extension-man.patch"
+                 "0087-ENH-Also-descend-into-SlicerWizard-subdir-without-ex.patch")))))
 
     (build-system cmake-build-system)
     (arguments
@@ -1435,7 +1438,8 @@ modifier look-ups backed by JSON terminology files) and is built from the
    #:name "slicer-subjecthierarchy-5.10"
    #:module-subdir "SubjectHierarchy"
    #:patches (list "subjecthierarchy/0001-ENH-Add-standalone-build-support-for-SubjectHierarch.patch"
-                  "subjecthierarchy/0002-COMP-Move-Q_OBJECT-headers-to-MOC_SRCS-in-SubjectHie.patch")
+                  "subjecthierarchy/0002-COMP-Move-Q_OBJECT-headers-to-MOC_SRCS-in-SubjectHie.patch"
+                  "subjecthierarchy/0003-BUG-Use-abspath-not-realpath-so-merged-profile-dirs-.patch")
    #:synopsis "3D Slicer SubjectHierarchy loadable module (5.10)"
    #:description
    "The SubjectHierarchy loadable module extracted from 3D Slicer 5.10.  It
@@ -2255,7 +2259,8 @@ from the @file{Modules/Scripted/ExtensionWizard} subtree."))
   (make-slicer-scripted-module-5.10
    #:name "slicer-dicomlib-5.10"
    #:module-subdir "DICOMLib"
-   #:patches (list "dicomlib/0001-ENH-Add-standalone-build-support-for-DICOMLib-script.patch")
+   #:patches (list "dicomlib/0001-ENH-Add-standalone-build-support-for-DICOMLib-script.patch"
+                   "dicomlib/0002-ENH-Make-dicomweb_client-import-optional-in-DICOMPro.patch")
    #:synopsis "3D Slicer DICOMLib scripted module (5.10)"
    #:description
    "The DICOMLib scripted module extracted from 3D Slicer 5.10.
@@ -2339,15 +2344,10 @@ the @file{Modules/Scripted/LineProfile} subtree."))
 
 ;; Runtime Python packages for Slicer 5.10.
 ;;
-;; Slicer 5.10 embeds Python 3.12 (lib/python3.12/site-packages).  The default
-;; Guix Python builds install to lib/python3.11/site-packages.
-;;
-;; PYTHONPATH in slicer-5.10 now includes BOTH lib/python3.11/site-packages
-;; AND lib/python3.12/site-packages, so pure-Python packages (requests, pydicom,
-;; dicomweb-client) installed by the default Guix builds are importable from
-;; Python 3.12.  Compiled-extension packages (numpy, scipy) have cpython-311
-;; in their .so filenames and will fail to import; they must be installed via
-;; pip inside Slicer 5.10 if needed.
+;; Slicer 5.10 embeds Python 3.12.  Pure-Python packages (requests, pydicom, pip)
+;; are imported from lib/python3.11/site-packages via PYTHONPATH.  numpy has
+;; compiled C extensions, so it is built against Python 3.12 explicitly via
+;; python-numpy-3.12 (see systole/packages/python-xyz.scm).
 (define-public slicer-all-5.10
   (package
     (name "slicer-all-5.10")
@@ -2357,8 +2357,8 @@ the @file{Modules/Scripted/LineProfile} subtree."))
     (arguments (list #:builder #~(mkdir #$output)))
     (propagated-inputs
      (append (list slicer-5.10
-                   python-numpy python-requests python-pydicom
-                   python-scipy python-dicomweb-client python-pip)
+                   python-numpy-3.12
+                   python-requests python-pydicom python-pip)
              %slicer-5.10-loadable-modules
              %slicer-5.10-scripted-modules))
     (synopsis "3D Slicer 5.10 with all loadable and scripted modules")
