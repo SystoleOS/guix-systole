@@ -1613,6 +1613,389 @@ compatibility for older Slicer scenes.  Built from the
        #$slicer-subjecthierarchy-5.10
        "/lib/Slicer-5.10/qt-loadable-modules"))))
 
+(define-public slicer-markups-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-markups-5.10"
+   #:module-subdir "Markups"
+   #:patches (list "markups/5.10-0001-ENH-Add-standalone-build-support-for-Markups-module-.patch"
+                  "markups/5.10-0002-COMP-Fix-Markups-MRML-for-standalone-build-5.10.patch"
+                  "markups/5.10-0003-COMP-Add-Annotations-include-dir-and-LINK_DIRECTORIE.patch"
+                  "markups/5.10-0004-COMP-Add-vtkSlicerTerminologiesModuleLogic-and-LINK_.patch"
+                  "markups/5.10-0005-COMP-Fix-MOC_SRCS-for-DesignerPlugins-and-add-CTKScr.patch")
+   #:synopsis "3D Slicer Markups loadable module (5.10)"
+   #:description
+   "The Markups loadable module extracted from 3D Slicer 5.10.  It provides
+fiducials, lines, angles, curves, planes, and ROIs, along with a subject
+hierarchy plugin and legacy Annotations reader.  Built from the
+@file{Modules/Loadable/Markups} subtree of the Slicer 5.10 source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.10
+                        slicer-annotations-5.10
+                        slicer-colors-5.10
+                        slicer-terminologies-5.10)
+   #:propagated-inputs (list slicer-colors-5.10
+                             slicer-annotations-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DqSlicerColorsModuleWidgets_INCLUDE_DIRS="
+       #$slicer-colors-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerColorsModuleWidgets")
+      (string-append
+       "-DvtkSlicerColorsModuleMRML_INCLUDE_DIRS="
+       #$slicer-colors-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerColorsModuleMRML")
+      (string-append
+       "-DvtkSlicerColorsModuleLogic_INCLUDE_DIRS="
+       #$slicer-colors-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerColorsModuleLogic")
+      (string-append
+       "-DqSlicerTerminologiesModuleWidgets_INCLUDE_DIRS="
+       #$slicer-terminologies-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerTerminologiesModuleWidgets")
+      (string-append
+       "-DvtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS="
+       #$slicer-terminologies-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerTerminologiesModuleLogic")
+      (string-append
+       "-DvtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS="
+       #$slicer-annotations-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML")
+      (string-append
+       "-DvtkSlicerAnnotationsModuleLogic_INCLUDE_DIRS="
+       #$slicer-annotations-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerAnnotationsModuleLogic")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-annotations-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-colors-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-terminologies-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules"))))
+
+(define-public slicer-reformat-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-reformat-5.10"
+   #:module-subdir "Reformat"
+   #:patches (list "reformat/5.10-0001-ENH-Add-standalone-build-support-for-Reformat-module.patch")
+   #:synopsis "3D Slicer Reformat loadable module (5.10)"
+   #:description
+   "The Reformat loadable module extracted from 3D Slicer 5.10.  It provides
+oblique slice reformat controls.  Built from the
+@file{Modules/Loadable/Reformat} subtree of the Slicer 5.10 source tree."))
+
+(define-public slicer-plots-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-plots-5.10"
+   #:module-subdir "Plots"
+   #:patches (list "plots/5.10-0001-ENH-Add-standalone-build-support-for-Plots-module-5..patch")
+   #:synopsis "3D Slicer Plots loadable module (5.10)"
+   #:description
+   "The Plots loadable module extracted from 3D Slicer 5.10.  It provides
+chart and plot visualization.  Built from the
+@file{Modules/Loadable/Plots} subtree of the Slicer 5.10 source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.10)
+   #:propagated-inputs (list slicer-subjecthierarchy-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules"))))
+
+(define-public slicer-viewcontrollers-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-viewcontrollers-5.10"
+   #:module-subdir "ViewControllers"
+   #:patches (list "viewcontrollers/5.10-0001-ENH-Add-standalone-build-support-for-ViewControllers.patch")
+   #:synopsis "3D Slicer ViewControllers loadable module (5.10)"
+   #:description
+   "The ViewControllers loadable module extracted from 3D Slicer 5.10.  It provides
+slice and 3D view controller widgets.  Built from the
+@file{Modules/Loadable/ViewControllers} subtree of the Slicer 5.10 source tree."))
+
+(define-public slicer-sequences-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-sequences-5.10"
+   #:module-subdir "Sequences"
+   #:patches (list "sequences/5.10-0001-ENH-Add-standalone-build-support-for-Sequences-modul.patch")
+   #:synopsis "3D Slicer Sequences loadable module (5.10)"
+   #:description
+   "The Sequences loadable module extracted from 3D Slicer 5.10.  It provides
+sequence browser functionality for time-varying data.  Built from the
+@file{Modules/Loadable/Sequences} subtree of the Slicer 5.10 source tree."))
+
+(define-public slicer-sceneviews-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-sceneviews-5.10"
+   #:module-subdir "SceneViews"
+   #:patches (list "sceneviews/5.10-0001-ENH-Add-standalone-build-support-for-SceneViews-modu.patch"
+                   "sceneviews/5.10-0002-COMP-Add-LINK_DIRECTORIES-to-SceneViews-Logic-for-st.patch"
+                   "sceneviews/5.10-0003-COMP-Add-vtkSlicerSequencesModuleMRML-to-SceneViews-.patch"
+                   "sceneviews/5.10-0004-COMP-Add-qSlicerBaseQTApp-to-SceneViews-MODULE_TARGE.patch")
+   #:synopsis "3D Slicer SceneViews loadable module (5.10)"
+   #:description
+   "The SceneViews loadable module extracted from 3D Slicer 5.10.  It provides
+scene capture and restoration functionality.  Built from the
+@file{Modules/Loadable/SceneViews} subtree of the Slicer 5.10 source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.10
+                        slicer-sequences-5.10)
+   #:propagated-inputs (list slicer-sequences-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSequencesModuleMRML_INCLUDE_DIRS="
+       #$slicer-sequences-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerSequencesModuleMRML")
+      (string-append
+       "-DvtkSlicerSequencesModuleLogic_INCLUDE_DIRS="
+       #$slicer-sequences-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerSequencesModuleLogic")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-sequences-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules"))))
+
+(define-public slicer-texts-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-texts-5.10"
+   #:module-subdir "Texts"
+   #:patches (list "texts/5.10-0001-ENH-Add-standalone-build-support-for-Texts-module-5..patch")
+   #:synopsis "3D Slicer Texts loadable module (5.10)"
+   #:description
+   "The Texts loadable module extracted from 3D Slicer 5.10.  It provides
+text annotation support linked to Markups.  Built from the
+@file{Modules/Loadable/Texts} subtree of the Slicer 5.10 source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.10
+                        slicer-markups-5.10)
+   #:propagated-inputs (list slicer-markups-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-markups-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules"))))
+
+(define-public slicer-transforms-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-transforms-5.10"
+   #:module-subdir "Transforms"
+   #:patches (list "transforms/5.10-0001-ENH-Add-standalone-build-support-for-Transforms-modu.patch"
+                   "transforms/5.10-0002-COMP-Fix-Transforms-missing-CMake-dependencies-for-s.patch")
+   #:synopsis "3D Slicer Transforms loadable module (5.10)"
+   #:description
+   "The Transforms loadable module extracted from 3D Slicer 5.10.  It provides
+linear and non-linear transform support with display and subject hierarchy.
+Built from the @file{Modules/Loadable/Transforms} subtree of the Slicer
+5.10 source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.10
+                        slicer-markups-5.10)
+   #:propagated-inputs (list slicer-markups-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-markups-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules"))))
+
+(define-public slicer-models-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-models-5.10"
+   #:module-subdir "Models"
+   #:patches (list "models/5.10-0001-ENH-Add-standalone-build-support-for-Models-module-5.patch"
+                  "models/5.10-0002-COMP-Add-vtkSlicerSubjectHierarchyModuleLogic-and-MR.patch")
+   #:synopsis "3D Slicer Models loadable module (5.10)"
+   #:description
+   "The Models loadable module extracted from 3D Slicer 5.10.  It provides
+model loading, display, and subject hierarchy integration.  Built from the
+@file{Modules/Loadable/Models} subtree of the Slicer 5.10 source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.10
+                        slicer-colors-5.10
+                        slicer-terminologies-5.10)
+   #:propagated-inputs (list slicer-colors-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DqSlicerColorsModuleWidgets_INCLUDE_DIRS="
+       #$slicer-colors-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerColorsModuleWidgets")
+      (string-append
+       "-DvtkSlicerColorsModuleMRML_INCLUDE_DIRS="
+       #$slicer-colors-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerColorsModuleMRML")
+      (string-append
+       "-DvtkSlicerColorsModuleLogic_INCLUDE_DIRS="
+       #$slicer-colors-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerColorsModuleLogic")
+      (string-append
+       "-DqSlicerTerminologiesModuleWidgets_INCLUDE_DIRS="
+       #$slicer-terminologies-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerTerminologiesModuleWidgets")
+      (string-append
+       "-DvtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS="
+       #$slicer-terminologies-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerTerminologiesModuleLogic")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-colors-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-terminologies-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules"))))
+
+(define-public slicer-volumes-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-volumes-5.10"
+   #:module-subdir "Volumes"
+   #:patches (list "volumes/5.10-0001-ENH-Add-standalone-build-support-for-Volumes-module-.patch"
+                   "volumes/5.10-0002-COMP-Fix-Volumes-Logic-use-rapidjson-target-and-add-.patch"
+                   "volumes/5.10-0003-COMP-Add-vtkSlicerVolumesModuleLogic-to-Volumes-SHP-.patch")
+   #:synopsis "3D Slicer Volumes loadable module (5.10)"
+   #:description
+   "The Volumes loadable module extracted from 3D Slicer 5.10.  It provides
+volume loading, display, and scalar/diffusion tensor volume capabilities.
+Built from the @file{Modules/Loadable/Volumes} subtree of the Slicer 5.10
+source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.10
+                        slicer-colors-5.10
+                        slicer-units-5.10)
+   #:propagated-inputs (list slicer-colors-5.10 slicer-units-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DvtkSlicerColorsModuleLogic_INCLUDE_DIRS="
+       #$slicer-colors-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerColorsModuleLogic")
+      (string-append
+       "-DvtkSlicerColorsModuleMRML_INCLUDE_DIRS="
+       #$slicer-colors-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerColorsModuleMRML")
+      (string-append
+       "-DqSlicerColorsModuleWidgets_INCLUDE_DIRS="
+       #$slicer-colors-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerColorsModuleWidgets")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-colors-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules"))))
+
+(define-public slicer-volumerendering-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-volumerendering-5.10"
+   #:module-subdir "VolumeRendering"
+   #:patches (list "volumerendering/5.10-0001-ENH-Add-standalone-build-support-for-VolumeRendering.patch")
+   #:synopsis "3D Slicer VolumeRendering loadable module (5.10)"
+   #:description
+   "The VolumeRendering loadable module extracted from 3D Slicer 5.10.  It
+provides CPU and GPU ray-cast volume rendering, transfer-function presets,
+shader-property MRML nodes, and a subject-hierarchy plugin.  Built from the
+@file{Modules/Loadable/VolumeRendering} subtree of the Slicer 5.10 source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.10
+                        slicer-markups-5.10
+                        slicer-volumes-5.10)
+   #:propagated-inputs (list slicer-markups-5.10 slicer-volumes-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
+       "-DqSlicerMarkupsModuleWidgets_INCLUDE_DIRS="
+       #$slicer-markups-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerMarkupsModuleWidgets")
+      (string-append
+       "-DqSlicerVolumesSubjectHierarchyPlugins_INCLUDE_DIRS="
+       #$slicer-volumes-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerVolumesSubjectHierarchyPlugins")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-markups-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-volumes-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules"))))
+
 ;;;
 ;;; Factory for standalone Slicer loadable-module packages
 ;;;

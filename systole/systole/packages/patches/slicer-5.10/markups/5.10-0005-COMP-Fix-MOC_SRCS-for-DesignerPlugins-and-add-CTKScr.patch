@@ -1,0 +1,49 @@
+From 62981ee3f52a83291086a3d6d100b731157981a7 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 20:40:45 +0200
+Subject: [PATCH] COMP: Fix MOC_SRCS for DesignerPlugins and add
+ CTKScriptingPythonCore to Markups
+
+- Add MOC_SRCS with all Q_OBJECT plugin headers to ctkMacroBuildQtDesignerPlugin
+  in Widgets/DesignerPlugins/CMakeLists.txt so vtables are generated
+- Add CTKScriptingPythonCore to MODULE_TARGET_LIBRARIES to resolve
+  ctkAbstractPythonManager::executeString undefined reference
+---
+ Modules/Loadable/Markups/CMakeLists.txt                  | 1 +
+ .../Markups/Widgets/DesignerPlugins/CMakeLists.txt       | 9 +++++++++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/Modules/Loadable/Markups/CMakeLists.txt b/Modules/Loadable/Markups/CMakeLists.txt
+index 48b8be5055..5d4c0fd6a5 100644
+--- a/Modules/Loadable/Markups/CMakeLists.txt
++++ b/Modules/Loadable/Markups/CMakeLists.txt
+@@ -80,6 +80,7 @@ set(MODULE_TARGET_LIBRARIES
+   qSlicerColorsModuleWidgets
+   vtkSlicerColorsModuleLogic
+   vtkSlicerColorsModuleMRML
++  CTKScriptingPythonCore
+   )
+ 
+ set(MODULE_RESOURCES
+diff --git a/Modules/Loadable/Markups/Widgets/DesignerPlugins/CMakeLists.txt b/Modules/Loadable/Markups/Widgets/DesignerPlugins/CMakeLists.txt
+index 8225bbc39e..65f9373040 100644
+--- a/Modules/Loadable/Markups/Widgets/DesignerPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Markups/Widgets/DesignerPlugins/CMakeLists.txt
+@@ -32,5 +32,14 @@ ctkMacroBuildQtDesignerPlugin(
+   EXPORT_DIRECTIVE ${${KIT}_EXPORT}
+   FOLDER "Module-${MODULE_NAME}"
+   SRCS ${${KIT}_SRCS}
++  MOC_SRCS
++    qSlicer${MODULE_NAME}ModuleWidgetsAbstractPlugin.h
++    qSlicer${MODULE_NAME}ModuleWidgetsPlugin.h
++    qMRML${MODULE_NAME}DisplayNodeWidgetPlugin.h
++    qMRML${MODULE_NAME}FiducialProjectionPropertyWidgetPlugin.h
++    qMRML${MODULE_NAME}InteractionHandleWidgetPlugin.h
++    qMRML${MODULE_NAME}ROIWidgetPlugin.h
++    qSlicer${MODULE_NAME}PlaceWidgetPlugin.h
++    qSlicerSimpleMarkupsWidgetPlugin.h
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   )
+-- 
+2.52.0
+

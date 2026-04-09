@@ -1,0 +1,94 @@
+From ecf0e1bb141e13cb78364f5a21ae87da1817691e Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 20:18:39 +0200
+Subject: [PATCH] ENH: Add standalone build support for Markups module (5.10)
+
+- Add cmake_minimum_required, find_package(Slicer), Slicer_USE_FILE,
+  and QTLOADABLEMODULES dir guards to top-level CMakeLists.txt
+- Add vtkSlicerAnnotationsModuleMRML/Logic_INCLUDE_DIRS for legacy reader
+- Add LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS} to slicerMacroBuildLoadableModule
+- VTKWidgets: replace _SOURCE_DIR/_BINARY_DIR with _INCLUDE_DIRS
+- Widgets: replace _SOURCE_DIR/_BINARY_DIR with _INCLUDE_DIRS
+---
+ Modules/Loadable/Markups/CMakeLists.txt        | 18 ++++++++++++++++++
+ .../Loadable/Markups/VTKWidgets/CMakeLists.txt |  3 +--
+ .../Loadable/Markups/Widgets/CMakeLists.txt    |  3 +--
+ 3 files changed, 20 insertions(+), 4 deletions(-)
+
+diff --git a/Modules/Loadable/Markups/CMakeLists.txt b/Modules/Loadable/Markups/CMakeLists.txt
+index e619f3030c..48b8be5055 100644
+--- a/Modules/Loadable/Markups/CMakeLists.txt
++++ b/Modules/Loadable/Markups/CMakeLists.txt
+@@ -1,9 +1,24 @@
+ 
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME "Markups")
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(MRML)
+ add_subdirectory(VTKWidgets)
+@@ -29,6 +44,8 @@ set(MODULE_INCLUDE_DIRECTORIES
+   ${qSlicerColorsModuleWidgets_INCLUDE_DIRS}
+   ${vtkSlicerColorsModuleMRML_INCLUDE_DIRS}
+   ${vtkSlicerColorsModuleLogic_INCLUDE_DIRS}
++  ${vtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS}
++  ${vtkSlicerAnnotationsModuleLogic_INCLUDE_DIRS}
+   )
+ 
+ set(MODULE_SRCS
+@@ -78,6 +95,7 @@ slicerMacroBuildLoadableModule(
+   UI_SRCS ${MODULE_UI_SRCS}
+   TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
+   RESOURCES ${MODULE_RESOURCES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   WITH_GENERIC_TESTS
+   )
+ 
+diff --git a/Modules/Loadable/Markups/VTKWidgets/CMakeLists.txt b/Modules/Loadable/Markups/VTKWidgets/CMakeLists.txt
+index 52fd30cf73..7ee5a596c3 100644
+--- a/Modules/Loadable/Markups/VTKWidgets/CMakeLists.txt
++++ b/Modules/Loadable/Markups/VTKWidgets/CMakeLists.txt
+@@ -5,8 +5,7 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_VTKWIDGETS_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+-  ${vtkSlicer${MODULE_NAME}ModuleMRML_SOURCE_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleMRML_BINARY_DIR}
++  ${vtkSlicer${MODULE_NAME}ModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+diff --git a/Modules/Loadable/Markups/Widgets/CMakeLists.txt b/Modules/Loadable/Markups/Widgets/CMakeLists.txt
+index 850931a268..fb9393ca5a 100644
+--- a/Modules/Loadable/Markups/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/Markups/Widgets/CMakeLists.txt
+@@ -5,8 +5,7 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_MODULE_${MODULE_NAME_UPPER}_WIDGETS_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+-  ${vtkSlicer${MODULE_NAME}ModuleLogic_SOURCE_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleLogic_BINARY_DIR}
++  ${vtkSlicer${MODULE_NAME}ModuleLogic_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+-- 
+2.52.0
+
