@@ -42,7 +42,8 @@
   #:use-module (gnu packages pkg-config)    ; pkg-config
   #:use-module (gnu packages serialization) ; jsoncpp
   #:use-module (gnu packages xml)           ; libxml2
-  #:use-module (gnu packages compression))  ; zlib
+  #:use-module (gnu packages compression)   ; zlib
+  #:use-module (systole packages openhaptics))  ; openhaptics-sdk, touch-driver
 
 ;;;
 ;;; clapack source — a separate origin so cisstNetlib's ExternalProject
@@ -329,4 +330,75 @@ used by JHU's haptic-device stack.  This Guix package builds only the
 @code{core/components} subtree (the shared library); the example
 programs in @code{core/examples} are skipped because they pull in Qt
 and are not needed for the Touch demo.")
+    (license license:bsd-3)))
+
+;;;
+;;; sawSensablePhantom (core) — cisst/SAW component that talks to
+;;; the 3D Systems Touch via OpenHaptics HD.  First consumer of
+;;; openhaptics-sdk and touch-driver from (systole packages openhaptics).
+;;;
+
+(define-public saw-sensable-phantom
+  (package
+    (name "saw-sensable-phantom")
+    (version "1.1.0")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/jhu-saw/sawSensablePhantom")
+             (commit "64c8b05ec2263a93a1ebd1a2bd508c2c46d024a9")))
+       (file-name (git-file-name name version))
+       (sha256
+        (base32 "1a32y6qdsrpyvq9i2v0w5kw1xbngbi4nkm4rxvn83kaddwy4jm6b"))))
+    (build-system cmake-build-system)
+    (arguments
+     (list
+      #:tests? #f
+      #:configure-flags
+      #~(list "-DCMAKE_BUILD_TYPE=Release"
+              (string-append "-Dcisst_DIR="
+                             #$(this-package-input "cisst")
+                             "/share/cisst-1.4/cmake")
+              (string-append "-DsawControllers_DIR="
+                             #$(this-package-input "saw-controllers")
+                             "/share/sawControllers"))
+      #:phases
+      #~(modify-phases %standard-phases
+          ;; Build only core/components; core/examples requires Qt.
+          (replace 'configure
+            (lambda* (#:key outputs configure-flags #:allow-other-keys)
+              (let ((source (getcwd))
+                    (out (assoc-ref outputs "out")))
+                (apply invoke "cmake"
+                       "-S" (string-append source "/core/components")
+                       "-B" "build"
+                       (string-append "-DCMAKE_INSTALL_PREFIX=" out)
+                       configure-flags))))
+          (replace 'build
+            (lambda* (#:key parallel-build? #:allow-other-keys)
+              (invoke "cmake" "--build" "build"
+                      "-j" (if parallel-build?
+                               (number->string (parallel-job-count))
+                               "1"))))
+          (replace 'install
+            (lambda _ (invoke "cmake" "--install" "build")))
+          (add-before 'configure 'set-install-rpath
+            (lambda _
+              (setenv "CMAKE_INSTALL_RPATH"
+                      "$ORIGIN:$ORIGIN/../lib"))))))
+    (inputs (list cisst cisst-netlib saw-keyboard saw-controllers
+                  jsoncpp
+                  ;; libHD + libPhantomIOLib42 from the proprietary
+                  ;; OpenHaptics stack.  openhaptics-sdk propagates
+                  ;; touch-driver automatically.
+                  openhaptics-sdk))
+    (supported-systems '("x86_64-linux"))
+    (home-page "https://github.com/jhu-saw/sawSensablePhantom")
+    (synopsis "cisst/SAW component for the 3D Systems Touch haptic device")
+    (description
+     "@code{sawSensablePhantom} is the cisst @code{mtsComponent} that
+wraps the OpenHaptics HD SDK to talk to the 3D Systems Touch.  Links
+against the proprietary @code{openhaptics-sdk} and pulls in
+@code{touch-driver} at runtime.")
     (license license:bsd-3)))
