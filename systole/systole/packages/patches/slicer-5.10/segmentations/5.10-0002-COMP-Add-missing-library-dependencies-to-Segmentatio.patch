@@ -1,0 +1,41 @@
+From 9ffd1e42066fb23a8adf23e345fbf98eed1cefb3 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 9 Apr 2026 08:20:05 +0200
+Subject: [PATCH] COMP: Add missing library dependencies to Segmentations 5.10
+
+- Add vtkITK to Logic TARGET_LIBRARIES
+- Add vtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS to Widgets
+- Add LINK_DIRECTORIES for EXTRA_MODULE_LIB_DIRS to Logic, MRML,
+  Widgets, and SubjectHierarchyPlugins
+---
+ Modules/Loadable/Segmentations/Logic/CMakeLists.txt   | 1 +
+ Modules/Loadable/Segmentations/Widgets/CMakeLists.txt | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/Modules/Loadable/Segmentations/Logic/CMakeLists.txt b/Modules/Loadable/Segmentations/Logic/CMakeLists.txt
+index 9edcd8f1dd..c068038390 100644
+--- a/Modules/Loadable/Segmentations/Logic/CMakeLists.txt
++++ b/Modules/Loadable/Segmentations/Logic/CMakeLists.txt
+@@ -26,6 +26,7 @@ set(${KIT}_TARGET_LIBRARIES
+   vtkSlicer${MODULE_NAME}ModuleMRML
+   vtkSlicerTerminologiesModuleLogic
+   vtkSlicerMarkupsModuleMRML
++  vtkITK
+   )
+ 
+ #-----------------------------------------------------------------------------
+diff --git a/Modules/Loadable/Segmentations/Widgets/CMakeLists.txt b/Modules/Loadable/Segmentations/Widgets/CMakeLists.txt
+index 276875ce45..cae28aa3ee 100644
+--- a/Modules/Loadable/Segmentations/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/Segmentations/Widgets/CMakeLists.txt
+@@ -9,6 +9,7 @@ set(${KIT}_INCLUDE_DIRECTORIES
+   ${vtkSlicerSegmentationsModuleLogic_INCLUDE_DIRS}
+   ${qSlicerSegmentationsEditorEffects_INCLUDE_DIRS}
+   ${qSlicerTerminologiesModuleWidgets_INCLUDE_DIRS}
++  ${vtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+-- 
+2.52.0
+
