@@ -1,0 +1,38 @@
+From 52a4b13dc0aa32378ceb5fade61fa627464d1799 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 9 Apr 2026 08:22:30 +0200
+Subject: [PATCH] COMP: Fix Slicer_BINARY_DIR in SegmentEditorEffects for
+ standalone 5.10
+
+Replace ${Slicer_BINARY_DIR} with ${CMAKE_BINARY_DIR} and add
+file(MAKE_DIRECTORY) before ctkMacroCompilePythonScript to ensure
+the destination exists at configure time.
+---
+ .../Python/SegmentEditorEffects/CMakeLists.txt             | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/Modules/Loadable/Segmentations/EditorEffects/Python/SegmentEditorEffects/CMakeLists.txt b/Modules/Loadable/Segmentations/EditorEffects/Python/SegmentEditorEffects/CMakeLists.txt
+index fd345eacd4..bbdfdf5407 100644
+--- a/Modules/Loadable/Segmentations/EditorEffects/Python/SegmentEditorEffects/CMakeLists.txt
++++ b/Modules/Loadable/Segmentations/EditorEffects/Python/SegmentEditorEffects/CMakeLists.txt
+@@ -32,11 +32,16 @@ set(SegmentEditorEffects_PYTHON_RESOURCES
+   Resources/Icons/Threshold.png
+   )
+ 
++# Ensure the destination directory exists at configure time so that
++# ctkMacroCompilePythonScript's get_filename_component(... REALPATH) call
++# can resolve the path correctly (realpath() requires existing dirs on Linux).
++file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SegmentEditorEffects")
++
+ ctkMacroCompilePythonScript(
+   TARGET_NAME SegmentEditorEffects
+   SCRIPTS "${SegmentEditorEffects_PYTHON_SCRIPTS}"
+   RESOURCES "${SegmentEditorEffects_PYTHON_RESOURCES}"
+-  DESTINATION_DIR ${Slicer_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SegmentEditorEffects
++  DESTINATION_DIR ${CMAKE_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SegmentEditorEffects
+   INSTALL_DIR ${Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR}/SegmentEditorEffects
+   NO_INSTALL_SUBDIR
+   )
+-- 
+2.52.0
+

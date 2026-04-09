@@ -1996,6 +1996,58 @@ shader-property MRML nodes, and a subject-hierarchy plugin.  Built from the
        #$slicer-volumes-5.10
        "/lib/Slicer-5.10/qt-loadable-modules"))))
 
+(define-public slicer-segmentations-5.10
+  (make-slicer-loadable-module-5.10
+   #:name "slicer-segmentations-5.10"
+   #:module-subdir "Segmentations"
+   #:patches (list "segmentations/5.10-0001-ENH-Add-standalone-build-support-for-Segmentations-m.patch"
+                   "segmentations/5.10-0002-COMP-Add-missing-library-dependencies-to-Segmentatio.patch"
+                   "segmentations/5.10-0003-COMP-Add-LINK_DIRECTORIES-to-Segmentations-MRML-and-.patch"
+                   "segmentations/5.10-0004-COMP-Fix-Slicer_BINARY_DIR-in-SegmentEditorEffects-f.patch"
+                   "segmentations/5.10-0005-COMP-Link-Python3-for-ScriptedEffect-in-standalone-S.patch"
+                   "segmentations/5.10-0006-COMP-Add-MOC_SRCS-for-DesignerPlugins-in-standalone-.patch")
+   #:synopsis "3D Slicer Segmentations loadable module (5.10)"
+   #:description
+   "The Segmentations loadable module extracted from 3D Slicer 5.10.  It
+provides MRML node types, display managers, editor effects, and widgets for
+working with segmentation objects.  Built from the
+@file{Modules/Loadable/Segmentations} subtree of the Slicer 5.10 source tree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.10
+                        slicer-terminologies-5.10
+                        slicer-markups-5.10)
+   ;; slicer-markups-5.10 propagates colors+annotations+SH+terminologies.
+   #:propagated-inputs (list slicer-markups-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DqSlicerTerminologiesModuleWidgets_INCLUDE_DIRS="
+       #$slicer-terminologies-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerTerminologiesModuleWidgets")
+      (string-append
+       "-DvtkSlicerTerminologiesModuleLogic_INCLUDE_DIRS="
+       #$slicer-terminologies-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerTerminologiesModuleLogic")
+      (string-append
+       "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
+       #$slicer-markups-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-terminologies-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-markups-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules"))))
+
 ;;;
 ;;; Factory for standalone Slicer loadable-module packages
 ;;;
