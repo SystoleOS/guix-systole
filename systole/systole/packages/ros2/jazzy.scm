@@ -3165,6 +3165,53 @@ parameter) and republishes the merged state on @code{/joint_states}.
 Used by the Touch demo to forward @code{/arm/measured_js} from the
 Sensable Phantom driver into @code{robot_state_publisher}."))
 
+(define-public ros-crtk-msgs-jazzy
+  (make-ros2-rosidl-interface-package
+   #:distro jazzy-distro
+   #:ros-name "crtk_msgs"
+   #:version "1.1.0"
+   #:repo "https://github.com/collaborative-robotics/ros2_crtk_msgs"
+   #:commit "444014f8f63544a59f34e78e8fd1891256f10dac"
+   #:hash (base32 "0015ipvrk14ab713sy48p0ygw4mm99afsh45snx25ppfh2h6aakh")
+   #:message-deps (list ros-rosidl-default-generators-jazzy
+                        ros-rosidl-default-runtime-jazzy
+                        ros-builtin-interfaces-jazzy
+                        ros-rclcpp-jazzy
+                        ros-std-msgs-jazzy
+                        ros-geometry-msgs-jazzy)
+   #:home-page "https://github.com/collaborative-robotics/ros2_crtk_msgs"
+   #:synopsis "CRTK (collaborative-robotics) ROS 2 message definitions"
+   #:description
+   "Interface package for the Collaborative Robotics Toolkit (CRTK)
+naming convention used by the JHU cisst-SAW stack: OperatingState,
+StringStamped, CartesianImpedance*, TriggerOperatingState,
+QueryForwardKinematics, QueryInverseKinematics.  Required by
+@code{cisst_ros2_crtk} and, transitively, the sawSensablePhantom
+ROS 2 bridge."))
+
+(define-public ros-cisst-msgs-jazzy
+  (make-ros2-rosidl-interface-package
+   #:distro jazzy-distro
+   #:ros-name "cisst_msgs"
+   #:version "2.1.0"
+   #:repo "https://github.com/jhu-cisst/ros2_cisst_msgs"
+   #:commit "2addbab1afc3c998b95435baa16c6363f4b2e5ab"
+   #:hash (base32 "14spwl982bc7r2lbxdcxlx2lynwvx6ja0wnjn8simfhz3296gh2v")
+   #:message-deps (list ros-rosidl-default-generators-jazzy
+                        ros-rosidl-default-runtime-jazzy
+                        ros-builtin-interfaces-jazzy
+                        ros-rclcpp-jazzy
+                        ros-std-msgs-jazzy
+                        ros-sensor-msgs-jazzy
+                        ros-geometry-msgs-jazzy)
+   #:home-page "https://github.com/jhu-cisst/ros2_cisst_msgs"
+   #:synopsis "JHU cisst-specific ROS 2 message definitions"
+   #:description
+   "Interface package for cisst-specific ROS 2 messages: BoolStamped,
+DoubleVec, IntervalStatistics and a ConvertFloat64Array service.
+Consumed by @code{cisst_ros2_bridge} to translate cisst component
+state onto standard ROS 2 topics."))
+
 (define-public ros-sensable-omni-model-jazzy
   (make-ros2-ament-python-package
    #:distro jazzy-distro
