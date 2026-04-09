@@ -2808,11 +2808,13 @@ the upstream @code{yaml-cpp} library shipped by Guix."))
 Guix); used by @code{rosbag2_storage_sqlite3}."))
 
 (define-public ros-zstd-vendor-jazzy
+  ;; Upstream Guix zstd ships headers in the "lib" output, not "out",
+  ;; so we must explicitly request it via the (pkg output) tuple.
   (rosbag2-subpkg
    "zstd_vendor"
-   #:propagated-inputs (list ros-ament-cmake-jazzy
-                             ros-ament-cmake-vendor-package-jazzy
-                             zstd)
+   #:propagated-inputs `(,ros-ament-cmake-jazzy
+                         ,ros-ament-cmake-vendor-package-jazzy
+                         (,zstd "lib"))
    #:synopsis "ROS 2 vendor wrapper around libzstd"
    #:description
    "Vendor wrapper around the upstream Zstandard compression library
@@ -3150,7 +3152,53 @@ for working with @code{rosbag2} bags."))
 
    ;; diagnostics + robot_state_publisher
    ros-diagnostic-updater-jazzy
-   ros-robot-state-publisher-jazzy))
+   ros-robot-state-publisher-jazzy
+
+   ;; launch framework
+   ros-launch-jazzy
+   ros-launch-xml-jazzy
+   ros-launch-yaml-jazzy
+   ros-launch-testing-jazzy
+   ros-launch-pytest-jazzy
+   ros-launch-testing-ament-cmake-jazzy
+   ros-launch-ros-jazzy
+
+   ;; ros2cli suite
+   ros-rosidl-runtime-py-jazzy
+   ros-ros2cli-jazzy
+   ros-ros2pkg-jazzy
+   ros-ros2run-jazzy
+   ros-ros2node-jazzy
+   ros-ros2topic-jazzy
+   ros-ros2service-jazzy
+   ros-ros2param-jazzy
+   ros-ros2interface-jazzy
+   ros-ros2action-jazzy
+   ros-ros2lifecycle-jazzy
+   ros-ros2component-jazzy
+   ros-ros2multicast-jazzy
+   ros-ros2launch-jazzy
+
+   ;; small leaves
+   ros-angles-jazzy
+   ros-example-interfaces-jazzy
+
+   ;; rosbag2 stack
+   ros-yaml-cpp-vendor-jazzy
+   ros-keyboard-handler-jazzy
+   ros-shared-queues-vendor-jazzy
+   ros-sqlite3-vendor-jazzy
+   ros-zstd-vendor-jazzy
+   ros-rosbag2-interfaces-jazzy
+   ros-rosbag2-storage-jazzy
+   ros-rosbag2-cpp-jazzy
+   ros-rosbag2-compression-jazzy
+   ros-rosbag2-compression-zstd-jazzy
+   ros-rosbag2-storage-sqlite3-jazzy
+   ros-rosbag2-transport-jazzy
+   ros-rosbag2-storage-default-plugins-jazzy
+   ros-rosbag2-py-jazzy
+   ros-ros2bag-jazzy))
 
 ;;;
 ;;; ros-jazzy aggregation meta-package.
