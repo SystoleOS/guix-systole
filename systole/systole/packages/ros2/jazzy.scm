@@ -40,6 +40,7 @@
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-science) ; python-numpy
   #:use-module (gnu packages python-build) ; python-packaging
+  #:use-module (gnu packages qt)           ; qtbase-5 (for turtlesim)
   #:use-module (gnu packages python-xyz)   ; python-empy, python-pyyaml, python-lark,
                                            ; python-psutil, python-importlib-metadata,
                                            ; python-importlib-resources, python-argcomplete
@@ -2991,6 +2992,124 @@ third-party @code{mcap} C++ library is not yet packaged."))
 for working with @code{rosbag2} bags."))
 
 ;;;
+;;; SlicerROS2 prerequisites: turtlesim, object_recognition_msgs,
+;;; octomap_msgs, moveit_msgs.  None are strictly part of ros_core or
+;;; ros_base, but all are declared dependencies of the upstream
+;;; SlicerROS2 module (rosmed/slicer_ros2_module).
+;;;
+
+(define-public ros-turtlesim-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "turtlesim"
+   #:version "1.8.3"
+   #:repo "https://github.com/ros/ros_tutorials"
+   #:commit "3908ad534d12df375c5c22b47f2a3a0252358803"
+   #:hash (base32 "0i1zk7043406ab98i4304jhnn52v4xdwdbpyfa45h50579qm362j")
+   #:module-subdir "turtlesim"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-index-cpp-jazzy
+                             ros-geometry-msgs-jazzy
+                             ros-rcl-interfaces-jazzy
+                             ros-rclcpp-jazzy
+                             ros-rclcpp-action-jazzy
+                             ros-rosidl-default-generators-jazzy
+                             ros-rosidl-default-runtime-jazzy
+                             ros-std-msgs-jazzy
+                             ros-std-srvs-jazzy
+                             ros-action-msgs-jazzy
+                             ros-service-msgs-jazzy
+                             ros-builtin-interfaces-jazzy
+                             ros-unique-identifier-msgs-jazzy
+                             qtbase-5)
+   #:home-page "https://github.com/ros/ros_tutorials"
+   #:synopsis "Classic ROS 2 turtle simulation node (Qt5)"
+   #:description
+   "@code{turtlesim} is the canonical ROS 2 tutorial node: a small Qt5
+window with a turtle that responds to @file{geometry_msgs/Twist}
+commands.  Declared as a required dependency by the upstream
+@code{slicer_ros2_module} CMakeLists so it's needed to build the
+SlicerROS2 extension against @code{ros-jazzy}."))
+
+(define-public ros-object-recognition-msgs-jazzy
+  (make-ros2-rosidl-interface-package
+   #:distro jazzy-distro
+   #:ros-name "object_recognition_msgs"
+   #:version "2.0.0"
+   #:repo "https://github.com/wg-perception/object_recognition_msgs"
+   #:commit "19e949778095f35ca1cd3369596409f5a3e22558"
+   #:hash (base32 "10783ny1qqhigyz92mw8s8v56c4ga6lmddnbz41878y5zil3sdyp")
+   #:message-deps (list ros-rosidl-default-generators-jazzy
+                        ros-rosidl-default-runtime-jazzy
+                        ros-action-msgs-jazzy
+                        ros-service-msgs-jazzy
+                        ros-builtin-interfaces-jazzy
+                        ros-unique-identifier-msgs-jazzy
+                        ros-geometry-msgs-jazzy
+                        ros-sensor-msgs-jazzy
+                        ros-shape-msgs-jazzy
+                        ros-std-msgs-jazzy)
+   #:home-page "https://github.com/wg-perception/object_recognition_msgs"
+   #:synopsis "Object-recognition message types for ROS 2"
+   #:description
+   "Message, service, and action definitions used by ROS 2 object
+recognition pipelines (@code{RecognizedObject}, @code{Table},
+@code{ObjectType}).  Dependency of @code{moveit_msgs} and
+SlicerROS2."))
+
+(define-public ros-octomap-msgs-jazzy
+  (make-ros2-rosidl-interface-package
+   #:distro jazzy-distro
+   #:ros-name "octomap_msgs"
+   #:version "2.0.1"
+   #:repo "https://github.com/OctoMap/octomap_msgs"
+   #:commit "50eece2bfc2f3163b2fb70b9157356e12d375dff"
+   #:hash (base32 "1bbahfr8cb6jc1zj2f8xbfql538nafrf3hnyf7cpfl4pxqsnrqib")
+   ;; octomap_msgs ships a service (GetOctomap) so service_msgs is
+   ;; required at code-generation time, even though package.xml
+   ;; under-declares it.
+   #:message-deps (list ros-rosidl-default-generators-jazzy
+                        ros-rosidl-default-runtime-jazzy
+                        ros-builtin-interfaces-jazzy
+                        ros-geometry-msgs-jazzy
+                        ros-service-msgs-jazzy
+                        ros-std-msgs-jazzy)
+   #:home-page "https://github.com/OctoMap/octomap_msgs"
+   #:synopsis "OctoMap message types for ROS 2"
+   #:description
+   "@code{Octomap} and related message types used to transport octree
+occupancy maps between ROS 2 nodes; required by @code{moveit_msgs}."))
+
+(define-public ros-moveit-msgs-jazzy
+  (make-ros2-rosidl-interface-package
+   #:distro jazzy-distro
+   #:ros-name "moveit_msgs"
+   #:version "2.7.1"
+   #:repo "https://github.com/moveit/moveit_msgs"
+   #:commit "8daca8c56914e9cb8bd31d3332e71dd93dde5cc6"
+   #:hash (base32 "1waj10i829k8f73x41ms03pl2pj556k32x104nnm7fz976gciwnd")
+   #:message-deps (list ros-rosidl-default-generators-jazzy
+                        ros-rosidl-default-runtime-jazzy
+                        ros-action-msgs-jazzy
+                        ros-service-msgs-jazzy
+                        ros-builtin-interfaces-jazzy
+                        ros-unique-identifier-msgs-jazzy
+                        ros-geometry-msgs-jazzy
+                        ros-object-recognition-msgs-jazzy
+                        ros-octomap-msgs-jazzy
+                        ros-sensor-msgs-jazzy
+                        ros-shape-msgs-jazzy
+                        ros-std-msgs-jazzy
+                        ros-trajectory-msgs-jazzy)
+   #:home-page "https://github.com/moveit/moveit_msgs"
+   #:synopsis "MoveIt 2 motion-planning message types"
+   #:description
+   "Message, service, and action definitions used by MoveIt 2
+(@code{RobotState}, @code{PlanningScene}, @code{Constraints},
+@code{MotionPlanRequest}, @code{CollisionObject}, ...).  Pure interface
+package; required by the SlicerROS2 module."))
+
+;;;
 ;;; Aggregation meta-package.
 ;;;
 ;;; Phase 1 will grow this package's propagated-inputs tier by tier until
@@ -3198,7 +3317,13 @@ for working with @code{rosbag2} bags."))
    ros-rosbag2-transport-jazzy
    ros-rosbag2-storage-default-plugins-jazzy
    ros-rosbag2-py-jazzy
-   ros-ros2bag-jazzy))
+   ros-ros2bag-jazzy
+
+   ;; SlicerROS2 prerequisites
+   ros-turtlesim-jazzy
+   ros-object-recognition-msgs-jazzy
+   ros-octomap-msgs-jazzy
+   ros-moveit-msgs-jazzy))
 
 ;;;
 ;;; ros-jazzy aggregation meta-package.
