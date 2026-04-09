@@ -52,6 +52,17 @@ print("STEP 1 OK")
 echo "[smoke] step 1b: ros_base check (geometry/sensor/nav/tf2)"
 "${GUIX_SHELL[@]}" -- python3 "$HERE/ros_base_check.py"
 
+echo "[smoke] step 1c: ros2 CLI sanity (pkg/topic/bag/launch --help)"
+"${GUIX_SHELL[@]}" -- bash -c '
+set -e
+ros2 pkg list >/dev/null
+echo "ros2 pkg list: $(ros2 pkg list | wc -l) packages registered"
+ros2 topic --help >/dev/null
+ros2 bag --help >/dev/null
+ros2 launch --help >/dev/null
+echo "CLI SANITY OK"
+'
+
 echo "[smoke] step 2: build C++ talker, run listener"
 "${GUIX_SHELL[@]}" -- bash -c "
 set -euo pipefail
