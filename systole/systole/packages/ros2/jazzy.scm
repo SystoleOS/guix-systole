@@ -2353,6 +2353,60 @@ multi-joint robot in ROS 2."))
    ros-rclpy-jazzy))
 
 ;;;
+;;; Phase 2 ros_base package list — layered on top of ros_core.
+;;;
+
+(define %ros-base-jazzy-packages
+  (list
+   ;; common_interfaces messages (std_msgs is already in ros_core)
+   ros-std-srvs-jazzy
+   ros-geometry-msgs-jazzy
+   ros-actionlib-msgs-jazzy
+   ros-shape-msgs-jazzy
+   ros-trajectory-msgs-jazzy
+   ros-sensor-msgs-jazzy
+   ros-stereo-msgs-jazzy
+   ros-nav-msgs-jazzy
+   ros-diagnostic-msgs-jazzy
+   ros-visualization-msgs-jazzy
+
+   ;; plugin framework
+   ros-tinyxml2-vendor-jazzy
+   ros-console-bridge-vendor-jazzy
+   ros-class-loader-jazzy
+   ros-pluginlib-jazzy
+
+   ;; URDF
+   ros-urdf-parser-plugin-jazzy
+   ros-urdf-jazzy
+
+   ;; KDL
+   ros-eigen3-cmake-module-jazzy
+   ros-orocos-kdl-vendor-jazzy
+   ros-kdl-parser-jazzy
+
+   ;; composition / message_filters (deferred from Phase 1)
+   ros-composition-interfaces-jazzy
+   ros-rclcpp-components-jazzy
+   ros-message-filters-jazzy
+
+   ;; tf2 stack
+   ros-tf2-msgs-jazzy
+   ros-tf2-jazzy
+   ros-tf2-ros-jazzy
+   ros-tf2-eigen-jazzy
+   ros-tf2-eigen-kdl-jazzy
+   ros-tf2-geometry-msgs-jazzy
+   ros-tf2-kdl-jazzy
+   ros-tf2-py-jazzy
+   ros-tf2-sensor-msgs-jazzy
+   ros-tf2-ros-py-jazzy
+
+   ;; diagnostics + robot_state_publisher
+   ros-diagnostic-updater-jazzy
+   ros-robot-state-publisher-jazzy))
+
+;;;
 ;;; ros-jazzy aggregation meta-package.
 ;;;
 ;;; Implemented as a trivial-build-system package that symlinks every
@@ -2396,29 +2450,37 @@ multi-joint robot in ROS 2."))
                    (union-build out inputs
                                 #:create-all-directories? #t)
                    #t)))))
-    ;; inputs = direct ros_core packages + the union of their transitive
-    ;; propagated-inputs, so the resulting union contains every runtime
-    ;; dependency (python, numpy, pyyaml, glibc, gcc-lib, ...) of each
-    ;; ROS component.  `packages->inputs' deduplicates by package object.
+    ;; inputs = direct ros_core + ros_base packages plus the union of
+    ;; their transitive propagated-inputs, so the resulting union
+    ;; contains every runtime dependency (python, numpy, pyyaml, eigen,
+    ;; orocos-kinematics-dynamics, urdfdom, ..., glibc, gcc-lib) of each
+    ;; ROS component.  Deduplicated by package object.
     (inputs
-     (delete-duplicates
-      (append %ros-core-jazzy-packages
-              (append-map
-               (lambda (pkg)
-                 (map (match-lambda ((_ p . _) p))
-                      (package-transitive-propagated-inputs pkg)))
-               %ros-core-jazzy-packages))
-      eq?))
+     (let ((direct (append %ros-core-jazzy-packages
+                           %ros-base-jazzy-packages)))
+       (delete-duplicates
+        (append direct
+                (append-map
+                 (lambda (pkg)
+                   (map (match-lambda ((_ p . _) p))
+                        (package-transitive-propagated-inputs pkg)))
+                 direct))
+        eq?)))
     (native-search-paths (ros2-native-search-paths jazzy-distro))
     (synopsis "ROS 2 Jazzy Jalisco meta-package (guix-systole)")
     (description
      "Aggregation meta-package for the ROS 2 Jazzy Jalisco distribution
 provided by the guix-systole channel.  Installing @code{ros-jazzy}
 yields a single store output that is a symlink-union of the full
-@code{ros_core} stack — ament build tooling, the rosidl C/C++/Python
-interface generators, the rmw middleware abstraction plus an Eclipse
-Cyclone DDS implementation, the @code{rcl} client support library, and
-both @code{rclcpp} (C++) and @code{rclpy} (Python) client libraries.
+@code{ros_base} stack: all of @code{ros_core} (ament build tooling, the
+rosidl C/C++/Python interface generators, the rmw middleware abstraction
+plus an Eclipse Cyclone DDS implementation, @code{rcl}, @code{rclcpp},
+@code{rclpy}) plus the standard @code{ros2/common_interfaces} message
+families (@code{geometry_msgs}, @code{sensor_msgs}, @code{nav_msgs},
+@code{std_srvs}, ...), the URDF parser, the Orocos KDL kinematics
+stack, @code{pluginlib}, the @code{tf2} transform graph,
+@code{rclcpp_components}, @code{diagnostic_updater}, and
+@code{robot_state_publisher}.
 
 The package configures the relevant search paths
 (@env{AMENT_PREFIX_PATH}, @env{CMAKE_PREFIX_PATH},

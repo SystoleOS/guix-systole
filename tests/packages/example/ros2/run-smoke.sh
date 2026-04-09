@@ -49,6 +49,9 @@ rclpy.shutdown()
 print("STEP 1 OK")
 '
 
+echo "[smoke] step 1b: ros_base check (geometry/sensor/nav/tf2)"
+"${GUIX_SHELL[@]}" -- python3 "$HERE/ros_base_check.py"
+
 echo "[smoke] step 2: build C++ talker, run listener"
 "${GUIX_SHELL[@]}" -- bash -c "
 set -euo pipefail
