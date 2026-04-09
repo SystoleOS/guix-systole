@@ -29,6 +29,7 @@
 (define-module (systole packages ros2 jazzy)
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix build-system trivial)
+  #:use-module (guix download)
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (gnu packages algebra)      ; eigen
@@ -42,7 +43,9 @@
   #:use-module (gnu packages python-xyz)   ; python-empy, python-pyyaml, python-lark,
                                            ; python-psutil, python-importlib-metadata,
                                            ; python-importlib-resources, python-argcomplete
-  #:use-module (gnu packages serialization) ; libyaml
+  #:use-module (gnu packages compression)  ; zstd
+  #:use-module (gnu packages sqlite)       ; sqlite
+  #:use-module (gnu packages serialization) ; libyaml, yaml-cpp
   #:use-module (gnu packages xml)          ; tinyxml2
   #:use-module (systole packages ros2)
   #:use-module (systole packages ros2-helpers) ; urdfdom, urdfdom-headers, console-bridge
@@ -2640,6 +2643,350 @@ radians.  Used by many ROS 2 control and navigation packages."))
    "Trivial message, service, and action definitions used by the
 @code{demo_nodes_*} packages and most ROS 2 tutorials.  Provides
 @code{AddTwoInts.srv}, @code{Fibonacci.action}, and friends."))
+
+;;;
+;;; rosbag2 prerequisites: yaml_cpp_vendor + keyboard_handler.
+;;;
+
+(define-public ros-yaml-cpp-vendor-jazzy
+  (package
+    (inherit
+     (make-ros2-ament-cmake-package
+      #:distro jazzy-distro
+      #:ros-name "yaml_cpp_vendor"
+      #:version "14.0.2"
+      #:repo "https://github.com/ros2/yaml_cpp_vendor"
+      #:commit "867dd6b7305e2e812a24249c03fba2af62a32c5b"
+      #:hash (base32 "01bjcgxgg4ilpdqnpjdmshb69j4kdb8k8pd72l12jxix15cjj1i7")
+      #:propagated-inputs (list ros-ament-cmake-jazzy
+                                ros-ament-cmake-vendor-package-jazzy
+                                yaml-cpp)
+      #:home-page "https://github.com/ros2/yaml_cpp_vendor"
+      #:synopsis "ROS 2 vendor wrapper around yaml-cpp"
+      #:description
+      "Thin shim that makes @code{find_package(yaml-cpp)} resolve to
+the upstream @code{yaml-cpp} library shipped by Guix."))
+    (arguments
+     (list #:tests? #f
+           #:phases
+           #~(modify-phases %standard-phases
+               (add-after 'unpack 'relax-yaml-cpp-version
+                 (lambda _
+                   ;; Upstream pins find_package(yaml-cpp 0.8.0 EXACT),
+                   ;; but Guix ships 0.9.0.  Drop the version check so
+                   ;; ament_vendor's SATISFIED path fires against the
+                   ;; system library.
+                   (substitute* "CMakeLists.txt"
+                     (("find_package\\(yaml-cpp 0\\.8\\.0 QUIET")
+                      "find_package(yaml-cpp QUIET")))))
+           #:configure-flags
+           #~(list "-DCMAKE_BUILD_TYPE=Release"
+                   "-DBUILD_TESTING=OFF"
+                   "-DCMAKE_INSTALL_RPATH=$ORIGIN;$ORIGIN/..;$ORIGIN/../../.."
+                   "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON")))))
+
+(define-public ros-keyboard-handler-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "keyboard_handler"
+   #:version "0.3.2"
+   #:repo "https://github.com/ros-tooling/keyboard_handler"
+   #:commit "b007b08de43ecb9fe12bf72c406b4345de8d42b4"
+   #:hash (base32 "14b4q0xhdfvxqnvw70203gnfg7g99la2664927f1qd9xis5cfnv0")
+   #:module-subdir "keyboard_handler"
+   #:propagated-inputs (list ros-ament-cmake-jazzy)
+   #:home-page "https://github.com/ros-tooling/keyboard_handler"
+   #:synopsis "Cross-platform keyboard event handler"
+   #:description
+   "Small C++ library for non-blocking keyboard input, used by
+@code{rosbag2_transport} for the play/pause/step keybindings of
+@command{ros2 bag play --interactive}."))
+
+;;;
+;;; rosbag2 stack (ros2/rosbag2@f93f9e6 = 0.26.10).
+;;;
+;;; Skipped: rosbag2_storage_mcap (needs a third-party mcap C++ library
+;;; not packaged here), rosbag2_examples, rosbag2_performance,
+;;; rosbag2_tests, liblz4_vendor.
+
+(define %rosbag2-repo "https://github.com/ros2/rosbag2")
+(define %rosbag2-commit "f93f9e69983bb0b529d52b36ec9669d52214b191")
+(define %rosbag2-hash
+  (base32 "03izmyfjz8p8qss5cfjj6yxxdqrap1yza4vvdq36wh6nas2viijs"))
+(define %rosbag2-version "0.26.10")
+
+(define* (rosbag2-subpkg ros-name #:key
+                         (propagated-inputs '())
+                         (extra-configure-flags #~'())
+                         (python? #f)
+                         synopsis description)
+  ((if python?
+       make-ros2-ament-python-package
+       make-ros2-ament-cmake-package)
+   #:distro jazzy-distro
+   #:ros-name ros-name
+   #:version %rosbag2-version
+   #:repo %rosbag2-repo
+   #:commit %rosbag2-commit
+   #:hash %rosbag2-hash
+   #:module-subdir ros-name
+   #:propagated-inputs propagated-inputs
+   #:home-page %rosbag2-repo
+   #:synopsis synopsis
+   #:description description))
+
+;;; readerwriterqueue archive that shared_queues_vendor would otherwise
+;;; fetch from GitHub at build time; we supply it as a native-input.
+(define %readerwriterqueue-archive
+  (origin
+    (method url-fetch)
+    (uri "https://github.com/cameron314/readerwriterqueue/archive/ef7dfbf553288064347d51b8ac335f1ca489032a.zip")
+    (file-name "readerwriterqueue-ef7dfbf.zip")
+    (sha256
+     (base32 "1255n51y1bjry97n4w60mgz6b9h14flfrxb01ihjf6pwvvfns8ag"))))
+
+(define-public ros-shared-queues-vendor-jazzy
+  (package
+    (inherit
+     (rosbag2-subpkg
+      "shared_queues_vendor"
+      #:propagated-inputs (list ros-ament-cmake-jazzy)
+      #:synopsis "Header-only SPSC/MPSC queue vendor for rosbag2"
+      #:description
+      "Vendors a small header-only shared-queues C++ library used by
+@code{rosbag2_compression}."))
+    (native-inputs (list %readerwriterqueue-archive python))
+    (arguments
+     (list #:tests? #f
+           #:phases
+           #~(modify-phases %standard-phases
+               (add-after 'unpack 'use-local-archive
+                 (lambda* (#:key inputs #:allow-other-keys)
+                   ;; Replace the remote URL with a file:// URL pointing at
+                   ;; the pre-fetched archive, so the build sandbox doesn't
+                   ;; need network access.
+                   (substitute* "shared_queues_vendor/CMakeLists.txt"
+                     (("URL https://github.com/cameron314/readerwriterqueue[^\n]*")
+                      (string-append
+                       "URL file://"
+                       #$%readerwriterqueue-archive)))))
+               (replace 'configure
+                 (lambda* (#:key outputs configure-flags
+                           #:allow-other-keys)
+                   (let ((source (getcwd))
+                         (out (assoc-ref outputs "out")))
+                     (apply invoke "cmake"
+                            "-S" (string-append source "/shared_queues_vendor")
+                            "-B" "build"
+                            (string-append "-DCMAKE_INSTALL_PREFIX=" out)
+                            configure-flags)
+                     (chdir "build"))))
+               (add-after 'install 'register-ament-package
+                 (lambda* (#:key outputs #:allow-other-keys)
+                   (let ((out (assoc-ref outputs "out")))
+                     (mkdir-p (string-append out
+                              "/share/ament_index/resource_index/packages"))
+                     (call-with-output-file
+                         (string-append out
+                          "/share/ament_index/resource_index/packages/shared_queues_vendor")
+                       (lambda (_) #t))))))
+           #:configure-flags
+           #~(list "-DCMAKE_BUILD_TYPE=Release"
+                   "-DBUILD_TESTING=OFF"
+                   "-DCMAKE_INSTALL_RPATH=$ORIGIN;$ORIGIN/..;$ORIGIN/../../.."
+                   "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON")))))
+
+(define-public ros-sqlite3-vendor-jazzy
+  (rosbag2-subpkg
+   "sqlite3_vendor"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-vendor-package-jazzy
+                             sqlite)
+   #:synopsis "ROS 2 vendor wrapper around SQLite3"
+   #:description
+   "Vendor wrapper around the upstream SQLite3 library (provided by
+Guix); used by @code{rosbag2_storage_sqlite3}."))
+
+(define-public ros-zstd-vendor-jazzy
+  (rosbag2-subpkg
+   "zstd_vendor"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-vendor-package-jazzy
+                             zstd)
+   #:synopsis "ROS 2 vendor wrapper around libzstd"
+   #:description
+   "Vendor wrapper around the upstream Zstandard compression library
+(provided by Guix); used by @code{rosbag2_compression_zstd}."))
+
+(define-public ros-rosbag2-interfaces-jazzy
+  (make-ros2-rosidl-interface-package
+   #:distro jazzy-distro
+   #:ros-name "rosbag2_interfaces"
+   #:version %rosbag2-version
+   #:repo %rosbag2-repo
+   #:commit %rosbag2-commit
+   #:hash %rosbag2-hash
+   #:module-subdir "rosbag2_interfaces"
+   #:message-deps (list ros-rosidl-default-generators-jazzy
+                        ros-rosidl-default-runtime-jazzy
+                        ros-builtin-interfaces-jazzy
+                        ros-service-msgs-jazzy)
+   #:home-page %rosbag2-repo
+   #:synopsis "rosbag2 service/message definitions"
+   #:description
+   "Message and service definitions used by @code{rosbag2_transport}
+to expose play/pause/seek control via ROS 2 services."))
+
+(define-public ros-rosbag2-storage-jazzy
+  (rosbag2-subpkg
+   "rosbag2_storage"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-pluginlib-jazzy
+                             ros-rcutils-jazzy
+                             ros-rclcpp-jazzy
+                             ros-rmw-jazzy
+                             ros-yaml-cpp-vendor-jazzy)
+   #:synopsis "Storage abstraction layer for rosbag2"
+   #:description
+   "C++ interface for pluggable rosbag2 storage back-ends (SQLite,
+MCAP, ...)."))
+
+(define-public ros-rosbag2-cpp-jazzy
+  (rosbag2-subpkg
+   "rosbag2_cpp"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-index-cpp-jazzy
+                             ros-pluginlib-jazzy
+                             ros-rclcpp-jazzy
+                             ros-rcutils-jazzy
+                             ros-rcpputils-jazzy
+                             ros-rmw-jazzy
+                             ros-rmw-implementation-jazzy
+                             ros-rosbag2-storage-jazzy
+                             ros-rosidl-runtime-c-jazzy
+                             ros-rosidl-runtime-cpp-jazzy
+                             ros-rosidl-typesupport-cpp-jazzy
+                             ros-rosidl-typesupport-introspection-cpp-jazzy
+                             ros-shared-queues-vendor-jazzy)
+   #:synopsis "C++ high-level API for rosbag2 (read/write bags)"
+   #:description
+   "High-level C++ API for reading and writing rosbag2 bags: message
+writers, readers, converters, storage factories."))
+
+(define-public ros-rosbag2-compression-jazzy
+  (rosbag2-subpkg
+   "rosbag2_compression"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-pluginlib-jazzy
+                             ros-rcpputils-jazzy
+                             ros-rcutils-jazzy
+                             ros-rosbag2-cpp-jazzy
+                             ros-rosbag2-storage-jazzy
+                             ros-shared-queues-vendor-jazzy)
+   #:synopsis "Compression abstraction layer for rosbag2"
+   #:description
+   "C++ interface for pluggable rosbag2 compression back-ends (zstd,
+lz4, ...)."))
+
+(define-public ros-rosbag2-compression-zstd-jazzy
+  (rosbag2-subpkg
+   "rosbag2_compression_zstd"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-pluginlib-jazzy
+                             ros-rcutils-jazzy
+                             ros-rosbag2-compression-jazzy
+                             ros-zstd-vendor-jazzy)
+   #:synopsis "Zstandard compression plugin for rosbag2"
+   #:description
+   "@code{rosbag2_compression} plugin that compresses bag contents
+with Zstandard."))
+
+(define-public ros-rosbag2-storage-sqlite3-jazzy
+  (rosbag2-subpkg
+   "rosbag2_storage_sqlite3"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-python-jazzy
+                             ros-pluginlib-jazzy
+                             ros-rcpputils-jazzy
+                             ros-rcutils-jazzy
+                             ros-rosbag2-storage-jazzy
+                             ros-sqlite3-vendor-jazzy
+                             ros-yaml-cpp-vendor-jazzy)
+   #:synopsis "SQLite3 storage plugin for rosbag2"
+   #:description
+   "@code{rosbag2_storage} plugin that reads and writes bags as
+@file{*.db3} SQLite3 files.  Historically the default rosbag2 storage
+format before MCAP; still fully supported in jazzy."))
+
+(define-public ros-rosbag2-transport-jazzy
+  (rosbag2-subpkg
+   "rosbag2_transport"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-keyboard-handler-jazzy
+                             ros-rclcpp-jazzy
+                             ros-rclcpp-components-jazzy
+                             ros-rcpputils-jazzy
+                             ros-rcutils-jazzy
+                             ros-rmw-jazzy
+                             ros-rosbag2-compression-jazzy
+                             ros-rosbag2-cpp-jazzy
+                             ros-rosbag2-interfaces-jazzy
+                             ros-rosbag2-storage-jazzy
+                             ros-yaml-cpp-vendor-jazzy)
+   #:synopsis "ROS 2 transport layer for rosbag2 (record/play)"
+   #:description
+   "Bridges the @code{rosbag2_cpp} high-level API to live ROS 2
+topics/services, providing the @code{Recorder} and @code{Player}
+components used by @command{ros2 bag record} and @command{ros2 bag play}."))
+
+(define-public ros-rosbag2-storage-default-plugins-jazzy
+  (rosbag2-subpkg
+   "rosbag2_storage_default_plugins"
+   ;; Meta-package; depends on rosbag2_storage_sqlite3 only (we skip
+   ;; rosbag2_storage_mcap because the mcap C++ library isn't packaged
+   ;; here yet).
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-rosbag2-storage-sqlite3-jazzy)
+   #:synopsis "Meta-package aggregating the default rosbag2 storage plugins"
+   #:description
+   "Meta-package that pulls in the default @code{rosbag2} storage
+plugins provided by guix-systole.  Upstream also bundles
+@code{rosbag2_storage_mcap} here; we currently omit it because the
+third-party @code{mcap} C++ library is not yet packaged."))
+
+(define-public ros-rosbag2-py-jazzy
+  (rosbag2-subpkg
+   "rosbag2_py"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-ament-cmake-python-jazzy
+                             ros-python-cmake-module-jazzy
+                             ros-pybind11-vendor-jazzy
+                             ros-rclpy-jazzy
+                             ros-rosbag2-compression-jazzy
+                             ros-rosbag2-cpp-jazzy
+                             ros-rosbag2-storage-jazzy
+                             ros-rosbag2-transport-jazzy
+                             ros-rpyutils-jazzy)
+   #:synopsis "Python bindings for rosbag2"
+   #:description
+   "pybind11 bindings for the rosbag2 C++ API, used by the
+@code{ros2bag} CLI plugin."))
+
+(define-public ros-ros2bag-jazzy
+  (rosbag2-subpkg
+   "ros2bag"
+   #:python? #t
+   #:propagated-inputs (list ros-ament-index-python-jazzy
+                             ros-rclpy-jazzy
+                             ros-ros2cli-jazzy
+                             ros-rosbag2-py-jazzy
+                             ros-rosbag2-storage-default-plugins-jazzy
+                             python-pyyaml)
+   #:synopsis "ros2 bag — record, play, and inspect ROS 2 bags"
+   #:description
+   "Implements @command{ros2 bag record}, @command{ros2 bag play},
+@command{ros2 bag info}, @command{ros2 bag list}, and other subcommands
+for working with @code{rosbag2} bags."))
 
 ;;;
 ;;; Aggregation meta-package.
