@@ -40,6 +40,7 @@
   #:use-module (gnu packages maths)         ; lapack (unused, reference)
   #:use-module (gnu packages python)
   #:use-module (gnu packages pkg-config)    ; pkg-config
+  #:use-module (gnu packages qt)            ; qtbase-5, qttools
   #:use-module (gnu packages serialization) ; jsoncpp
   #:use-module (gnu packages xml)           ; libxml2
   #:use-module (gnu packages compression)   ; zlib
@@ -175,7 +176,11 @@ drives the 3D Systems Touch.")
               ;; clone jsoncpp from GitHub.
               "-DCISST_USE_PKG_CONFIG=ON"
               "-DCISST_HAS_SWIG_PYTHON=OFF"
-              "-DCISST_HAS_QT5=OFF"
+              ;; Qt5 is required by the sawSensablePhantom ROS 2
+              ;; executable (Laura Connolly's Touch demo), which
+              ;; needs cisstCommonQt/VectorQt/MultiTaskQt/ParameterTypesQt
+              ;; and cisstQt.
+              "-DCISST_HAS_QT5=ON"
               "-DCISST_HAS_IOS=OFF"
               "-DCISST_HAS_LINUX_RTAI=OFF"
               "-DCISST_HAS_LINUX_XENOMAI=OFF"
@@ -200,7 +205,12 @@ drives the 3D Systems Touch.")
               (setenv "CMAKE_INSTALL_RPATH"
                       "$ORIGIN:$ORIGIN/../lib"))))))
     (native-inputs (list pkg-config))
-    (inputs (list cisst-netlib jsoncpp libxml2 zlib))
+    (inputs (list cisst-netlib jsoncpp libxml2 zlib
+                  ;; Qt5 for the *Qt companion libraries.  cisst
+                  ;; requests Qt5Core/Xml/XmlPatterns/Widgets/Gui/
+                  ;; OpenGL — all but XmlPatterns are in qtbase-5.
+                  qtbase-5
+                  (@ (gnu packages qt) qtxmlpatterns-5)))
     (home-page "https://github.com/jhu-cisst/cisst")
     (synopsis "JHU cisst robotics / surgical-systems framework")
     (description
@@ -244,16 +254,19 @@ unused dependencies.")
       #:tests? #f
       #:configure-flags
       #~(list "-DCMAKE_BUILD_TYPE=Release"
+              "-DCMAKE_INSTALL_RPATH=$ORIGIN;$ORIGIN/../lib"
+              "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
               (string-append "-Dcisst_DIR="
                              #$(this-package-input "cisst")
                              "/share/cisst-1.4/cmake"))
       #:phases
-      #~(modify-phases %standard-phases
-          (add-before 'configure 'set-install-rpath
-            (lambda _
-              (setenv "CMAKE_INSTALL_RPATH"
-                      "$ORIGIN:$ORIGIN/../lib"))))))
-    (inputs (list cisst cisst-netlib))
+      #~(modify-phases %standard-phases)))
+    (inputs (list cisst cisst-netlib
+                  ;; cisst's CMake config re-invokes find_package(Qt5*)
+                  ;; on downstream consumers because cisst is Qt-enabled.
+                  qtbase-5
+                  (@ (gnu packages qt) qtxmlpatterns-5)
+                  jsoncpp))
     (home-page "https://github.com/jhu-saw/sawKeyboard")
     (synopsis "cisst/SAW keyboard-input component")
     (description
@@ -288,6 +301,8 @@ terminal key presses into cisst events.  It is a build dependency of
       ;; (examples) which needs Qt; we don't need those.
       #:configure-flags
       #~(list "-DCMAKE_BUILD_TYPE=Release"
+              "-DCMAKE_INSTALL_RPATH=$ORIGIN;$ORIGIN/../lib"
+              "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
               (string-append "-Dcisst_DIR="
                              #$(this-package-input "cisst")
                              "/share/cisst-1.4/cmake")
@@ -312,15 +327,14 @@ terminal key presses into cisst events.  It is a build dependency of
                                (number->string (parallel-job-count))
                                "1"))))
           (replace 'install
-            (lambda _ (invoke "cmake" "--install" "build")))
-          (add-before 'configure 'set-install-rpath
-            (lambda _
-              (setenv "CMAKE_INSTALL_RPATH"
-                      "$ORIGIN:$ORIGIN/../lib"))))))
+            (lambda _ (invoke "cmake" "--install" "build"))))))
     (inputs (list cisst cisst-netlib saw-keyboard
                   ;; cisst's mtsCommonXML/JSON leaks libjsoncpp.so.26
-                  ;; into downstream link; RUNPATH validation needs it.
-                  jsoncpp))
+                  ;; and libxml2 into downstream link; add both.
+                  jsoncpp libxml2
+                  ;; cisst re-invokes find_package(Qt5*) downstream.
+                  qtbase-5
+                  (@ (gnu packages qt) qtxmlpatterns-5)))
     (home-page "https://github.com/jhu-saw/sawControllers")
     (synopsis "cisst/SAW PID and teleoperation controllers")
     (description
@@ -357,6 +371,8 @@ and are not needed for the Touch demo.")
       #:tests? #f
       #:configure-flags
       #~(list "-DCMAKE_BUILD_TYPE=Release"
+              "-DCMAKE_INSTALL_RPATH=$ORIGIN;$ORIGIN/../lib"
+              "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
               (string-append "-Dcisst_DIR="
                              #$(this-package-input "cisst")
                              "/share/cisst-1.4/cmake")
@@ -382,13 +398,11 @@ and are not needed for the Touch demo.")
                                (number->string (parallel-job-count))
                                "1"))))
           (replace 'install
-            (lambda _ (invoke "cmake" "--install" "build")))
-          (add-before 'configure 'set-install-rpath
-            (lambda _
-              (setenv "CMAKE_INSTALL_RPATH"
-                      "$ORIGIN:$ORIGIN/../lib"))))))
+            (lambda _ (invoke "cmake" "--install" "build"))))))
     (inputs (list cisst cisst-netlib saw-keyboard saw-controllers
-                  jsoncpp
+                  jsoncpp libxml2
+                  qtbase-5
+                  (@ (gnu packages qt) qtxmlpatterns-5)
                   ;; libHD + libPhantomIOLib42 from the proprietary
                   ;; OpenHaptics stack.  openhaptics-sdk propagates
                   ;; touch-driver automatically.
