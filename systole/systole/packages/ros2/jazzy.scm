@@ -2598,6 +2598,50 @@ and friends."))
 @code{launch} and @code{launch_ros} frameworks."))
 
 ;;;
+;;; Small leaf packages: angles, example_interfaces.
+;;;
+
+(define-public ros-angles-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "angles"
+   #:version "1.16.1"
+   #:repo "https://github.com/ros/angles"
+   #:commit "a96224f9ab3ac51fe8fd981c1e1554528dc4345a"
+   #:hash (base32 "164lzdj8mi2q9w8qs19lrdp88bahq3yzmb2rm4fnp4m7pcls05m2")
+   #:module-subdir "angles"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-python-jazzy)
+   #:home-page "https://github.com/ros/angles"
+   #:synopsis "C++/Python helpers for manipulating angles"
+   #:description
+   "Small library of helpers for wrapping/unwrapping angles, computing
+shortest angular distances, and converting between degrees and
+radians.  Used by many ROS 2 control and navigation packages."))
+
+(define-public ros-example-interfaces-jazzy
+  (make-ros2-rosidl-interface-package
+   #:distro jazzy-distro
+   #:ros-name "example_interfaces"
+   #:version "0.12.0"
+   #:repo "https://github.com/ros2/example_interfaces"
+   #:commit "3fac5497d76b1425cfbd556d3010f33d905d5f73"
+   #:hash (base32 "0g5i4i06zp87ysm0jifjsrqwrrg1j8wkccvi4gjk4akgx40dz8gr")
+   ;; Contains actions, so service_msgs must be available at generation time.
+   #:message-deps (list ros-rosidl-default-generators-jazzy
+                        ros-rosidl-default-runtime-jazzy
+                        ros-action-msgs-jazzy
+                        ros-service-msgs-jazzy
+                        ros-builtin-interfaces-jazzy
+                        ros-unique-identifier-msgs-jazzy)
+   #:home-page "https://github.com/ros2/example_interfaces"
+   #:synopsis "Example message/service/action interfaces for ROS 2 demos"
+   #:description
+   "Trivial message, service, and action definitions used by the
+@code{demo_nodes_*} packages and most ROS 2 tutorials.  Provides
+@code{AddTwoInts.srv}, @code{Fibonacci.action}, and friends."))
+
+;;;
 ;;; Aggregation meta-package.
 ;;;
 ;;; Phase 1 will grow this package's propagated-inputs tier by tier until
