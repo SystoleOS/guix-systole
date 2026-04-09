@@ -1,0 +1,25 @@
+From 99c3109bba3c189373da4d5e460f9c0accfa301b Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 21:50:52 +0200
+Subject: [PATCH] COMP: Add vtkSlicerSequencesModuleMRML to SceneViews Logic
+ TARGET_LIBRARIES (5.10)
+
+---
+ Modules/Loadable/SceneViews/Logic/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/Loadable/SceneViews/Logic/CMakeLists.txt b/Modules/Loadable/SceneViews/Logic/CMakeLists.txt
+index a4b07e1685..ead23f4078 100644
+--- a/Modules/Loadable/SceneViews/Logic/CMakeLists.txt
++++ b/Modules/Loadable/SceneViews/Logic/CMakeLists.txt
+@@ -17,6 +17,7 @@ set(${KIT}_SRCS
+   )
+ 
+ set(${KIT}_TARGET_LIBRARIES
++  vtkSlicerSequencesModuleMRML
+   vtkSlicerSequencesModuleLogic
+   )
+ 
+-- 
+2.52.0
+

@@ -1,0 +1,43 @@
+From d551e7b12408bd1a9669740191d05b2376d5c619 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 21:05:11 +0200
+Subject: [PATCH] ENH: Add standalone build support for ViewControllers module
+ (5.10)
+
+Add cmake_minimum_required/find_package(Slicer) preamble to top-level
+CMakeLists for standalone module build.
+---
+ Modules/Loadable/ViewControllers/CMakeLists.txt | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/Modules/Loadable/ViewControllers/CMakeLists.txt b/Modules/Loadable/ViewControllers/CMakeLists.txt
+index 77754158e1..6ee5556ae9 100644
+--- a/Modules/Loadable/ViewControllers/CMakeLists.txt
++++ b/Modules/Loadable/ViewControllers/CMakeLists.txt
+@@ -1,9 +1,23 @@
+ 
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME ViewControllers)
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++set(CMAKE_CXX_STANDARD "17")
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ 
+-- 
+2.52.0
+
