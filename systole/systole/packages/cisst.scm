@@ -38,7 +38,11 @@
   #:use-module (gnu packages commencement) ; gfortran-toolchain
   #:use-module (gnu packages gcc)           ; gfortran
   #:use-module (gnu packages maths)         ; lapack (unused, reference)
-  #:use-module (gnu packages python))
+  #:use-module (gnu packages python)
+  #:use-module (gnu packages pkg-config)    ; pkg-config
+  #:use-module (gnu packages serialization) ; jsoncpp
+  #:use-module (gnu packages xml)           ; libxml2
+  #:use-module (gnu packages compression))  ; zlib
 
 ;;;
 ;;; clapack source — a separate origin so cisstNetlib's ExternalProject
@@ -121,4 +125,87 @@ backend used by @code{cisstNumerical} and, transitively, any cisst
 component that performs matrix factorisations — including the trajectory
 generation and inverse kinematics used by the sawControllers stack that
 drives the 3D Systems Touch.")
+    (license license:bsd-3)))
+
+;;;
+;;; cisst — JHU's Computer Integrated Surgical Systems and Technology
+;;; C++ framework.  Minimal build profile: the 7 default libraries
+;;; (cisstCommon, cisstVector, cisstOSAbstraction, cisstNumerical,
+;;; cisstMultiTask, cisstParameterTypes, cisstRobot) as shared libs,
+;;; with JSON support on and everything else off.  Enough to build
+;;; the saw- stack and, transitively, sawSensablePhantom / ROS 2.
+;;;
+
+(define-public cisst
+  (package
+    (name "cisst")
+    (version "1.4.0")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/jhu-cisst/cisst")
+             (commit "fe84bf08817dc67e0fbf782190c656fe9cc5c2df")))
+       (file-name (git-file-name name version))
+       (sha256
+        (base32 "095icl70bh8kdsq30bds2jmn70gqykmhskjshij89q8gq5d9gqm8"))))
+    (build-system cmake-build-system)
+    (arguments
+     (list
+      #:tests? #f
+      #:configure-flags
+      #~(list "-DCMAKE_BUILD_TYPE=Release"
+              "-DCISST_BUILD_SHARED_LIBS=ON"
+              "-DCISST_BUILD_TESTS=OFF"
+              "-DCISST_BUILD_EXAMPLES=OFF"
+              "-DCISST_BUILD_APPLICATIONS=OFF"
+              "-DCISST_HAS_JSON=ON"
+              ;; Use pkg-config to pick up Guix's jsoncpp instead of
+              ;; the cisstJSONExternal ExternalProject_Add that would
+              ;; clone jsoncpp from GitHub.
+              "-DCISST_USE_PKG_CONFIG=ON"
+              "-DCISST_HAS_SWIG_PYTHON=OFF"
+              "-DCISST_HAS_QT5=OFF"
+              "-DCISST_HAS_IOS=OFF"
+              "-DCISST_HAS_LINUX_RTAI=OFF"
+              "-DCISST_HAS_LINUX_XENOMAI=OFF"
+              "-DCISST_USE_SI_UNITS=ON"
+              ;; Optional libs off — only the 7 default libs.
+              "-DCISST_cisstMesh=OFF"
+              "-DCISST_cisstInteractive=OFF"
+              "-DCISST_cisstStereoVision=OFF"
+              "-DCISST_cisst3DUserInterface=OFF"
+              ;; cisstNetlib location for cisstNumerical.
+              (string-append "-DCisstNetlib_DIR="
+                             #$(this-package-input "cisst-netlib")
+                             "/share/cisstNetlib"))
+      #:phases
+      #~(modify-phases %standard-phases
+          (add-before 'configure 'set-install-rpath
+            (lambda _
+              ;; cisst installs libcisst*.so into lib/; internal
+              ;; libraries dlopen each other and must resolve via
+              ;; $ORIGIN, and cisst-netlib's config dir is used at
+              ;; configure time only (its libs are static).
+              (setenv "CMAKE_INSTALL_RPATH"
+                      "$ORIGIN:$ORIGIN/../lib"))))))
+    (native-inputs (list pkg-config))
+    (inputs (list cisst-netlib jsoncpp libxml2 zlib))
+    (home-page "https://github.com/jhu-cisst/cisst")
+    (synopsis "JHU cisst robotics / surgical-systems framework")
+    (description
+     "@code{cisst} is the Johns Hopkins Computer Integrated Surgical
+Systems and Technology framework — a C++ collection of libraries used
+as the foundation of the JHU saw- robot-integration components and,
+through them, Laura Connolly's SlicerROS2 Touch haptic-device demo.
+
+This Guix package builds the seven default shared libraries
+(@code{cisstCommon}, @code{cisstVector}, @code{cisstOSAbstraction},
+@code{cisstNumerical}, @code{cisstMultiTask}, @code{cisstParameterTypes},
+@code{cisstRobot}) with JSON support enabled; SWIG/Python bindings,
+Qt5 widgets, FLTK widgets, real-time extensions (RTAI, Xenomai), and
+the optional @code{cisstMesh}/@code{cisstStereoVision}/
+@code{cisst3DUserInterface} libraries are all disabled — they are not
+needed for the haptic-device control path and would pull in large
+unused dependencies.")
     (license license:bsd-3)))
