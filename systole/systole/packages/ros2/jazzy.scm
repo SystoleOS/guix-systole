@@ -3110,6 +3110,81 @@ occupancy maps between ROS 2 nodes; required by @code{moveit_msgs}."))
 package; required by the SlicerROS2 module."))
 
 ;;;
+;;; Touch haptic-device demo support (Laura Connolly's VirtualFixture
+;;; reproducer).  The stack is:
+;;;
+;;;   xacro + joint_state_publisher + robot_state_publisher
+;;;     -> parses ros2_sensable_omni_model URDF and publishes /tf
+;;;   cisst + sawSensablePhantom[ROS2]  (packaged separately)
+;;;     -> drives the 3D Systems Touch via OpenHaptics HD
+;;;        and bridges CRTK topics onto ROS 2
+;;;
+;;; These are the pure-ament helpers required even before we tackle the
+;;; cisst/saw stack; they are useful independent of the Touch demo too.
+;;;
+
+(define-public ros-xacro-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "xacro"
+   #:version "2.1.1"
+   #:repo "https://github.com/ros/xacro"
+   #:commit "da4b3849f8320903d625250089f67f0632be86f2"
+   #:hash (base32 "19pirchr0xi02ky1ijyiaqi8j8s2pcyp6irv9f4538y2iiavnwk3")
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-python-jazzy
+                             ros-ament-index-python-jazzy
+                             python-pyyaml)
+   #:home-page "https://github.com/ros/xacro"
+   #:synopsis "XML macro language for URDF"
+   #:description
+   "@code{xacro} is the standard XML macro language used by ROS robot
+description files to generate URDF from parameterised templates.  The
+@command{xacro} command is invoked at launch time by the Touch demo's
+@code{sensable_phantom_rviz.launch.py} to expand the URDF shipped in
+@code{sensable_omni_model}."))
+
+(define-public ros-joint-state-publisher-jazzy
+  (make-ros2-ament-python-package
+   #:distro jazzy-distro
+   #:ros-name "joint_state_publisher"
+   #:version "2.4.1"
+   #:repo "https://github.com/ros/joint_state_publisher"
+   #:commit "e535250131aaccafce227ef124dbbd8b0a466f23"
+   #:hash (base32 "0jmjc84bznv9r5ghflf5z52vfbqsa8bxksj548jvps9gxg6zxssr")
+   #:module-subdir "joint_state_publisher"
+   #:propagated-inputs (list ros-rclpy-jazzy
+                             ros-sensor-msgs-jazzy
+                             ros-std-msgs-jazzy)
+   #:home-page "https://github.com/ros/joint_state_publisher"
+   #:synopsis "Aggregate joint state sources into a single /joint_states topic"
+   #:description
+   "@code{joint_state_publisher} is a ROS 2 node that subscribes to one
+or more @code{sensor_msgs/JointState} topics (its @var{source_list}
+parameter) and republishes the merged state on @code{/joint_states}.
+Used by the Touch demo to forward @code{/arm/measured_js} from the
+Sensable Phantom driver into @code{robot_state_publisher}."))
+
+(define-public ros-sensable-omni-model-jazzy
+  (make-ros2-ament-python-package
+   #:distro jazzy-distro
+   #:ros-name "sensable_omni_model"
+   #:version "0.0.0"
+   #:repo "https://github.com/jhu-saw/ros2_sensable_omni_model"
+   #:commit "0af819b9b7547ebe5b6ad0c316b81faa5a321b14"
+   #:hash (base32 "0ijyryar7fmxinfm2lg2fi0vvxrs8cnzam592yh3bsmq4w26vdks")
+   #:propagated-inputs (list ros-rclpy-jazzy
+                             ros-sensor-msgs-jazzy)
+   #:license license:expat
+   #:home-page "https://github.com/jhu-saw/ros2_sensable_omni_model"
+   #:synopsis "URDF and mesh model of the 3D Systems Touch (Sensable Omni)"
+   #:description
+   "Pure-data ament package containing the URDF, xacro, STL meshes, and
+an RViz config for the 3D Systems Touch haptic device (formerly the
+Sensable Phantom Omni).  Consumed by @code{robot_state_publisher} when
+running Laura Connolly's SlicerROS2 Touch teleoperation demo."))
+
+;;;
 ;;; Aggregation meta-package.
 ;;;
 ;;; Phase 1 will grow this package's propagated-inputs tier by tier until
