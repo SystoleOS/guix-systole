@@ -50,6 +50,7 @@
   #:use-module (gnu packages xml)          ; tinyxml2
   #:use-module (systole packages ros2)
   #:use-module (systole packages ros2-helpers) ; urdfdom, urdfdom-headers, console-bridge
+  #:use-module (systole packages cisst)         ; cisst, cisst-netlib (Touch demo)
   #:use-module (srfi srfi-1)               ; delete-duplicates, append-map
   #:use-module (ice-9 match)               ; match-lambda
   #:export (jazzy-distro))
@@ -3211,6 +3212,77 @@ ROS 2 bridge."))
 DoubleVec, IntervalStatistics and a ConvertFloat64Array service.
 Consumed by @code{cisst_ros2_bridge} to translate cisst component
 state onto standard ROS 2 topics."))
+
+(define-public ros-cisst-ros2-bridge-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "cisst_ros2_bridge"
+   #:version "2.1.0"
+   #:repo "https://github.com/jhu-cisst/cisst_ros2_bridge"
+   #:commit "119a77d31e2dbaf54a26eef55ba092fc50a4cacd"
+   #:hash (base32 "0dznqqilasw55cnj07fnpiv61hq63haixxsgvigmpn288g00cf5x")
+   #:extra-inputs (list cisst cisst-netlib)
+   #:extra-configure-flags
+   #~(list (string-append "-Dcisst_DIR="
+                          #$cisst
+                          "/share/cisst-1.4/cmake"))
+   ;; Upstream's mtsROSToCISST.cpp calls cisstData.Name().SetSize(...)
+   ;; but in cisst 1.4 prmStateJoint::Name() returns
+   ;; std::vector<std::string>& which uses .resize().  Patch it.
+   #:patches '("cisst_ros2_bridge-fix-name-resize.patch")
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-rclcpp-jazzy
+                             ros-std-msgs-jazzy
+                             ros-std-srvs-jazzy
+                             ros-geometry-msgs-jazzy
+                             ros-sensor-msgs-jazzy
+                             ros-diagnostic-msgs-jazzy
+                             ros-cisst-msgs-jazzy
+                             ros-tf2-ros-jazzy
+                             ros-tf2-msgs-jazzy)
+   #:home-page "https://github.com/jhu-cisst/cisst_ros2_bridge"
+   #:synopsis "Bridge cisst/SAW multi-task components to ROS 2 topics"
+   #:description
+   "@code{cisst_ros2_bridge} provides @code{mtsROSBridge}, the
+translation layer between cisst's @code{mtsComponent} interfaces and
+ROS 2 publishers/subscribers.  Consumed by the JHU @code{saw*}
+components — including @code{sawSensablePhantom} — to publish haptic
+device state on standard ROS 2 topics."))
+
+(define-public ros-cisst-ros2-crtk-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "cisst_ros2_crtk"
+   #:version "2.1.0"
+   #:repo "https://github.com/jhu-cisst/cisst_ros2_crtk"
+   #:commit "763a848db5011a0445b746448472f41319c437c6"
+   #:hash (base32 "1z0nbi93kamvvd22crlixillxsalhbnhndjbsmxqv162ljyw8f8b")
+   #:extra-inputs (list cisst cisst-netlib)
+   #:extra-configure-flags
+   #~(list (string-append "-Dcisst_DIR="
+                          #$cisst
+                          "/share/cisst-1.4/cmake"))
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-cisst-ros2-bridge-jazzy
+                             ros-crtk-msgs-jazzy
+                             ros-rclcpp-jazzy
+                             ros-std-msgs-jazzy
+                             ros-std-srvs-jazzy
+                             ros-geometry-msgs-jazzy
+                             ros-sensor-msgs-jazzy
+                             ros-diagnostic-msgs-jazzy
+                             ros-cisst-msgs-jazzy
+                             ros-tf2-ros-jazzy
+                             ros-tf2-msgs-jazzy)
+   #:home-page "https://github.com/jhu-cisst/cisst_ros2_crtk"
+   #:synopsis "CRTK (collaborative robotics) ROS 2 bridge for cisst"
+   #:description
+   "@code{cisst_ros2_crtk} layers the CRTK naming convention on top of
+@code{cisst_ros2_bridge}: @code{mts_ros_crtk_bridge_provided} exposes
+all CRTK interfaces (@code{measured_js}, @code{measured_cp},
+@code{servo_cf}, @code{operating_state}, ...) of an @code{mtsComponent}
+as ROS 2 topics/services with consistent names.  Used by the JHU
+@code{sawSensablePhantom} ROS 2 node to speak CRTK."))
 
 (define-public ros-sensable-omni-model-jazzy
   (make-ros2-ament-python-package
