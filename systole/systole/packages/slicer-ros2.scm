@@ -38,8 +38,10 @@
   #:use-module (guix packages)
   #:use-module (guix utils)
   #:use-module (gnu packages python)
+  #:use-module (gnu packages qt)
   #:use-module (systole packages slicer)
-  #:use-module (systole packages ros2 jazzy))
+  #:use-module (systole packages ros2 jazzy)
+  #:use-module (srfi srfi-1))
 
 ;;;
 ;;; SlicerROS2 loadable module (jazzy).
@@ -98,7 +100,18 @@
                 ;; CMAKE_INSTALL_PREFIX.  Strip the leading slash.
                 (substitute* "CMakeLists.txt"
                   (("DESTINATION /\\$\\{SlicerROS2_AMENT_INSTALL_PREFIX\\}")
-                   "DESTINATION ${SlicerROS2_AMENT_INSTALL_PREFIX}"))))
+                   "DESTINATION ${SlicerROS2_AMENT_INSTALL_PREFIX}"))
+                ;; (3) Logic/vtkSlicerROS2Logic.cxx includes
+                ;; <qSlicerCoreApplication.h> and references symbols from
+                ;; qSlicerBaseQTCore + ctkVTKWidgets that aren't in the
+                ;; Logic lib's TARGET_LIBRARIES.  Add them so the link
+                ;; resolves.
+                (substitute* "Logic/CMakeLists.txt"
+                  (("vtkSlicer\\$\\{MODULE_NAME\\}ModuleMRML")
+                   (string-append
+                    "vtkSlicer${MODULE_NAME}ModuleMRML\n"
+                    "  qSlicerBaseQTCore\n"
+                    "  CTKVisualizationVTKWidgets")))))
             (add-after 'unpack 'make-generator-executable
               (lambda _
                 ;; Upstream runs ROS2_to_vtkObjects.py at cmake time via
@@ -121,39 +134,63 @@
                 (setenv "CXXFLAGS"
                         (string-append
                          (or (getenv "CXXFLAGS") "")
-                         " -Wno-error")))))))
+                         " -Wno-error"))))
+            (add-after 'patch-install-layout 'add-qt5-uitools
+              (lambda* (#:key inputs #:allow-other-keys)
+                ;; qSlicerROS2ModuleWidget.cxx includes <QUiLoader>.
+                ;; Upstream's CMakeLists.txt doesn't request the Qt5
+                ;; UiTools component, so inject find_package() + an
+                ;; include_directories() call at the top.
+                (let ((qttools (assoc-ref inputs "qttools")))
+                  ;; Inject after the main find_package(Slicer REQUIRED)
+                  ;; (which runs project() and enables CXX), so the Qt5
+                  ;; UiTools find_package has an enabled CXX language.
+                  (substitute* "CMakeLists.txt"
+                    (("find_package\\(Slicer REQUIRED\\)")
+                     (string-append
+                      "find_package(Slicer REQUIRED)\n"
+                      "find_package(Qt5 REQUIRED COMPONENTS UiTools)\n"
+                      "include_directories(SYSTEM \""
+                      qttools "/include/qt5\" \""
+                      qttools "/include/qt5/QtUiTools\")\n"
+                      "link_libraries(Qt5::UiTools)")))))))))
       (native-inputs (list python))
+      ;; UseSlicer.cmake transitively requires all of slicer-5.8's build-time
+      ;; libraries (Qt5, VTK, ITK, PNG, EXPAT, HDF5, ...) at configure time,
+      ;; not just slicer-5.8 itself.  We start from slicer-5.8's own input
+      ;; list (same pattern as make-slicer-loadable-module) and prepend
+      ;; slicer-5.8 + the ROS 2 deps upstream SlicerROS2 declares.
       (inputs
-       ;; Slicer + all ROS 2 packages the upstream CMakeLists lists in
-       ;; SlicerROS2_ROS_DEPENDENCIES, minus cisst_msgs (gated on
-       ;; USE_CISST_MSGS, we build with it off).
-       (list slicer-5.8
-             ;; rosidl pipeline bits the code generator needs
-             ros-rclcpp-jazzy
-             ros-rclcpp-action-jazzy
-             ;; URDF / KDL
-             ros-kdl-parser-jazzy
-             ros-urdf-jazzy
-             ;; tf2 stack
-             ros-tf2-jazzy
-             ros-tf2-ros-jazzy
-             ros-tf2-msgs-jazzy
-             ;; turtlesim (required by find_package loop)
-             ros-turtlesim-jazzy
-             ;; interface families
-             ros-builtin-interfaces-jazzy
-             ros-std-msgs-jazzy
-             ros-std-srvs-jazzy
-             ros-geometry-msgs-jazzy
-             ros-sensor-msgs-jazzy
-             ros-shape-msgs-jazzy
-             ros-trajectory-msgs-jazzy
-             ros-object-recognition-msgs-jazzy
-             ros-octomap-msgs-jazzy
-             ros-moveit-msgs-jazzy
-             ros-rosbag2-interfaces-jazzy
-             ;; Python 3 for the build-time code generator
-             python))
+       (fold (lambda (pkg acc)
+               (modify-inputs acc (prepend pkg)))
+             (modify-inputs (package-inputs slicer-5.8)
+               (prepend slicer-5.8))
+             (list
+              ;; ROS 2 packages from upstream SlicerROS2_ROS_DEPENDENCIES
+              ;; (minus cisst_msgs, gated on USE_CISST_MSGS).
+              ros-rclcpp-jazzy
+              ros-rclcpp-action-jazzy
+              ros-kdl-parser-jazzy
+              ros-urdf-jazzy
+              ros-tf2-jazzy
+              ros-tf2-ros-jazzy
+              ros-tf2-msgs-jazzy
+              ros-turtlesim-jazzy
+              ros-builtin-interfaces-jazzy
+              ros-std-msgs-jazzy
+              ros-std-srvs-jazzy
+              ros-geometry-msgs-jazzy
+              ros-sensor-msgs-jazzy
+              ros-shape-msgs-jazzy
+              ros-trajectory-msgs-jazzy
+              ros-object-recognition-msgs-jazzy
+              ros-octomap-msgs-jazzy
+              ros-moveit-msgs-jazzy
+              ros-rosbag2-interfaces-jazzy
+              ;; Qt5 UiTools for QUiLoader used in the widget.
+              qttools
+              ;; Python 3 for the build-time code generator
+              python)))
       ;; Propagate slicer-5.8 so `guix install slicer-ros2-module-jazzy'
       ;; brings a usable Slicer alongside it; also propagate ros-jazzy
       ;; components whose .so files are dlopen'd by the module at
