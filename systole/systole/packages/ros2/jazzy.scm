@@ -2243,6 +2243,137 @@ joint states change.  Essential for any mobile-manipulator or
 multi-joint robot in ROS 2."))
 
 ;;;
+;;; launch framework (ros2/launch + ros2/launch_ros).
+;;;
+
+(define %launch-repo "https://github.com/ros2/launch")
+(define %launch-commit "587b6998fb830ba92ba1ff7fee8069f47b36b7b9")
+(define %launch-hash
+  (base32 "17pl9lihd8x6p2r7bgylzjcx91nmlb5d2p6kqgjpdm5jr9vappq4"))
+(define %launch-version "3.4.10")
+
+(define* (launch-py-subpkg ros-name #:key
+                           (propagated-inputs '())
+                           synopsis description)
+  (make-ros2-ament-python-package
+   #:distro jazzy-distro
+   #:ros-name ros-name
+   #:version %launch-version
+   #:repo %launch-repo
+   #:commit %launch-commit
+   #:hash %launch-hash
+   #:module-subdir ros-name
+   #:propagated-inputs propagated-inputs
+   #:home-page %launch-repo
+   #:synopsis synopsis
+   #:description description))
+
+(define-public ros-launch-jazzy
+  (launch-py-subpkg
+   "launch"
+   #:propagated-inputs (list ros-ament-index-python-jazzy
+                             python-osrf-pycommon
+                             python-lark
+                             python-importlib-metadata
+                             python-pyyaml)
+   #:synopsis "ROS 2 launch system core"
+   #:description
+   "@code{launch} is the ROS 2 declarative launch framework.  It
+describes process-launch graphs as Python actions/substitutions and
+drives them from a single @code{launch} call."))
+
+(define-public ros-launch-xml-jazzy
+  (launch-py-subpkg
+   "launch_xml"
+   #:propagated-inputs (list ros-launch-jazzy)
+   #:synopsis "XML frontend for ROS 2 launch files"
+   #:description
+   "Enables the ROS 2 launch system to consume @file{.launch.xml}
+files in addition to Python launch descriptions."))
+
+(define-public ros-launch-yaml-jazzy
+  (launch-py-subpkg
+   "launch_yaml"
+   #:propagated-inputs (list ros-launch-jazzy)
+   #:synopsis "YAML frontend for ROS 2 launch files"
+   #:description
+   "Enables the ROS 2 launch system to consume @file{.launch.yaml}
+files in addition to Python launch descriptions."))
+
+(define-public ros-launch-testing-jazzy
+  (launch-py-subpkg
+   "launch_testing"
+   #:propagated-inputs (list ros-ament-index-python-jazzy
+                             ros-launch-jazzy
+                             ros-launch-xml-jazzy
+                             ros-launch-yaml-jazzy
+                             python-osrf-pycommon
+                             python-pytest)
+   #:synopsis "pytest harness for ROS 2 launch-based tests"
+   #:description
+   "Utilities for writing launch-aware integration tests in ROS 2,
+with pytest as the driver and the @code{launch} framework as the
+process manager."))
+
+(define-public ros-launch-pytest-jazzy
+  (launch-py-subpkg
+   "launch_pytest"
+   #:propagated-inputs (list ros-ament-index-python-jazzy
+                             ros-launch-jazzy
+                             ros-launch-testing-jazzy
+                             python-osrf-pycommon
+                             python-pytest)
+   #:synopsis "pytest plugin that runs launch descriptions as fixtures"
+   #:description
+   "pytest plugin offered by the ROS 2 launch framework for describing
+launch descriptions as test fixtures."))
+
+(define-public ros-launch-testing-ament-cmake-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "launch_testing_ament_cmake"
+   #:version %launch-version
+   #:repo %launch-repo
+   #:commit %launch-commit
+   #:hash %launch-hash
+   #:module-subdir "launch_testing_ament_cmake"
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-test-jazzy
+                             ros-launch-testing-jazzy
+                             ros-python-cmake-module-jazzy)
+   #:home-page %launch-repo
+   #:synopsis "ament_cmake integration for launch_testing"
+   #:description
+   "CMake macros (@code{add_launch_test}) that register
+@code{launch_testing} pytest-based integration tests with the ament
+test framework."))
+
+;;; ros2/launch_ros — ROS-aware launch actions (Node, LifecycleNode, ...).
+
+(define-public ros-launch-ros-jazzy
+  (make-ros2-ament-python-package
+   #:distro jazzy-distro
+   #:ros-name "launch_ros"
+   #:version "0.26.11"
+   #:repo "https://github.com/ros2/launch_ros"
+   #:commit "a4580bd3dccf08f93871a32e14bf750c24fb780d"
+   #:hash (base32 "1yyfbcdz145kh82hjaapy4pxl76jf2clpry8y23cz66wnavc2p06")
+   #:module-subdir "launch_ros"
+   #:propagated-inputs (list ros-ament-index-python-jazzy
+                             ros-composition-interfaces-jazzy
+                             ros-launch-jazzy
+                             ros-lifecycle-msgs-jazzy
+                             ros-rclpy-jazzy
+                             python-importlib-metadata
+                             python-osrf-pycommon
+                             python-pyyaml)
+   #:home-page "https://github.com/ros2/launch_ros"
+   #:synopsis "ROS 2-aware launch actions (Node, LifecycleNode, ...)"
+   #:description
+   "Extends @code{launch} with ROS-aware actions for spawning ROS 2
+nodes, lifecycle nodes, and composable components."))
+
+;;;
 ;;; Aggregation meta-package.
 ;;;
 ;;; Phase 1 will grow this package's propagated-inputs tier by tier until
