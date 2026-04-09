@@ -22,6 +22,7 @@ MODULES=(
     "(systole packages ros2)"
     "(systole packages ros2-helpers)"
     "(systole packages ros2 jazzy)"
+    "(systole packages slicer-ros2)"
 )
 
 FAILED=0
