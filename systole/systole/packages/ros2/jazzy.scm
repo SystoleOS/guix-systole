@@ -40,7 +40,7 @@
   #:use-module (gnu packages serialization) ; libyaml
   #:use-module (gnu packages xml)          ; tinyxml2
   #:use-module (systole packages ros2)
-  #:use-module (systole packages ros2-helpers)
+  #:use-module (systole packages ros2-helpers) ; urdfdom, urdfdom-headers, console-bridge
   #:use-module (srfi srfi-1)               ; delete-duplicates, append-map
   #:use-module (ice-9 match)               ; match-lambda
   #:export (jazzy-distro))
@@ -1811,6 +1811,56 @@ runtime.  Used as the foundation of @code{pluginlib} and the wider
    "@code{pluginlib} is the higher-level ROS 2 plugin loading library
 built on top of @code{class_loader}, used for runtime discovery and
 loading of plugins declared via @file{plugin_description.xml} files."))
+
+;;;
+;;; urdf — ROS 2 wrapper around upstream urdfdom.
+;;;
+
+(define %urdf-repo "https://github.com/ros2/urdf")
+(define %urdf-commit "4f1fded3c9576cd58901959fb9c220fba3065eb9")
+(define %urdf-hash
+  (base32 "1lnzcw3n6p48rv5mbnccwz2kqy2kkill8a3n0656mwq1zn3c46ar"))
+(define %urdf-version "2.10.0")
+
+(define-public ros-urdf-parser-plugin-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "urdf_parser_plugin"
+   #:version %urdf-version
+   #:repo %urdf-repo
+   #:commit %urdf-commit
+   #:hash %urdf-hash
+   #:module-subdir "urdf_parser_plugin"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             urdfdom-headers)
+   #:home-page "https://github.com/ros2/urdf"
+   #:synopsis "Plugin interface for ROS 2 URDF parsers"
+   #:description
+   "Defines the C++ plugin interface that ROS 2 URDF parsers implement,
+allowing @code{urdf} to dispatch to multiple parser back-ends."))
+
+(define-public ros-urdf-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "urdf"
+   #:version %urdf-version
+   #:repo %urdf-repo
+   #:commit %urdf-commit
+   #:hash %urdf-hash
+   #:module-subdir "urdf"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-pluginlib-jazzy
+                             ros-tinyxml2-vendor-jazzy
+                             ros-urdf-parser-plugin-jazzy
+                             urdfdom
+                             urdfdom-headers
+                             tinyxml2)
+   #:home-page "https://github.com/ros2/urdf"
+   #:synopsis "ROS 2 URDF parser"
+   #:description
+   "@code{urdf} is the ROS 2 entry point for parsing Unified Robot
+Description Format (URDF) files.  It dispatches to upstream
+@code{urdfdom} via @code{urdf_parser_plugin}."))
 
 ;;;
 ;;; Aggregation meta-package.
