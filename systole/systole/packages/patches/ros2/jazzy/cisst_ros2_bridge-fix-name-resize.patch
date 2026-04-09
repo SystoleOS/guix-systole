@@ -1,0 +1,15 @@
+Fix build against cisst 1.4: prmStateJoint::Name() returns
+std::vector<std::string>&, which has no SetSize() method — use the
+standard resize() member instead.
+
+--- a/src/mtsROSToCISST.cpp
++++ b/src/mtsROSToCISST.cpp
+@@ -279,7 +279,7 @@
+
+ void mtsROSToCISST(const sensor_msgs::msg::JointState & rosData, prmStateJoint & cisstData)
+ {
+-    cisstData.Name().SetSize(rosData.name.size());
++    cisstData.Name().resize(rosData.name.size());
+     std::copy(rosData.name.begin(), rosData.name.end(),
+               cisstData.Name().begin());
+     cisstData.Position().SetSize(rosData.position.size());
