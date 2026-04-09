@@ -1,12 +1,13 @@
-From 08a5daa141a4fa1e795255126ed2bb72f8a96bac Mon Sep 17 00:00:00 2001
+From e88e25a6e1873830b63d45114d4a0f65c3854052 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Thu, 9 Apr 2026 09:26:38 +0200
 Subject: [PATCH] ENH: Add standalone build support for SegmentEditor scripted
  module 5.10
 
 ---
- Modules/Scripted/SegmentEditor/CMakeLists.txt | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+ Modules/Scripted/SegmentEditor/CMakeLists.txt   | 17 +++++++++++++++++
+ .../SubjectHierarchyPlugins/CMakeLists.txt      |  4 +++-
+ 2 files changed, 20 insertions(+), 1 deletion(-)
 
 diff --git a/Modules/Scripted/SegmentEditor/CMakeLists.txt b/Modules/Scripted/SegmentEditor/CMakeLists.txt
 index ffd2d5c92e..13783f3572 100644
@@ -33,6 +34,25 @@ index ffd2d5c92e..13783f3572 100644
  #-----------------------------------------------------------------------------
  set(MODULE_NAME SegmentEditor)
  
+diff --git a/Modules/Scripted/SegmentEditor/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Scripted/SegmentEditor/SubjectHierarchyPlugins/CMakeLists.txt
+index 832a2e1835..15626d2ef6 100644
+--- a/Modules/Scripted/SegmentEditor/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Scripted/SegmentEditor/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -5,11 +5,13 @@ set(${MODULE_NAME}SubjectHierarchyPlugins_PYTHON_SCRIPTS
+ set(${MODULE_NAME}SubjectHierarchyPlugins_PYTHON_RESOURCES
+   )
+ 
++file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins")
++
+ ctkMacroCompilePythonScript(
+   TARGET_NAME ${MODULE_NAME}SubjectHierarchyPlugins
+   SCRIPTS "${${MODULE_NAME}SubjectHierarchyPlugins_PYTHON_SCRIPTS}"
+   RESOURCES "${${MODULE_NAME}SubjectHierarchyPlugins_PYTHON_RESOURCES}"
+-  DESTINATION_DIR ${Slicer_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins
++  DESTINATION_DIR ${CMAKE_BINARY_DIR}/${Slicer_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins
+   INSTALL_DIR ${Slicer_INSTALL_QTSCRIPTEDMODULES_LIB_DIR}/SubjectHierarchyPlugins
+   NO_INSTALL_SUBDIR
+   )
 -- 
 2.52.0
 

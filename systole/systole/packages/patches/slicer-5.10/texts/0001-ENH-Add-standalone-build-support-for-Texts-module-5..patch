@@ -1,4 +1,4 @@
-From 668f18af40525a64032a680101ea3d391a1fd828 Mon Sep 17 00:00:00 2001
+From 4372a8a1febf360e8d0b3254b17bd144c99d9ee3 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Wed, 8 Apr 2026 21:25:17 +0200
 Subject: [PATCH] ENH: Add standalone build support for Texts module (5.10)
@@ -11,9 +11,9 @@ Subject: [PATCH] ENH: Add standalone build support for Texts module (5.10)
  Modules/Loadable/Texts/CMakeLists.txt             | 15 +++++++++++++++
  Modules/Loadable/Texts/Logic/CMakeLists.txt       |  1 +
  .../Texts/SubjectHierarchyPlugins/CMakeLists.txt  |  1 +
- Modules/Loadable/Texts/Widgets/CMakeLists.txt     |  3 +--
+ Modules/Loadable/Texts/Widgets/CMakeLists.txt     |  4 ++--
  .../Texts/Widgets/DesignerPlugins/CMakeLists.txt  |  4 ++++
- 5 files changed, 22 insertions(+), 2 deletions(-)
+ 5 files changed, 23 insertions(+), 2 deletions(-)
 
 diff --git a/Modules/Loadable/Texts/CMakeLists.txt b/Modules/Loadable/Texts/CMakeLists.txt
 index ca904dbd5b..28e9e1daac 100644
@@ -74,7 +74,7 @@ index 96272d6dc0..5c74d8ac83 100644
    WRAP_PYTHONQT
    )
 diff --git a/Modules/Loadable/Texts/Widgets/CMakeLists.txt b/Modules/Loadable/Texts/Widgets/CMakeLists.txt
-index a003292473..c9f5311700 100644
+index a003292473..f2334067b3 100644
 --- a/Modules/Loadable/Texts/Widgets/CMakeLists.txt
 +++ b/Modules/Loadable/Texts/Widgets/CMakeLists.txt
 @@ -5,8 +5,7 @@ set(KIT ${PROJECT_NAME})
@@ -87,6 +87,14 @@ index a003292473..c9f5311700 100644
    )
  
  set(${KIT}_SRCS
+@@ -22,6 +21,7 @@ set(${KIT}_RESOURCES
+   )
+ 
+ set(${KIT}_TARGET_LIBRARIES
++  MRMLCore
+   )
+ 
+ #-----------------------------------------------------------------------------
 diff --git a/Modules/Loadable/Texts/Widgets/DesignerPlugins/CMakeLists.txt b/Modules/Loadable/Texts/Widgets/DesignerPlugins/CMakeLists.txt
 index bc9fdc3a5d..3fa62b90c6 100644
 --- a/Modules/Loadable/Texts/Widgets/DesignerPlugins/CMakeLists.txt
