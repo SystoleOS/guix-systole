@@ -17,12 +17,13 @@
 
 (define-module (systole packages)
   #:use-module (gnu packages)
+  #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (guix diagnostics)
   #:use-module (guix i18n)
   #:use-module (ice-9 match)
   #:replace (%patch-path search-patch search-patches)
-  #:export (systole-patches))
+  #:export (systole-patches slicer-patch))
 
 (define %systole-root-directory
   ;; This is like %distro-root-directory from (gnu packages), with adjusted
@@ -72,6 +73,15 @@
                          (string-append systole-patches "/ros2/common")
                          (string-append systole-patches "/ros2"))
                    ((module-ref (resolve-module '(gnu packages)) '%patch-path)))))
+
+;; Version-scoped patch helper for Slicer packages.
+;; Using local-file bypasses the global %patch-path so that 5.8 and 5.10
+;; patches with identical relative names resolve independently.
+(define (slicer-patch version name)
+  "Return the patch file NAME under patches/slicer-VERSION/.
+NAME may include a subdirectory prefix, e.g. \"terminologies/0001-ENH-…\"."
+  (local-file (string-append systole-patches "/slicer-" version "/" name)
+              (basename name)))
 
 ;; Define search-patch functio
 (define (search-patch file-name)
