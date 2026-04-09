@@ -2063,6 +2063,301 @@ the @file{Modules/Loadable/SlicerWelcome} subtree of the Slicer 5.10 source
 tree."))
 
 ;;;
+;;; Slicer 5.10 — scripted module packages
+;;;
+
+(define-public slicer-sampledata-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-sampledata-5.10"
+   #:module-subdir "SampleData"
+   #:patches (list "sampledata/5.10-0001-ENH-Add-standalone-build-support-for-SampleData-scri.patch")
+   #:synopsis "3D Slicer SampleData scripted module (5.10)"
+   #:description
+   "The SampleData scripted module extracted from 3D Slicer 5.10.  It provides
+a catalog of sample medical data sets that can be downloaded and loaded from
+within Slicer.  Built from the @file{Modules/Scripted/SampleData} subtree."))
+
+(define-public slicer-endoscopy-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-endoscopy-5.10"
+   #:module-subdir "Endoscopy"
+   #:patches (list "endoscopy/5.10-0001-ENH-Add-standalone-build-support-for-Endoscopy-scrip.patch")
+   #:synopsis "3D Slicer Endoscopy scripted module (5.10)"
+   #:description
+   "The Endoscopy scripted module extracted from 3D Slicer 5.10.  It provides
+virtual endoscopy visualization along curve markup paths.  Built from
+the @file{Modules/Scripted/Endoscopy} subtree."))
+
+(define-public slicer-importitksnaplabel-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-importitksnaplabel-5.10"
+   #:module-subdir "ImportItkSnapLabel"
+   #:patches (list "importitksnaplabel/5.10-0001-ENH-Add-standalone-build-support-for-ImportItkSnapLa.patch")
+   #:synopsis "3D Slicer ImportItkSnapLabel scripted module (5.10)"
+   #:description
+   "The ImportItkSnapLabel scripted module extracted from 3D Slicer 5.10.
+Imports ITK-SNAP label description files.  Built from
+the @file{Modules/Scripted/ImportItkSnapLabel} subtree."))
+
+(define-public slicer-performancetests-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-performancetests-5.10"
+   #:module-subdir "PerformanceTests"
+   #:patches (list "performancetests/5.10-0001-ENH-Add-standalone-build-support-for-PerformanceTest.patch")
+   #:synopsis "3D Slicer PerformanceTests scripted module (5.10)"
+   #:description
+   "The PerformanceTests scripted module extracted from 3D Slicer 5.10.
+Provides rendering and pipeline performance benchmarks.  Built from
+the @file{Modules/Scripted/PerformanceTests} subtree."))
+
+(define-public slicer-selftests-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-selftests-5.10"
+   #:module-subdir "SelfTests"
+   #:patches (list "selftests/5.10-0001-ENH-Add-standalone-build-support-for-SelfTests-scrip.patch")
+   #:synopsis "3D Slicer SelfTests scripted module (5.10)"
+   #:description
+   "The SelfTests scripted module extracted from 3D Slicer 5.10.
+Provides self-test infrastructure for Slicer modules.  Built from
+the @file{Modules/Scripted/SelfTests} subtree."))
+
+(define-public slicer-screencapture-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-screencapture-5.10"
+   #:module-subdir "ScreenCapture"
+   #:patches (list "screencapture/5.10-0001-ENH-Add-standalone-build-support-for-ScreenCapture-s.patch")
+   #:synopsis "3D Slicer ScreenCapture scripted module (5.10)"
+   #:description
+   "The ScreenCapture scripted module extracted from 3D Slicer 5.10.
+Captures screenshots and animations from Slicer views.  Built from
+the @file{Modules/Scripted/ScreenCapture} subtree."))
+
+(define-public slicer-vectortoscalarvolume-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-vectortoscalarvolume-5.10"
+   #:module-subdir "VectorToScalarVolume"
+   #:patches (list "vectortoscalarvolume/5.10-0001-ENH-Add-standalone-build-support-for-VectorToScalarV.patch")
+   #:synopsis "3D Slicer VectorToScalarVolume scripted module (5.10)"
+   #:description
+   "The VectorToScalarVolume scripted module extracted from 3D Slicer 5.10.
+Converts vector volumes to scalar volumes.  Built from
+the @file{Modules/Scripted/VectorToScalarVolume} subtree."))
+
+(define-public slicer-dataprobe-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-dataprobe-5.10"
+   #:module-subdir "DataProbe"
+   #:patches (list "dataprobe/5.10-0001-ENH-Add-standalone-build-support-for-DataProbe-scrip.patch")
+   #:synopsis "3D Slicer DataProbe scripted module (5.10)"
+   #:description
+   "The DataProbe scripted module extracted from 3D Slicer 5.10.
+Displays voxel values under the cursor in slice views.  Built from
+the @file{Modules/Scripted/DataProbe} subtree."))
+
+(define-public slicer-cropvolumesequence-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-cropvolumesequence-5.10"
+   #:module-subdir "CropVolumeSequence"
+   #:patches (list "cropvolumesequence/5.10-0001-ENH-Add-standalone-build-support-for-CropVolumeSeque.patch")
+   #:synopsis "3D Slicer CropVolumeSequence scripted module (5.10)"
+   #:description
+   "The CropVolumeSequence scripted module extracted from 3D Slicer 5.10.
+Crops all volumes in a sequence node using a region of interest.  Built from
+the @file{Modules/Scripted/CropVolumeSequence} subtree."))
+
+(define-public slicer-webserver-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-webserver-5.10"
+   #:module-subdir "WebServer"
+   #:patches (list "webserver/5.10-0001-ENH-Add-standalone-build-support-for-WebServer-scrip.patch")
+   #:synopsis "3D Slicer WebServer scripted module (5.10)"
+   #:description
+   "The WebServer scripted module extracted from 3D Slicer 5.10.
+Embeds a lightweight HTTP server for remote Slicer control.  Built from
+the @file{Modules/Scripted/WebServer} subtree."))
+
+(define-public slicer-dicompatcher-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-dicompatcher-5.10"
+   #:module-subdir "DICOMPatcher"
+   #:patches (list "dicompatcher/5.10-0001-ENH-Add-standalone-build-support-for-DICOMPatcher-sc.patch")
+   #:synopsis "3D Slicer DICOMPatcher scripted module (5.10)"
+   #:description
+   "The DICOMPatcher scripted module extracted from 3D Slicer 5.10.
+Fixes common DICOM compliance issues in datasets.  Built from
+the @file{Modules/Scripted/DICOMPatcher} subtree."))
+
+(define-public slicer-dicomplugins-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-dicomplugins-5.10"
+   #:module-subdir "DICOMPlugins"
+   #:patches (list "dicomplugins/5.10-0001-ENH-Add-standalone-build-support-for-DICOMPlugins-sc.patch")
+   #:synopsis "3D Slicer DICOMPlugins scripted module (5.10)"
+   #:description
+   "The DICOMPlugins scripted module extracted from 3D Slicer 5.10.
+Provides base DICOM loading plugins (scalar volumes, segmentations,
+fiducials, etc.).  Built from the @file{Modules/Scripted/DICOMPlugins} subtree."))
+
+(define-public slicer-segmenteditor-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-segmenteditor-5.10"
+   #:module-subdir "SegmentEditor"
+   #:patches (list "segmenteditor/5.10-0001-ENH-Add-standalone-build-support-for-SegmentEditor-s.patch")
+   #:synopsis "3D Slicer SegmentEditor scripted module (5.10)"
+   #:description
+   "The SegmentEditor scripted module extracted from 3D Slicer 5.10.
+Provides the main scripted-module wrapper that exposes the
+qMRMLSegmentEditorWidget as a Slicer module panel.  Built from
+the @file{Modules/Scripted/SegmentEditor} subtree."))
+
+(define-public slicer-segmentstatistics-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-segmentstatistics-5.10"
+   #:module-subdir "SegmentStatistics"
+   #:patches (list "segmentstatistics/5.10-0001-ENH-Add-standalone-build-support-for-SegmentStatisti.patch")
+   #:synopsis "3D Slicer SegmentStatistics scripted module (5.10)"
+   #:description
+   "The SegmentStatistics scripted module extracted from 3D Slicer 5.10.
+Computes per-segment statistics (volume, surface area, etc.).  Built from
+the @file{Modules/Scripted/SegmentStatistics} subtree."))
+
+(define-public slicer-dicom-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-dicom-5.10"
+   #:module-subdir "DICOM"
+   #:patches (list "dicom/5.10-0001-ENH-Add-standalone-build-support-for-DICOM-scripted-.patch")
+   #:synopsis "3D Slicer DICOM scripted module (5.10)"
+   #:description
+   "The DICOM scripted module extracted from 3D Slicer 5.10.
+Provides the DICOM browser UI for importing and loading DICOM data.  Built
+from the @file{Modules/Scripted/DICOM} subtree."))
+
+(define-public slicer-extensionwizard-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-extensionwizard-5.10"
+   #:module-subdir "ExtensionWizard"
+   #:patches (list "extensionwizard/5.10-0001-ENH-Add-standalone-build-support-for-ExtensionWizard.patch")
+   #:synopsis "3D Slicer ExtensionWizard scripted module (5.10)"
+   #:description
+   "The ExtensionWizard scripted module extracted from 3D Slicer 5.10.
+Provides a wizard for creating new Slicer extensions and modules.  Built
+from the @file{Modules/Scripted/ExtensionWizard} subtree."))
+
+(define-public slicer-dicomlib-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-dicomlib-5.10"
+   #:module-subdir "DICOMLib"
+   #:patches (list "dicomlib/5.10-0001-ENH-Add-standalone-build-support-for-DICOMLib-script.patch")
+   #:synopsis "3D Slicer DICOMLib scripted module (5.10)"
+   #:description
+   "The DICOMLib scripted module extracted from 3D Slicer 5.10.
+Provides the core DICOM infrastructure: C++ logic for loadable and
+exportable series, the DICOM database, and Python bindings.  Built from
+the @file{Modules/Scripted/DICOMLib} subtree."
+   #:extra-inputs (list slicer-subjecthierarchy-5.10)
+   #:propagated-inputs (list slicer-subjecthierarchy-5.10)
+   #:extra-configure-flags
+   #~(list
+      (string-append
+       "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+      (string-append
+       "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/include/Slicer-5.10/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+      (string-append
+       "-DEXTRA_MODULE_LIB_DIRS="
+       #$slicer-subjecthierarchy-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-5.10
+       "/lib/Slicer-5.10/qt-loadable-modules;"
+       #$slicer-5.10
+       "/lib/Slicer-5.10"))))
+
+(define-public slicer-lineprofile-5.10
+  (make-slicer-scripted-module-5.10
+   #:name "slicer-lineprofile-5.10"
+   #:module-subdir "LineProfile"
+   #:patches (list "lineprofile/5.10-0001-ENH-Add-standalone-build-support-for-LineProfile-scr.patch")
+   #:synopsis "3D Slicer LineProfile scripted module (5.10)"
+   #:description
+   "The LineProfile scripted module extracted from 3D Slicer 5.10.
+Plots intensity profiles along a line markup.  Built from
+the @file{Modules/Scripted/LineProfile} subtree."))
+
+(define %slicer-5.10-loadable-modules
+  (list slicer-terminologies-5.10
+        slicer-subjecthierarchy-5.10
+        slicer-colors-5.10
+        slicer-volumes-5.10
+        slicer-volumerendering-5.10
+        slicer-units-5.10
+        slicer-tables-5.10
+        slicer-cameras-5.10
+        slicer-data-5.10
+        slicer-annotations-5.10
+        slicer-markups-5.10
+        slicer-models-5.10
+        slicer-sequences-5.10
+        slicer-viewcontrollers-5.10
+        slicer-reformat-5.10
+        slicer-plots-5.10
+        slicer-sceneviews-5.10
+        slicer-transforms-5.10
+        slicer-texts-5.10
+        slicer-slicerwelcome-5.10
+        slicer-segmentations-5.10))
+
+(define %slicer-5.10-scripted-modules
+  (list slicer-sampledata-5.10
+        slicer-endoscopy-5.10
+        slicer-importitksnaplabel-5.10
+        slicer-performancetests-5.10
+        slicer-selftests-5.10
+        slicer-screencapture-5.10
+        slicer-vectortoscalarvolume-5.10
+        slicer-dataprobe-5.10
+        slicer-cropvolumesequence-5.10
+        slicer-webserver-5.10
+        slicer-dicompatcher-5.10
+        slicer-dicomplugins-5.10
+        slicer-segmenteditor-5.10
+        slicer-segmentstatistics-5.10
+        slicer-dicom-5.10
+        slicer-extensionwizard-5.10
+        slicer-dicomlib-5.10
+        slicer-lineprofile-5.10))
+
+(define-public slicer-all-5.10
+  (package
+    (name "slicer-all-5.10")
+    (version (package-version slicer-5.10))
+    (source #f)
+    (build-system trivial-build-system)
+    (arguments (list #:builder #~(mkdir #$output)))
+    (propagated-inputs
+     (append (list slicer-5.10
+                   python-numpy python-requests python-pydicom python-scipy
+                   python-dicomweb-client
+                   python-pip)
+             %slicer-5.10-loadable-modules
+             %slicer-5.10-scripted-modules))
+    (synopsis "3D Slicer 5.10 with all loadable and scripted modules")
+    (description
+     "Meta-package that installs 3D Slicer 5.10 (Python-enabled) together with
+all its standalone loadable modules (terminologies, subjecthierarchy, colors,
+volumes, volumerendering, units, tables, cameras, data, annotations, markups,
+models, sequences, viewcontrollers, reformat, plots, sceneviews, transforms,
+texts, slicerwelcome, segmentations) and all Python scripted modules
+(sampledata, endoscopy, importitksnaplabel, performancetests, selftests,
+screencapture, vectortoscalarvolume, dataprobe, cropvolumesequence,
+webserver, dicompatcher, dicomplugins, segmenteditor, segmentstatistics,
+dicom, extensionwizard, dicomlib, lineprofile).")
+    (home-page (package-home-page slicer-5.10))
+    (license (package-license slicer-5.10))))
+
+;;;
 ;;; Factory for standalone Slicer loadable-module packages
 ;;;
 
@@ -3706,3 +4001,4 @@ webserver, dicompatcher, dicomplugins, segmenteditor, segmentstatistics,
 dicom, extensionwizard, dicomlib).")
     (home-page (package-home-page slicer-5.8))
     (license (package-license slicer-5.8))))
+
