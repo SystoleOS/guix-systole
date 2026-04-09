@@ -16,7 +16,9 @@
 ;;
 
 (define-module (systole licenses)
-  #:export (slul))
+  #:export (slul
+            openhaptics-eula
+            3ds-touch-driver-eula))
 
 ;; Guix does not export the license record constructor.
 (define license (@@ (guix licenses) license))
@@ -25,3 +27,20 @@
   (license "Simple Library Usage License"
            "https://svn.code.sf.net/p/teem/code/teem/trunk/LICENSE.txt"
            "A simple permissive license for library usage."))
+
+;; 3D Systems proprietary EULA that ships with OpenHaptics 3.4 Developer
+;; Edition and the Touch device driver.  The SDK and driver are freely
+;; downloadable from 3D Systems' public S3 bucket but may only be used
+;; under the terms printed in their respective README_INSTALL files.
+;; These packages are non-free; they are provided in this channel to
+;; make the JHU sawSensablePhantom stack buildable against the 3D
+;; Systems Touch haptic device.
+(define openhaptics-eula
+  (license "OpenHaptics Developer Edition EULA"
+           "https://www.3dsystems.com/software/openhaptics-developer-license"
+           "3D Systems proprietary license for the OpenHaptics SDK."))
+
+(define 3ds-touch-driver-eula
+  (license "3D Systems Touch Device Driver EULA"
+           "https://www.3dsystems.com/haptics-devices/touch"
+           "3D Systems proprietary license for the Touch USB driver."))
