@@ -3166,6 +3166,21 @@ parameter) and republishes the merged state on @code{/joint_states}.
 Used by the Touch demo to forward @code{/arm/measured_js} from the
 Sensable Phantom driver into @code{robot_state_publisher}."))
 
+;;
+;; jhu-cisst/cisst-ros is a monorepo containing cisst_msgs,
+;; cisst_ros_bridge and cisst_ros_crtk as three ament sub-packages.
+;; It supersedes the deprecated ros2_cisst_msgs / cisst_ros2_bridge /
+;; cisst_ros2_crtk repos and matches the names sawControllers/ros
+;; and sawSensablePhantom/ros actually use (and provides the
+;; cisst_ral ROS 1/2 abstraction they require).
+;;
+;; Pinned to tag 3.0.0 — introduces the cisst_ral abstraction required
+;; by the saw-components ROS 2 wrappers, without the 4.0.0 additions
+;; (CartesianState, servo_cs) that depend on an unreleased crtk_msgs.
+(define %cisst-ros-commit "5b3884b6f8ab0129ce0277e64cdc2346be9f00e1")
+(define %cisst-ros-hash
+  (base32 "02gpn8nh64gg98l0zw2zny54zf7jkynvlrzszyql67s26vpfzz3y"))
+
 (define-public ros-crtk-msgs-jazzy
   (make-ros2-rosidl-interface-package
    #:distro jazzy-distro
@@ -3184,20 +3199,17 @@ Sensable Phantom driver into @code{robot_state_publisher}."))
    #:synopsis "CRTK (collaborative-robotics) ROS 2 message definitions"
    #:description
    "Interface package for the Collaborative Robotics Toolkit (CRTK)
-naming convention used by the JHU cisst-SAW stack: OperatingState,
-StringStamped, CartesianImpedance*, TriggerOperatingState,
-QueryForwardKinematics, QueryInverseKinematics.  Required by
-@code{cisst_ros2_crtk} and, transitively, the sawSensablePhantom
-ROS 2 bridge."))
+naming convention used by the JHU cisst-SAW stack."))
 
 (define-public ros-cisst-msgs-jazzy
   (make-ros2-rosidl-interface-package
    #:distro jazzy-distro
    #:ros-name "cisst_msgs"
-   #:version "2.1.0"
-   #:repo "https://github.com/jhu-cisst/ros2_cisst_msgs"
-   #:commit "2addbab1afc3c998b95435baa16c6363f4b2e5ab"
-   #:hash (base32 "14spwl982bc7r2lbxdcxlx2lynwvx6ja0wnjn8simfhz3296gh2v")
+   #:version "3.0.0"
+   #:repo "https://github.com/jhu-cisst/cisst-ros"
+   #:commit %cisst-ros-commit
+   #:hash %cisst-ros-hash
+   #:module-subdir "cisst_msgs"
    #:message-deps (list ros-rosidl-default-generators-jazzy
                         ros-rosidl-default-runtime-jazzy
                         ros-builtin-interfaces-jazzy
@@ -3205,31 +3217,30 @@ ROS 2 bridge."))
                         ros-std-msgs-jazzy
                         ros-sensor-msgs-jazzy
                         ros-geometry-msgs-jazzy)
-   #:home-page "https://github.com/jhu-cisst/ros2_cisst_msgs"
+   #:home-page "https://github.com/jhu-cisst/cisst-ros"
    #:synopsis "JHU cisst-specific ROS 2 message definitions"
    #:description
-   "Interface package for cisst-specific ROS 2 messages: BoolStamped,
-DoubleVec, IntervalStatistics and a ConvertFloat64Array service.
-Consumed by @code{cisst_ros2_bridge} to translate cisst component
-state onto standard ROS 2 topics."))
+   "Interface package for cisst-specific ROS 2 messages (BoolStamped,
+DoubleVec, IntervalStatistics, ConvertFloat64Array).  Sub-package of
+the jhu-cisst/cisst-ros monorepo."))
 
-(define-public ros-cisst-ros2-bridge-jazzy
+(define-public ros-cisst-ros-bridge-jazzy
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
-   #:ros-name "cisst_ros2_bridge"
-   #:version "2.1.0"
-   #:repo "https://github.com/jhu-cisst/cisst_ros2_bridge"
-   #:commit "119a77d31e2dbaf54a26eef55ba092fc50a4cacd"
-   #:hash (base32 "0dznqqilasw55cnj07fnpiv61hq63haixxsgvigmpn288g00cf5x")
+   #:ros-name "cisst_ros_bridge"
+   #:version "3.0.0"
+   #:repo "https://github.com/jhu-cisst/cisst-ros"
+   #:commit %cisst-ros-commit
+   #:hash %cisst-ros-hash
+   #:module-subdir "cisst_ros_bridge"
+   ;; cisst 1.4's prmStateJoint::Name() returns std::vector<std::string>&;
+   ;; patch mtsROSToCISST.cpp to call resize() instead of SetSize().
+   #:patches '("cisst-ros-fix-name-resize.patch")
    #:extra-inputs (list cisst cisst-netlib)
    #:extra-configure-flags
    #~(list (string-append "-Dcisst_DIR="
                           #$cisst
                           "/share/cisst-1.4/cmake"))
-   ;; Upstream's mtsROSToCISST.cpp calls cisstData.Name().SetSize(...)
-   ;; but in cisst 1.4 prmStateJoint::Name() returns
-   ;; std::vector<std::string>& which uses .resize().  Patch it.
-   #:patches '("cisst_ros2_bridge-fix-name-resize.patch")
    #:propagated-inputs (list ros-ament-cmake-jazzy
                              ros-rclcpp-jazzy
                              ros-std-msgs-jazzy
@@ -3240,30 +3251,31 @@ state onto standard ROS 2 topics."))
                              ros-cisst-msgs-jazzy
                              ros-tf2-ros-jazzy
                              ros-tf2-msgs-jazzy)
-   #:home-page "https://github.com/jhu-cisst/cisst_ros2_bridge"
+   #:home-page "https://github.com/jhu-cisst/cisst-ros"
    #:synopsis "Bridge cisst/SAW multi-task components to ROS 2 topics"
    #:description
-   "@code{cisst_ros2_bridge} provides @code{mtsROSBridge}, the
-translation layer between cisst's @code{mtsComponent} interfaces and
-ROS 2 publishers/subscribers.  Consumed by the JHU @code{saw*}
-components — including @code{sawSensablePhantom} — to publish haptic
-device state on standard ROS 2 topics."))
+   "@code{cisst_ros_bridge} (from the jhu-cisst/cisst-ros monorepo)
+provides @code{mtsROSBridge} — the translation layer between cisst's
+@code{mtsComponent} interfaces and ROS 2 publishers/subscribers — plus
+the @code{cisst_ral} ROS 1/2 abstraction namespace consumed by the
+saw-components' ROS wrappers."))
 
-(define-public ros-cisst-ros2-crtk-jazzy
+(define-public ros-cisst-ros-crtk-jazzy
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
-   #:ros-name "cisst_ros2_crtk"
-   #:version "2.1.0"
-   #:repo "https://github.com/jhu-cisst/cisst_ros2_crtk"
-   #:commit "763a848db5011a0445b746448472f41319c437c6"
-   #:hash (base32 "1z0nbi93kamvvd22crlixillxsalhbnhndjbsmxqv162ljyw8f8b")
+   #:ros-name "cisst_ros_crtk"
+   #:version "3.0.0"
+   #:repo "https://github.com/jhu-cisst/cisst-ros"
+   #:commit %cisst-ros-commit
+   #:hash %cisst-ros-hash
+   #:module-subdir "cisst_ros_crtk"
    #:extra-inputs (list cisst cisst-netlib)
    #:extra-configure-flags
    #~(list (string-append "-Dcisst_DIR="
                           #$cisst
                           "/share/cisst-1.4/cmake"))
    #:propagated-inputs (list ros-ament-cmake-jazzy
-                             ros-cisst-ros2-bridge-jazzy
+                             ros-cisst-ros-bridge-jazzy
                              ros-crtk-msgs-jazzy
                              ros-rclcpp-jazzy
                              ros-std-msgs-jazzy
@@ -3274,15 +3286,15 @@ device state on standard ROS 2 topics."))
                              ros-cisst-msgs-jazzy
                              ros-tf2-ros-jazzy
                              ros-tf2-msgs-jazzy)
-   #:home-page "https://github.com/jhu-cisst/cisst_ros2_crtk"
+   #:home-page "https://github.com/jhu-cisst/cisst-ros"
    #:synopsis "CRTK (collaborative robotics) ROS 2 bridge for cisst"
    #:description
-   "@code{cisst_ros2_crtk} layers the CRTK naming convention on top of
-@code{cisst_ros2_bridge}: @code{mts_ros_crtk_bridge_provided} exposes
-all CRTK interfaces (@code{measured_js}, @code{measured_cp},
-@code{servo_cf}, @code{operating_state}, ...) of an @code{mtsComponent}
-as ROS 2 topics/services with consistent names.  Used by the JHU
-@code{sawSensablePhantom} ROS 2 node to speak CRTK."))
+   "@code{cisst_ros_crtk} (from the jhu-cisst/cisst-ros monorepo)
+layers the CRTK naming convention on top of @code{cisst_ros_bridge}:
+@code{mts_ros_crtk_bridge_provided} exposes all CRTK interfaces
+(@code{measured_js}, @code{measured_cp}, @code{servo_cf},
+@code{operating_state}, ...) of an @code{mtsComponent} as ROS 2
+topics/services."))
 
 (define-public ros-sensable-omni-model-jazzy
   (make-ros2-ament-python-package
