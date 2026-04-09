@@ -2189,6 +2189,60 @@ sensor messages between coordinate frames using @code{tf2}."))
 transform graph, built on top of @code{tf2_py}."))
 
 ;;;
+;;; diagnostic_updater + robot_state_publisher.
+;;;
+
+(define-public ros-diagnostic-updater-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "diagnostic_updater"
+   #:version "4.2.6"
+   #:repo "https://github.com/ros/diagnostics"
+   #:commit "2c0e15b9d0441750ea8e51ddeef8f28e4c1ee090"
+   #:hash (base32 "0c8a31fk244l1dpmgx2nc1l5815i6syw6w92nl1djm25nwj4bs3i")
+   #:module-subdir "diagnostic_updater"
+   #:propagated-inputs (list ros-ament-cmake-ros-jazzy
+                             ros-ament-cmake-python-jazzy
+                             ros-diagnostic-msgs-jazzy
+                             ros-rclcpp-jazzy
+                             ros-rclpy-jazzy
+                             ros-std-msgs-jazzy)
+   #:home-page "https://github.com/ros/diagnostics"
+   #:synopsis "Helper for publishing ROS 2 diagnostic_msgs/DiagnosticStatus"
+   #:description
+   "@code{diagnostic_updater} is a C++/Python helper for publishing
+@file{diagnostic_msgs/DiagnosticStatus} at a regular rate, used by
+nodes that report driver/sensor health."))
+
+(define-public ros-robot-state-publisher-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "robot_state_publisher"
+   #:version "3.3.3"
+   #:repo "https://github.com/ros/robot_state_publisher"
+   #:commit "bca90e6d30ba69da80bd5ec601bcee502040e587"
+   #:hash (base32 "0vn3n5dczxc7nyg3iz1za1b1gyyqdynybg29v65l10m6sncmxl6a")
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-builtin-interfaces-jazzy
+                             ros-geometry-msgs-jazzy
+                             ros-kdl-parser-jazzy
+                             ros-orocos-kdl-vendor-jazzy
+                             ros-rcl-interfaces-jazzy
+                             ros-rclcpp-jazzy
+                             ros-rclcpp-components-jazzy
+                             ros-sensor-msgs-jazzy
+                             ros-std-msgs-jazzy
+                             ros-tf2-ros-jazzy
+                             ros-urdf-jazzy)
+   #:home-page "https://github.com/ros/robot_state_publisher"
+   #:synopsis "Publish forward kinematics of a URDF robot to /tf"
+   #:description
+   "@code{robot_state_publisher} reads a URDF model and publishes the
+corresponding forward-kinematic transforms to the @code{tf2} graph as
+joint states change.  Essential for any mobile-manipulator or
+multi-joint robot in ROS 2."))
+
+;;;
 ;;; Aggregation meta-package.
 ;;;
 ;;; Phase 1 will grow this package's propagated-inputs tier by tier until
