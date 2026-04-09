@@ -50,7 +50,8 @@
   #:use-module (gnu packages xml)          ; tinyxml2
   #:use-module (systole packages ros2)
   #:use-module (systole packages ros2-helpers) ; urdfdom, urdfdom-headers, console-bridge
-  #:use-module (systole packages cisst)         ; cisst, cisst-netlib (Touch demo)
+  #:use-module (systole packages cisst)         ; cisst, cisst-netlib, saw-* (Touch demo)
+  #:use-module (gnu packages qt)                ; qtbase-5 for the saw-*-ros wrappers
   #:use-module (srfi srfi-1)               ; delete-duplicates, append-map
   #:use-module (ice-9 match)               ; match-lambda
   #:export (jazzy-distro))
@@ -3174,12 +3175,14 @@ Sensable Phantom driver into @code{robot_state_publisher}."))
 ;; and sawSensablePhantom/ros actually use (and provides the
 ;; cisst_ral ROS 1/2 abstraction they require).
 ;;
-;; Pinned to tag 3.0.0 — introduces the cisst_ral abstraction required
-;; by the saw-components ROS 2 wrappers, without the 4.0.0 additions
-;; (CartesianState, servo_cs) that depend on an unreleased crtk_msgs.
-(define %cisst-ros-commit "5b3884b6f8ab0129ce0277e64cdc2346be9f00e1")
+;; Pinned to post-3.0.0 commit f6184aa — introduces the
+;; required_interface_name_for helper and the 6-argument
+;; bridge_interface_provided overload needed by saw_controllers_ros,
+;; but stops before 4.0.0's CartesianState/servo_cs additions which
+;; depend on an unreleased crtk_msgs with the new message type.
+(define %cisst-ros-commit "f6184aa310f230e2853ef252a3b52a5bca81a09e")
 (define %cisst-ros-hash
-  (base32 "02gpn8nh64gg98l0zw2zny54zf7jkynvlrzszyql67s26vpfzz3y"))
+  (base32 "105n9iqlark1yj0smjdffshxgac57qagi3ycww822vn86i72qi0d"))
 
 (define-public ros-crtk-msgs-jazzy
   (make-ros2-rosidl-interface-package
@@ -3314,6 +3317,104 @@ topics/services."))
 an RViz config for the 3D Systems Touch haptic device (formerly the
 Sensable Phantom Omni).  Consumed by @code{robot_state_publisher} when
 running Laura Connolly's SlicerROS2 Touch teleoperation demo."))
+
+(define-public ros-saw-controllers-ros-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "saw_controllers_ros"
+   #:version "2.3.0"
+   #:repo "https://github.com/jhu-saw/sawControllers"
+   #:commit "cc8870e20ef0954745a83cbc4eda7d167e3bda9a"
+   #:hash (base32 "0ih28k1b09hnqn4crk0ffpk6rrjxcnnld0y8xcsxyfk0vijnly3n")
+   #:module-subdir "ros"
+   #:extra-inputs (list cisst cisst-netlib saw-keyboard saw-controllers
+                        qtbase-5 qtxmlpatterns-5)
+   #:extra-configure-flags
+   #~(list (string-append "-Dcisst_DIR="
+                          #$cisst
+                          "/share/cisst-1.4/cmake")
+           (string-append "-DsawControllers_DIR="
+                          #$saw-controllers
+                          "/share/sawControllers")
+           (string-append "-DsawKeyboard_DIR="
+                          #$saw-keyboard
+                          "/share/sawKeyboard"))
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-cisst-ros-bridge-jazzy
+                             ros-cisst-ros-crtk-jazzy
+                             ros-crtk-msgs-jazzy
+                             ros-rclcpp-jazzy)
+   #:home-page "https://github.com/jhu-saw/sawControllers"
+   #:synopsis "ROS 2 bridge for cisst/SAW controllers"
+   #:description
+   "@code{saw_controllers_ros} exposes the JHU sawControllers PID /
+gravity-compensation / teleop components as ROS 2 CRTK-bridged nodes.
+Sub-package of jhu-saw/sawControllers built from the @file{ros/}
+subdirectory against our saw-controllers core package."))
+
+(define-public ros-sensable-phantom-jazzy
+  (make-ros2-ament-cmake-package
+   #:distro jazzy-distro
+   #:ros-name "sensable_phantom"
+   #:version "1.1.0"
+   #:repo "https://github.com/jhu-saw/sawSensablePhantom"
+   #:commit "64c8b05ec2263a93a1ebd1a2bd508c2c46d024a9"
+   #:hash (base32 "1a32y6qdsrpyvq9i2v0w5kw1xbngbi4nkm4rxvn83kaddwy4jm6b")
+   #:module-subdir "ros"
+   #:extra-inputs (list cisst cisst-netlib
+                        saw-keyboard saw-controllers saw-sensable-phantom
+                        qtbase-5 qtxmlpatterns-5
+                        ;; libHD; the sensable_phantom executable
+                        ;; links against it directly, not just through
+                        ;; libsawSensablePhantom.so's NEEDED.
+                        (@ (systole packages openhaptics) openhaptics-sdk)
+                        ;; libPhantomIOLib42.so — libHD's DT_NEEDED
+                        ;; that's dlopen'd at runtime, but the final
+                        ;; executable link requires its symbols
+                        ;; (get_phantom_rate, get_status_light, ...).
+                        (@ (systole packages openhaptics) touch-driver))
+   #:extra-configure-flags
+   #~(list (string-append "-Dcisst_DIR="
+                          #$cisst
+                          "/share/cisst-1.4/cmake")
+           (string-append "-DsawSensablePhantom_DIR="
+                          #$saw-sensable-phantom
+                          "/share/sawSensablePhantom")
+           (string-append "-DsawControllers_DIR="
+                          #$saw-controllers
+                          "/share/sawControllers")
+           (string-append "-DsawKeyboard_DIR="
+                          #$saw-keyboard
+                          "/share/sawKeyboard")
+           ;; libHD DT_NEEDED's libPhantomIOLib42.so (from touch-driver),
+           ;; which is only dlopen'd at runtime.  Tell ld to ignore
+           ;; unresolved symbols from shared libs at executable link.
+           "-DCMAKE_EXE_LINKER_FLAGS=-Wl,--unresolved-symbols=ignore-in-shared-libs")
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-cisst-ros-bridge-jazzy
+                             ros-cisst-ros-crtk-jazzy
+                             ros-crtk-msgs-jazzy
+                             ros-rclcpp-jazzy
+                             ros-xacro-jazzy
+                             ros-joint-state-publisher-jazzy
+                             ros-robot-state-publisher-jazzy
+                             ros-sensable-omni-model-jazzy)
+   #:home-page "https://github.com/jhu-saw/sawSensablePhantom"
+   #:synopsis "3D Systems Touch haptic device ROS 2 node (sensable_phantom)"
+   #:description
+   "@code{sensable_phantom} is the JHU cisst-SAW ROS 2 executable that
+drives the 3D Systems Touch haptic device over OpenHaptics and
+publishes the device state on CRTK topics (@code{/arm/measured_js},
+@code{/arm/measured_cp}, @code{/arm/measured_cf}, @code{/arm/operating_state})
+while subscribing to @code{/arm/servo_cf} for haptic feedback.  Ships
+the @file{sensable_phantom_rviz.launch.py} launch file used by Laura
+Connolly's SlicerROS2 Touch teleoperation demo.
+
+At runtime this package pulls in @code{touch-driver} and
+@code{openhaptics-sdk} transitively through @code{saw-sensable-phantom},
+so installing @code{ros-sensable-phantom-jazzy} into a profile gives
+a complete Touch ROS 2 node ready to @code{ros2 run sensable_phantom
+sensable_phantom}."))
 
 ;;;
 ;;; Aggregation meta-package.
