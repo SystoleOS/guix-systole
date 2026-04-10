@@ -231,9 +231,10 @@ from their public S3 bucket under a proprietary EULA.")
            (@ (gnu packages elf) patchelf)))
     (inputs
      ;; libHD needs libncurses.so.5 + libtinfo.so.5 (legacy ABI).
-     ;; Guix proper only ships ncurses@6; nonguix ships ncurses-5.9.
-     ;; gcc:lib gives libstdc++/libgcc_s.
-     `(("ncurses" ,(@ (nongnu packages ncurses) ncurses-5))
+     ;; Must use ncurses/tinfo-5 (not ncurses-5) so libtinfo.so.5 is
+     ;; split out as a separate shared library — libHD DT_NEEDs it
+     ;; independently.  gcc:lib gives libstdc++/libgcc_s.
+     `(("ncurses" ,(@ (nongnu packages ncurses) ncurses/tinfo-5))
        ("gcc:lib" ,(@ (gnu packages gcc) gcc) "lib")))
     ;; libHD DT_NEEDED's libPhantomIOLib42.so which lives in
     ;; touch-driver; propagate so anything that installs
