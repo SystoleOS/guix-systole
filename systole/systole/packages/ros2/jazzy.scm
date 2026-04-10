@@ -3718,3 +3718,74 @@ DDS middleware (this is currently the only @code{rmw} implementation
 provided by guix-systole).")
     (home-page "https://docs.ros.org/en/jazzy/")
     (license license:asl2.0)))
+
+;;;
+;;; ros-jazzy-touch — union meta-package for Laura Connolly's Touch demo.
+;;; Same union-build pattern as ros-jazzy to avoid quadratic RAM during
+;;; `guix shell'.  One store path = one profile entry = fast hooks.
+;;;
+
+(define %ros-jazzy-touch-packages
+  (list ros-jazzy
+        ros-sensable-phantom-jazzy
+        ros-saw-controllers-ros-jazzy
+        ros-cisst-ros-bridge-jazzy
+        ros-cisst-ros-crtk-jazzy
+        ros-cisst-msgs-jazzy
+        ros-crtk-msgs-jazzy
+        ros-xacro-jazzy
+        ros-joint-state-publisher-jazzy
+        ros-sensable-omni-model-jazzy
+        ;; Explicitly include the proprietary driver + SDK so the
+        ;; Touch_Setup, Touch_Diagnostic, and ListUSBHapticDevices
+        ;; utilities land in the union's bin/.
+        (@ (systole packages openhaptics) openhaptics-sdk)
+        (@ (systole packages openhaptics) touch-driver)))
+
+(define-public ros-jazzy-touch
+  (package
+    (name "ros-jazzy-touch")
+    (version "0.1.0")
+    (source #f)
+    (build-system trivial-build-system)
+    (arguments
+     (list #:modules '((guix build union)
+                       (guix build utils)
+                       (srfi srfi-1))
+           #:builder
+           (with-imported-modules '((guix build union)
+                                    (guix build utils))
+             #~(begin
+                 (use-modules (guix build union)
+                              (guix build utils)
+                              (srfi srfi-1)
+                              (ice-9 match))
+                 (let ((out #$output)
+                       (inputs (map cdr %build-inputs)))
+                   (union-build out inputs
+                                #:create-all-directories? #t)
+                   #t)))))
+    (inputs
+     (let ((direct %ros-jazzy-touch-packages))
+       (delete-duplicates
+        (append direct
+                (append-map
+                 (lambda (pkg)
+                   (map (match-lambda ((_ p . _) p))
+                        (package-transitive-propagated-inputs pkg)))
+                 direct))
+        eq?)))
+    (native-search-paths (ros2-native-search-paths jazzy-distro))
+    (synopsis "ROS 2 Jazzy + 3D Systems Touch haptic device demo")
+    (description
+     "Union meta-package bundling @code{ros-jazzy} with the full Touch
+haptic device stack: the @code{sensable_phantom} ROS 2 node, the
+cisst/SAW framework, the CRTK bridge, the Touch URDF model, and the
+proprietary OpenHaptics SDK + USB driver.  Run with:
+
+@example
+guix shell ros-jazzy-touch
+ros2 run sensable_phantom sensable_phantom -D
+@end example")
+    (home-page "https://github.com/jhu-saw/sawSensablePhantom")
+    (license license:asl2.0)))
