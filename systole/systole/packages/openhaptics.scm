@@ -98,10 +98,38 @@
                  (when (file-exists? src)
                    (install-file src (string-append out "/lib/udev/rules.d")))))
              '("lib/udev/rules.d/91-3dsystems-hid.rules"
-               "lib/udev/rules.d/91-3dsystems-touch.rules"))))))
+               "lib/udev/rules.d/91-3dsystems-touch.rules"))
+            ;; Patchelf the pre-built binaries so they use the Guix
+            ;; dynamic linker + find their Qt5 / PhantomIO deps.
+            (let* ((patchelf (string-append
+                              #$(this-package-native-input "patchelf")
+                              "/bin/patchelf"))
+                   (ld-linux (string-append
+                              #$(this-package-input "glibc")
+                              "/lib/ld-linux-x86-64.so.2"))
+                   (gcc-lib-path
+                    ;; gcc "lib" output lives at a separate store path
+                    ;; (-gcc-14.x-lib).  Resolve via %build-inputs.
+                    (or (assoc-ref %build-inputs "gcc:lib")
+                        (error "gcc:lib input not found")))
+                   (rpath (string-append
+                           out "/lib:"
+                           gcc-lib-path "/lib:"
+                           #$(this-package-input "glibc") "/lib")))
+              (for-each
+               (lambda (bin)
+                 (let ((f (string-append out "/bin/" bin)))
+                   (when (file-exists? f)
+                     (invoke patchelf "--set-interpreter" ld-linux f)
+                     (invoke patchelf "--set-rpath" rpath f))))
+               '("Touch_Diagnostic" "Touch_Setup")))))))
     (native-inputs
      (list (@ (gnu packages base) tar)
-           (@ (gnu packages compression) gzip)))
+           (@ (gnu packages compression) gzip)
+           (@ (gnu packages elf) patchelf)))
+    (inputs
+     `(("glibc" ,(@ (gnu packages base) glibc))
+       ("gcc:lib" ,(@ (gnu packages gcc) gcc) "lib")))
     (supported-systems '("x86_64-linux"))
     (home-page "https://www.3dsystems.com/haptics-devices/touch")
     (synopsis "3D Systems Touch USB user-space driver (proprietary)")
