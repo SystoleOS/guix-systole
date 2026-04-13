@@ -90,5 +90,5 @@
 
 (define-public pythonqt-commontk-for-slicer-5.10
   (make-pythonqt-commontk #:name "pythonqt-commontk-for-slicer-5.10"
-                           #:python-pkg python-next
+                           #:python-pkg python-3.12
                            #:python-version "3.12"))
