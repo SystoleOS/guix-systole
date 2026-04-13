@@ -50,7 +50,6 @@
   #:use-module (gnu packages tbb)
   #:use-module (gnu packages xiph)
   #:use-module (systole packages maths)
-  #:use-module (systole packages python-xyz)
   #:use-module (systole packages))
 
 ;; Private non-Python base — used only for (inherit) in vtk-slicer (Python).

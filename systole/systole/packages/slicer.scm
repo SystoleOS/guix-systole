@@ -202,7 +202,7 @@ development tools, code search, and documentation generation.")
                  "0074-COMP-Fix-designer-plugin-build-dir-and-install-path-.patch"
                  "0075-COMP-Install-Slicer-VTK-hierarchy-files-and-expose-p.patch"
                  "0076-ENH-Redirect-pip_install-to-user-home-and-update-sys.patch"
-                 "0079-ENH-Add-GUIX_ENVIRONMENT-module-path-to-LD_LIBRARY_P.patch"))))
+                 "0079-ENH-Add-GUIX_ENVIRONMENT-module-path-to-LD_LIBRARY_P.patch")))))
 
     (build-system cmake-build-system)
     (arguments
@@ -1192,8 +1192,7 @@ visualization and medical image computing.")
     (license license:bsd-3)))
 
 ;; slicer-5.10 is the canonical public Slicer 5.10 package.  Python support is
-;; enabled via python-next (3.12).  VTK 9.5, ITK 5.4.4, and vtkAddon (9.5) are
-;; used.
+;; enabled via python-3.12.  VTK 9.5, ITK 5.4.4, and vtkAddon (9.5) are used.
 (define-public slicer-5.10
   (package
     (inherit %slicer-5.10)
@@ -1203,7 +1202,7 @@ visualization and medical image computing.")
        ((#:configure-flags flags)
         #~(append
            (list
-            ;; Python — Guix python-next (3.12)
+            ;; Python 3.12 (upstream package name is still "python-next")
             (string-append "-DPython3_EXECUTABLE="
                            #$(this-package-input "python-next") "/bin/python3")
             (string-append "-DPython3_INCLUDE_DIR="

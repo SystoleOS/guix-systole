@@ -335,7 +335,7 @@ code search and API exploration.")))
 (define-public ctk-for-slicer-5.10
   (let ((base (make-ctk #:vtk-pkg vtk-slicer-9.5
                         #:itk-pkg itk-slicer-5.4.4
-                        #:python-pkg python-next
+                        #:python-pkg python-3.12
                         #:python-version "3.12"
                         #:pythonqt-pkg pythonqt-commontk-for-slicer-5.10)))
     (package
