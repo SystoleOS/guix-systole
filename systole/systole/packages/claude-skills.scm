@@ -327,7 +327,7 @@ Slicer-Systole development fork."
    ;; search them for Layer 2 context (runtime behavior differences).
    #:extra-data
    (list (cons "patches"
-               (local-file "patches/slicer" #:recursive? #t)))
+               (local-file "patches/slicer-5.8" #:recursive? #t)))
 
    #:block-content %slicer-block-content
 
