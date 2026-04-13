@@ -22,16 +22,8 @@
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-xyz))
 
-;; Pinned Python 3.12 alias.  python-next drifts over time; this alias asserts
-;; the major/minor at module load so a silent upgrade to 3.13 fails loudly
-;; instead of mysteriously breaking the Slicer 5.10 PYTHONPATH (which scans
-;; lib/python3.12/site-packages).
-(define-public python-3.12
-  (let ((p python-next))
-    (unless (string-prefix? "3.12." (package-version p))
-      (error "python-next is no longer 3.12.x; update systole/packages accordingly"
-             (package-version p)))
-    p))
+;; python-3.12 is now exported by (gnu packages python) upstream.
+;; We import it from there and use it for the wrapper and rewriter below.
 
 ;; Python 3.12 wrapper that provides the 'python' binary (symlink to python3),
 ;; suitable for use as the #:python argument in pyproject-build-system.
