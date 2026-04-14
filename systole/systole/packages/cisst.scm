@@ -398,7 +398,23 @@ and are not needed for the Touch demo.")
                                (number->string (parallel-job-count))
                                "1"))))
           (replace 'install
-            (lambda _ (invoke "cmake" "--install" "build"))))))
+            (lambda _ (invoke "cmake" "--install" "build")))
+          ;; Install the JSON device config files from core/share/.
+          ;; These are not installed by core/components/CMakeLists.txt
+          ;; but are needed at runtime (e.g. -j <path>/sawSensablePhantomDefaultDevice.json).
+          (add-after 'install 'install-share
+            (lambda* (#:key outputs #:allow-other-keys)
+              (let ((share (string-append (assoc-ref outputs "out")
+                                         "/share/sawSensablePhantom")))
+                (for-each
+                 (lambda (f)
+                   (let ((src (string-append (getcwd) "/core/share/" f)))
+                     (when (file-exists? src)
+                       (install-file src share))))
+                 '("sawSensablePhantomDefault.json"
+                   "sawSensablePhantomDefaultDevice.json"
+                   "sawSensablePhantomLeft.json"
+                   "sawSensablePhantomRight.json"))))))))
     (inputs (list cisst cisst-netlib saw-keyboard saw-controllers
                   jsoncpp libxml2
                   qtbase-5

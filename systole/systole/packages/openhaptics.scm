@@ -92,13 +92,19 @@
              '("bin/Touch_Diagnostic"
                "bin/Touch_Setup"
                "ListUSBHapticDevices"))
-            (for-each
-             (lambda (rule)
-               (let ((src (string-append payload "/" rule)))
-                 (when (file-exists? src)
-                   (install-file src (string-append out "/lib/udev/rules.d")))))
-             '("lib/udev/rules.d/91-3dsystems-hid.rules"
-               "lib/udev/rules.d/91-3dsystems-touch.rules"))
+            ;; The 2022 driver tarball doesn't ship udev rules.
+            ;; Create one for the Touch USB device (vendor 2988).
+            (let ((rules-dir (string-append out "/lib/udev/rules.d")))
+              (mkdir-p rules-dir)
+              (call-with-output-file
+                  (string-append rules-dir "/91-3dsystems-touch.rules")
+                (lambda (port)
+                  (display
+                   (string-append
+                    "# 3D Systems Touch haptic device — grant rw to all users\n"
+                    "SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"2988\", "
+                    "ATTRS{idProduct}==\"0302\", MODE=\"0666\"\n")
+                   port))))
             ;; Patchelf the pre-built binaries so they use the Guix
             ;; dynamic linker + find their Qt5 / PhantomIO deps.
             (let* ((patchelf (string-append
