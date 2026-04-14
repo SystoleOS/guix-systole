@@ -3740,7 +3740,10 @@ provided by guix-systole).")
         ;; Touch_Setup, Touch_Diagnostic, and ListUSBHapticDevices
         ;; utilities land in the union's bin/.
         (@ (systole packages openhaptics) openhaptics-sdk)
-        (@ (systole packages openhaptics) touch-driver)))
+        (@ (systole packages openhaptics) touch-driver)
+        ;; Slicer + all loadable/scripted modules + SlicerROS2.
+        (@ (systole packages slicer) slicer-all-5.8)
+        (@ (systole packages slicer-ros2) slicer-ros2-module-jazzy)))
 
 (define-public ros-jazzy-touch
   (package
