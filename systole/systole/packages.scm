@@ -71,7 +71,10 @@
                          ;; they override entries in ros2/common.
                          (string-append systole-patches "/ros2/jazzy")
                          (string-append systole-patches "/ros2/common")
-                         (string-append systole-patches "/ros2"))
+                         (string-append systole-patches "/ros2")
+                         ;; SOFA Framework and SlicerSOFA extension.
+                         (string-append systole-patches "/sofa")
+                         (string-append systole-patches "/slicer-sofa"))
                    ((module-ref (resolve-module '(gnu packages)) '%patch-path)))))
 
 ;; Version-scoped patch helper for Slicer packages.
