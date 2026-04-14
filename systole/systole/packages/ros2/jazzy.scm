@@ -3817,7 +3817,20 @@ provided by guix-systole).")
                         (package-transitive-propagated-inputs pkg)))
                  direct))
         eq?)))
-    (native-search-paths (ros2-native-search-paths jazzy-distro))
+    (native-search-paths
+     (append (ros2-native-search-paths jazzy-distro)
+             ;; Slicer module discovery — same paths as slicer-5.8's
+             ;; native-search-paths so the profile hooks set
+             ;; SLICER_ADDITIONAL_MODULE_PATHS without needing
+             ;; slicer-all-5.8 as a separate manifest entry.
+             (list (search-path-specification
+                    (variable "SLICER_ADDITIONAL_MODULE_PATHS")
+                    (files '("lib/Slicer-5.8/qt-loadable-modules"
+                             "lib/Slicer-5.8/cli-modules")))
+                   (search-path-specification
+                    (variable "SLICER_INIT_DIR")
+                    (files '("share/slicer-init"))
+                    (separator #f)))))
     (synopsis "ROS 2 Jazzy + 3D Systems Touch haptic device demo")
     (description
      "Union meta-package bundling @code{ros-jazzy} with the full Touch
