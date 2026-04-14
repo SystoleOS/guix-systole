@@ -3741,6 +3741,8 @@ provided by guix-systole).")
         ;; utilities land in the union's bin/.
         (@ (systole packages openhaptics) openhaptics-sdk)
         (@ (systole packages openhaptics) touch-driver)
+        ;; saw-sensable-phantom (core) for its share/ JSON configs.
+        (@ (systole packages cisst) saw-sensable-phantom)
         ;; Slicer + all loadable/scripted modules + SlicerROS2.
         (@ (systole packages slicer) slicer-all-5.8)
         (@ (systole packages slicer-ros2) slicer-ros2-module-jazzy)))
@@ -3767,6 +3769,45 @@ provided by guix-systole).")
                        (inputs (map cdr %build-inputs)))
                    (union-build out inputs
                                 #:create-all-directories? #t)
+                   ;; Install the touch-demo launcher script.
+                   (let ((bin (string-append out "/bin/touch-demo")))
+                     (call-with-output-file bin
+                       (lambda (port)
+                         (display
+                          (string-append
+                           "#!/bin/bash\n"
+                           "# SlicerROS2 + 3D Systems Touch demo launcher.\n"
+                           "# Usage: guix shell ros-jazzy-touch -- touch-demo\n"
+                           "set -e\n"
+                           "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp\n"
+                           "export CYCLONEDDS_URI='<CycloneDDS><Domain><General>"
+                           "<Interfaces><NetworkInterface name=\"lo\"/></Interfaces>"
+                           "</General><Discovery><ParticipantIndex>auto</ParticipantIndex>"
+                           "</Discovery></Domain></CycloneDDS>'\n"
+                           "P=${GUIX_ENVIRONMENT:-$(dirname $(dirname $(which ros2)))}\n"
+                           "JSON=$P/share/sawSensablePhantom/sawSensablePhantomDefaultDevice.json\n"
+                           "URDF=$P/share/sensable_omni_model/omni.urdf\n"
+                           "cleanup() { kill $SP $RSP $JSP 2>/dev/null; }\n"
+                           "trap cleanup EXIT\n"
+                           "echo '=== Touch node ==='\n"
+                           "ros2 run sensable_phantom sensable_phantom -j $JSON \"$@\" &\n"
+                           "SP=$!; sleep 8\n"
+                           "echo '=== robot_state_publisher ==='\n"
+                           "ros2 run robot_state_publisher robot_state_publisher "
+                           "--ros-args -p robot_description:=\"$(cat $URDF)\" &\n"
+                           "RSP=$!\n"
+                           "echo '=== joint_state_publisher ==='\n"
+                           "$P/bin/joint_state_publisher "
+                           "--ros-args -p \"source_list:=['/arm/measured_js']\" &\n"
+                           "JSP=$!; sleep 3\n"
+                           "echo '=== Slicer + ROS2 ==='\n"
+                           "Slicer --additional-module-paths "
+                           "$P/lib/Slicer-5.8/qt-loadable-modules "
+                           "$P/lib/Slicer-5.8/qt-scripted-modules &\n"
+                           "echo 'All started. Ctrl+C to stop.'\n"
+                           "wait\n")
+                          port)))
+                     (chmod bin #o755))
                    #t)))))
     (inputs
      (let ((direct %ros-jazzy-touch-packages))
