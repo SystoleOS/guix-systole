@@ -3775,7 +3775,7 @@ provided by guix-systole).")
                        (lambda (port)
                          (display
                           (string-append
-                           "#!/bin/bash\n"
+                           "#!/usr/bin/env bash\n"
                            "# SlicerROS2 + 3D Systems Touch demo launcher.\n"
                            "# Usage: guix shell ros-jazzy-touch -- touch-demo\n"
                            "set -e\n"
@@ -3801,9 +3801,7 @@ provided by guix-systole).")
                            "--ros-args -p \"source_list:=['/arm/measured_js']\" &\n"
                            "JSP=$!; sleep 3\n"
                            "echo '=== Slicer + ROS2 ==='\n"
-                           "Slicer --additional-module-paths "
-                           "$P/lib/Slicer-5.8/qt-loadable-modules "
-                           "$P/lib/Slicer-5.8/qt-scripted-modules &\n"
+                           "Slicer &\n"
                            "echo 'All started. Ctrl+C to stop.'\n"
                            "wait\n")
                           port)))
