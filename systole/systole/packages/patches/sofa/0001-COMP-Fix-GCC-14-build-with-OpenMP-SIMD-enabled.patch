@@ -1,0 +1,125 @@
+From 9af809f2c817786b8a9403165f69a51859cff8d3 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 15 Apr 2026 15:24:01 +0200
+Subject: [PATCH] COMP: Fix GCC 14 build with OpenMP/SIMD enabled
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+1. Replace bare linearsolver:: with sofa::component::linearsolver::
+   in EigenSparseMatrix.h MT code paths.
+
+2. Guard EigenBaseSparseMatrix_MT.h include and all
+   SOFA_LINEARALGEBRA_HAVE_OPENMP code paths with
+   !EIGEN_VERSION_AT_LEAST(3,4,0) — ProductBase was removed
+   in Eigen 3.4 and the MT sparse-dense product code depends on it.
+   This disables the OpenMP sparse-dense multiplication optimization
+   on Eigen >= 3.4 while keeping the rest of OpenMP support active.
+---
+ .../linearalgebra/EigenBaseSparseMatrix.h     |  2 ++
+ .../sofa/linearalgebra/EigenSparseMatrix.h    | 30 +++++++++----------
+ 2 files changed, 17 insertions(+), 15 deletions(-)
+
+diff --git a/Sofa/framework/LinearAlgebra/src/sofa/linearalgebra/EigenBaseSparseMatrix.h b/Sofa/framework/LinearAlgebra/src/sofa/linearalgebra/EigenBaseSparseMatrix.h
+index 24d46667fe..4434b7c4cd 100644
+--- a/Sofa/framework/LinearAlgebra/src/sofa/linearalgebra/EigenBaseSparseMatrix.h
++++ b/Sofa/framework/LinearAlgebra/src/sofa/linearalgebra/EigenBaseSparseMatrix.h
+@@ -27,8 +27,10 @@
+ #include <Eigen/Sparse>
+ 
+ #if (SOFA_LINEARALGEBRA_HAVE_OPENMP == 1)
++#if !EIGEN_VERSION_AT_LEAST(3,4,0)
+ #include <sofa/linearalgebra/EigenBaseSparseMatrix_MT.h>
+ #endif
++#endif
+ 
+ namespace sofa::linearalgebra
+ {
+diff --git a/Sofa/framework/LinearAlgebra/src/sofa/linearalgebra/EigenSparseMatrix.h b/Sofa/framework/LinearAlgebra/src/sofa/linearalgebra/EigenSparseMatrix.h
+index edfff68b3e..eaa0e89fb5 100644
+--- a/Sofa/framework/LinearAlgebra/src/sofa/linearalgebra/EigenSparseMatrix.h
++++ b/Sofa/framework/LinearAlgebra/src/sofa/linearalgebra/EigenSparseMatrix.h
+@@ -277,11 +277,11 @@ protected:
+ 		// use optimized product if possible
+         if(canCast(data)) {
+ 
+-#if (SOFA_LINEARALGEBRA_HAVE_OPENMP == 1)
++#if (SOFA_LINEARALGEBRA_HAVE_OPENMP == 1) && !EIGEN_VERSION_AT_LEAST(3,4,0)
+             if( alias(result, data) )
+-                map(result) = linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix, map(data).template cast<Real>() );
++                map(result) = sofa::component::linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix, map(data).template cast<Real>() );
+             else
+-                map(result).noalias() = linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix, map(data).template cast<Real>() );
++                map(result).noalias() = sofa::component::linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix, map(data).template cast<Real>() );
+ #else
+             if( alias(result, data) ) {
+                 this->map(result) = (this->compressedMatrix *
+@@ -303,8 +303,8 @@ protected:
+ 		}
+ 		
+         // compute the product
+-#if (SOFA_LINEARALGEBRA_HAVE_OPENMP == 1)
+-        aux2.noalias() = linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix, aux1 );
++#if (SOFA_LINEARALGEBRA_HAVE_OPENMP == 1) && !EIGEN_VERSION_AT_LEAST(3,4,0)
++        aux2.noalias() = sofa::component::linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix, aux1 );
+ #else
+         aux2.noalias() = this->compressedMatrix * aux1;
+ #endif
+@@ -326,13 +326,13 @@ protected:
+ 		// use optimized product if possible
+ 		if( canCast(data) ) {
+ 
+-#if (SOFA_LINEARALGEBRA_HAVE_OPENMP == 1)
++#if (SOFA_LINEARALGEBRA_HAVE_OPENMP == 1) && !EIGEN_VERSION_AT_LEAST(3,4,0)
+             if( alias(result, data) )
+-                map(result) += linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix, this->map(data).template cast<Real>() * fact ).template cast<OutReal>();
++                map(result) += sofa::component::linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix, this->map(data).template cast<Real>() * fact ).template cast<OutReal>();
+             else
+             {
+                 typename map_traits<OutType>::map_type r = map(result);
+-                r.noalias() += linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix, this->map(data).template cast<Real>() * fact ).template cast<OutReal>();
++                r.noalias() += sofa::component::linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix, this->map(data).template cast<Real>() * fact ).template cast<OutReal>();
+             }
+ #else
+ 			// TODO multiply only the smallest dimension by fact 
+@@ -356,8 +356,8 @@ protected:
+ 		}
+         
+         // compute the product
+-#if (SOFA_LINEARALGEBRA_HAVE_OPENMP == 1)
+-        aux2.noalias() = linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix, aux1 );
++#if (SOFA_LINEARALGEBRA_HAVE_OPENMP == 1) && !EIGEN_VERSION_AT_LEAST(3,4,0)
++        aux2.noalias() = sofa::component::linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix, aux1 );
+ #else
+         aux2.noalias() = this->compressedMatrix * aux1;
+ #endif
+@@ -378,12 +378,12 @@ protected:
+ 		// use optimized product if possible
+ 		if(canCast(result)) {
+ 
+-#if (SOFA_LINEARALGEBRA_HAVE_OPENMP == 1)
++#if (SOFA_LINEARALGEBRA_HAVE_OPENMP == 1) && !EIGEN_VERSION_AT_LEAST(3,4,0)
+             if( alias(result, data) )
+-                map(result) += linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix.transpose(), this->map(data).template cast<Real>() * fact ).template cast<InReal>();
++                map(result) += sofa::component::linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix.transpose(), this->map(data).template cast<Real>() * fact ).template cast<InReal>();
+             else {
+                 typename map_traits<InType>::map_type r = map(result);
+-                r.noalias() += linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix.transpose(), this->map(data).template cast<Real>() * fact ).template cast<InReal>();
++                r.noalias() += sofa::component::linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix.transpose(), this->map(data).template cast<Real>() * fact ).template cast<InReal>();
+             }
+ #else
+             // TODO multiply only the smallest dimension by fact
+@@ -408,8 +408,8 @@ protected:
+ 		}
+ 		
+ 		// compute the product
+-#if (SOFA_LINEARALGEBRA_HAVE_OPENMP == 1)
+-        aux2.noalias() = linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix.transpose(), aux1 );
++#if (SOFA_LINEARALGEBRA_HAVE_OPENMP == 1) && !EIGEN_VERSION_AT_LEAST(3,4,0)
++        aux2.noalias() = sofa::component::linearsolver::mul_EigenSparseDenseMatrix_MT( this->compressedMatrix.transpose(), aux1 );
+ #else
+         aux2.noalias() = this->compressedMatrix.transpose() * aux1;
+ #endif
+-- 
+2.52.0
+
