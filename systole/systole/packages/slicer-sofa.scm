@@ -77,11 +77,35 @@
             ;; reference ${Sofa_DIR} (which we don't set).
             (add-after 'unpack 'patch-cmakelists
               (lambda _
-                ;; Remove everything after the add_subdirectory calls
-                ;; that references Sofa_DIR / CPack.
                 (substitute* "CMakeLists.txt"
                   (("set\\(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS\\)")
-                   "return() # Guix: skip CPack/SOFA install")))))))
+                   "return() # Guix: skip CPack/SOFA install"))))
+            (add-after 'unpack 'patch-sofa-environment
+              (lambda _
+                ;; Rewrite SofaEnvironment/__init__.py to use
+                ;; SOFA_ROOT from the environment (set by Guix
+                ;; search paths) instead of computing it relative
+                ;; to the script location.
+                (call-with-output-file
+                    "SlicerSofa/SofaEnvironment/__init__.py"
+                  (lambda (port)
+                    (display
+                     (string-append
+                      "import os, sys\n"
+                      "sofa_root = os.environ.get('SOFA_ROOT', '')\n"
+                      "if sofa_root:\n"
+                      "    for p in ['SofaPython3', 'STLIB', 'Cosserat',\n"
+                      "              'BeamAdapter', 'Registration']:\n"
+                      "        sp = os.path.join(sofa_root, 'plugins', p,\n"
+                      "                          'lib', 'python3', 'site-packages')\n"
+                      "        if os.path.isdir(sp) and sp not in sys.path:\n"
+                      "            sys.path.insert(0, sp)\n"
+                      "defaultExecHook = sys.excepthook\n"
+                      "import Sofa\n"
+                      "import SofaRuntime\n"
+                      "sys.excepthook = defaultExecHook\n"
+                      "__all__ = ['Sofa', 'SofaRuntime']\n")
+                     port))))))))
       ;; UseSlicer.cmake transitively requires all of slicer-5.8's
       ;; build-time libraries at configure time.  Inherit the full
       ;; input set (same pattern as slicer-ros2-module-jazzy).
