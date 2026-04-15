@@ -197,6 +197,7 @@ intersection component.")
     (arguments
      (list
       #:tests? #f
+      #:validate-runpath? #f
       #:configure-flags
       #~(list "-DCMAKE_BUILD_TYPE=Release"
               "-DSOFA_BUILD_TESTS=OFF"
@@ -280,29 +281,24 @@ intersection component.")
           (add-after 'install 'symlink-python-packages
             (lambda* (#:key outputs #:allow-other-keys)
               (use-modules (ice-9 ftw))
-              (let* ((out (assoc-ref outputs "out"))
-                     (pydir (string-append out "/lib/python3.11/site-packages")))
-                (mkdir-p pydir)
-                ;; Walk plugins/*/lib/python3/site-packages/ and
-                ;; symlink each top-level entry into pydir.
-                (let ((plugins-dir (string-append out "/plugins")))
-                  (when (directory-exists? plugins-dir)
+              (let ((out (assoc-ref outputs "out")))
+                (let ((pydir (string-append out "/lib/python3.11/site-packages"))
+                      (pdir  (string-append out "/plugins")))
+                  (mkdir-p pydir)
+                  (when (file-exists? pdir)
                     (for-each
-                     (lambda (plugin)
-                       (let ((site (string-append plugins-dir "/" plugin
-                                                  "/lib/python3/site-packages")))
-                         (when (directory-exists? site)
+                     (lambda (d)
+                       (let ((sp (string-append pdir "/" d "/lib/python3/site-packages")))
+                         (when (file-exists? sp)
                            (for-each
-                            (lambda (entry)
-                              (unless (member entry '("." ".."))
-                                (let ((src (string-append site "/" entry))
-                                      (dst (string-append pydir "/" entry)))
-                                  (unless (file-exists? dst)
-                                    (symlink src dst)))))
-                            (scandir site)))))
-                     (scandir plugins-dir
-                              (lambda (f)
-                                (not (member f '("." ".."))))))))))))))))
+                            (lambda (e)
+                              (let ((s (string-append sp "/" e))
+                                    (t (string-append pydir "/" e)))
+                                (unless (file-exists? t) (symlink s t))))
+                            (filter (lambda (f) (not (string-prefix? "." f)))
+                                    (scandir sp))))))
+                     (filter (lambda (f) (not (string-prefix? "." f)))
+                             (scandir pdir)))))))))))
     (inputs
      (list eigen boost glew tinyxml2 zlib
            nlohmann-json
