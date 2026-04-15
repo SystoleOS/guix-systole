@@ -44,7 +44,8 @@
   #:use-module (gnu packages gl)            ; glew
   #:use-module (gnu packages python)        ; python
   #:use-module (gnu packages qt)            ; qtbase-5
-  #:use-module (gnu packages xml))           ; tinyxml2
+  #:use-module (gnu packages xml)            ; tinyxml2
+  #:use-module (systole packages))          ; search-patches
 
 ;;;
 ;;; tight-inclusion — Continuous Collision Detection library required
@@ -192,7 +193,10 @@ intersection component.")
              (commit "9f48bc12fa974fb3d8d4d5b2ec8ed154181d8c11")))
        (file-name (git-file-name name version))
        (sha256
-        (base32 "1qwllykc72nyjz5f8rrccd2vyxxpcpkaz17kbi2bknhd4689r939"))))
+        (base32 "1qwllykc72nyjz5f8rrccd2vyxxpcpkaz17kbi2bknhd4689r939"))
+       (patches
+        (search-patches
+         "sofa/0001-COMP-Fix-GCC-14-build-with-OpenMP-SIMD-enabled.patch"))))
     (build-system cmake-build-system)
     (arguments
      (list
@@ -223,6 +227,9 @@ intersection component.")
               "-DPLUGIN_SOFA_GUI_QT=ON"
               "-DSOFA_WITH_OPENGL=ON"
               "-DSofaSTLIB_ENABLED=ON"
+              ;; Performance: enable OpenMP + SIMD.
+              "-DSOFA_OPENMP=ON"
+              "-DSOFA_ENABLE_SIMD=ON"
               ;; System dependencies:
               (string-append "-DBOOST_ROOT=" #$(this-package-input "boost"))
               "-DBoost_NO_BOOST_CMAKE=FALSE"
