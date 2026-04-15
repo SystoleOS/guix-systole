@@ -272,7 +272,37 @@ intersection component.")
           ;; at configure time.  The build sandbox has no writable HOME.
           (add-before 'configure 'set-home
             (lambda _
-              (setenv "HOME" (getcwd)))))))
+              (setenv "HOME" (getcwd))))
+          ;; SOFA installs Python modules into non-standard paths
+          ;; under plugins/<name>/lib/python3/site-packages/.  Create
+          ;; symlinks into lib/python3.11/site-packages/ so Guix's
+          ;; profile hooks and Slicer's PYTHONPATH pick them up.
+          (add-after 'install 'symlink-python-packages
+            (lambda* (#:key outputs #:allow-other-keys)
+              (use-modules (ice-9 ftw))
+              (let* ((out (assoc-ref outputs "out"))
+                     (pydir (string-append out "/lib/python3.11/site-packages")))
+                (mkdir-p pydir)
+                ;; Walk plugins/*/lib/python3/site-packages/ and
+                ;; symlink each top-level entry into pydir.
+                (let ((plugins-dir (string-append out "/plugins")))
+                  (when (directory-exists? plugins-dir)
+                    (for-each
+                     (lambda (plugin)
+                       (let ((site (string-append plugins-dir "/" plugin
+                                                  "/lib/python3/site-packages")))
+                         (when (directory-exists? site)
+                           (for-each
+                            (lambda (entry)
+                              (unless (member entry '("." ".."))
+                                (let ((src (string-append site "/" entry))
+                                      (dst (string-append pydir "/" entry)))
+                                  (unless (file-exists? dst)
+                                    (symlink src dst)))))
+                            (scandir site)))))
+                     (scandir plugins-dir
+                              (lambda (f)
+                                (not (member f '("." ".."))))))))))))))))
     (inputs
      (list eigen boost glew tinyxml2 zlib
            nlohmann-json
@@ -285,6 +315,14 @@ intersection component.")
            qtbase-5
            pybind11
            python))
+    (native-search-paths
+     (list (search-path-specification
+            (variable "SOFA_ROOT")
+            (files '(""))
+            (separator #f))
+           (search-path-specification
+            (variable "PYTHONPATH")
+            (files '("lib/python3.11/site-packages")))))
     (home-page "https://www.sofa-framework.org/")
     (synopsis "SOFA real-time physics simulation framework (Slicer fork, v25.12)")
     (description
