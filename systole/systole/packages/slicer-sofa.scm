@@ -34,9 +34,11 @@
   #:use-module (guix git-download)
   #:use-module (guix packages)
   #:use-module (guix utils)
+  #:use-module (gnu packages python)
   #:use-module (systole packages slicer)
   #:use-module (systole packages pythonqt)
-  #:use-module (systole packages sofa))
+  #:use-module (systole packages sofa)
+  #:use-module (srfi srfi-1))
 
 (define-public slicer-sofa
   (let ((commit "ff9f67fb8f318dcf02e9995d31f6a3278d529929")
@@ -80,10 +82,16 @@
                 (substitute* "CMakeLists.txt"
                   (("set\\(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS\\)")
                    "return() # Guix: skip CPack/SOFA install")))))))
+      ;; UseSlicer.cmake transitively requires all of slicer-5.8's
+      ;; build-time libraries at configure time.  Inherit the full
+      ;; input set (same pattern as slicer-ros2-module-jazzy).
       (inputs
-       (list slicer-5.8
-             pythonqt-commontk
-             sofa-framework))
+       (fold (lambda (pkg acc)
+               (modify-inputs acc (prepend pkg)))
+             (modify-inputs (package-inputs slicer-5.8)
+               (prepend slicer-5.8))
+             (list sofa-framework
+                   python)))
       (propagated-inputs
        (list slicer-5.8
              sofa-framework))
