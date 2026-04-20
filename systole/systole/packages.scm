@@ -65,6 +65,9 @@
                          (string-append systole-patches "/slicer-igt")
                          (string-append systole-patches "/slicer-openigtlink")
                          (string-append systole-patches "/slicerexecutionmodel")
+                         (string-append systole-patches "/openigtlinkio")
+                         (string-append systole-patches "/plusapp")
+                         (string-append systole-patches "/plustoolkit")
                          (string-append systole-patches "/vtk")
                          (string-append systole-patches "/vtk-9.5")
                          ;; Distro-specific ROS 2 patch dirs come FIRST so
