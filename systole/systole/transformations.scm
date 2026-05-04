@@ -67,6 +67,13 @@ FIXME: GUIX-SOURCE? is disabled by default due to performance issue."
   (curve Ed25519)
   (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))"))
 
+  (define %guix-moe-signing-key
+    (plain-file "guix-moe.pub" "
+(public-key
+ (ecc
+  (curve Ed25519)
+  (q #552F670D5005D7EB6ACF05284A1066E52156B51D75DE3EBD3030CD046675D543#)))"))
+
   (define %nonguix-channel
     (channel
      (name 'nonguix)
@@ -123,13 +130,15 @@ FIXME: GUIX-SOURCE? is disabled by default due to performance issue."
                                              %default-channels)))))
                           (guix-configuration-guix config)))
                      (authorized-keys
-                      (cons %nonguix-signing-key
-                            (guix-configuration-authorized-keys config)))
+                      (append (list %nonguix-signing-key
+                                    %guix-moe-signing-key)
+                              (guix-configuration-authorized-keys config)))
                      (substitute-urls
                       (delete-duplicates
                        `(,@(guix-configuration-substitute-urls config)
                          ,@(if substitutes?
-                               '("https://substitutes.nonguix.org")
+                               '("https://substitutes.nonguix.org"
+                                 "https://cache-cdn.guix.moe")
                                '())))))))))))
 
 (define* (systole-transformation-linux #:key (linux linux)
