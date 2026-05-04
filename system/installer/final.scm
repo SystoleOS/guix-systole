@@ -255,7 +255,33 @@ or #f.  Return #t on success and #f on failure."
                                       "--no-nvram")))
                      (unless (zero? rc)
                        (installer-log-line
-                        "WARNING: grub-install --recheck exited ~a" rc)))))))
+                        "WARNING: grub-install --recheck exited ~a" rc))))))
+
+             ;; The guix-service-type activation runs 'guix archive --authorize'
+             ;; during 'guix system init', but that writes to the *installer's*
+             ;; /etc/guix/acl rather than the target's.  As a result the newly
+             ;; installed system boots without the signing key in its ACL, causing
+             ;; 'guix deploy' to fail with "unauthorized public key".
+             ;;
+             ;; Fix: authorize the key in the installer's running guix daemon and
+             ;; copy the resulting ACL directly to the target file system.
+             (when (and ret (file-exists? "/etc/systole-signing-key.pub"))
+               (installer-log-line "authorizing signing key in target system ACL")
+               (let ((pipe (open-pipe* OPEN_WRITE "guix" "archive" "--authorize")))
+                 (display (call-with-input-file "/etc/systole-signing-key.pub"
+                            get-string-all)
+                          pipe)
+                 (let ((status (close-pipe pipe)))
+                   (if (zero? status)
+                       (let ((target-etc-guix
+                              (string-append (%installer-target-dir) "/etc/guix")))
+                         (mkdir-p target-etc-guix)
+                         (copy-file "/etc/guix/acl"
+                                    (string-append target-etc-guix "/acl"))
+                         (installer-log-line "signing key authorized in target ACL"))
+                       (installer-log-line
+                        "WARNING: failed to authorize signing key (exit ~a)"
+                        status))))))
            (lambda ()
              ;; Stop guix-daemon so that it does no keep the MNT namespace
              ;; alive.
