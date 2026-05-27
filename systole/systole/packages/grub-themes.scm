@@ -22,8 +22,17 @@
   #:use-module ((guix licenses)
                 #:prefix license:))
 
+;; current-filename returns #f when the module is loaded from a compiled
+;; .go (no source attachment), which happens during channel evaluation by
+;; `guix system reconfigure`.  Fall back to search-path so dirname never
+;; sees #f.
 (define %here
-  (dirname (dirname (dirname (dirname (current-filename))))))
+  (dirname
+   (dirname
+    (dirname
+     (dirname
+      (or (current-filename)
+          (search-path %load-path "systole/packages/grub-themes.scm")))))))
 
 (define-public systole-grub-theme
   (package
