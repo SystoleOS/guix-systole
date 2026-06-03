@@ -52,6 +52,7 @@
   #:use-module (guix channels)
   #:use-module (systole)
   #:use-module (systole transformations)
+  #:use-module (systole packages grub-themes)
   #:use-module (installer installer)
   #:use-module (srfi srfi-1)
   #:export (systole-os-installation
@@ -83,7 +84,8 @@
           (resolution '(1280 . 1024))
           (color-normal '((fg . light-gray) (bg . black)))
           (color-highlight '((fg . black ) (bg . yellow)))
-          (image (local-file (string-append %systole-root "assets/grub-theme/systole.png"))))))))
+          (image (file-append systole-grub-theme
+                              "/share/grub/themes/systole/systole.png")))))))
 
     (label "GNU Systole installation")
 
@@ -175,7 +177,8 @@ Examples:
           (resolution '(1280 . 1024))
           (color-normal '((fg . light-gray) (bg . black)))
           (color-highlight '((fg . black ) (bg . yellow)))
-          (image (local-file (string-append %systole-root "assets/grub-theme/systole.png"))))))))
+          (image (file-append systole-grub-theme
+                              "/share/grub/themes/systole/systole.png")))))))
 
     (label "GNU Systole installation")
 
