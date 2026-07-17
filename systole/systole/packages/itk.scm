@@ -352,3 +352,31 @@ complete 3D segmentation from a subset of manually segmented slices.")
 files, such as DICOM Spatial Registration Objects, using the DCMTK
 library.")
     (license license:asl2.0)))
+
+;;
+;; Slicer 5.12 variant — ITK 5.4.6
+;;
+
+;; ITK 5.4.6 for use by the Slicer 5.12 stack.
+;; Inherits all configure flags and remote modules from itk-slicer (5.4.0);
+;; only the source commit and vtk dependency are updated.
+;; Pin from Slicer v5.12.2 SuperBuild/External_ITK.cmake
+;; (slicer-v5.4.6-2026-04-20-f7ff6ad).
+(define-public itk-slicer-5.4.6
+  (package
+    (inherit itk-slicer)
+    (name "itk-slicer")
+    (version "5.4.6")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/Slicer/ITK")
+             (commit "5bfed9195aa26be10b0c4df533b9685bcc10cefe")))
+       (file-name (git-file-name name version))
+       (sha256
+        (base32 "0axahcv40wfw3bc8xn65zgmm412wmd2kl0vqzchhbz503dimyzcm"))))
+    (inputs (modify-inputs (package-inputs itk-slicer)
+              (replace "vtk-slicer" vtk-slicer-9.6)
+              (prepend python-3.12)))
+    (home-page "https://github.com/Slicer/ITK/")))
