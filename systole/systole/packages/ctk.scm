@@ -143,9 +143,8 @@
            libjpeg-turbo
            freetype
            tbb))
-    (home-page "github.com/commontk/CTK")
-    (synopsis "A set of common support code for medical imaging, surgical
-navigation, and related purposes. ")
+    (home-page "https://github.com/commontk/CTK")
+    (synopsis "Common support code for medical imaging and surgical navigation")
    (description
     "The goal of CTK is to support biomedical image computing. CTK
 code is licensed under Apache 2.0. This means that users of CTK are allowed to
@@ -195,17 +194,20 @@ code search and API exploration.")))
       (base32 "1d74gkpnl0rn9fbkij111zzwsxir57cgirgr4pj7xlslkiplg26i"))))
    (build-system cmake-build-system)
    (arguments
-    '(#:tests? #f
-      #:configure-flags (list "-DBUILD_TESTING=OFF"
-                              "-DCTKAppLauncher_QT_VERSION=5"
-                              "-DCTKAppLauncher_INSTALL_LauncherLibrary=ON"
-                              )))
+    (list
+     #:tests? #f
+     #:configure-flags
+     #~(list "-DBUILD_TESTING=OFF"
+             "-DCTKAppLauncher_QT_VERSION=5"
+             "-DCTKAppLauncher_INSTALL_LauncherLibrary=ON")))
    (inputs (list qtbase-5))
    (home-page "http://www.commontk.org/")
-   (synopsis
-    "Simple and small program allowing to set the environment of any executable.")
+   (synopsis "Launcher that sets up the environment of an executable")
    (description
-    "Simple and small program allowing to set the environment of any executable.")
+    "CTKAppLauncher is a simple and small program that sets up the
+environment (library paths and environment variables) of an arbitrary
+executable before launching it.  It is used by CTK-based applications such
+as 3D Slicer.")
    (license license:asl2.0)))
 
 ;;;
