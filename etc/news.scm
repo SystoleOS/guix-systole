@@ -6,6 +6,17 @@
 (channel-news
  (version 0)
 
+ (entry (commit "95b6be5bd1f0f44d6860add5fdb105667f454713")
+        (title (en "Slicer 5.12.2 stack and slicer-next preview (scaffold)"))
+        (body
+         (en "New packages @code{slicer-5.12} and @code{slicer-all-5.12} track
+upstream's current stable 5.12.2, with the matching dependency variants
+(@code{vtk-slicer-9.6}, @code{itk-slicer} 5.4.6, @code{ctk-for-slicer-5.12}).
+@code{slicer-next} tracks the 5.13 preview (Slicer main) on the same
+dependency stack.  All patches are rebased and apply cleanly, but binary
+verification on the build farm is still pending -- consider these packages
+experimental until then.")))
+
  (entry (commit "8395c62440fd096b147b3918fc7a85b6aad32b61")
         (title (en "Slicer packages no longer set PYTHONPATH"))
         (body
