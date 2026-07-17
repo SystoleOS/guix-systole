@@ -25,9 +25,9 @@
        (commit "876828a590c28881c649450588eb2e3eb2bc1f99"))
       (channel
        (name 'tailscale)
-       (url "https://github.com/umanwizard/guix-tailscale")
+       (url "https://codeberg.org/rafaelpalomar/guix-tailscale.git")
        (branch "main")
-       (commit "58bc8b05520b8565a3230e21388e97f00b886e4b"))
+       (commit "bee82d89aa8b77eb25273398325c8f54e4fcd936"))
       (channel
        (name 'guix-systole)
        (url "https://github.com/systoleos/guix-systole")
