@@ -6,6 +6,19 @@
 (channel-news
  (version 0)
 
+ (entry (commit "8395c62440fd096b147b3918fc7a85b6aad32b61")
+        (title (en "Slicer packages no longer set PYTHONPATH"))
+        (body
+         (en "The @code{slicer-5.8} and @code{slicer-5.10} packages no longer
+declare a @env{PYTHONPATH} native search path.  Guix dropped profile-level
+@env{PYTHONPATH} in 2021; a profile containing Slicer would force Slicer's
+Python 3.11/3.12 module paths onto every other Python interpreter in that
+profile.  Slicer's own module discovery is unaffected: the
+@env{SLICER_PYTHONPATH} search path remains and Slicer builds its in-process
+Python path from it at startup.  To use Slicer's Python modules from a plain
+@command{python3}, set @env{PYTHONPATH} from @env{SLICER_PYTHONPATH}
+explicitly.")))
+
  (entry (commit "89c36d9555e196fc820e2ac7f444d88b5bf4b5d9")
         (title (en "guix.moe substitutes are now opt-in"))
         (body
