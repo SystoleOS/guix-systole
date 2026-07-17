@@ -146,14 +146,14 @@
     (home-page "https://github.com/commontk/CTK")
     (synopsis "Common support code for medical imaging and surgical navigation")
    (description
-    "The goal of CTK is to support biomedical image computing. CTK
-code is licensed under Apache 2.0. This means that users of CTK are allowed to
+    "The goal of CTK is to support biomedical image computing.  CTK
+code is licensed under Apache 2.0.  This means that users of CTK are allowed to
 use the code for academic, commercial, or other purposes without paying license
 fees or being restricted in their ability to redistribute their code or keep it
 private.
 
 CTK works on topics that are not covered by existing toolkits that support the
-mutual interest and needs of the CTK community. The main scope of current CTK
+mutual interest and needs of the CTK community.  The main scope of current CTK
 efforts includes the topics DICOM, DICOM Application Hosting, Widgets, and
 Plugin Framework.")
    (license license:asl2.0)))
@@ -277,9 +277,12 @@ as 3D Slicer.")
               ;; PythonQt location — captured directly from factory arg
               (string-append "-DPYTHONQT_INSTALL_DIR=" #$pythonqt-pkg)
               ;; Python — captured directly from factory arg
-              (string-append "-DPython3_EXECUTABLE=" #$python-pkg "/bin/python3")
-              (string-append "-DPython3_INCLUDE_DIR=" #$python-pkg "/include/python" #$python-version)
-              (string-append "-DPython3_LIBRARY=" #$python-pkg "/lib/libpython" #$python-version ".so")
+              (string-append "-DPython3_EXECUTABLE=" #$python-pkg
+                             "/bin/python3")
+              (string-append "-DPython3_INCLUDE_DIR=" #$python-pkg
+                             "/include/python" #$python-version)
+              (string-append "-DPython3_LIBRARY=" #$python-pkg
+                             "/lib/libpython" #$python-version ".so")
               ;; DCMTK — still uses this-package-input (always "dcmtk", never varies)
               (string-append "-DDCMTK_DIR:PATH="
                              #$(this-package-input "dcmtk")

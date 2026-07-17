@@ -41,8 +41,7 @@
        (sha256
         (base32 "1na6ac5w2kz496wf83h4zcx9lz2h24gp6arzfizr446xvh8z43qx"))
        (patches (search-patches
-                 "0001-ENH-Refactor-CMake-project-infrastructure.patch"))
-       ))
+                 "0001-ENH-Refactor-CMake-project-infrastructure.patch"))))
     (build-system cmake-build-system)
     (arguments
      '(#:tests? #f
@@ -55,8 +54,10 @@
                           "-DqRestAPI_INSTALL_NO_DEVELOPMENT:BOOL=OFF")))
     (inputs (list qtbase-5 qtdeclarative-5))
     (home-page "https://github.com/commontk/qRestAPI")
-    (synopsis
-     "Simple Qt library allowing to synchronously or asynchronously query a REST server.")
+    (synopsis "Qt library to query REST servers synchronously or asynchronously")
     (description
-     "qRestAPI is a cross-platform, Qt-based library designed to easily query any RESTful web services. It supports multiple interfaces, including qRestAPI for general RESTful APIs, qGirderAPI for Girder, and qMidasAPI for Midas.")
+     "qRestAPI is a cross-platform, Qt-based library designed to easily query
+any RESTful web services.  It supports multiple interfaces, including
+qRestAPI for general RESTful APIs, qGirderAPI for Girder, and qMidasAPI for
+Midas.")
     (license license:asl2.0)))

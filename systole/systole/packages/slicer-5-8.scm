@@ -460,7 +460,7 @@ development tools, code search, and documentation generation.")
     (synopsis "3D Slicer - Medical visualization and computing environment")
     (description
      "3D Slicer is a multi-platform, free and open source software package for
-visualization and medical image computing. It provides capabilities for:
+visualization and medical image computing.  It provides capabilities for:
 @itemize
 @item Medical image processing and analysis
 @item Segmentation and registration
@@ -506,7 +506,8 @@ visualization and medical image computing. It provides capabilities for:
             "-DVTK_WRAP_PYTHON:BOOL=ON"
             "-DSlicer_USE_PYTHONQT:BOOL=ON"
             "-DSlicer_USE_SYSTEM_python:BOOL=ON"
-            ;; Disable Qt-scripted modules since they can be installed as separate packages
+            ;; Disable Qt-scripted modules since they can be installed
+            ;; as separate packages.
             "-DSlicer_BUILD_QTSCRIPTEDMODULES:BOOL=OFF"
             ;; PythonQt location (CTK's FindPythonQt uses PYTHONQT_INSTALL_DIR)
             (string-append "-DPYTHONQT_INSTALL_DIR="

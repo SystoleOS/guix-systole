@@ -100,15 +100,16 @@
     "Free, open-source network communication library for image-guided therapy")
    (description
     "The OpenIGTLink Library is a C/C++ implementation of The OpenIGTLink
-Protocol. OpenIGTLink is an open-source network communication interface
-specifically designed for image-guided interventions. It aims to provide a
-plug-and-play unified real-time communications (URTC) in operating rooms (ORs)
-for image-guided interventions, where imagers, sensors, surgical robots,and
-computers from different vendors work cooperatively. This URTC will ensure the
-seamless data flow among those components and enable a closed-loop process of
-planning, control, delivery, and feedback. The specification of OpenIGTLink is
-open, and can be used without any license fee; hence OpenIGTLink is suitable for
-both industrial and academic developers.")
+Protocol.  OpenIGTLink is an open-source network communication interface
+specifically designed for image-guided interventions.  It aims to provide a
+plug-and-play unified real-time communications (URTC) in operating rooms
+(ORs) for image-guided interventions, where imagers, sensors, surgical
+robots, and computers from different vendors work cooperatively.  This URTC
+will ensure the seamless data flow among those components and enable a
+closed-loop process of planning, control, delivery, and feedback.  The
+specification of OpenIGTLink is open, and can be used without any license
+fee; hence OpenIGTLink is suitable for both industrial and academic
+developers.")
    (license license:bsd-3))))
 
 (define-public slicer-openigtlink
@@ -162,13 +163,16 @@ both industrial and academic developers.")
                             "/lib/cmake/igtlio")
              (string-append "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
                             #$(this-package-input "slicer-markups-5.8")
-                            "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+                            "/include/Slicer-5.8/qt-loadable-modules/"
+                            "vtkSlicerMarkupsModuleMRML")
              (string-append "-DvtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS="
                             #$(this-package-input "slicer-annotations-5.8")
-                            "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML")
+                            "/include/Slicer-5.8/qt-loadable-modules/"
+                            "vtkSlicerAnnotationsModuleMRML")
              (string-append "-DvtkSlicerColorsModuleLogic_INCLUDE_DIRS="
                             #$(this-package-input "slicer-colors-5.8")
-                            "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerColorsModuleLogic")
+                            "/include/Slicer-5.8/qt-loadable-modules/"
+                            "vtkSlicerColorsModuleLogic")
              (string-append "-DEXTRA_MODULE_LIB_DIRS="
                             #$(this-package-input "slicer-markups-5.8")
                             "/lib/Slicer-5.8/qt-loadable-modules;"
@@ -257,8 +261,7 @@ both industrial and academic developers.")
           ;; Extra Slicer loadable modules needed for headers/libs
           slicer-markups-5.8
           slicer-annotations-5.8
-          slicer-colors-5.8
-          ))
+          slicer-colors-5.8))
    (native-inputs (list patchelf))
    (synopsis "Slicer extension for communication of IGT data")
    (description
