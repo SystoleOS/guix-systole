@@ -32,21 +32,30 @@ Run `guix-systole-dev-skill status` to print the active store path.
 ### Channel Structure
 
 The channel directory is `systole/`.  All package definitions live under
-`systole/systole/packages/`.  The channel is loaded with `-L $(pwd)/systole`.
+`systole/systole/packages/`.  The channel is loaded with `-L $(pwd)/systole`
+— never `-L .`, which leaves the checkout's modules off the load path.
 
 ```
 systole/
-  guix.scm                      # channel descriptor
   systole/packages/
-    slicer.scm                  # 3D Slicer packages (largest file)
+    slicer.scm                  # facade: re-exports the three modules below
+    slicer-factory.scm          # module factories + slicerexecutionmodel
+    slicer-5-8.scm              # Slicer 5.8.1 stack (slicer-5.8, modules, slicer-all-5.8)
+    slicer-5-10.scm             # Slicer 5.10.0 stack (slicer-5.10, modules, slicer-all-5.10)
     vtk.scm                     # VTK packages
     itk.scm                     # ITK packages
     ctk.scm                     # CTK packages
     pythonqt.scm                # PythonQt packages
     claude-skills.scm           # Claude skill packages (this skill!)
-    patches/slicer/             # Guix patches for Slicer (0001-0048 + per-module subdirs)
+    patches/slicer-5.8/         # Slicer 5.8 patches (base series + per-module subdirs)
+    patches/slicer-5.10/        # Slicer 5.10 patches (same layout)
     skills/                     # SKILL.md files for each skill package
 ```
+
+The per-version module names use `-5-8`/`-5-10` because Guile refuses dots in
+the last module-name component.  Python is always enabled: the canonical
+packages are `slicer-5.8`/`slicer-5.10` (there is **no** `slicer-python-*`
+family; non-Python bases are private `%`-prefixed definitions).
 
 ### Package Records
 
@@ -101,66 +110,80 @@ Configure flags go in `#:configure-flags`:
 
 ### Patch Infrastructure
 
-Patches are stored in `systole/systole/packages/patches/`.  They are referenced
-in `(origin ...)` with `(patches (search-patches "slicer/0001-foo.patch"))`.
+Patches are stored in `systole/systole/packages/patches/`.  Non-Slicer
+patches are referenced in `(origin ...)` with
+`(patches (search-patches "0001-foo.patch"))`; the searched directories are
+registered in `%patch-path` in `systole/systole/packages.scm`.
 
-Guix searches for patches relative to `%patch-path`, which includes the channel's
-`patches/` directory (configured in `guix.scm`).
+Slicer patches are **version-scoped**: they live under
+`patches/slicer-5.8/` and `patches/slicer-5.10/` and are resolved by the
+`slicer-patch` helper from `(systole packages)`, which uses `local-file` so
+5.8 and 5.10 patches with identical relative names resolve independently:
 
-To **replace** all patches in an inherited origin (e.g., for standalone module builds):
 ```scheme
-(origin (inherit (package-source slicer-python-5.8))
-        (patches (search-patches "slicer/markups/0001-foo.patch"
-                                 "slicer/markups/0002-bar.patch")))
+(slicer-patch "5.8" "markups/0001-foo.patch")
+;; => local-file for patches/slicer-5.8/markups/0001-foo.patch
 ```
+
+The module factories call it for you: their `#:patches` lists are file names
+relative to `patches/slicer-<version>/`, and they **replace** the base
+package's patches (standalone module builds never see the base series).
 
 ### Factory Functions
 
-**`make-slicer-loadable-module`** (in `slicer.scm`): builds a loadable module as a
-standalone CMake project.  Key keyword arguments:
+Defined in `slicer-factory.scm`, version-neutral; each per-version module
+(`slicer-5-8.scm`, `slicer-5-10.scm`) defines local wrappers with `#:slicer`,
+`#:slicer-version` (and `#:pythonqt` for loadable modules) pre-applied.
+
+**`make-slicer-loadable-module`** builds `Modules/Loadable/<subdir>` as a
+standalone CMake project against an installed Slicer:
 
 | Argument | Purpose |
 |---|---|
-| `#:module-name` | String, e.g., `"Markups"` |
-| `#:module-subdir` | Subdir under `Modules/Loadable/`, e.g., `"Markups"` |
-| `#:patches` | List of patch paths (replaces slicer-python-5.8's patches) |
-| `#:extra-inputs` | Additional package inputs |
+| `#:name` | Package name string, e.g., `"slicer-volumes-5.8"` |
+| `#:module-subdir` | Subdir under `Modules/Loadable/`, e.g., `"Volumes"` |
+| `#:patches` | List of patch names relative to `patches/slicer-<version>/` |
+| `#:synopsis`, `#:description` | Package metadata |
+| `#:extra-inputs` | Inter-module build-time deps (headers + libs) |
 | `#:extra-configure-flags` | Additional CMake `-D` flags (as a gexp list) |
-| `#:slicer` | Base Slicer package (default: `slicer-python-5.8`) |
-| `#:validate-runpath?` | Whether to validate ELF RPATHs (default: `#f`) |
+| `#:propagated-inputs` | Inter-module runtime (dlopen) deps |
+| `#:slicer`, `#:slicer-version`, `#:pythonqt` | Pre-applied by the per-version wrappers |
 
-**`make-slicer-scripted-module`** (in `slicer.scm`): builds a scripted (Python) module.
-Always uses `slicer-python-5.8`.  Key arguments: `#:module-name`, `#:module-subdir`,
-`#:patches`.
+**`make-slicer-scripted-module`**: same pattern for `Modules/Scripted/<subdir>`
+(no `#:pythonqt`).
+
+**`make-slicer-cli-module`**: builds `Modules/CLI/<subdir>` against
+SlicerExecutionModel + ITK only; executables install to
+`lib/Slicer-<version>/cli-modules`.
 
 ### Key Gotchas
 
 - **Always use absolute `-L` path**: `guix build -L $(pwd)/systole` — `local-file`
   resolves relative to the `.scm` file location, not the working directory.
 - **`(inherit ...)` replaces only listed fields** — all others come from the parent.
-- **Patches in `slicer-5.8` are NOT applied to standalone module builds** — modules
-  replace the patches list entirely (they don't append).
+- **Patches in the base Slicer package are NOT applied to standalone module
+  builds** — modules replace the patches list entirely (they don't append).
 
 ### Testing Commands
 
 ```bash
 # Syntax check (fast — just loads the module)
-guix repl -L . <<< ',m (systole packages slicer)'
-guix repl -L . <<< ',m (systole packages claude-skills)'
+guix repl -L systole <<< ',m (systole packages slicer)'
+guix repl -L systole <<< ',m (systole packages claude-skills)'
 
 # Build a specific package
 guix build -L $(pwd)/systole slicer-cameras-5.8
-guix build -L $(pwd)/systole slicer-python-all-5.8
+guix build -L $(pwd)/systole slicer-all-5.8
 
 # Lint (skip archival check which needs network)
 guix lint -L systole --exclude=archival slicer-cameras-5.8
 
 # Enter a test shell
-guix shell -L systole slicer-python-all-5.8
+guix shell -L systole slicer-all-5.8
 
 # Run all fast tests
 ./scripts/run-tests.sh
-./scripts/run-tests.sh packages   # module-loading tests only
+./scripts/run-tests.sh packages   # module discovery + package sweep
 ```
 
 ---
@@ -170,46 +193,49 @@ guix shell -L systole slicer-python-all-5.8
 ### Repository Layout
 
 ```
-patches/slicer/
-  0001-...patch  through  0048-...patch  # Applied to slicer-5.8 (full build)
+patches/slicer-5.8/
+  0001-...patch  0002-...patch  ...      # Applied to slicer-5.8 (base build)
   markups/0001-...  0002-...             # Applied to slicer-markups-5.8 only
-  subjecthierarchy/0001-... 0008-...
-  segmentations/0001-...
+  subjecthierarchy/0001-... ...
+  cli/<name>/0001-...                    # Per-CLI-module preamble patches
   colors/  units/  tables/  ...          # One subdir per module that needs patches
+patches/slicer-5.10/                     # Same layout for the 5.10 stack
 ```
 
 ### Slicer-Systole Git Repository
 
 The patches are git commits in `$SLICER_SYSTOLE_DIR` (default: `~/src/Slicer/Slicer-Systole`).
 
-**Base commit** (all branches must start here):
-```
-11eaf62e5a70b828021ff8beebbdd14d10d4f51c
-```
+**Base commits** (all branches of a stack must start at its base):
+
+| Stack | Base commit | Base branch |
+|---|---|---|
+| 5.8 | `11eaf62e5a70b828021ff8beebbdd14d10d4f51c` | `guix-systole-slicer-5.8` |
+| 5.10 | `a2b6d082be04274a849884fbb1e85634a9df90fb` | `guix-systole-slicer-5.10` |
 
 **Branch naming**:
 
 | Type | Branch pattern |
 |---|---|
-| Main Slicer patches | `guix-systole-slicer-5.8` |
-| Loadable module | `guix-systole-<name>-module-5.8.1` |
-| Scripted module | `guix-systole-<name>-scripted-module-5.8.1` |
+| Main Slicer patches | `guix-systole-slicer-<version>` |
+| Loadable module | `guix-systole-<name>-module-<x.y.z>` |
+| Scripted module | `guix-systole-<name>-scripted-module-<x.y.z>` |
 
 ### Creating / Updating a Module Branch
 
 ```bash
 cd $SLICER_SYSTOLE_DIR
 
-# Create a new branch from the base commit
+# Create a new branch from the base commit (5.8 shown)
 git checkout 11eaf62e -b guix-systole-<name>-module-5.8.1
 
 # Make your changes to Modules/Loadable/<Name>/CMakeLists.txt etc.
 # Then commit with the guix-systole format:
 git commit -m "[ENH][packages/slicer] Add standalone build support for <Name>"
 
-# Export patches (ALWAYS use absolute --output-directory)
+# Export patches (ALWAYS use absolute --output-directory, version-scoped dir)
 git format-patch -N 11eaf62e..HEAD \
-  --output-directory /home/rafael/src/guix-systole/systole/systole/packages/patches/slicer/<name>/
+  --output-directory <repo>/systole/systole/packages/patches/slicer-5.8/<name>/
 ```
 
 **Commit format**: `[Prefix][Component] Title`
@@ -257,20 +283,25 @@ endif()
 
 ### Basic make-slicer-loadable-module Usage
 
+Definitions go in the per-version module (`slicer-5-8.scm` shown), using its
+local factory wrapper.  Patch names are relative to `patches/slicer-5.8/`:
+
 ```scheme
 ;; Minimal (no inter-module deps)
-(define-public slicer-colors-5.8
+(define-public slicer-units-5.8
   (make-slicer-loadable-module
-   #:module-name "Colors"
-   #:module-subdir "Colors"
-   #:patches (search-patches "slicer/colors/0001-add-standalone-build.patch")))
+   #:name "slicer-units-5.8"
+   #:module-subdir "Units"
+   #:patches (list "units/0001-ENH-Add-standalone-build-support.patch")
+   #:synopsis "3D Slicer Units loadable module"
+   #:description "..."))
 
-;; With inter-module dependency
+;; With inter-module dependencies
 (define-public slicer-data-5.8
   (make-slicer-loadable-module
-   #:module-name "Data"
+   #:name "slicer-data-5.8"
    #:module-subdir "Data"
-   #:patches (search-patches "slicer/data/0001-add-standalone-build.patch")
+   #:patches (list "data/0001-ENH-Add-standalone-build-support.patch")
    #:extra-inputs
    (list slicer-cameras-5.8
          slicer-subjecthierarchy-5.8)
@@ -283,7 +314,13 @@ endif()
                              "/lib/Slicer-5.8/qt-loadable-modules")
                           ";"
                           #$(file-append slicer-subjecthierarchy-5.8
-                             "/lib/Slicer-5.8/qt-loadable-modules")))))
+                             "/lib/Slicer-5.8/qt-loadable-modules")))
+   ;; Runtime (dlopen) deps must be in the profile alongside this module.
+   #:propagated-inputs
+   (list slicer-cameras-5.8
+         slicer-subjecthierarchy-5.8)
+   #:synopsis "3D Slicer Data loadable module"
+   #:description "..."))
 ```
 
 ### make-slicer-scripted-module Usage
@@ -291,15 +328,17 @@ endif()
 ```scheme
 (define-public slicer-sampledata-5.8
   (make-slicer-scripted-module
-   #:module-name "SampleData"
+   #:name "slicer-sampledata-5.8"
    #:module-subdir "SampleData"
-   #:patches (search-patches "slicer/sampledata/0001-add-standalone-build.patch")))
+   #:patches (list "sampledata/0001-ENH-Add-standalone-build-support.patch")
+   #:synopsis "3D Slicer SampleData scripted module"
+   #:description "..."))
 ```
 
 ### Inter-Module Dependency Wiring
 
-**Include path pattern**: `<pkg>/include/Slicer-5.8/qt-loadable-modules/<LibName>`
-**Lib path pattern**: `<pkg>/lib/Slicer-5.8/qt-loadable-modules`
+**Include path pattern**: `<pkg>/include/Slicer-<version>/qt-loadable-modules/<LibName>`
+**Lib path pattern**: `<pkg>/lib/Slicer-<version>/qt-loadable-modules`
 
 Multiple lib dirs are joined with `;` (CMake list separator):
 ```scheme
@@ -316,20 +355,26 @@ calls: `slicerMacroBuildLoadableModule`, `SlicerMacroBuildModuleMRML`,
 
 1. **Check the source** in `$GUIX_SYSTOLE_SOURCE` to see if it's already packaged.
 2. **Check `$SLICER_SOURCE/Modules/Loadable/<Name>/CMakeLists.txt`** for dependencies.
-3. **Create the branch** in `$SLICER_SYSTOLE_DIR` from the base commit.
+3. **Create the branch** in `$SLICER_SYSTOLE_DIR` from the stack's base commit.
 4. **Add the CMakeLists preamble** (loadable or scripted variant).
 5. **Add `LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}`** to all macro calls.
-6. **Commit and export patches** with `git format-patch`.
-7. **Add the package definition** in `slicer.scm` using the factory function.
-8. **Add to `%slicer-5.8-loadable-modules`** (or scripted list).
-9. **Syntax check**: `guix repl -L . <<< ',m (systole packages slicer)'`
+6. **Commit and export patches** with `git format-patch` into
+   `patches/slicer-<version>/<name>/`.
+7. **Add the package definition** in `slicer-5-8.scm` (or `slicer-5-10.scm`)
+   using the module's local factory wrapper.
+8. **Add to `%slicer-5.8-loadable-modules`** (or the scripted/CLI list) so
+   `slicer-all-5.8` picks it up.
+9. **Syntax check**: `guix repl -L systole <<< ',m (systole packages slicer)'`
 10. **Build**: `guix build -L $(pwd)/systole slicer-<name>-5.8`
 
 ### ABI Rule
 
-**Always build against `slicer-python-5.8`** (never `slicer-5.8`).
-`make-slicer-loadable-module` defaults to `#:slicer slicer-python-5.8`.
-Do NOT override to `slicer-5.8` — it causes ABI mismatches with `ctk-python`/`vtk-slicer-python`.
+**Every module builds against the canonical base Slicer of its stack**
+(`slicer-5.8` or `slicer-5.10`), which is Python-enabled — the per-version
+factory wrappers hardcode this.  `SlicerConfig.cmake` unconditionally sets
+`Slicer_USE_PYTHONQT=ON`, so modules produce Python wrappers matching the
+application's ABI.  Never mix Python-enabled and non-Python VTK/CTK variants
+in one build — CMake fails with "Some but not all targets already defined".
 
 ### Known Build Issues
 
@@ -343,27 +388,29 @@ Do NOT override to `slicer-5.8` — it causes ABI mismatches with `ctk-python`/`
 | `Python3::Python` not linked | Scripted effects use Python C API directly | Add `Python3::Python` to `${KIT}_TARGET_LIBRARIES` when `Slicer_USE_PYTHONQT` |
 | `PYTHON_EXECUTABLE` empty | Called before `find_package(Python3)` | Patch to add fallback to `Python3_EXECUTABLE` (patch 0036) |
 | `Slicer_BINARY_DIR` empty in install config | Scripted subdirs use build-tree var | Use `${CMAKE_BINARY_DIR}` + `file(MAKE_DIRECTORY ...)` |
-| CLI-dependent module fails | `Slicer_BUILD_CLI=OFF` | CropVolume/GeneralizedReformat are blocked — don't package |
 
 ### Searching the .scm Snapshot
 
 ```bash
 # Find make-slicer-loadable-module usage patterns
 grep -n 'make-slicer-loadable-module' \
-  $GUIX_SYSTOLE_SOURCE/systole/systole/packages/slicer.scm | head -20
+  $GUIX_SYSTOLE_SOURCE/systole/systole/packages/slicer-5-8.scm | head -20
 
 # Find inter-module dependency patterns (extra-configure-flags)
 grep -B2 -A8 'extra-configure-flags' \
-  $GUIX_SYSTOLE_SOURCE/systole/systole/packages/slicer.scm | head -60
+  $GUIX_SYSTOLE_SOURCE/systole/systole/packages/slicer-5-8.scm | head -60
 
 # List packaged modules
 grep -n 'define-public slicer-' \
-  $GUIX_SYSTOLE_SOURCE/systole/systole/packages/slicer.scm
+  $GUIX_SYSTOLE_SOURCE/systole/systole/packages/slicer-5-8.scm
 
 # Find existing patch subdirectories
-ls $GUIX_SYSTOLE_SOURCE/systole/systole/packages/patches/slicer/
+ls $GUIX_SYSTOLE_SOURCE/systole/systole/packages/patches/slicer-5.8/
 
 # Look at a specific module's package definition
 grep -A30 'define-public slicer-markups-5.8' \
-  $GUIX_SYSTOLE_SOURCE/systole/systole/packages/slicer.scm
+  $GUIX_SYSTOLE_SOURCE/systole/systole/packages/slicer-5-8.scm
+
+# The factory implementations themselves
+less $GUIX_SYSTOLE_SOURCE/systole/systole/packages/slicer-factory.scm
 ```
