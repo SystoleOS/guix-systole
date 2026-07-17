@@ -55,7 +55,7 @@
   #:use-module (guix build-system cmake)
   #:use-module (guix build-system qt)
   #:use-module (guix build-system trivial)
-  #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (guix utils)
@@ -76,7 +76,7 @@
   )
 
 (define %slicer-5.10-commit "a2b6d082be04274a849884fbb1e85634a9df90fb")
-(define %slicer-5.10-hash (base32 "0d69b9d4kkm4k4682b0dgwn1d681vd8kzkay5rr9xjic2s9skcvz"))
+(define %slicer-5.10-hash (base32 "122za47872piwqlbha4i662x5s86wfb1hb9fdxkc2x6gvswc4iya"))
 
 ;;;
 ;;; Slicer 5.10
@@ -88,11 +88,11 @@
     (version "5.10.0")
     (source
      (origin
-       (method url-fetch)
-       (uri
-        (string-append
-         "https://github.com/Slicer/Slicer/archive/"
-         %slicer-5.10-commit ".tar.gz"))
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/Slicer/Slicer")
+             (commit %slicer-5.10-commit)))
+       (file-name (git-file-name name version))
        (sha256 %slicer-5.10-hash)
        (patches (map (lambda (p) (slicer-patch "5.10" p))
               (list "0001-COMP-Add-vtk-CommonSystem-component-as-requirement.patch"

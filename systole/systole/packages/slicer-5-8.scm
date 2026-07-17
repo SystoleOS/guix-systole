@@ -53,9 +53,10 @@
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages)
   #:use-module (guix build-system cmake)
+  #:use-module (guix build-system copy)
   #:use-module (guix build-system qt)
   #:use-module (guix build-system trivial)
-  #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (guix utils)
@@ -77,7 +78,7 @@
   )
 
 (define %slicer-5.8-commit "11eaf62e5a70b828021ff8beebbdd14d10d4f51c")
-(define %slicer-5.8-hash (base32 "05rz797ddci3a2m8297zyzv2g2hp6bd6djmwa1n0gbsla8b175bx"))
+(define %slicer-5.8-hash (base32 "00kgzgl0x7acrcb34sfg9vqwxaqh9w9ddnlp0s61br9fbfdhssrw"))
 
 (define-public slicer-source-5.8
   ;; Upstream Slicer 5.8 source tree, without Guix-specific build patches.
@@ -87,25 +88,16 @@
     (version "5.8.1")
     (source
      (origin
-       (method url-fetch)
-       (uri (string-append
-             "https://github.com/Slicer/Slicer/archive/"
-             %slicer-5.8-commit ".tar.gz"))
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/Slicer/Slicer")
+             (commit %slicer-5.8-commit)))
+       (file-name (git-file-name name version))
        (sha256 %slicer-5.8-hash)))
-    (build-system trivial-build-system)
-    (native-inputs (list tar gzip))
+    (build-system copy-build-system)
     (arguments
-     (list #:builder
-           (with-imported-modules '((guix build utils))
-             #~(begin
-                 (use-modules (guix build utils))
-                 (setenv "PATH"
-                         (string-append #$(file-append tar "/bin") ":"
-                                        #$(file-append gzip "/bin")))
-                 (mkdir-p #$output)
-                 (invoke "tar" "xf" #$source
-                         "--strip-components=1"
-                         "-C" #$output)))))
+     ;; The git checkout is already the bare source tree; install it as-is.
+     (list #:install-plan #~'(("." "/"))))
     (synopsis "3D Slicer 5.8 upstream source tree")
     (description
      "Upstream source tree of 3D Slicer 5.8 (commit @code{11eaf62e}), without
@@ -120,11 +112,11 @@ development tools, code search, and documentation generation.")
     (version "5.8.1")
     (source
      (origin
-       (method url-fetch)
-       (uri
-        (string-append
-         "https://github.com/Slicer/Slicer/archive/"
-         %slicer-5.8-commit ".tar.gz"))
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/Slicer/Slicer")
+             (commit %slicer-5.8-commit)))
+       (file-name (git-file-name name version))
        (sha256 %slicer-5.8-hash)
        (patches (map (lambda (p) (slicer-patch "5.8" p))
               (list "0001-COMP-Add-vtk-CommonSystem-component-as-requirement.patch"
