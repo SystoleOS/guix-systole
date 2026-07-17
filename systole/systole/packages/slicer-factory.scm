@@ -25,7 +25,7 @@
   #:use-module (gnu packages xml)
   #:use-module (gnu packages)
   #:use-module (guix build-system cmake)
-  #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (guix utils)
@@ -63,11 +63,13 @@
    (version "2.0.0")
    (source
     (origin
-     (method url-fetch)
-     (uri
-      "https://github.com/Slicer/SlicerExecutionModel/archive/91b921bd5977c3384916ba4b03705d87b26067f7.tar.gz")
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/Slicer/SlicerExecutionModel")
+           (commit "91b921bd5977c3384916ba4b03705d87b26067f7")))
+     (file-name (git-file-name name version))
      (sha256
-      (base32 "10k1m3impplv9hwhxx06wfmvlx9h54avhibv4id1pjlqjn5gjjza"))
+      (base32 "1ppff74lsncf7wgz15k4r735mbgsl3r2c6yw9jskihs3b9m460qr"))
      (patches (search-patches
                "0001-comp-use-generateclp-directly-instead-of-launcher-in.patch"
                "0002-comp-add-install-tree-cmake-config-infrastructure-fo.patch"
