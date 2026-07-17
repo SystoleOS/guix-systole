@@ -20,7 +20,7 @@
   #:use-module (gnu packages)
   #:use-module (guix gexp)
   #:use-module (guix packages)
-  #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix build-system cmake)
   #:use-module ((guix licenses)
                 #:prefix license:)
@@ -33,11 +33,13 @@
     (version "0.1")
     (source
      (origin
-       (method url-fetch)
-       (uri
-        "https://github.com/commontk/qRestAPI/archive/88c02c5d90169dfe065fa068969e59ada314d3cb.tar.gz")
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/commontk/qRestAPI")
+             (commit "88c02c5d90169dfe065fa068969e59ada314d3cb")))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "0jfnja3frcm4vkibi1vygdh7f4dmhqxni43bbb3rmlcl6jlyaibl"))
+        (base32 "1na6ac5w2kz496wf83h4zcx9lz2h24gp6arzfizr446xvh8z43qx"))
        (patches (search-patches
                  "0001-ENH-Refactor-CMake-project-infrastructure.patch"))
        ))
