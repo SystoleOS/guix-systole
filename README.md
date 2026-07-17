@@ -24,62 +24,101 @@ Then pull and build:
 
 ```bash
 guix pull
-guix build slicer
+guix build slicer-5.8          # Slicer application (Python-enabled)
+guix build slicer-all-5.8      # Slicer + all module packages
 ```
 
-Or from a local checkout:
+Or from a local checkout (the channel root is the `systole/`
+subdirectory, so always pass `-L systole` — not `-L .`):
 
 ```bash
 git clone https://github.com/SystoleOS/guix-systole.git
-guix build -L guix-systole/systole slicer
+cd guix-systole
+guix build -L systole slicer-all-5.8
 ```
 
-List all available packages:
+Search for channel packages by name:
 
 ```bash
-guix package -L guix-systole/systole -A systole
+guix package -L systole -A slicer
+```
+
+[`manifest.scm`](manifest.scm) at the repository root enumerates every
+public package in the channel — one target for full builds and
+substitute-coverage checks:
+
+```bash
+guix build -m manifest.scm                    # build everything
+guix weather -m manifest.scm                  # substitute coverage
 ```
 
 ## Available Packages
 
 ### Core Medical Imaging
-- **3D Slicer 5.8** — medical visualization and computing platform
-- **VTK / ITK** (Slicer variants) — visualization and image processing
-- **CTK** — Common Toolkit for biomedical computing
+- **3D Slicer 5.8 and 5.10** — medical visualization and computing
+  platform, packaged as parallel stacks (`slicer-5.8`/`slicer-all-5.8`
+  and `slicer-5.10`/`slicer-all-5.10`); the application plus per-module
+  packages (loadable, scripted, and CLI modules). See
+  [doc/architecture.md](doc/architecture.md) for how the modularization
+  works.
+- **VTK / ITK** (`vtk-slicer`, `vtkaddon`, `itk-slicer`) — visualization
+  and image processing, Slicer variants
+- **CTK** (`ctk`, `ctkapplauncher`) — Common Toolkit for biomedical
+  computing
 
 ### Simulation and Robotics
-- **SOFA Framework** — real-time biomechanical simulation
+- **SOFA Framework** (`sofa-framework`) — real-time biomechanical simulation
 - **SlicerSOFA** — SOFA integration for 3D Slicer
 - **SlicerROS2** — ROS 2 Jazzy bridge for Slicer
-- **ROS 2 Jazzy** — full ROS 2 distribution with cisst/SAW stack
+- **ROS 2 Jazzy** (`ros-jazzy-...`) — ROS 2 distribution with cisst/SAW stack
 
 ### Image-Guided Therapy
 - **OpenIGTLink / OpenIGTLinkIO** — network protocol for IGT
-- **PlusToolkit / PlusApp** — data acquisition for IGT
-- **SlicerIGT** — image-guided therapy extension
-- **IGSIO** — IO library for IGT
+- **PlusToolkit** (`pluslib`, `plusapp`) — data acquisition for IGT
+- **SlicerIGT** (`slicer-igt`) — image-guided therapy extension
+- **IGSIO** (`igsio`) — IO library for IGT
 
 ### Supporting Libraries
-- libarchive-slicer, teem, qRestAPI, PythonQt
+- `libarchive-slicer` (Slicer's 3.8.1 security-fix fork),
+  `teem-slicer` (Slicer's r7265 fork), `qrestapi`, `pythonqt-commontk`
+
+## Substitutes
+
+Systems built with the Systole transformations authorize the
+[nonguix](https://gitlab.com/nonguix/nonguix) substitute server by
+default. The community-run `cache-cdn.guix.moe` mirror is **opt-in**:
+pass `#:community-substitutes? #t` to `systole-transformation-guix` to
+authorize its key and add its URL (the published installer images opt
+in so Slicer-stack substitutes are available out of the box).
+
+## Channel Authentication
+
+Channel authentication (signed commits + channel introduction) is
+scaffolded but **not yet activated**: the repository carries
+`.guix-authorizations`, and [doc/channel-authentication.md](doc/channel-authentication.md)
+contains the activation runbook. Until activation, pulls are not
+cryptographically authenticated.
 
 ## Testing
 
 ```bash
-./scripts/run-tests.sh                 # all fast tests (CI runs this)
-./scripts/run-tests.sh packages        # package definition tests
-./scripts/run-tests.sh installer       # installer module tests
-./scripts/run-tests.sh lint            # guix lint
-./scripts/run-vm-tests.sh             # VM integration tests (slow)
+./scripts/run-tests.sh                 # packages + installer + lint (CI runs these)
+./scripts/run-tests.sh packages        # module loading + package sweep
+./scripts/run-tests.sh installer       # installer module checks
+./scripts/run-tests.sh lint            # guix lint with allowlist gating
+./scripts/run-vm-tests.sh              # VM integration tests (slow)
 ```
 
 ## Documentation
 
 Full documentation is in [`doc/`](doc/):
 
-- [Channel Management](doc/channel-management.rst) — versioning and reproducible builds
-- [Remote Deployment](doc/remote-deployment.rst) — `guix deploy` workflow
-- [VM Testing](doc/vm-testing.rst) — Marionette-based system tests
-- [Testing Guide](doc/testing.rst) — how to run and write tests
+- [Architecture](doc/architecture.md) — the Slicer modularization and channel design
+- [Channel Management](doc/channel-management.md) — versioning and reproducible builds
+- [Channel Authentication](doc/channel-authentication.md) — activation runbook
+- [Remote Deployment](doc/remote-deployment.md) — `guix deploy` workflow
+- [VM Testing](doc/vm-testing.md) — Marionette-based system tests
+- [Testing Guide](doc/testing.md) — how to run and write tests
 
 See also:
 - [CONTRIBUTING.md](CONTRIBUTING.md) — contribution guidelines and commit format
