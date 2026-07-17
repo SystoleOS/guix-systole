@@ -101,10 +101,9 @@
            ;; but GenerateCLP's RPATH only includes lib/.  Append the subdirectory to
            ;; the existing RPATH (read via --print-rpath) so we don't lose the GCC
            ;; libstdc++/libgcc_s paths that CMake's linker already recorded.
-           (lambda* (#:key outputs #:allow-other-keys)
+           (lambda _
              (use-modules (ice-9 popen) (ice-9 textual-ports))
-             (let* ((out (assoc-ref outputs "out"))
-                    (mdp (string-append out "/lib/ModuleDescriptionParser")))
+             (let ((mdp (string-append #$output "/lib/ModuleDescriptionParser")))
                (for-each
                 (lambda (bin)
                   (when (file-exists? bin)
@@ -114,9 +113,8 @@
                       (invoke "patchelf" "--set-rpath"
                               (string-append cur ":" mdp)
                               bin))))
-                (list (string-append out "/bin/GenerateCLP")
-                      (string-append out "/bin/GenerateCLPLauncher")))
-               #t))))))
+                (list (string-append #$output "/bin/GenerateCLP")
+                      (string-append #$output "/bin/GenerateCLPLauncher")))))))))
    (inputs (list itk-slicer
                  expat       ; ITKExpat / ITKIOXML dependency
                  hdf5-1.10)) ; ITKHDF5 pulled in transitively via ITKConfig
@@ -220,14 +218,13 @@ Line Interface) modules.  It bundles @code{tclap} and
               ;; that itkPluginUtilities.h is found without requiring an
               ;; installed Slicer package as a build input.
               (replace 'configure
-                (lambda* (#:key inputs outputs configure-flags #:allow-other-keys)
-                  (let* ((source (getcwd))
-                         (out (assoc-ref outputs "out")))
+                (lambda* (#:key configure-flags #:allow-other-keys)
+                  (let ((source (getcwd)))
                     (apply invoke "cmake"
                            "-S" (string-append source "/Modules/CLI/"
                                                #$module-subdir)
                            "-B" "build"
-                           (string-append "-DCMAKE_INSTALL_PREFIX=" out)
+                           (string-append "-DCMAKE_INSTALL_PREFIX=" #$output)
                            ;; Base/CLI provides itkPluginUtilities.h;
                            ;; Libs/vtkITK provides itkConstrainedValue*Filter.h
                            ;; (used by e.g. MultiplyScalarVolumes).  Both are
@@ -237,8 +234,7 @@ Line Interface) modules.  It bundles @code{tclap} and
                                           source "/Base/CLI;"
                                           source "/Libs/vtkITK")
                            configure-flags)
-                    (chdir "build")
-                    #t))))))
+                    (chdir "build")))))))
    ;; slicerexecutionmodel and itk-slicer are the primary build deps.
    ;; expat and hdf5-1.10 are explicit because ITKConfig.cmake references them
    ;; but they are not propagated-inputs of itk-slicer.
@@ -330,17 +326,14 @@ Line Interface) modules.  It bundles @code{tclap} and
           #~(modify-phases %standard-phases
               ;; Build only the named sub-directory, not the Slicer root.
               (replace 'configure
-                (lambda* (#:key inputs outputs configure-flags #:allow-other-keys)
-                  (let* ((source (getcwd))
-                         (out (assoc-ref outputs "out")))
-                    (apply invoke "cmake"
-                           "-S" (string-append source "/Modules/Loadable/"
-                                               #$module-subdir)
-                           "-B" "build"
-                           (string-append "-DCMAKE_INSTALL_PREFIX=" out)
-                           configure-flags)
-                    (chdir "build")
-                    #t))))))
+                (lambda* (#:key configure-flags #:allow-other-keys)
+                  (apply invoke "cmake"
+                         "-S" (string-append (getcwd) "/Modules/Loadable/"
+                                             #$module-subdir)
+                         "-B" "build"
+                         (string-append "-DCMAKE_INSTALL_PREFIX=" #$output)
+                         configure-flags)
+                  (chdir "build"))))))
    ;; UseSlicer.cmake transitively requires all of the base Slicer's build-time
    ;; libraries (Qt5, VTK, ITK, etc.) to be present in the build environment,
    ;; not just the base Slicer itself.  We therefore start from its input
@@ -414,17 +407,14 @@ Line Interface) modules.  It bundles @code{tclap} and
           ;; build only the named scripted-module sub-directory.
           #~(modify-phases %standard-phases
               (replace 'configure
-                (lambda* (#:key inputs outputs configure-flags #:allow-other-keys)
-                  (let* ((source (getcwd))
-                         (out (assoc-ref outputs "out")))
-                    (apply invoke "cmake"
-                           "-S" (string-append source "/Modules/Scripted/"
-                                               #$module-subdir)
-                           "-B" "build"
-                           (string-append "-DCMAKE_INSTALL_PREFIX=" out)
-                           configure-flags)
-                    (chdir "build")
-                    #t))))))
+                (lambda* (#:key configure-flags #:allow-other-keys)
+                  (apply invoke "cmake"
+                         "-S" (string-append (getcwd) "/Modules/Scripted/"
+                                             #$module-subdir)
+                         "-B" "build"
+                         (string-append "-DCMAKE_INSTALL_PREFIX=" #$output)
+                         configure-flags)
+                  (chdir "build"))))))
    ;; useslicer.cmake requires the full dependency tree.
    ;; we start from the base slicer's inputs and prepend the base slicer
    ;; itself so cmake can locate slicerconfig.cmake.

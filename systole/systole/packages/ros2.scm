@@ -213,18 +213,16 @@ of monorepos such as ament_cmake or rcl_interfaces)."
            #~(modify-phases %standard-phases
                #$@(if module-subdir
                       #~((replace 'configure
-                           (lambda* (#:key outputs configure-flags
+                           (lambda* (#:key configure-flags
                                      #:allow-other-keys)
-                             (let ((source (getcwd))
-                                   (out (assoc-ref outputs "out")))
-                               (apply invoke "cmake"
-                                      "-S" (string-append source "/"
-                                                          #$module-subdir)
-                                      "-B" "build"
-                                      (string-append "-DCMAKE_INSTALL_PREFIX="
-                                                     out)
-                                      configure-flags)
-                               (chdir "build")))))
+                             (apply invoke "cmake"
+                                    "-S" (string-append (getcwd) "/"
+                                                        #$module-subdir)
+                                    "-B" "build"
+                                    (string-append "-DCMAKE_INSTALL_PREFIX="
+                                                   #$output)
+                                    configure-flags)
+                             (chdir "build"))))
                       #~()))))
     ;; Python is needed at configure time by virtually every ament_cmake
     ;; package (cmake/core/python.cmake calls find_package(Python3)).

@@ -107,12 +107,12 @@
                      (lambda (port)
                        (display "# pbar disabled\n" port)))))
                (add-after 'install 'install-config-header
-                 (lambda* (#:key outputs #:allow-other-keys)
-                   (let ((out (assoc-ref outputs "out"))
-                         (src "../source/src/tight_inclusion/config.hpp"))
+                 (lambda _
+                   (let ((src "../source/src/tight_inclusion/config.hpp"))
                      (when (file-exists? src)
                        (install-file src
-                                     (string-append out "/include/tight_inclusion")))))))))
+                                     (string-append
+                                      #$output "/include/tight_inclusion")))))))))
     (inputs (list eigen (@ (gnu packages logging) spdlog)))
     (home-page "https://github.com/sofa-framework/Tight-Inclusion")
     (synopsis "Tight-Inclusion continuous collision detection")
@@ -286,9 +286,9 @@ intersection component.")
           ;; symlinks into lib/python3.11/site-packages/ so Guix's
           ;; profile hooks and Slicer's PYTHONPATH pick them up.
           (add-after 'install 'symlink-python-packages
-            (lambda* (#:key outputs #:allow-other-keys)
+            (lambda _
               (use-modules (ice-9 ftw))
-              (let ((out (assoc-ref outputs "out")))
+              (let ((out #$output))
                 (let ((pydir (string-append out "/lib/python3.11/site-packages"))
                       (pdir  (string-append out "/plugins")))
                   (mkdir-p pydir)

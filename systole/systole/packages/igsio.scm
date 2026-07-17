@@ -204,15 +204,13 @@ SlicerIGSIO 3D Slicer extensions.")
           #:phases
           #~(modify-phases %standard-phases
               (replace 'configure
-                (lambda* (#:key inputs outputs configure-flags #:allow-other-keys)
-                  (let ((out (assoc-ref outputs "out")))
-                    (apply invoke "cmake"
-                           "-S" (string-append (getcwd) "/SlicerIGSIOCommon")
-                           "-B" "build"
-                           (string-append "-DCMAKE_INSTALL_PREFIX=" out)
-                           configure-flags)
-                    (chdir "build")
-                    #t))))))
+                (lambda* (#:key configure-flags #:allow-other-keys)
+                  (apply invoke "cmake"
+                         "-S" (string-append (getcwd) "/SlicerIGSIOCommon")
+                         "-B" "build"
+                         (string-append "-DCMAKE_INSTALL_PREFIX=" #$output)
+                         configure-flags)
+                  (chdir "build"))))))
    (inputs (fold (lambda (pkg acc)
                    (modify-inputs acc (prepend pkg)))
                  (modify-inputs (package-inputs slicer-5.8)

@@ -136,12 +136,12 @@
                          (or (getenv "CXXFLAGS") "")
                          " -Wno-error"))))
             (add-after 'patch-install-layout 'add-qt5-uitools
-              (lambda* (#:key inputs #:allow-other-keys)
+              (lambda _
                 ;; qSlicerROS2ModuleWidget.cxx includes <QUiLoader>.
                 ;; Upstream's CMakeLists.txt doesn't request the Qt5
                 ;; UiTools component, so inject find_package() + an
                 ;; include_directories() call at the top.
-                (let ((qttools (assoc-ref inputs "qttools")))
+                (let ((qttools #$(this-package-input "qttools")))
                   ;; Inject after the main find_package(Slicer REQUIRED)
                   ;; (which runs project() and enables CXX), so the Qt5
                   ;; UiTools find_package has an enabled CXX language.
