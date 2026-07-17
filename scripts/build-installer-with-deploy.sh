@@ -284,11 +284,13 @@ elif [[ -f "$CHANNELS_FILE" ]]; then
     info "Using channels file: $CHANNELS_FILE"
 fi
 
-# Generate output filename if not specified
+# Generate output filename if not specified.  Default to artifacts/ so
+# multi-gigabyte ISOs do not accumulate in the repository root.
 if [[ -z "$OUTPUT" ]]; then
     TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-    OUTPUT="$REPO_DIR/systole-installer-deploy-$TIMESTAMP.iso"
+    OUTPUT="$REPO_DIR/artifacts/systole-installer-deploy-$TIMESTAMP.iso"
 fi
+mkdir -p "$(dirname "$OUTPUT")"
 
 info "Building installer ISO with configuration..."
 info "Output: $OUTPUT"

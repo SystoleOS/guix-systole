@@ -2,8 +2,15 @@ CLAUDE.md
 
 # Build artifacts
 *.iso
+*.iso.sha256
+*.gcroot
 *.log
 *.qcow2
+*.bak
+artifacts/
+
+# Local tooling state
+.pks-project-id
 
 # Test keys (SSH/signing keys for testing)
 test-key
