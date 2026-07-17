@@ -310,3 +310,85 @@ future.")
      (modify-inputs (package-inputs %vtkaddon-9.5)
        (replace "vtk-slicer" vtk-slicer-9.5)
        (prepend python-3.12)))))
+
+;;
+;; Slicer 5.12 variants — VTK 9.6.2 + matching vtkAddon
+;;
+
+;; Private non-Python base for VTK 9.6 — used only for (inherit) in vtk-slicer-9.6.
+;;
+;; Note: Slicer's SuperBuild (External_VTK.cmake at v5.12.2) additionally passes
+;; a linker version script (vtk-hide-stdcxx-regex.ver) hiding libstdc++ regex
+;; internals.  That workaround exists only because upstream Slicer bundles a
+;; prebuilt Qt WebEngine built with a different toolchain; on Guix everything
+;; is built with one toolchain and WebEngine support is OFF, so it is not
+;; carried over.  All other flags are inherited unchanged from the 9.5 variant.
+(define %vtk-slicer-9.6
+  (package
+    (inherit %vtk-slicer)
+    (version "9.6.2")
+    (source
+     (origin
+       (method git-fetch)
+       ;; Commit from VTK version: slicer-v9.6.2-2026-05-15-f49a1dbaf
+       (uri (git-reference
+             (url "https://github.com/Slicer/VTK")
+             (commit "6181bb1223bbc499a340a1644f5356e7e152c318")))
+       (file-name (git-file-name "vtk-slicer" version))
+       (sha256
+        (base32 "06cvyq6z8gs83d8k9vbvwayyrx49vgyd2r0vvr0qwj1g34579m5w"))))))
+
+;; Python-enabled VTK 9.6 for use by the Slicer 5.12 stack.
+(define-public vtk-slicer-9.6
+  (package
+    (inherit %vtk-slicer-9.6)
+    (name "vtk-slicer-9.6")
+    (arguments
+     (substitute-keyword-arguments (package-arguments %vtk-slicer-9.6)
+       ((#:configure-flags flags)
+        #~(cons "-DVTK_WRAP_PYTHON:BOOL=ON"
+                (delete "-DVTK_WRAP_PYTHON:BOOL=OFF" #$flags)))))
+    (inputs
+     (modify-inputs (package-inputs %vtk-slicer-9.6)
+       (prepend python-3.12)))))
+
+;; Private non-Python base for vtkAddon (Slicer 5.12).
+;;
+;; The 0001-COMP-Fix-Python-detection patch used by the 9.5-era vtkAddon is
+;; dropped here: upstream vtkAddon 2ed3e222 migrated vtkMacroKitPythonWrap to
+;; the VTK_Python3_LIBRARIES machinery, so the legacy find_package(PythonLibs)
+;; path that the patch worked around is gone.
+(define %vtkaddon-9.6
+  (let ((commit "2ed3e2226cf25958b4dbf8bf917b2f7793ecd6a2")
+        (revision "0"))
+  (package
+    (inherit %vtkaddon)
+    (version (git-version "0.0.0" revision commit))
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/Slicer/vtkAddon")
+             (commit commit)))
+       (file-name (git-file-name "vtkaddon" (git-version "0.0.0" revision commit)))
+       (sha256
+        (base32 "13pjpk1m6gcgp84wfzmbf0zza4jqrvikf79w3mgyw1n21faz17h6"))
+       (patches (search-patches
+                 "0007-ENH-packages-vtk-use-CMAKE-GNUInstallDirs.patch"))))
+    (inputs (modify-inputs (package-inputs %vtkaddon)
+              (replace "vtk-slicer" %vtk-slicer-9.6))))))
+
+;; Python-enabled vtkAddon for Slicer 5.12.
+(define-public vtkaddon-9.6
+  (package
+    (inherit %vtkaddon-9.6)
+    (name "vtkaddon-9.6")
+    (arguments
+     (substitute-keyword-arguments (package-arguments %vtkaddon-9.6)
+       ((#:configure-flags flags)
+        #~(cons "-DvtkAddon_WRAP_PYTHON:BOOL=ON"
+                (delete "-DvtkAddon_WRAP_PYTHON:BOOL=OFF" #$flags)))))
+    (inputs
+     (modify-inputs (package-inputs %vtkaddon-9.6)
+       (replace "vtk-slicer" vtk-slicer-9.6)
+       (prepend python-3.12)))))
