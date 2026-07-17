@@ -1,14 +1,16 @@
 # Testing Infrastructure
 
-This directory contains the testing infrastructure for Guix-Systole.
+This directory contains the test suite for Guix-Systole. The full
+guide, including CI details and the `GUIX` override for pinned runs,
+is in [doc/testing.md](../doc/testing.md).
 
 ## Quick Start
 
 ```bash
-# Run all tests (except slow build tests)
+# Run all fast tests (packages + installer + lint)
 ./scripts/run-tests.sh
 
-# Run specific test category
+# Run a specific category
 ./scripts/run-tests.sh packages
 ./scripts/run-tests.sh installer
 ./scripts/run-tests.sh lint
@@ -16,143 +18,59 @@ This directory contains the testing infrastructure for Guix-Systole.
 # Run build tests (WARNING: very slow!)
 ./scripts/run-tests.sh build
 
+# Run against the pinned channels, as CI does
+GUIX="guix time-machine -C channels-lock.scm --" ./scripts/run-tests.sh
+
 # See all options
 ./scripts/run-tests.sh --help
 ```
-
-## Test Categories
-
-### Package Tests (`tests/packages/`)
-- **Module loading tests:** Verify all Guile modules load without errors
-- **Package definitions:** Test package syntax and structure
-- **Build tests:** Actually build packages (slow, not run by default in CI)
-- **Functionality tests:** Test that packages work as expected
-
-### Installer Tests (`tests/installer/`)
-- **Module loading:** Verify installer modules load correctly
-- **Dry-run tests:** Test installer logic without actual installation
-- **VM tests:** Test full installer in QEMU virtual machines (to be implemented)
-
-### Lint Tests
-- Run `guix lint` on all packages
-- Check for common issues and Guix standards compliance
-- Already integrated in CI
 
 ## Directory Structure
 
 ```
 tests/
-├── packages/          # Package-specific tests
-│   └── test-modules-load.sh
-├── installer/         # Installer tests
-│   └── test-dry-run.sh
-├── system/            # System configuration tests (to be added)
-└── common/            # Shared test utilities (to be added)
+├── packages/
+│   ├── test-modules-load.sh    # wrapper: runs check-packages.scm in script mode
+│   └── check-packages.scm      # module discovery + package sweep + API contract
+├── installer/
+│   ├── test-dry-run.sh         # wrapper: runs check-installer.scm in script mode
+│   ├── check-installer.scm     # installer/OS module + entry-point checks
+│   └── installer.scm           # VM tests, module (tests installer installer)
+├── manual/                     # interactive end-to-end scripts (see its README)
+└── lint-allowlist.regex        # guix lint warnings accepted as technical debt
 ```
+
+## Test Categories
+
+- **Package tests** (`tests/packages/`): load every `(systole ...)`
+  module, touch every exported package, and verify the channel's public
+  API contract. New modules are discovered automatically.
+- **Installer tests** (`tests/installer/`): load all installer/OS
+  modules and verify the ISO-build entry points. Needs
+  `guix shell guile guile-newt guile-parted guile-webutils` (the
+  wrapper handles this).
+- **Lint**: `guix lint -L systole` over the `LINT_PACKAGES` list in
+  `scripts/run-tests.sh`, gated on `lint-allowlist.regex`.
+- **VM tests**: Marionette system tests booting full QEMU VMs; run with
+  `./scripts/run-vm-tests.sh [basic|deploy-key|no-ssh|all]`.
+- **Manual tests** (`tests/manual/`): deployment workflows that need
+  real hardware or human interaction.
 
 ## Writing New Tests
 
-### Shell Script Tests
+Shell tests named `tests/packages/test-*.sh` or
+`tests/installer/test-*.sh` are discovered and run automatically by
+`run-tests.sh`. Keep them:
 
-Create a test script in the appropriate directory:
+1. **Fast by default** — slow things go in `build`, VM, or manual tests
+2. **Honoring `$GUIX`** — so CI can pin them via time-machine
+3. **Exit-status-clean** — non-zero on failure; prefer `guix repl`
+   *script mode* over heredoc REPL sessions (which always exit 0)
+4. **Using `-L systole`** — never `-L .`; the channel root is the
+   `systole/` subdirectory
+
+Example build check inside a test:
 
 ```bash
-#!/usr/bin/env bash
-# tests/packages/test-mypackage.sh
-
-set -e
-
-echo "Testing my package..."
-
-# Your test logic here
-if guix build -L . mypackage; then
-    echo "✓ Build succeeded"
-    exit 0
-else
-    echo "✗ Build failed"
-    exit 1
-fi
+guix build -L "$REPO_ROOT/systole" mypackage
 ```
-
-Make it executable:
-```bash
-chmod +x tests/packages/test-mypackage.sh
-```
-
-The test runner will automatically discover and run it.
-
-### Guile/Scheme Tests
-
-For more complex tests, use Guile:
-
-```scheme
-;; tests/packages/test-mypackage.scm
-(define-module (tests packages mypackage)
-  #:use-module (systole packages mypackage)
-  #:use-module (srfi srfi-64))
-
-(test-begin "mypackage")
-
-(test-assert "package builds"
-  ;; Test logic here
-  #t)
-
-(test-end "mypackage")
-```
-
-## CI Integration
-
-Tests run automatically in GitHub Actions:
-- **On every PR:** Module loading and lint tests
-- **On push to main/dev:** Full test suite (except builds)
-- **Build tests:** Run manually due to time constraints
-
-See `.github/workflows/` for CI configuration.
-
-## Adding Tests for Refactoring
-
-Before refactoring code:
-
-1. **Add tests for current behavior**
-   ```bash
-   # Create test that validates current functionality
-   vim tests/packages/test-before-refactor.sh
-   ./scripts/run-tests.sh packages
-   ```
-
-2. **Refactor the code**
-
-3. **Run tests to verify nothing broke**
-   ```bash
-   ./scripts/run-tests.sh
-   ```
-
-4. **Add tests for new behavior**
-
-## Test Best Practices
-
-1. **Fast by default:** Don't include slow tests in the main suite
-2. **Isolated:** Tests should not depend on each other
-3. **Deterministic:** Same input = same output, every time
-4. **Clear output:** Make it obvious what passed and what failed
-5. **Documentation:** Comment why you're testing something, not just what
-
-## Current Test Coverage
-
-- [x] Package module loading
-- [x] Lint checks for all packages
-- [ ] Package builds (too slow for CI, run manually)
-- [ ] Package functionality tests
-- [x] Installer module loading
-- [ ] Installer dry-run full workflow
-- [ ] Installer VM tests
-- [ ] System transformation tests
-
-## Future Enhancements
-
-- [ ] Add pytest-based test framework for better reporting
-- [ ] Add coverage metrics
-- [ ] Add performance benchmarking
-- [ ] Add integration tests for package interactions
-- [ ] Add automated VM testing for installer
-- [ ] Add snapshot testing for generated configurations
