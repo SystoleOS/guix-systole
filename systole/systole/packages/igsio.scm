@@ -35,7 +35,7 @@
   #:use-module (gnu packages xml)
   #:use-module (gnu packages xiph)
   #:use-module (guix build-system cmake)
-  #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (guix utils)
@@ -53,7 +53,7 @@
 ;;;
 
 (define %igsio-commit "4f3605eb1928c9926be4e476c8608c0754f35873")
-(define %igsio-version "0.0.0-4f3605e")
+(define %igsio-version (git-version "0.0.0" "0" %igsio-commit))
 
 (define-public igsio
   (package
@@ -61,12 +61,13 @@
    (version %igsio-version)
    (source
     (origin
-     (method url-fetch)
-     (uri (string-append
-           "https://github.com/IGSIO/IGSIO/archive/"
-           %igsio-commit ".tar.gz"))
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/IGSIO/IGSIO")
+           (commit %igsio-commit)))
+     (file-name (git-file-name name version))
      (sha256
-      (base32 "1wqzyi28yi5s5jhip996b594lxcjmbf2l6l0a7a3rvy6qbx68lxs"))
+      (base32 "0ppwidr5srbizin3nim9nw22x6jv8cmpmisn3k3pwj74ycg51idi"))
      (patches (search-patches
                "0001-ENH-Add-install-tree-CMake-configuration-to-IGSIO.patch"
                "0002-ENH-Restrict-find_package-VTK-to-required-components.patch"
@@ -158,16 +159,17 @@ SlicerIGSIO 3D Slicer extensions.")
 ;;;
 
 (define %slicer-igsio-commit "1a89776c9f1c8bbbad62000561aa892afe1e7077")
-(define %slicer-igsio-version "0.0.0-1a89776")
+(define %slicer-igsio-version (git-version "0.0.0" "0" %slicer-igsio-commit))
 
 (define %slicer-igsio-source
   (origin
-   (method url-fetch)
-   (uri (string-append
-         "https://github.com/IGSIO/SlicerIGSIO/archive/"
-         %slicer-igsio-commit ".tar.gz"))
+   (method git-fetch)
+   (uri (git-reference
+         (url "https://github.com/IGSIO/SlicerIGSIO")
+         (commit %slicer-igsio-commit)))
+   (file-name (git-file-name "slicer-igsio" %slicer-igsio-version))
    (sha256
-    (base32 "1dxwbjwdazzf0k29hyzg0zh8mm07q0lqhzcj1xrsgaf9r2zq8h0z"))
+    (base32 "0wwb6irfygx4jnmksni3kl9wzm7awvq3xdvzlb5pissj3bzy27g8"))
    (patches (search-patches
              "0001-ENH-Add-standalone-CMake-preamble-for-SlicerIGSIOCom.patch"
              "0002-COMP-Guard-vtkIGSIOMkvSequenceIO-include-behind-IGSI.patch"))))
