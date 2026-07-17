@@ -6,85 +6,39 @@ on:
       - main
       - dev
     paths:
-      - 'systole/systole/packages/**'
+      - 'systole/**'
       - 'tests/**'
+      - 'scripts/run-tests.sh'
+      - 'channels-lock.scm'
       - '.github/workflows/package-tests.yml'
   push:
     branches:
       - main
       - dev
     paths:
-      - 'systole/systole/packages/**'
+      - 'systole/**'
+      - 'tests/**'
+      - 'channels-lock.scm'
 
 jobs:
-  module-loading:
-    name: Test Module Loading
+  package-tests:
+    name: Module + package checks (pinned Guix)
     runs-on: ubuntu-24.04
+    timeout-minutes: 120
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Guix
+      # The apt Guix is only a bootstrap: every check runs through
+      # `guix time-machine -C channels-lock.scm`, i.e. against the
+      # exact Guix + channel commits the project actually ships with,
+      # not whatever Ubuntu packaged.
+      - name: Install Guix (bootstrap)
         run: |
           sudo apt-get update
-          sudo apt-get install -y guix guile-library
+          sudo apt-get install -y guix
 
-      - name: Test package modules load
-        run: |
-          ./tests/packages/test-modules-load.sh
-
-  package-definitions:
-    name: Test Package Definitions
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Guix
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y guix guile-library
-
-      - name: Test package definitions exist
-        run: |
-          ./tests/packages/test-package-definitions.sh
-
-  # Lint tests disabled in CI - require nonguix channel
-  # Run locally with: ./scripts/run-tests.sh lint
-  #
-  # lint-packages:
-  #   name: Lint Packages
-  #   runs-on: ubuntu-24.04
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #     - name: Note
-  #       run: |
-  #         echo "Package linting requires nonguix channel"
-  #         echo "Run locally: ./scripts/run-tests.sh lint"
-
-  # Note: Build tests are commented out as they take too long for CI
-  # Run them locally with: ./scripts/run-tests.sh build
-  # build-packages:
-  #   name: Build Packages
-  #   runs-on: ubuntu-24.04
-  #   strategy:
-  #     matrix:
-  #       package:
-  #         - vtk-slicer
-  #         - itk-slicer
-  #         - ctk
-  #     fail-fast: false
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Install Guix
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install -y guix guile-library
-  #
-  #     - name: Build ${{ matrix.package }}
-  #       run: |
-  #         guix build -L . ${{ matrix.package }}
-  #       timeout-minutes: 240
+      - name: Run package tests against pinned channels
+        env:
+          GUIX: guix time-machine -C channels-lock.scm --
+        run: ./scripts/run-tests.sh packages

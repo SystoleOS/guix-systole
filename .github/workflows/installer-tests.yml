@@ -6,51 +6,46 @@ on:
       - main
       - dev
     paths:
-      - 'system/installer/**'
+      # The installer depends on systole/ modules ((os install) imports
+      # (systole transformations), (systole packages grub-themes), ...),
+      # so changes there must re-run these tests too.
+      - 'system/**'
+      - 'systole/**'
       - 'tests/installer/**'
+      - 'channels-lock.scm'
       - '.github/workflows/installer-tests.yml'
   push:
     branches:
       - main
     paths:
-      - 'system/installer/**'
+      - 'system/**'
+      - 'systole/**'
+      - 'channels-lock.scm'
 
 jobs:
   installer-modules:
-    name: Test Installer Module Loading
+    name: Installer module checks (pinned Guix)
     runs-on: ubuntu-24.04
+    timeout-minutes: 120
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Guix
+      # Bootstrap only; the checks run through time-machine.  (os
+      # install) imports nonguix modules, so the pinned channel set
+      # from channels-lock.scm is required -- the apt Guix alone could
+      # never load these modules.
+      - name: Install Guix (bootstrap)
         run: |
           sudo apt-get update
-          sudo apt-get install -y guix guile-library
+          sudo apt-get install -y guix
 
-      - name: Test installer modules
-        run: |
-          ./tests/installer/test-dry-run.sh
+      - name: Run installer module checks against pinned channels
+        env:
+          GUIX: guix time-machine -C channels-lock.scm --
+        run: ./scripts/run-tests.sh installer
 
-  # VM-based installer tests would go here
-  # These require more setup and longer runtime
-  # installer-vm:
-  #   name: Test Installer in VM
-  #   runs-on: ubuntu-24.04
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Install QEMU and Guix
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install -y qemu-system-x86 guix
-  #
-  #     - name: Build installer ISO
-  #       run: |
-  #         guix system image --image-type=iso9660 system/os/install.scm
-  #
-  #     - name: Test installer in VM
-  #       run: |
-  #         # To be implemented
-  #         echo "VM testing not yet implemented"
+  # VM-based installer tests (tests/installer/installer.scm, module
+  # (tests installer installer)) boot full QEMU VMs and need KVM plus
+  # long build times; run them locally or on a self-hosted runner:
+  #   ./scripts/run-vm-tests.sh [basic|deploy-key|no-ssh|all]
