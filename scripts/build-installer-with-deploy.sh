@@ -327,6 +327,12 @@ fi
 
 EXPRESSION="$EXPRESSION)"
 
+# Register a GC root so the image cannot be garbage-collected between
+# build and copy, and read the store path from the root symlink instead
+# of scraping stdout (progress output and stdout contamination made the
+# scrape fragile).
+GC_ROOT="$OUTPUT.gcroot"
+
 # Build with time-machine for reproducibility (uses channels-lock.scm)
 if [[ "$USE_TIME_MACHINE" == "true" ]]; then
     if [[ ! -f "$CHANNELS_LOCK" ]]; then
@@ -334,19 +340,22 @@ if [[ "$USE_TIME_MACHINE" == "true" ]]; then
     fi
     info "Using guix time-machine with channels-lock.scm for reproducible build"
     info "Channel lock file: $CHANNELS_LOCK"
-    STORE_PATH=$(guix time-machine -C "$CHANNELS_LOCK" -- system image -t iso9660 -L "$REPO_DIR/systole" -L "$REPO_DIR/system" -e "$EXPRESSION")
+    guix time-machine -C "$CHANNELS_LOCK" -- system image -t iso9660 -L "$REPO_DIR/systole" -L "$REPO_DIR/system" -e "$EXPRESSION" -r "$GC_ROOT" > /dev/null
 else
     info "Building with current channels (--no-time-machine specified)"
-    STORE_PATH=$(guix system image -t iso9660 -L "$REPO_DIR/systole" -L "$REPO_DIR/system" -e "$EXPRESSION")
+    guix system image -t iso9660 -L "$REPO_DIR/systole" -L "$REPO_DIR/system" -e "$EXPRESSION" -r "$GC_ROOT" > /dev/null
 fi
 
-if [[ $? -eq 0 && -n "$STORE_PATH" ]]; then
+STORE_PATH=$(readlink -f "$GC_ROOT")
+
+if [[ -n "$STORE_PATH" && -e "$STORE_PATH" ]]; then
     info "Build completed successfully!"
     info "Image built at: $STORE_PATH"
 
     # Copy the ISO from the store to the desired output location
     info "Copying ISO to: $OUTPUT"
     if cp "$STORE_PATH" "$OUTPUT"; then
+        rm -f "$GC_ROOT"
         info "ISO copied successfully!"
         echo ""
         echo -e "${GREEN}===== Next Steps =====${NC}"
