@@ -44,16 +44,25 @@
   #:re-export (replace-mesa))
 
 (define* (systole-transformation-guix #:key (substitutes? #t)
+                                      (community-substitutes? #f)
                                       (channel? #t)
                                       (guix-source? #f)
                                       (channels #f))
   "Return a procedure that transforms an operating system, setting up Nonguix
 signing key for the Guix daemon.
 
-Additionally, SUBSTITUTES? (default: #t) sets up the substitute server,
-CHANNEL? (default: #t) adds Nonguix channel specification, GUIX-SOURCE?
-(default: #f) builds Nonguix channel into the default Guix, and CHANNELS
-(default: #f) allows specifying custom channel list (overrides default behavior).
+Additionally, SUBSTITUTES? (default: #t) sets up the nonguix substitute
+server, CHANNEL? (default: #t) adds Nonguix channel specification,
+GUIX-SOURCE? (default: #f) builds Nonguix channel into the default Guix, and
+CHANNELS (default: #f) allows specifying custom channel list (overrides
+default behavior).
+
+COMMUNITY-SUBSTITUTES? (default: #f) additionally authorizes the signing key
+of the community-run cache-cdn.guix.moe mirror and adds its URL.  Trusting a
+third-party build farm's key on every deployed system is a supply-chain
+decision, so it is opt-in; flip it only where binary coverage of the systole
+stack matters more than the added trust root (e.g. the public installer ISO,
+until the project's own substitute endpoint is up).
 
 When CHANNELS is provided, it is used directly as the channel list. Otherwise,
 the default behavior is to append nonguix and guix-systole channels.
@@ -130,15 +139,19 @@ FIXME: GUIX-SOURCE? is disabled by default due to performance issue."
                                              %default-channels)))))
                           (guix-configuration-guix config)))
                      (authorized-keys
-                      (append (list %nonguix-signing-key
-                                    %guix-moe-signing-key)
+                      (append (list %nonguix-signing-key)
+                              (if community-substitutes?
+                                  (list %guix-moe-signing-key)
+                                  '())
                               (guix-configuration-authorized-keys config)))
                      (substitute-urls
                       (delete-duplicates
                        `(,@(guix-configuration-substitute-urls config)
                          ,@(if substitutes?
-                               '("https://substitutes.nonguix.org"
-                                 "https://cache-cdn.guix.moe")
+                               '("https://substitutes.nonguix.org")
+                               '())
+                         ,@(if community-substitutes?
+                               '("https://cache-cdn.guix.moe")
                                '())))))))))))
 
 (define* (systole-transformation-linux #:key (linux linux)
@@ -235,6 +248,13 @@ HOST-KEY-PRIVATE and HOST-KEY-PUBLIC (default: #f) should be paths to SSH host
 key files. When provided, the installed system will use these keys instead of
 generating new ones, enabling predictable host key fingerprints.
 
+SECURITY: any file passed as HOST-KEY-PRIVATE is copied into /gnu/store, which
+is world-readable on the build machine and inside every image built from the
+resulting system.  Treat such a host identity as low-trust and disposable
+(e.g. an installer ISO's transient identity), rotate it after installation,
+and prefer out-of-band secret provisioning (sops-guix) for anything durable.
+A warning is emitted whenever this option is used.
+
 When SSH-DEPLOY-KEY is provided, this transformation:
 - Adds openssh-service-type to enable SSH daemon in the installer
 - Configures the SSH key as authorized for root user
@@ -277,27 +297,37 @@ Use 'ssh-deploy-key' instead.~%"))
                        (if has-signing-key?
                            (list `("systole-signing-key.pub"
                                    ,(plain-file "systole-signing-key.pub" signing-key)))
-                           '())
-                       (if has-host-key?
-                           (list `("systole-host-key"
-                                   ,(local-file host-key-private))
-                                 `("systole-host-key.pub"
-                                   ,(local-file host-key-public)))
                            '())))
+           ;; Host keys are installed by an activation snippet that COPIES
+           ;; them into /etc with correct permissions.  They must not go
+           ;; through etc-service-type: its entries are symlinks into the
+           ;; read-only store, so the old chmod-in-activation was a no-op
+           ;; and /etc/systole-host-key stayed a pointer to a world-readable
+           ;; store file.  (The store copy itself is unavoidable with this
+           ;; transport -- see the docstring warning.)
            (host-key-activation
             (if has-host-key?
-                (list (simple-service 'systole-host-key-permissions
+                (list (simple-service 'systole-host-key
                                       activation-service-type
                                       (with-imported-modules '((guix build utils))
                                         #~(begin
                                             (use-modules (guix build utils))
-                                            (when (file-exists? "/etc/systole-host-key")
-                                              (chmod "/etc/systole-host-key" #o600)
-                                              (chown "/etc/systole-host-key" 0 0))
-                                            (when (file-exists? "/etc/systole-host-key.pub")
-                                              (chmod "/etc/systole-host-key.pub" #o644)
-                                              (chown "/etc/systole-host-key.pub" 0 0))))))
+                                            (copy-file #$(local-file host-key-private
+                                                                     "systole-host-key")
+                                                       "/etc/systole-host-key")
+                                            (chmod "/etc/systole-host-key" #o600)
+                                            (chown "/etc/systole-host-key" 0 0)
+                                            (copy-file #$(local-file host-key-public
+                                                                     "systole-host-key.pub")
+                                                       "/etc/systole-host-key.pub")
+                                            (chmod "/etc/systole-host-key.pub" #o644)
+                                            (chown "/etc/systole-host-key.pub" 0 0)))))
                 '())))
+      (when has-host-key?
+        (warning (G_ "embedding SSH host private key '~a': it will be \
+world-readable in /gnu/store and inside any image built from this system; \
+treat this host identity as disposable and rotate it after installation~%")
+                 host-key-private))
       (if (and (not has-ssh-deploy-key?)
                (not has-channels?)
                (not has-signing-key?)

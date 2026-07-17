@@ -63,7 +63,12 @@
 
 (define systole-os-installation
 
-  ((compose (systole-transformation-guix #:guix-source? #t)
+  ;; community-substitutes? is an explicit opt-in: the public installer
+  ;; trades the extra guix.moe trust root for binary coverage of the
+  ;; systole stack until the project's own substitute endpoint is up
+  ;; (ivs ADR-0010 phase 2).
+  ((compose (systole-transformation-guix #:guix-source? #t
+                                         #:community-substitutes? #t)
             ;; FIXME: ‘microcode-initrd’ results in unbootable live system.
             (systole-transformation-linux #:initrd base-initrd))
 
@@ -150,6 +155,8 @@ Examples:
              #:host-key-public host-key-public)
             (systole-transformation-guix
              #:guix-source? #t
+             ;; Explicit opt-in; see systole-os-installation above.
+             #:community-substitutes? #t
              #:channels (and channels-file
                              (file-exists? channels-file)
                              ;; Evaluate the channels file in a *fresh sandbox module*
