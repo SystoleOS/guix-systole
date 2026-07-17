@@ -294,14 +294,13 @@ development tools, code search, and documentation generation.")
            #:phases
            #~(modify-phases %standard-phases
                             (add-before 'configure 'set-cmake-paths
-                                        (lambda* (#:key inputs #:allow-other-keys)
+                                        (lambda _
                                           ;; Make 'vtkaddon' discoverable by CMake
-
                                           (setenv "CMAKE_PREFIX_PATH"
-                                                  (string-append (assoc-ref inputs "vtkaddon")
+                                                  (string-append #$(this-package-input "vtkaddon")
                                                                  "/lib/cmake:"
                                                                  (or (getenv "CMAKE_PREFIX_PATH")
-                                                                     ""))) #t))
+                                                                     "")))))
 
                             (add-after 'install 'patch-runpath
                               ;; SlicerApp-real's build RUNPATH does not
@@ -309,14 +308,12 @@ development tools, code search, and documentation generation.")
                               ;; shared libraries live.  Extend it with
                               ;; $ORIGIN-relative entries so the binary finds
                               ;; them without LD_LIBRARY_PATH.
-                              (lambda* (#:key outputs #:allow-other-keys)
-                                (let* ((out (assoc-ref outputs "out"))
-                                       (bin (string-append out "/bin/SlicerApp-real")))
-                                  (invoke "patchelf" "--add-rpath"
-                                          (string-append "$ORIGIN/../lib/Slicer-5.8"
-                                                         ":"
-                                                         "$ORIGIN/../lib/Slicer-5.8/qt-loadable-modules")
-                                          bin))))
+                              (lambda _
+                                (invoke "patchelf" "--add-rpath"
+                                        (string-append "$ORIGIN/../lib/Slicer-5.8"
+                                                       ":"
+                                                       "$ORIGIN/../lib/Slicer-5.8/qt-loadable-modules")
+                                        (string-append #$output "/bin/SlicerApp-real"))))
                             (add-after 'patch-runpath 'install-slicer-symlink
                               ;; Install bin/Slicer as a wrapper script rather than
                               ;; a plain symlink to SlicerApp-real.  The wrapper
@@ -326,9 +323,8 @@ development tools, code search, and documentation generation.")
                               ;; caches LD_LIBRARY_PATH at process startup; setting
                               ;; it via putenv() inside the running process (patch
                               ;; 0046) is too late for dlopen() to pick it up.
-                              (lambda* (#:key outputs #:allow-other-keys)
-                                (let* ((out (assoc-ref outputs "out"))
-                                       (wrapper (string-append out "/bin/Slicer")))
+                              (lambda _
+                                (let ((wrapper (string-append #$output "/bin/Slicer")))
                                   (when (file-exists? wrapper)
                                     (delete-file wrapper))
                                   (call-with-output-file wrapper
@@ -373,9 +369,8 @@ development tools, code search, and documentation generation.")
                               ;; Before running ctest, the developer exports
                               ;; SLICER_ADDITIONAL_MODULE_PATHS to include their
                               ;; extension build directory.
-                              (lambda* (#:key outputs #:allow-other-keys)
-                                (let* ((out (assoc-ref outputs "out"))
-                                       (script (string-append out "/bin/slicer-launch")))
+                              (lambda _
+                                (let ((script (string-append #$output "/bin/slicer-launch")))
                                   (call-with-output-file script
                                     (lambda (port)
                                       (display "#!/bin/sh\n" port)
@@ -531,13 +526,12 @@ visualization and medical image computing. It provides capabilities for:
         #~(modify-phases #$phases
             ;; Extend CMAKE_PREFIX_PATH to include pythonqt-commontk.
             (replace 'set-cmake-paths
-              (lambda* (#:key inputs #:allow-other-keys)
+              (lambda _
                 (setenv "CMAKE_PREFIX_PATH"
                         (string-append
-                         (assoc-ref inputs "pythonqt-commontk") "/lib/cmake:"
-                         (assoc-ref inputs "vtkaddon") "/lib/cmake:"
-                         (or (getenv "CMAKE_PREFIX_PATH") "")))
-                #t))
+                         #$(this-package-input "pythonqt-commontk") "/lib/cmake:"
+                         #$(this-package-input "vtkaddon") "/lib/cmake:"
+                         (or (getenv "CMAKE_PREFIX_PATH") "")))))
             ;; Python extension modules in lib/Slicer-5.8/ (MRMLCorePython.so,
             ;; vtkSegmentationCorePython.so, SlicerBaseLogicPython.so, …) are
             ;; installed with RUNPATH pointing to lib/ (set by CMake's install
@@ -548,9 +542,8 @@ visualization and medical image computing. It provides capabilities for:
             ;; standalone python3 process dlopen-s the extension, without
             ;; requiring LD_LIBRARY_PATH.
             (add-after 'install-slicer-symlink 'patch-python-extension-runpath
-              (lambda* (#:key outputs #:allow-other-keys)
-                (let ((dir (string-append (assoc-ref outputs "out")
-                                          "/lib/Slicer-5.8")))
+              (lambda _
+                (let ((dir (string-append #$output "/lib/Slicer-5.8")))
                   (for-each
                    (lambda (lib) (invoke "patchelf" "--add-rpath" "$ORIGIN" lib))
                    ;; find-files does not support #:max-depth; filter to direct
@@ -567,11 +560,11 @@ visualization and medical image computing. It provides capabilities for:
             ;; declared below) so that `from vtkAddonPython import *` succeeds
             ;; in Slicer's embedded Python.
             (add-after 'patch-python-extension-runpath 'link-vtkaddon-python
-              (lambda* (#:key inputs outputs #:allow-other-keys)
+              (lambda _
                 (symlink
-                 (string-append (assoc-ref inputs "vtkaddon")
+                 (string-append #$(this-package-input "vtkaddon")
                                 "/lib/vtkAddonPython.so")
-                 (string-append (assoc-ref outputs "out")
+                 (string-append #$output
                                 "/lib/Slicer-5.8/vtkAddonPython.so"))))
             ;; In embedded Slicer Python, the C++ startup code adds
             ;; bin/Python/slicer/ to sys.path so that the `logic` kit in
@@ -579,10 +572,9 @@ visualization and medical image computing. It provides capabilities for:
             ;; standalone python3 that path is not added.  Provide a shim at
             ;; the top level of bin/Python/ that re-exports from slicer.logic.
             (add-after 'link-vtkaddon-python 'create-logic-shim
-              (lambda* (#:key outputs #:allow-other-keys)
+              (lambda _
                 (call-with-output-file
-                    (string-append (assoc-ref outputs "out")
-                                   "/bin/Python/logic.py")
+                    (string-append #$output "/bin/Python/logic.py")
                   (lambda (port)
                     (display "from slicer.logic import *\n" port)))))))))
     (inputs
@@ -1554,11 +1546,11 @@ tree."))
    #:name "slicer-sampledata-5.8"
    #:module-subdir "SampleData"
    #:patches (list "sampledata/0001-ENH-Add-standalone-build-support-for-SampleData-scri.patch")
-   #:synopsis "3d slicer sampledata scripted module"
+   #:synopsis "3D Slicer sampledata scripted module"
    #:description
-   "the sampledata scripted module extracted from 3d slicer.  it provides a
+   "The sampledata scripted module extracted from 3D Slicer.  It provides a
 catalog of sample medical data sets (mr brain, ct chest, dti, etc.) that can
-be downloaded and loaded directly from within slicer.  built from the
+be downloaded and loaded directly from within slicer.  Built from the
 @file{modules/scripted/sampledata} subtree of the slicer source tree."))
 
 (define-public slicer-endoscopy-5.8
@@ -1566,11 +1558,11 @@ be downloaded and loaded directly from within slicer.  built from the
    #:name "slicer-endoscopy-5.8"
    #:module-subdir "Endoscopy"
    #:patches (list "endoscopy/0001-ENH-Add-standalone-build-support-for-Endoscopy-scrip.patch")
-   #:synopsis "3d slicer endoscopy scripted module"
+   #:synopsis "3D Slicer endoscopy scripted module"
    #:description
-   "the endoscopy scripted module extracted from 3d slicer.  it provides
+   "The endoscopy scripted module extracted from 3D Slicer.  It provides
 virtual endoscopy visualization by flying a camera through tubular structures
-(e.g. the colon) along a path defined by a curve markup node.  built from the
+(e.g. the colon) along a path defined by a curve markup node.  Built from the
 @file{modules/scripted/endoscopy} subtree of the slicer source tree."))
 
 (define-public slicer-importitksnaplabel-5.8
@@ -1578,11 +1570,11 @@ virtual endoscopy visualization by flying a camera through tubular structures
    #:name "slicer-importitksnaplabel-5.8"
    #:module-subdir "ImportItkSnapLabel"
    #:patches (list "importitksnaplabel/0001-ENH-Add-standalone-build-support-for-ImportItkSnapLa.patch")
-   #:synopsis "3d slicer importitksnaplabel scripted module"
+   #:synopsis "3D Slicer importitksnaplabel scripted module"
    #:description
-   "the importitksnaplabel scripted module extracted from 3d slicer.  it
+   "The importitksnaplabel scripted module extracted from 3D Slicer.  It
 imports itk-snap label description files (.label) and creates a slicer color
-table node from the label definitions.  built from the
+table node from the label definitions.  Built from the
 @file{modules/scripted/importitksnaplabel} subtree of the slicer source tree."))
 
 (define-public slicer-performancetests-5.8
@@ -1590,11 +1582,11 @@ table node from the label definitions.  built from the
    #:name "slicer-performancetests-5.8"
    #:module-subdir "PerformanceTests"
    #:patches (list "performancetests/0001-ENH-Add-standalone-build-support-for-PerformanceTest.patch")
-   #:synopsis "3d slicer performancetests scripted module"
+   #:synopsis "3D Slicer performancetests scripted module"
    #:description
-   "the performancetests scripted module extracted from 3d slicer.  it runs a
+   "The performancetests scripted module extracted from 3D Slicer.  It runs a
 suite of rendering and scene-management benchmarks to measure slicer
-performance across different hardware configurations.  built from the
+performance across different hardware configurations.  Built from the
 @file{modules/scripted/performancetests} subtree of the slicer source tree."))
 
 (define-public slicer-selftests-5.8
@@ -1602,11 +1594,11 @@ performance across different hardware configurations.  built from the
    #:name "slicer-selftests-5.8"
    #:module-subdir "SelfTests"
    #:patches (list "selftests/0001-ENH-Add-standalone-build-support-for-SelfTests-scrip.patch")
-   #:synopsis "3d slicer selftests scripted module"
+   #:synopsis "3D Slicer selftests scripted module"
    #:description
-   "the selftests scripted module extracted from 3d slicer.  it provides a
+   "The selftests scripted module extracted from 3D Slicer.  It provides a
 graphical interface for running slicer's built-in python unit tests directly
-from the application.  built from the
+from the application.  Built from the
 @file{modules/scripted/selftests} subtree of the slicer source tree."))
 
 (define-public slicer-screencapture-5.8
@@ -1614,11 +1606,11 @@ from the application.  built from the
    #:name "slicer-screencapture-5.8"
    #:module-subdir "ScreenCapture"
    #:patches (list "screencapture/0001-ENH-Add-standalone-build-support-for-ScreenCapture-s.patch")
-   #:synopsis "3d slicer screencapture scripted module"
+   #:synopsis "3D Slicer screencapture scripted module"
    #:description
-   "the screencapture scripted module extracted from 3d slicer.  it captures
+   "The screencapture scripted module extracted from 3D Slicer.  It captures
 still images and animated sequences (video, animated gif) from any combination
-of 2d and 3d views, with optional watermarking and rotation sweep.  built from
+of 2d and 3d views, with optional watermarking and rotation sweep.  Built from
 the @file{modules/scripted/screencapture} subtree of the slicer source tree."))
 
 (define-public slicer-vectortoscalarvolume-5.8
@@ -1626,12 +1618,12 @@ the @file{modules/scripted/screencapture} subtree of the slicer source tree."))
    #:name "slicer-vectortoscalarvolume-5.8"
    #:module-subdir "VectorToScalarVolume"
    #:patches (list "vectortoscalarvolume/0001-ENH-Add-standalone-build-support-for-VectorToScalarV.patch")
-   #:synopsis "3d slicer vectortoscalarvolume scripted module"
+   #:synopsis "3D Slicer vectortoscalarvolume scripted module"
    #:description
-   "the vectortoscalarvolume scripted module extracted from 3d slicer.  it
+   "The vectortoscalarvolume scripted module extracted from 3D Slicer.  It
 converts a vector-valued volume (e.g. rgb or multi-component images) to a
 scalar volume by extracting a single component or computing a luminance or
-magnitude measure.  built from the
+magnitude measure.  Built from the
 @file{modules/scripted/vectortoscalarvolume} subtree of the slicer source
 tree."))
 
@@ -1640,12 +1632,12 @@ tree."))
    #:name "slicer-dataprobe-5.8"
    #:module-subdir "DataProbe"
    #:patches (list "dataprobe/0001-ENH-Add-standalone-build-support-for-DataProbe-scrip.patch")
-   #:synopsis "3d slicer dataprobe scripted module"
+   #:synopsis "3D Slicer dataprobe scripted module"
    #:description
-   "the dataprobe scripted module extracted from 3d slicer.  it displays
+   "The dataprobe scripted module extracted from 3D Slicer.  It displays
 voxel-level annotation overlays in slice views showing the current cursor
 position in ras coordinates, ijk voxel indices, and interpolated scalar
-values for all visible volumes.  built from the
+values for all visible volumes.  Built from the
 @file{modules/scripted/dataprobe} subtree of the slicer source tree."))
 
 (define-public slicer-cropvolumesequence-5.8
@@ -1653,11 +1645,11 @@ values for all visible volumes.  built from the
    #:name "slicer-cropvolumesequence-5.8"
    #:module-subdir "CropVolumeSequence"
    #:patches (list "cropvolumesequence/0001-ENH-Add-standalone-build-support-for-CropVolumeSeque.patch")
-   #:synopsis "3d slicer cropvolumesequence scripted module"
+   #:synopsis "3D Slicer cropvolumesequence scripted module"
    #:description
-   "the cropvolumesequence scripted module extracted from 3d slicer.  it
+   "The cropvolumesequence scripted module extracted from 3D Slicer.  It
 applies the same crop-volume roi to every item in a sequence node, enabling
-batch cropping of 4d image series to a user-defined region of interest.  built
+batch cropping of 4D image series to a user-defined region of interest.  Built
 from the @file{modules/scripted/cropvolumesequence} subtree of the slicer
 source tree."))
 
@@ -1666,12 +1658,12 @@ source tree."))
    #:name "slicer-webserver-5.8"
    #:module-subdir "WebServer"
    #:patches (list "webserver/0001-ENH-Add-standalone-build-support-for-WebServer-scrip.patch")
-   #:synopsis "3d slicer webserver scripted module"
+   #:synopsis "3D Slicer webserver scripted module"
    #:description
-   "the webserver scripted module extracted from 3d slicer.  it embeds a
+   "The webserver scripted module extracted from 3D Slicer.  It embeds a
 lightweight http server inside slicer that exposes rest endpoints for scene
 inspection, dicom browsing, and remote rendering, together with a built-in
-web client served from the module's docroot.  built from the
+web client served from the module's docroot.  Built from the
 @file{modules/scripted/webserver} subtree of the slicer source tree."))
 
 (define-public slicer-dicompatcher-5.8
@@ -1679,12 +1671,12 @@ web client served from the module's docroot.  built from the
    #:name "slicer-dicompatcher-5.8"
    #:module-subdir "DICOMPatcher"
    #:patches (list "dicompatcher/0001-ENH-Add-standalone-build-support-for-DICOMPatcher-sc.patch")
-   #:synopsis "3d slicer dicompatcher scripted module"
+   #:synopsis "3D Slicer dicompatcher scripted module"
    #:description
-   "the dicompatcher scripted module extracted from 3d slicer.  it provides a
+   "The dicompatcher scripted module extracted from 3D Slicer.  It provides a
 graphical interface for fixing common dicom conformance issues in series
 imported into the slicer dicom database, including missing or malformed tags,
-incorrect transfer syntax, and multi-frame conversion.  built from the
+incorrect transfer syntax, and multi-frame conversion.  Built from the
 @file{modules/scripted/dicompatcher} subtree of the slicer source tree."))
 
 (define-public slicer-dicomplugins-5.8
@@ -1692,12 +1684,12 @@ incorrect transfer syntax, and multi-frame conversion.  built from the
    #:name "slicer-dicomplugins-5.8"
    #:module-subdir "DICOMPlugins"
    #:patches (list "dicomplugins/0001-ENH-Add-standalone-build-support-for-DICOMPlugins-sc.patch")
-   #:synopsis "3d slicer dicomplugins scripted module"
+   #:synopsis "3D Slicer dicomplugins scripted module"
    #:description
-   "the dicomplugins scripted module extracted from 3d slicer.  it provides the
+   "The dicomplugins scripted module extracted from 3D Slicer.  It provides the
 core set of dicom import plugins used by the slicer dicom browser, including
 scalar volume, enhanced ultrasound volume, image sequence, volume sequence,
-geabus, and slicer data bundle readers.  built from the
+geabus, and slicer data bundle readers.  Built from the
 @file{modules/scripted/dicomplugins} subtree of the slicer source tree."))
 
 (define-public slicer-segmenteditor-5.8
@@ -1705,13 +1697,13 @@ geabus, and slicer data bundle readers.  built from the
    #:name "slicer-segmenteditor-5.8"
    #:module-subdir "SegmentEditor"
    #:patches (list "segmenteditor/0001-ENH-Add-standalone-build-support-for-SegmentEditor-s.patch")
-   #:synopsis "3d slicer segmenteditor scripted module"
+   #:synopsis "3D Slicer segmenteditor scripted module"
    #:description
-   "the segmenteditor scripted module extracted from 3d slicer.  it provides an
+   "The segmenteditor scripted module extracted from 3D Slicer.  It provides an
 interactive segmentation editor supporting multiple effect plugins (paint,
 draw, erase, threshold, grow from seeds, fill between slices, etc.) and
 operates on segmentation nodes backed by the mrml segmentations framework.
-built from the @file{modules/scripted/segmenteditor} subtree of the slicer
+Built from the @file{modules/scripted/segmenteditor} subtree of the slicer
 source tree."))
 
 (define-public slicer-segmentstatistics-5.8
@@ -1719,12 +1711,12 @@ source tree."))
    #:name "slicer-segmentstatistics-5.8"
    #:module-subdir "SegmentStatistics"
    #:patches (list "segmentstatistics/0001-ENH-Add-standalone-build-support-for-SegmentStatisti.patch")
-   #:synopsis "3d slicer segmentstatistics scripted module"
+   #:synopsis "3D Slicer segmentstatistics scripted module"
    #:description
-   "the segmentstatistics scripted module extracted from 3d slicer.  it computes
+   "The segmentstatistics scripted module extracted from 3D Slicer.  It computes
 quantitative statistics (volume, surface area, mean intensity, etc.) for each
 segment in a segmentation node using a plugin-based architecture that supports
-labelmap, scalar volume, and closed-surface measurement backends.  built from
+labelmap, scalar volume, and closed-surface measurement backends.  Built from
 the @file{modules/scripted/segmentstatistics} subtree of the slicer source
 tree."))
 
@@ -1733,13 +1725,13 @@ tree."))
    #:name "slicer-dicom-5.8"
    #:module-subdir "DICOM"
    #:patches (list "dicom/0001-ENH-Add-standalone-build-support-for-DICOM-scripted-.patch")
-   #:synopsis "3d slicer dicom scripted module"
+   #:synopsis "3D Slicer dicom scripted module"
    #:description
-   "the dicom scripted module extracted from 3d slicer.  it provides the main
+   "The dicom scripted module extracted from 3D Slicer.  It provides the main
 dicom browser panel for importing dicom studies into the slicer scene,
 browsing the local dicom database, and invoking loadable-series plugins
 for import and export.  depends on @code{slicer-dicomplugins-5.8} and
-@code{slicer-dicomlib-5.8} at runtime.  built from the
+@code{slicer-dicomlib-5.8} at runtime.  Built from the
 @file{modules/scripted/dicom} subtree of the slicer source tree."))
 
 (define-public slicer-extensionwizard-5.8
@@ -1747,11 +1739,11 @@ for import and export.  depends on @code{slicer-dicomplugins-5.8} and
    #:name "slicer-extensionwizard-5.8"
    #:module-subdir "ExtensionWizard"
    #:patches (list "extensionwizard/0001-ENH-Add-standalone-build-support-for-ExtensionWizard.patch")
-   #:synopsis "3d slicer extensionwizard scripted module"
+   #:synopsis "3D Slicer extensionwizard scripted module"
    #:description
-   "the extensionwizard scripted module extracted from 3d slicer.  it provides
+   "The extensionwizard scripted module extracted from 3D Slicer.  It provides
 an interactive wizard for creating new slicer extensions and module templates,
-managing template search paths, and editing extension metadata.  built from
+managing template search paths, and editing extension metadata.  Built from
 the @file{modules/scripted/extensionwizard} subtree of the slicer source
 tree."))
 
@@ -1760,13 +1752,13 @@ tree."))
    #:name "slicer-dicomlib-5.8"
    #:module-subdir "DICOMLib"
    #:patches (list "dicomlib/0001-ENH-Add-standalone-build-support-for-DICOMLib-script.patch")
-   #:synopsis "3d slicer dicomlib scripted module"
+   #:synopsis "3D Slicer dicomlib scripted module"
    #:description
-   "the dicomlib scripted module extracted from 3d slicer.  it provides the
+   "The dicomlib scripted module extracted from 3D Slicer.  It provides the
 core dicom infrastructure: c++ logic for loadable and exportable series
 descriptors, qt widgets for dicom export dialogs and tag editing, a
 subject-hierarchy dicom plugin, and python utilities for dicom database
-management, series import, and export.  built from the
+management, series import, and export.  Built from the
 @file{modules/scripted/dicomlib} subtree of the slicer source tree."
    #:extra-inputs (list slicer-subjecthierarchy-5.8)
    #:propagated-inputs (list slicer-subjecthierarchy-5.8)
@@ -1815,7 +1807,7 @@ management, series import, and export.  built from the
 
 
 ;;;
-;;; cli module packages (tier 1: pure itk + slicerexecutionmodel)
+;;; CLI module packages (tier 1: pure itk + slicerexecutionmodel)
 ;;;
 
 (define-public slicer-add-scalar-volumes-5.8
@@ -1823,10 +1815,10 @@ management, series import, and export.  built from the
    #:name "slicer-add-scalar-volumes-5.8"
    #:module-subdir "AddScalarVolumes"
    #:patches (list "cli/addscalarvolumes/0001-ENH-Add-standalone-build-preamble-for-AddScalarVolum.patch")
-   #:synopsis "3d slicer addscalarvolumes cli module"
+   #:synopsis "3D Slicer addscalarvolumes CLI module"
    #:description
-   "the addscalarvolumes cli module extracted from 3d slicer.  it adds two
-scalar volumes voxel-by-voxel, with optional weighting factors.  built from
+   "The addscalarvolumes CLI module extracted from 3D Slicer.  It adds two
+scalar volumes voxel-by-voxel, with optional weighting factors.  Built from
 the @file{modules/cli/addscalarvolumes} subtree of the slicer source tree."))
 
 (define-public slicer-cast-scalar-volume-5.8
@@ -1834,10 +1826,10 @@ the @file{modules/cli/addscalarvolumes} subtree of the slicer source tree."))
    #:name "slicer-cast-scalar-volume-5.8"
    #:module-subdir "CastScalarVolume"
    #:patches (list "cli/castscalarvolume/0001-ENH-Add-standalone-build-preamble-for-CastScalarVolu.patch")
-   #:synopsis "3d slicer castscalarvolume cli module"
+   #:synopsis "3D Slicer castscalarvolume CLI module"
    #:description
-   "the castscalarvolume cli module extracted from 3d slicer.  it casts a
-scalar volume to a user-specified scalar type.  built from the
+   "The castscalarvolume CLI module extracted from 3D Slicer.  It casts a
+scalar volume to a user-specified scalar type.  Built from the
 @file{modules/cli/castscalarvolume} subtree of the slicer source tree."))
 
 (define-public slicer-checker-board-filter-5.8
@@ -1845,11 +1837,11 @@ scalar volume to a user-specified scalar type.  built from the
    #:name "slicer-checker-board-filter-5.8"
    #:module-subdir "CheckerBoardFilter"
    #:patches (list "cli/checkerboardfilter/0001-ENH-Add-standalone-build-preamble-for-CheckerBoardFi.patch")
-   #:synopsis "3d slicer checkerboardfilter cli module"
+   #:synopsis "3D Slicer checkerboardfilter CLI module"
    #:description
-   "the checkerboardfilter cli module extracted from 3d slicer.  it creates a
+   "The checkerboardfilter CLI module extracted from 3D Slicer.  It creates a
 checkerboard pattern image by compositing two scalar volumes — useful for
-visually comparing registration results.  built from the
+visually comparing registration results.  Built from the
 @file{modules/cli/checkerboardfilter} subtree of the slicer source tree."))
 
 (define-public slicer-curvature-anisotropic-diffusion-5.8
@@ -1857,11 +1849,11 @@ visually comparing registration results.  built from the
    #:name "slicer-curvature-anisotropic-diffusion-5.8"
    #:module-subdir "CurvatureAnisotropicDiffusion"
    #:patches (list "cli/curvatureanisotropicdiffusion/0001-ENH-Add-standalone-build-preamble-for-CurvatureAniso.patch")
-   #:synopsis "3d slicer curvatureanisotropicdiffusion cli module"
+   #:synopsis "3D Slicer curvatureanisotropicdiffusion CLI module"
    #:description
-   "the curvatureanisotropicdiffusion cli module extracted from 3d slicer.  it
+   "The curvatureanisotropicdiffusion CLI module extracted from 3D Slicer.  It
 performs edge-preserving smoothing using curvature-driven anisotropic
-diffusion.  built from the @file{modules/cli/curvatureanisotropicdiffusion}
+diffusion.  Built from the @file{modules/cli/curvatureanisotropicdiffusion}
 subtree of the slicer source tree."))
 
 (define-public slicer-gaussian-blur-image-filter-5.8
@@ -1869,10 +1861,10 @@ subtree of the slicer source tree."))
    #:name "slicer-gaussian-blur-image-filter-5.8"
    #:module-subdir "GaussianBlurImageFilter"
    #:patches (list "cli/gaussianblurimagefilter/0001-ENH-Add-standalone-build-preamble-for-GaussianBlurIm.patch")
-   #:synopsis "3d slicer gaussianblurimagefilter cli module"
+   #:synopsis "3D Slicer gaussianblurimagefilter CLI module"
    #:description
-   "the gaussianblurimagefilter cli module extracted from 3d slicer.  it
-applies a gaussian smoothing filter to a scalar volume.  built from the
+   "The gaussianblurimagefilter CLI module extracted from 3D Slicer.  It
+applies a gaussian smoothing filter to a scalar volume.  Built from the
 @file{modules/cli/gaussianblurimagefilter} subtree of the slicer source tree."))
 
 (define-public slicer-gradient-anisotropic-diffusion-5.8
@@ -1880,11 +1872,11 @@ applies a gaussian smoothing filter to a scalar volume.  built from the
    #:name "slicer-gradient-anisotropic-diffusion-5.8"
    #:module-subdir "GradientAnisotropicDiffusion"
    #:patches (list "cli/gradientanisotropicdiffusion/0001-ENH-Add-standalone-build-preamble-for-GradientAnisot.patch")
-   #:synopsis "3d slicer gradientanisotropicdiffusion cli module"
+   #:synopsis "3D Slicer gradientanisotropicdiffusion CLI module"
    #:description
-   "the gradientanisotropicdiffusion cli module extracted from 3d slicer.  it
+   "The gradientanisotropicdiffusion CLI module extracted from 3D Slicer.  It
 performs edge-preserving smoothing using gradient-driven anisotropic
-diffusion.  built from the @file{modules/cli/gradientanisotropicdiffusion}
+diffusion.  Built from the @file{modules/cli/gradientanisotropicdiffusion}
 subtree of the slicer source tree."))
 
 (define-public slicer-grayscale-fill-hole-image-filter-5.8
@@ -1892,10 +1884,10 @@ subtree of the slicer source tree."))
    #:name "slicer-grayscale-fill-hole-image-filter-5.8"
    #:module-subdir "GrayscaleFillHoleImageFilter"
    #:patches (list "cli/grayscalefillholeimagefilter/0001-ENH-Add-standalone-build-preamble-for-GrayscaleFillH.patch")
-   #:synopsis "3d slicer grayscalefillholeimagefilter cli module"
+   #:synopsis "3D Slicer grayscalefillholeimagefilter CLI module"
    #:description
-   "the grayscalefillholeimagefilter cli module extracted from 3d slicer.  it
-fills holes in a grayscale image using morphological reconstruction.  built
+   "The grayscalefillholeimagefilter CLI module extracted from 3D Slicer.  It
+fills holes in a grayscale image using morphological reconstruction.  Built
 from the @file{modules/cli/grayscalefillholeimagefilter} subtree of the slicer
 source tree."))
 
@@ -1904,11 +1896,11 @@ source tree."))
    #:name "slicer-grayscale-grind-peak-image-filter-5.8"
    #:module-subdir "GrayscaleGrindPeakImageFilter"
    #:patches (list "cli/grayscalegrindpeakimagefilter/0001-ENH-Add-standalone-build-preamble-for-GrayscaleGrind.patch")
-   #:synopsis "3d slicer grayscalegrindpeakimagefilter cli module"
+   #:synopsis "3D Slicer grayscalegrindpeakimagefilter CLI module"
    #:description
-   "the grayscalegrindpeakimagefilter cli module extracted from 3d slicer.  it
+   "The grayscalegrindpeakimagefilter CLI module extracted from 3D Slicer.  It
 removes peaks from a grayscale image using morphological reconstruction.
-built from the @file{modules/cli/grayscalegrindpeakimagefilter} subtree of the
+Built from the @file{modules/cli/grayscalegrindpeakimagefilter} subtree of the
 slicer source tree."))
 
 (define-public slicer-histogram-matching-5.8
@@ -1916,11 +1908,11 @@ slicer source tree."))
    #:name "slicer-histogram-matching-5.8"
    #:module-subdir "HistogramMatching"
    #:patches (list "cli/histogrammatching/0001-ENH-Add-standalone-build-preamble-for-HistogramMatch.patch")
-   #:synopsis "3d slicer histogrammatching cli module"
+   #:synopsis "3D Slicer histogrammatching CLI module"
    #:description
-   "the histogrammatching cli module extracted from 3d slicer.  it normalises
+   "The histogrammatching CLI module extracted from 3D Slicer.  It normalises
 one image's intensity distribution to match a reference image's histogram.
-built from the @file{modules/cli/histogrammatching} subtree of the slicer
+Built from the @file{modules/cli/histogrammatching} subtree of the slicer
 source tree."))
 
 (define-public slicer-image-label-combine-5.8
@@ -1928,10 +1920,10 @@ source tree."))
    #:name "slicer-image-label-combine-5.8"
    #:module-subdir "ImageLabelCombine"
    #:patches (list "cli/imagelabelcombine/0001-ENH-Add-standalone-build-preamble-for-ImageLabelComb.patch")
-   #:synopsis "3d slicer imagelabelcombine cli module"
+   #:synopsis "3D Slicer imagelabelcombine CLI module"
    #:description
-   "the imagelabelcombine cli module extracted from 3d slicer.  it combines
-two label-map volumes into one, optionally resolving label conflicts.  built
+   "The imagelabelcombine CLI module extracted from 3D Slicer.  It combines
+two label-map volumes into one, optionally resolving label conflicts.  Built
 from the @file{modules/cli/imagelabelcombine} subtree of the slicer source
 tree."))
 
@@ -1940,11 +1932,11 @@ tree."))
    #:name "slicer-label-map-smoothing-5.8"
    #:module-subdir "LabelMapSmoothing"
    #:patches (list "cli/labelmapsmoothing/0001-ENH-Add-standalone-build-preamble-for-LabelMapSmooth.patch")
-   #:synopsis "3d slicer labelmapsmoothing cli module"
+   #:synopsis "3D Slicer labelmapsmoothing CLI module"
    #:description
-   "the labelmapsmoothing cli module extracted from 3d slicer.  it smooths
+   "The labelmapsmoothing CLI module extracted from 3D Slicer.  It smooths
 the borders of label-map segmentations using an anti-aliased, gaussian-blurred
-binary threshold pipeline.  built from the @file{modules/cli/labelmapsmoothing}
+binary threshold pipeline.  Built from the @file{modules/cli/labelmapsmoothing}
 subtree of the slicer source tree."))
 
 (define-public slicer-mask-scalar-volume-5.8
@@ -1952,11 +1944,11 @@ subtree of the slicer source tree."))
    #:name "slicer-mask-scalar-volume-5.8"
    #:module-subdir "MaskScalarVolume"
    #:patches (list "cli/maskscalarvolume/0001-ENH-Add-standalone-build-preamble-for-MaskScalarVolu.patch")
-   #:synopsis "3d slicer maskscalarvolume cli module"
+   #:synopsis "3D Slicer maskscalarvolume CLI module"
    #:description
-   "the maskscalarvolume cli module extracted from 3d slicer.  it applies a
+   "The maskscalarvolume CLI module extracted from 3D Slicer.  It applies a
 binary mask image to a scalar volume, zeroing out voxels outside the mask.
-built from the @file{modules/cli/maskscalarvolume} subtree of the slicer
+Built from the @file{modules/cli/maskscalarvolume} subtree of the slicer
 source tree."))
 
 (define-public slicer-median-image-filter-5.8
@@ -1964,10 +1956,10 @@ source tree."))
    #:name "slicer-median-image-filter-5.8"
    #:module-subdir "MedianImageFilter"
    #:patches (list "cli/medianimagefilter/0001-ENH-Add-standalone-build-preamble-for-MedianImageFil.patch")
-   #:synopsis "3d slicer medianimagefilter cli module"
+   #:synopsis "3D Slicer medianimagefilter CLI module"
    #:description
-   "the medianimagefilter cli module extracted from 3d slicer.  it applies a
-median filter of configurable radius to denoise a scalar volume.  built from
+   "The medianimagefilter CLI module extracted from 3D Slicer.  It applies a
+median filter of configurable radius to denoise a scalar volume.  Built from
 the @file{modules/cli/medianimagefilter} subtree of the slicer source tree."))
 
 (define-public slicer-multiply-scalar-volumes-5.8
@@ -1975,10 +1967,10 @@ the @file{modules/cli/medianimagefilter} subtree of the slicer source tree."))
    #:name "slicer-multiply-scalar-volumes-5.8"
    #:module-subdir "MultiplyScalarVolumes"
    #:patches (list "cli/multiplyscalarvolumes/0001-ENH-Add-standalone-build-preamble-for-MultiplyScalar.patch")
-   #:synopsis "3d slicer multiplyscalarvolumes cli module"
+   #:synopsis "3D Slicer multiplyscalarvolumes CLI module"
    #:description
-   "the multiplyscalarvolumes cli module extracted from 3d slicer.  it
-multiplies two scalar volumes voxel-by-voxel.  built from the
+   "The multiplyscalarvolumes CLI module extracted from 3D Slicer.  It
+multiplies two scalar volumes voxel-by-voxel.  Built from the
 @file{modules/cli/multiplyscalarvolumes} subtree of the slicer source tree."))
 
 (define-public slicer-orient-scalar-volume-5.8
@@ -1986,11 +1978,11 @@ multiplies two scalar volumes voxel-by-voxel.  built from the
    #:name "slicer-orient-scalar-volume-5.8"
    #:module-subdir "OrientScalarVolume"
    #:patches (list "cli/orientscalarvolume/0001-ENH-Add-standalone-build-preamble-for-OrientScalarVo.patch")
-   #:synopsis "3d slicer orientscalarvolume cli module"
+   #:synopsis "3D Slicer orientscalarvolume CLI module"
    #:description
-   "the orientscalarvolume cli module extracted from 3d slicer.  it reorients
+   "The orientscalarvolume CLI module extracted from 3D Slicer.  It reorients
 a scalar volume to a standard anatomical orientation (e.g. ras, lps, rai).
-built from the @file{modules/cli/orientscalarvolume} subtree of the slicer
+Built from the @file{modules/cli/orientscalarvolume} subtree of the slicer
 source tree."))
 
 (define-public slicer-resample-scalar-volume-5.8
@@ -1998,11 +1990,11 @@ source tree."))
    #:name "slicer-resample-scalar-volume-5.8"
    #:module-subdir "ResampleScalarVolume"
    #:patches (list "cli/resamplescalarvolume/0001-ENH-Add-standalone-build-preamble-for-ResampleScalar.patch")
-   #:synopsis "3d slicer resamplescalarvolume cli module"
+   #:synopsis "3D Slicer resamplescalarvolume CLI module"
    #:description
-   "the resamplescalarvolume cli module extracted from 3d slicer.  it
+   "The resamplescalarvolume CLI module extracted from 3D Slicer.  It
 resamples a scalar volume to a new voxel spacing using linear, nearest-
-neighbour, or b-spline interpolation.  built from the
+neighbour, or b-spline interpolation.  Built from the
 @file{modules/cli/resamplescalarvolume} subtree of the slicer source tree."))
 
 (define-public slicer-subtract-scalar-volumes-5.8
@@ -2010,11 +2002,11 @@ neighbour, or b-spline interpolation.  built from the
    #:name "slicer-subtract-scalar-volumes-5.8"
    #:module-subdir "SubtractScalarVolumes"
    #:patches (list "cli/subtractscalarvolumes/0001-ENH-Add-standalone-build-preamble-for-SubtractScalar.patch")
-   #:synopsis "3d slicer subtractscalarvolumes cli module"
+   #:synopsis "3D Slicer subtractscalarvolumes CLI module"
    #:description
-   "the subtractscalarvolumes cli module extracted from 3d slicer.  it
+   "The subtractscalarvolumes CLI module extracted from 3D Slicer.  It
 subtracts one scalar volume from another voxel-by-voxel, with optional
-weighting factors.  built from the @file{modules/cli/subtractscalarvolumes}
+weighting factors.  Built from the @file{modules/cli/subtractscalarvolumes}
 subtree of the slicer source tree."))
 
 (define-public slicer-threshold-scalar-volume-5.8
@@ -2022,11 +2014,11 @@ subtree of the slicer source tree."))
    #:name "slicer-threshold-scalar-volume-5.8"
    #:module-subdir "ThresholdScalarVolume"
    #:patches (list "cli/thresholdscalarvolume/0001-ENH-Add-standalone-build-preamble-for-ThresholdScala.patch")
-   #:synopsis "3d slicer thresholdscalarvolume cli module"
+   #:synopsis "3D Slicer thresholdscalarvolume CLI module"
    #:description
-   "the thresholdscalarvolume cli module extracted from 3d slicer.  it
+   "The thresholdscalarvolume CLI module extracted from 3D Slicer.  It
 thresholds a scalar volume by clamping, replacing, or zeroing voxels outside
-a user-defined intensity range.  built from the
+a user-defined intensity range.  Built from the
 @file{modules/cli/thresholdscalarvolume} subtree of the slicer source tree."))
 
 (define-public slicer-voting-binary-hole-filling-image-filter-5.8
@@ -2034,11 +2026,11 @@ a user-defined intensity range.  built from the
    #:name "slicer-voting-binary-hole-filling-image-filter-5.8"
    #:module-subdir "VotingBinaryHoleFillingImageFilter"
    #:patches (list "cli/votingbinaryholefillingimagefilter/0001-ENH-Add-standalone-build-preamble-for-VotingBinaryHo.patch")
-   #:synopsis "3d slicer votingbinaryholefillingimagefilter cli module"
+   #:synopsis "3D Slicer votingbinaryholefillingimagefilter CLI module"
    #:description
-   "the votingbinaryholefillingimagefilter cli module extracted from 3d slicer.
-it fills binary holes in a label-map volume using majority-vote neighbourhood
-inspection.  built from the
+   "The votingbinaryholefillingimagefilter CLI module extracted from 3D Slicer.
+It fills binary holes in a label-map volume using majority-vote neighbourhood
+inspection.  Built from the
 @file{modules/cli/votingbinaryholefillingimagefilter} subtree of the slicer
 source tree."))
 
@@ -2047,11 +2039,11 @@ source tree."))
    #:name "slicer-fiducial-registration-5.8"
    #:module-subdir "FiducialRegistration"
    #:patches (list "cli/fiducialregistration/0001-ENH-Add-standalone-build-preamble-for-FiducialRegist.patch")
-   #:synopsis "3d slicer fiducialregistration cli module"
+   #:synopsis "3D Slicer fiducialregistration CLI module"
    #:description
-   "the fiducialregistration cli module extracted from 3d slicer.  it computes
+   "The fiducialregistration CLI module extracted from 3D Slicer.  It computes
 a rigid or similarity transform between two sets of corresponding fiducial
-points using itk's landmark-based registration.  built from the
+points using itk's landmark-based registration.  Built from the
 @file{modules/cli/fiducialregistration} subtree of the slicer source tree."))
 
 (define-public slicer-create-dicom-series-5.8
@@ -2059,11 +2051,11 @@ points using itk's landmark-based registration.  built from the
    #:name "slicer-create-dicom-series-5.8"
    #:module-subdir "CreateDICOMSeries"
    #:patches (list "cli/createdicomseries/0001-ENH-Add-standalone-build-preamble-for-CreateDICOMSer.patch")
-   #:synopsis "3d slicer createdicomseries cli module"
+   #:synopsis "3D Slicer createdicomseries CLI module"
    #:description
-   "the createdicomseries cli module extracted from 3d slicer.  it converts a
+   "The createdicomseries CLI module extracted from 3D Slicer.  It converts a
 scalar volume to a dicom image series, setting required dicom header fields.
-built from the @file{modules/cli/createdicomseries} subtree of the slicer
+Built from the @file{modules/cli/createdicomseries} subtree of the slicer
 source tree."))
 
 (define-public slicer-n4-itk-bias-field-correction-5.8
@@ -2071,11 +2063,11 @@ source tree."))
    #:name "slicer-n4-itk-bias-field-correction-5.8"
    #:module-subdir "N4ITKBiasFieldCorrection"
    #:patches (list "cli/n4itkbiasfieldcorrection/0001-ENH-Add-standalone-build-preamble-for-N4ITKBiasField.patch")
-   #:synopsis "3d slicer n4itkbiasfieldcorrection cli module"
+   #:synopsis "3D Slicer n4itkbiasfieldcorrection CLI module"
    #:description
-   "the n4itkbiasfieldcorrection cli module extracted from 3d slicer.  it
+   "The n4itkbiasfieldcorrection CLI module extracted from 3D Slicer.  It
 corrects mr intensity non-uniformity (bias field) using the itk n4 algorithm.
-built from the @file{modules/cli/n4itkbiasfieldcorrection} subtree of the
+Built from the @file{modules/cli/n4itkbiasfieldcorrection} subtree of the
 slicer source tree."))
 
 (define-public slicer-simple-region-growing-segmentation-5.8
@@ -2083,16 +2075,16 @@ slicer source tree."))
    #:name "slicer-simple-region-growing-segmentation-5.8"
    #:module-subdir "SimpleRegionGrowingSegmentation"
    #:patches (list "cli/simpleregiongrowingsegmentation/0001-ENH-Add-standalone-build-preamble-for-SimpleRegionGr.patch")
-   #:synopsis "3d slicer simpleregiongrowingsegmentation cli module"
+   #:synopsis "3D Slicer simpleregiongrowingsegmentation CLI module"
    #:description
-   "the simpleregiongrowingsegmentation cli module extracted from 3d slicer.
-it performs connected-threshold region-growing segmentation starting from a
-seed point, with optional smoothing.  built from the
+   "The simpleregiongrowingsegmentation CLI module extracted from 3D Slicer.
+It performs connected-threshold region-growing segmentation starting from a
+seed point, with optional smoothing.  Built from the
 @file{modules/cli/simpleregiongrowingsegmentation} subtree of the slicer
 source tree."))
 
 ;;;
-;;; cli module list and meta-package
+;;; CLI module list and meta-package
 ;;;
 
 (define-public %slicer-5.8-cli-modules
@@ -2140,9 +2132,9 @@ source tree."))
              %slicer-5.8-loadable-modules
              %slicer-5.8-scripted-modules
              %slicer-5.8-cli-modules))
-    (synopsis "3d slicer 5.8 with all loadable and scripted modules")
+    (synopsis "3D Slicer 5.8 with all loadable and scripted modules")
     (description
-     "meta-package that installs 3d slicer 5.8 (python-enabled) together with
+     "Meta-package that installs 3D Slicer 5.8 (Python-enabled) together with
 all its standalone loadable modules (terminologies, subjecthierarchy, colors,
 volumes, volumerendering, units, tables, cameras, data, annotations, markups,
 models, sequences, viewcontrollers, reformat, plots, sceneviews, transforms,

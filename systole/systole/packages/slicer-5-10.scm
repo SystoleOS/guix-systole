@@ -261,27 +261,23 @@
            #:phases
            #~(modify-phases %standard-phases
                             (add-before 'configure 'set-cmake-paths
-                                        (lambda* (#:key inputs #:allow-other-keys)
+                                        (lambda _
                                           (setenv "CMAKE_PREFIX_PATH"
-                                                  (string-append (assoc-ref inputs "vtkaddon-9.5")
+                                                  (string-append #$(this-package-input "vtkaddon-9.5")
                                                                  "/lib/cmake:"
                                                                  (or (getenv "CMAKE_PREFIX_PATH")
-                                                                     "")))
-                                          #t))
+                                                                     "")))))
 
                             (add-after 'install 'patch-runpath
-                              (lambda* (#:key outputs #:allow-other-keys)
-                                (let* ((out (assoc-ref outputs "out"))
-                                       (bin (string-append out "/bin/SlicerApp-real")))
-                                  (invoke "patchelf" "--add-rpath"
-                                          (string-append "$ORIGIN/../lib/Slicer-5.10"
-                                                         ":"
-                                                         "$ORIGIN/../lib/Slicer-5.10/qt-loadable-modules")
-                                          bin))))
+                              (lambda _
+                                (invoke "patchelf" "--add-rpath"
+                                        (string-append "$ORIGIN/../lib/Slicer-5.10"
+                                                       ":"
+                                                       "$ORIGIN/../lib/Slicer-5.10/qt-loadable-modules")
+                                        (string-append #$output "/bin/SlicerApp-real"))))
                             (add-after 'patch-runpath 'install-slicer-symlink
-                              (lambda* (#:key outputs #:allow-other-keys)
-                                (let* ((out (assoc-ref outputs "out"))
-                                       (wrapper (string-append out "/bin/Slicer")))
+                              (lambda _
+                                (let ((wrapper (string-append #$output "/bin/Slicer")))
                                   (when (file-exists? wrapper)
                                     (delete-file wrapper))
                                   (call-with-output-file wrapper
@@ -306,9 +302,8 @@
                                       (display "exec \"$_dir/SlicerApp-real\" \"$@\"\n" port)))
                                   (chmod wrapper #o755))))
                             (add-after 'install-slicer-symlink 'install-slicer-launch
-                              (lambda* (#:key outputs #:allow-other-keys)
-                                (let* ((out (assoc-ref outputs "out"))
-                                       (script (string-append out "/bin/slicer-launch")))
+                              (lambda _
+                                (let ((script (string-append #$output "/bin/slicer-launch")))
                                   (call-with-output-file script
                                     (lambda (port)
                                       (display "#!/bin/sh\n" port)
@@ -425,17 +420,15 @@ visualization and medical image computing.")
        ((#:phases phases)
         #~(modify-phases #$phases
             (replace 'set-cmake-paths
-              (lambda* (#:key inputs #:allow-other-keys)
+              (lambda _
                 (setenv "CMAKE_PREFIX_PATH"
                         (string-append
-                         (assoc-ref inputs "pythonqt-commontk-for-slicer-5.10") "/lib/cmake:"
-                         (assoc-ref inputs "vtkaddon-9.5") "/lib/cmake:"
-                         (or (getenv "CMAKE_PREFIX_PATH") "")))
-                #t))
+                         #$(this-package-input "pythonqt-commontk-for-slicer-5.10") "/lib/cmake:"
+                         #$(this-package-input "vtkaddon-9.5") "/lib/cmake:"
+                         (or (getenv "CMAKE_PREFIX_PATH") "")))))
             (add-after 'install-slicer-symlink 'patch-python-extension-runpath
-              (lambda* (#:key outputs #:allow-other-keys)
-                (let ((dir (string-append (assoc-ref outputs "out")
-                                          "/lib/Slicer-5.10")))
+              (lambda _
+                (let ((dir (string-append #$output "/lib/Slicer-5.10")))
                   (for-each
                    (lambda (lib) (invoke "patchelf" "--add-rpath" "$ORIGIN" lib))
                    (find-files dir
@@ -444,17 +437,16 @@ visualization and medical image computing.")
                          (and (string-suffix? ".so" rel)
                               (not (string-contains rel "/"))))))))))
             (add-after 'patch-python-extension-runpath 'link-vtkaddon-python
-              (lambda* (#:key inputs outputs #:allow-other-keys)
+              (lambda _
                 (symlink
-                 (string-append (assoc-ref inputs "vtkaddon-9.5")
+                 (string-append #$(this-package-input "vtkaddon-9.5")
                                 "/lib/vtkAddonPython.so")
-                 (string-append (assoc-ref outputs "out")
+                 (string-append #$output
                                 "/lib/Slicer-5.10/vtkAddonPython.so"))))
             (add-after 'link-vtkaddon-python 'create-logic-shim
-              (lambda* (#:key outputs #:allow-other-keys)
+              (lambda _
                 (call-with-output-file
-                    (string-append (assoc-ref outputs "out")
-                                   "/bin/Python/logic.py")
+                    (string-append #$output "/bin/Python/logic.py")
                   (lambda (port)
                     (display "from slicer.logic import *\n" port)))))))))
     (inputs
