@@ -1,0 +1,32 @@
+From 24c280fcefb08a7b0b6af0ebb3f279011297c85e Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 6 May 2025 10:13:19 +0200
+Subject: [PATCH] COMP: Document teem imported-target linkage
+
+The 2015-era Slicer/teem snapshot installed no usable export file, so
+this commit used to hard-code the path to libteem.so.  teem r7265
+(slicer-2025-05-18-r7265) installs a proper TeemLibraryDepends.cmake
+export, making upstream's plain 'teem' library name resolve to the
+imported target; only the stale XXX comment needs replacing.
+---
+ Libs/vtkTeem/CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Libs/vtkTeem/CMakeLists.txt b/Libs/vtkTeem/CMakeLists.txt
+index 55acaa204f..6b00de8973 100644
+--- a/Libs/vtkTeem/CMakeLists.txt
++++ b/Libs/vtkTeem/CMakeLists.txt
+@@ -41,8 +41,8 @@ if(${Teem_VERSION_MAJOR}.${Teem_VERSION_MINOR}.${Teem_VERSION_PATCH} VERSION_LES
+ endif()
+ include(${Teem_USE_FILE})
+ 
+-# XXX Teem 1.11.0 or Teem >= 4168 - This variable won't be needed anymore.
+-#     See https://sourceforge.net/p/teem/code/4168/
++# Teem r7265 (Slicer fork) exports the 'teem' imported target via
++# TeemLibraryDepends.cmake, so the plain library name resolves correctly.
+ set(Teem_LIBRARIES teem)
+ 
+ # --------------------------------------------------------------------------
+-- 
+2.54.0
+
