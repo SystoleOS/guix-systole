@@ -1,0 +1,44 @@
+From 2bec8545bb586484d737cea1e8e8a9a58dd3585f Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 9 Apr 2026 15:13:42 +0200
+Subject: [PATCH] ENH: Make dicomweb_client import optional in DICOMProcesses
+
+dicomweb_client imports numpy at module level.  On Slicer 5.10 (Python
+3.12), the Guix-provided numpy is built for Python 3.11 and cannot be
+loaded (cpython-311 ABI suffix).  Guard the import so DICOMLib loads
+even when dicomweb_client is unavailable, with DICOMweb STOW-RS
+functionality gracefully absent rather than crashing at startup.
+Also remove the dicomweb_client.DICOMwebClient type annotation that
+references the conditionally-imported module.
+---
+ Modules/Scripted/DICOMLib/DICOMProcesses.py | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/Modules/Scripted/DICOMLib/DICOMProcesses.py b/Modules/Scripted/DICOMLib/DICOMProcesses.py
+index 5164d2e430..6f75585dcc 100644
+--- a/Modules/Scripted/DICOMLib/DICOMProcesses.py
++++ b/Modules/Scripted/DICOMLib/DICOMProcesses.py
+@@ -10,7 +10,10 @@ from requests.auth import HTTPBasicAuth
+ import ctk
+ import qt
+ 
+-import dicomweb_client
++try:
++    import dicomweb_client
++except ImportError:
++    dicomweb_client = None
+ import slicer
+ 
+ from DICOMLib.DICOMUtils import getGlobalDICOMAuth
+@@ -725,7 +728,7 @@ class DICOMSender:
+         raise UserWarning(userMsg)
+ 
+     def _sendOneFileWithDICOMWeb(
+-        self, file: str, client: dicomweb_client.DICOMwebClient,
++        self, file: str, client,
+     ) -> None:
+         """
+         Do the actual work of transmitting one DICOM file to a remote server
+-- 
+2.52.0
+

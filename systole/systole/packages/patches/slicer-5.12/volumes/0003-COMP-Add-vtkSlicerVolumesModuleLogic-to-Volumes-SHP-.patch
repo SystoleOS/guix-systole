@@ -1,0 +1,25 @@
+From c5f51f2f74161dff4c5c2744f00be91f51c1e3f3 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 9 Apr 2026 05:55:42 +0200
+Subject: [PATCH] COMP: Add vtkSlicerVolumesModuleLogic to Volumes SHP
+ TARGET_LIBRARIES (5.10)
+
+---
+ Modules/Loadable/Volumes/SubjectHierarchyPlugins/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/Loadable/Volumes/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/Volumes/SubjectHierarchyPlugins/CMakeLists.txt
+index 8195bf245f..c67975d09e 100644
+--- a/Modules/Loadable/Volumes/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Volumes/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -39,6 +39,7 @@ set(${KIT}_TARGET_LIBRARIES
+   qMRMLWidgets
+   MRMLLogic
+   MRMLCore
++  vtkSlicerVolumesModuleLogic
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+

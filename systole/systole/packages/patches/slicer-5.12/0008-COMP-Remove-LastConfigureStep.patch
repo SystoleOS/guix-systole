@@ -1,0 +1,23 @@
+From 6721a96aa1e61fd0958b9d1714ab459fe34efacf Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Tue, 6 May 2025 10:17:52 +0200
+Subject: [PATCH] COMP: Remove LastConfigureStep
+
+Co-authored-by: Khai Duong <duongkhai@gmail.com>
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5dc745a3fd..19a7029fdc 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1458,4 +1458,4 @@ endif()
+ # The commands in this directory are intended to be executed as
+ # the end of the whole configuration process, as a "last step".
+ # This directory is typically the last add_subdirectory in the main CMakeLists.txt.
+-add_subdirectory(CMake/LastConfigureStep)
++#add_subdirectory(CMake/LastConfigureStep)
+-- 
+2.54.0
+

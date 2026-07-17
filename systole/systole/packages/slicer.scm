@@ -20,20 +20,22 @@
 ;;; Commentary:
 ;;;
 ;;; Facade module for the Slicer package stack.  The actual definitions
-;;; live in three per-concern modules:
+;;; live in per-concern modules:
 ;;;
 ;;;   (systole packages slicer-factory)  shared build infrastructure:
 ;;;       slicerexecutionmodel and the loadable/scripted/CLI module
 ;;;       factories, parameterized on the base Slicer package.
 ;;;   (systole packages slicer-5-8)      everything Slicer 5.8.
 ;;;   (systole packages slicer-5-10)     everything Slicer 5.10.
+;;;   (systole packages slicer-5-12)     everything Slicer 5.12, plus the
+;;;       slicer-next preview package tracking upstream main.
 ;;;
 ;;; The per-version module names use "-5-8"/"-5-10" rather than
 ;;; "-5.8"/"-5.10": Guile's load-path search treats a dot in the last
 ;;; module-name component as a file extension and refuses to append
 ;;; ".scm", so dotted module names can never be autoloaded.
 ;;;
-;;; This module re-exports every public binding from all three so that
+;;; This module re-exports every public binding from all of these so that
 ;;; existing users -- `guix install -L … slicer-5.8`, other channel
 ;;; modules with #:use-module (systole packages slicer), and
 ;;; `(@ (systole packages slicer) …)` references -- keep working
@@ -48,4 +50,5 @@
                 (module-use! interface (resolve-interface name)))
               '((systole packages slicer-factory)
                 (systole packages slicer-5-8)
-                (systole packages slicer-5-10)))))
+                (systole packages slicer-5-10)
+                (systole packages slicer-5-12)))))

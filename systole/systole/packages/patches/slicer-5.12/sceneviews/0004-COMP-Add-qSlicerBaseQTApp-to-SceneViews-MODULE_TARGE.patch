@@ -1,0 +1,25 @@
+From 47d594cc6902215c5a81ecc343bf5cadd6754a7c Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 21:54:22 +0200
+Subject: [PATCH] COMP: Add qSlicerBaseQTApp to SceneViews
+ MODULE_TARGET_LIBRARIES (5.10)
+
+---
+ Modules/Loadable/SceneViews/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/Loadable/SceneViews/CMakeLists.txt b/Modules/Loadable/SceneViews/CMakeLists.txt
+index 7c76eee5e8..39a926a734 100644
+--- a/Modules/Loadable/SceneViews/CMakeLists.txt
++++ b/Modules/Loadable/SceneViews/CMakeLists.txt
+@@ -61,6 +61,7 @@ set(MODULE_RESOURCES
+   )
+ 
+ set(MODULE_TARGET_LIBRARIES
++  qSlicerBaseQTApp
+   qSlicerBaseQTCore
+   qMRMLWidgets
+   vtkSlicer${MODULE_NAME}ModuleLogic
+-- 
+2.52.0
+

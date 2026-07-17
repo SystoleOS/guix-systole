@@ -1,0 +1,96 @@
+From 3b7935f6541d2afef6e6a2509f556fc2bd4c6836 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 21:09:24 +0200
+Subject: [PATCH] ENH: Add standalone build support for Plots module (5.10)
+
+- Add cmake_minimum_required/find_package(Slicer) preamble to top-level
+- Add LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS} to slicerMacroBuildLoadableModule
+  and SlicerMacroBuildModuleQtLibrary (SHP)
+- Replace _SOURCE_DIR/_BINARY_DIR with _INCLUDE_DIRS in Widgets
+- Add MOC_SRCS to ctkMacroBuildQtDesignerPlugin for Q_OBJECT headers
+---
+ Modules/Loadable/Plots/CMakeLists.txt             | 15 +++++++++++++++
+ .../Plots/SubjectHierarchyPlugins/CMakeLists.txt  |  1 +
+ Modules/Loadable/Plots/Widgets/CMakeLists.txt     |  3 +--
+ .../Plots/Widgets/DesignerPlugins/CMakeLists.txt  |  5 +++++
+ 4 files changed, 22 insertions(+), 2 deletions(-)
+
+diff --git a/Modules/Loadable/Plots/CMakeLists.txt b/Modules/Loadable/Plots/CMakeLists.txt
+index fbfd6abbec..781400ff93 100644
+--- a/Modules/Loadable/Plots/CMakeLists.txt
++++ b/Modules/Loadable/Plots/CMakeLists.txt
+@@ -1,9 +1,23 @@
+ 
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Plots)
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++set(CMAKE_CXX_STANDARD "17")
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ add_subdirectory(SubjectHierarchyPlugins)
+@@ -54,6 +68,7 @@ slicerMacroBuildLoadableModule(
+   UI_SRCS ${MODULE_UI_SRCS}
+   TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
+   RESOURCES ${MODULE_RESOURCES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   WITH_GENERIC_TESTS
+   )
+ 
+diff --git a/Modules/Loadable/Plots/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/Plots/SubjectHierarchyPlugins/CMakeLists.txt
+index 01e488f53f..cc74782530 100644
+--- a/Modules/Loadable/Plots/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Plots/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -46,5 +46,6 @@ SlicerMacroBuildModuleQtLibrary(
+   UI_SRCS ${${KIT}_UI_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   RESOURCES ${${KIT}_RESOURCES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   WRAP_PYTHONQT
+   )
+diff --git a/Modules/Loadable/Plots/Widgets/CMakeLists.txt b/Modules/Loadable/Plots/Widgets/CMakeLists.txt
+index ee21705fe4..a61d3f55c0 100644
+--- a/Modules/Loadable/Plots/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/Plots/Widgets/CMakeLists.txt
+@@ -5,8 +5,7 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_MODULE_${MODULE_NAME_UPPER}_WIDGETS_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+-  ${vtkSlicer${MODULE_NAME}ModuleLogic_SOURCE_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleLogic_BINARY_DIR}
++  ${vtkSlicer${MODULE_NAME}ModuleLogic_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+diff --git a/Modules/Loadable/Plots/Widgets/DesignerPlugins/CMakeLists.txt b/Modules/Loadable/Plots/Widgets/DesignerPlugins/CMakeLists.txt
+index 2314b5550d..a04020dae8 100644
+--- a/Modules/Loadable/Plots/Widgets/DesignerPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Plots/Widgets/DesignerPlugins/CMakeLists.txt
+@@ -24,5 +24,10 @@ ctkMacroBuildQtDesignerPlugin(
+   EXPORT_DIRECTIVE ${${KIT}_EXPORT}
+   FOLDER "Module-${MODULE_NAME}"
+   SRCS ${${KIT}_SRCS}
++  MOC_SRCS
++    qSlicer${MODULE_NAME}ModuleWidgetsAbstractPlugin.h
++    qSlicer${MODULE_NAME}ModuleWidgetsPlugin.h
++    qMRMLPlotSeriesPropertiesWidgetPlugin.h
++    qMRMLPlotChartPropertiesWidgetPlugin.h
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   )
+-- 
+2.52.0
+

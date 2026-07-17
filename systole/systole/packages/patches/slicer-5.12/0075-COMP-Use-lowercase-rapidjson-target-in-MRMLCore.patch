@@ -1,0 +1,33 @@
+From 0ae6c83451821cb425fc49f85c3e6a275d26fb5a Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 05:54:26 +0200
+Subject: [PATCH] COMP: Use lowercase rapidjson target in MRMLCore
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The system RapidJSON CMake config (from Guix) creates an INTERFACE
+imported target named "rapidjson" (lowercase).  MRMLCore linked against
+the bare name "RapidJSON" (uppercase) which CMake interprets as a
+library flag -lRapidJSON — a file that does not exist since RapidJSON is
+header-only.  Use the correct target name.
+---
+ Libs/MRML/Core/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Libs/MRML/Core/CMakeLists.txt b/Libs/MRML/Core/CMakeLists.txt
+index 63b4e668d9..770c3a9930 100644
+--- a/Libs/MRML/Core/CMakeLists.txt
++++ b/Libs/MRML/Core/CMakeLists.txt
+@@ -360,7 +360,7 @@ set(libs
+   ${VTK_LIBRARIES}
+   VTK::IOInfovis
+   ${LibArchive_LIBRARY}
+-  RapidJSON
++  rapidjson
+   )
+ if(MRML_USE_vtkTeem)
+   list(APPEND libs vtkTeem)
+-- 
+2.54.0
+

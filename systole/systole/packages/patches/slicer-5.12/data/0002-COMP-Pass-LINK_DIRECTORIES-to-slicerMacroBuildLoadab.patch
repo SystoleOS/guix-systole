@@ -1,0 +1,33 @@
+From a46d14968601d9cd3df904ff086b6f877cac6aba Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 20:04:42 +0200
+Subject: [PATCH] COMP: Pass LINK_DIRECTORIES to slicerMacroBuildLoadableModule
+ in Data
+
+EXTRA_MODULE_LIB_DIRS contains the installed lib paths for the Cameras
+and SubjectHierarchy modules; without forwarding them via LINK_DIRECTORIES
+the linker cannot locate libvtkSlicerCamerasModuleLogic and
+libqSlicerSubjectHierarchyModuleWidgets in a standalone build.
+---
+ Modules/Loadable/Data/CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Modules/Loadable/Data/CMakeLists.txt b/Modules/Loadable/Data/CMakeLists.txt
+index 707164c064..2e8635b150 100644
+--- a/Modules/Loadable/Data/CMakeLists.txt
++++ b/Modules/Loadable/Data/CMakeLists.txt
+@@ -72,9 +72,11 @@ slicerMacroBuildLoadableModule(
+   UI_SRCS ${MODULE_UI_SRCS}
+   TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
+   RESOURCES ${MODULE_RESOURCES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   WITH_GENERIC_TESTS
+   )
+ 
++
+ if(BUILD_TESTING)
+   add_subdirectory(Testing)
+ endif()
+-- 
+2.52.0
+

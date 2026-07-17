@@ -1,0 +1,38 @@
+From f0a3603a8adcd28daeedb31f998cef05a7cd8219 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 20:25:57 +0200
+Subject: [PATCH] COMP: Fix Markups MRML for standalone build (5.10)
+
+- Replace _SOURCE_DIR/_BINARY_DIR with _INCLUDE_DIRS for VTKWidgets
+- Use lowercase 'rapidjson' target (RapidJSON config exports 'rapidjson'
+  as an INTERFACE IMPORTED target in the installed package)
+---
+ Modules/Loadable/Markups/MRML/CMakeLists.txt | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/Modules/Loadable/Markups/MRML/CMakeLists.txt b/Modules/Loadable/Markups/MRML/CMakeLists.txt
+index e3a6b27e63..59670ebe75 100644
+--- a/Modules/Loadable/Markups/MRML/CMakeLists.txt
++++ b/Modules/Loadable/Markups/MRML/CMakeLists.txt
+@@ -7,8 +7,7 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_MRML_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+-  ${vtkSlicer${MODULE_NAME}ModuleVTKWidgets_SOURCE_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleVTKWidgets_BINARY_DIR}
++  ${vtkSlicer${MODULE_NAME}ModuleVTKWidgets_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+@@ -24,7 +23,7 @@ set(${KIT}_SRCS
+ 
+ set(${KIT}_TARGET_LIBRARIES
+   ${MRML_LIBRARIES}
+-  RapidJSON
++  rapidjson
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+

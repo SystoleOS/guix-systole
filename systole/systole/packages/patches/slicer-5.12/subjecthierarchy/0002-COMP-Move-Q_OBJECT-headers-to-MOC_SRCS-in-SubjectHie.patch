@@ -1,0 +1,40 @@
+From 8afd54cf92133f154e9b4dcf2e8e8f8f850b4c47 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 17:27:24 +0200
+Subject: [PATCH] COMP: Move Q_OBJECT headers to MOC_SRCS in SubjectHierarchy
+ DesignerPlugins
+
+---
+ .../Widgets/DesignerPlugins/CMakeLists.txt                | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/Modules/Loadable/SubjectHierarchy/Widgets/DesignerPlugins/CMakeLists.txt b/Modules/Loadable/SubjectHierarchy/Widgets/DesignerPlugins/CMakeLists.txt
+index 21f1f5bcb6..c89632528c 100644
+--- a/Modules/Loadable/SubjectHierarchy/Widgets/DesignerPlugins/CMakeLists.txt
++++ b/Modules/Loadable/SubjectHierarchy/Widgets/DesignerPlugins/CMakeLists.txt
+@@ -7,10 +7,13 @@ set(${KIT}_SRCS
+   qSlicerSubjectHierarchyModuleWidgetsAbstractPlugin.cxx
+   qSlicerSubjectHierarchyModuleWidgetsAbstractPlugin.h
+   qSlicerSubjectHierarchyModuleWidgetsPlugin.cxx
+-  qSlicerSubjectHierarchyModuleWidgetsPlugin.h
+   qMRMLSubjectHierarchyTreeViewPlugin.cxx
+-  qMRMLSubjectHierarchyTreeViewPlugin.h
+   qMRMLSubjectHierarchyComboBoxPlugin.cxx
++  )
++
++set(${KIT}_MOC_SRCS
++  qSlicerSubjectHierarchyModuleWidgetsPlugin.h
++  qMRMLSubjectHierarchyTreeViewPlugin.h
+   qMRMLSubjectHierarchyComboBoxPlugin.h
+   )
+ 
+@@ -24,5 +27,6 @@ ctkMacroBuildQtDesignerPlugin(
+   EXPORT_DIRECTIVE ${${KIT}_EXPORT}
+   FOLDER "Module-${MODULE_NAME}"
+   SRCS ${${KIT}_SRCS}
++  MOC_SRCS ${${KIT}_MOC_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   )
+-- 
+2.52.0
+

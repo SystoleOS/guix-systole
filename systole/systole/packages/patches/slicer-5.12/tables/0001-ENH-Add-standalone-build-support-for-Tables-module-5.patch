@@ -1,0 +1,66 @@
+From 272cb1e65a6bc9eb16655219423741dad1567f91 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 18:42:35 +0200
+Subject: [PATCH] ENH: Add standalone build support for Tables module (5.10)
+
+---
+ Modules/Loadable/Tables/CMakeLists.txt            | 15 +++++++++++++++
+ .../Tables/Widgets/DesignerPlugins/CMakeLists.txt |  6 +++++-
+ 2 files changed, 20 insertions(+), 1 deletion(-)
+
+diff --git a/Modules/Loadable/Tables/CMakeLists.txt b/Modules/Loadable/Tables/CMakeLists.txt
+index 27794fa77d..489791b9eb 100644
+--- a/Modules/Loadable/Tables/CMakeLists.txt
++++ b/Modules/Loadable/Tables/CMakeLists.txt
+@@ -1,9 +1,24 @@
+ 
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Tables)
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++#-----------------------------------------------------------------------------
++set(CMAKE_CXX_STANDARD "17")
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ add_subdirectory(SubjectHierarchyPlugins)
+diff --git a/Modules/Loadable/Tables/Widgets/DesignerPlugins/CMakeLists.txt b/Modules/Loadable/Tables/Widgets/DesignerPlugins/CMakeLists.txt
+index a4e03316d0..eff5f9c989 100644
+--- a/Modules/Loadable/Tables/Widgets/DesignerPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Tables/Widgets/DesignerPlugins/CMakeLists.txt
+@@ -7,8 +7,11 @@ set(${KIT}_SRCS
+   qSlicer${MODULE_NAME}ModuleWidgetsAbstractPlugin.cxx
+   qSlicer${MODULE_NAME}ModuleWidgetsAbstractPlugin.h
+   qSlicer${MODULE_NAME}ModuleWidgetsPlugin.cxx
+-  qSlicer${MODULE_NAME}ModuleWidgetsPlugin.h
+   qSlicerTableColumnPropertiesWidgetPlugin.cxx
++  )
++
++set(${KIT}_MOC_SRCS
++  qSlicer${MODULE_NAME}ModuleWidgetsPlugin.h
+   qSlicerTableColumnPropertiesWidgetPlugin.h
+   )
+ 
+@@ -22,5 +25,6 @@ ctkMacroBuildQtDesignerPlugin(
+   EXPORT_DIRECTIVE ${${KIT}_EXPORT}
+   FOLDER "Module-${MODULE_NAME}"
+   SRCS ${${KIT}_SRCS}
++  MOC_SRCS ${${KIT}_MOC_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   )
+-- 
+2.52.0
+

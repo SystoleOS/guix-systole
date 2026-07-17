@@ -1,0 +1,27 @@
+From d81b000656fb003434897c7b983dde3925ccdebd Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 20:11:13 +0200
+Subject: [PATCH] COMP: Add ITK::Common to Annotations MRML link libraries
+
+vtkMRMLAnnotationSnapshotStorageNode pulls in itksys::SystemToolsManager
+via a static initialiser; without an explicit ITK::Common dependency the
+symbol is undefined at link time in a standalone module build.
+---
+ Modules/Loadable/Annotations/MRML/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/Loadable/Annotations/MRML/CMakeLists.txt b/Modules/Loadable/Annotations/MRML/CMakeLists.txt
+index 564915bf76..944a0824ce 100644
+--- a/Modules/Loadable/Annotations/MRML/CMakeLists.txt
++++ b/Modules/Loadable/Annotations/MRML/CMakeLists.txt
+@@ -48,6 +48,7 @@ set(${KIT}_SRCS
+ 
+ set(${KIT}_TARGET_LIBRARIES
+   ${MRML_LIBRARIES}
++  ITKCommon
+   )
+ 
+ #-----------------------------------------------------------------------------
+-- 
+2.52.0
+

@@ -1,0 +1,85 @@
+From f1f03184ccd2df75e128f95a41ee55b55592c6d0 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 20:59:39 +0200
+Subject: [PATCH] ENH: Add standalone build support for Sequences module (5.10)
+
+- Add cmake_minimum_required/find_package(Slicer) preamble to top-level
+- Add LINK_DIRECTORIES to slicerMacroBuildLoadableModule
+- Replace _SOURCE_DIR/_BINARY_DIR with _INCLUDE_DIRS in Widgets
+- Add MOC_SRCS to ctkMacroBuildQtDesignerPlugin for Q_OBJECT headers
+---
+ Modules/Loadable/Sequences/CMakeLists.txt         | 15 +++++++++++++++
+ Modules/Loadable/Sequences/Widgets/CMakeLists.txt |  3 +--
+ .../Widgets/DesignerPlugins/CMakeLists.txt        |  7 +++++++
+ 3 files changed, 23 insertions(+), 2 deletions(-)
+
+diff --git a/Modules/Loadable/Sequences/CMakeLists.txt b/Modules/Loadable/Sequences/CMakeLists.txt
+index c7b2e98b74..b109ba885c 100644
+--- a/Modules/Loadable/Sequences/CMakeLists.txt
++++ b/Modules/Loadable/Sequences/CMakeLists.txt
+@@ -1,9 +1,23 @@
+ 
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Sequences)
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++set(CMAKE_CXX_STANDARD "17")
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(MRML)
+ add_subdirectory(Logic)
+@@ -51,6 +65,7 @@ slicerMacroBuildLoadableModule(
+   UI_SRCS ${MODULE_UI_SRCS}
+   TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
+   RESOURCES ${MODULE_RESOURCES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   WITH_GENERIC_TESTS
+   )
+ 
+diff --git a/Modules/Loadable/Sequences/Widgets/CMakeLists.txt b/Modules/Loadable/Sequences/Widgets/CMakeLists.txt
+index ed3c59ce5f..d4fcbff7cc 100644
+--- a/Modules/Loadable/Sequences/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/Sequences/Widgets/CMakeLists.txt
+@@ -5,8 +5,7 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_MODULE_${MODULE_NAME_UPPER}_WIDGETS_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+-  ${vtkSlicer${MODULE_NAME}ModuleLogic_SOURCE_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleLogic_BINARY_DIR}
++  ${vtkSlicer${MODULE_NAME}ModuleLogic_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+diff --git a/Modules/Loadable/Sequences/Widgets/DesignerPlugins/CMakeLists.txt b/Modules/Loadable/Sequences/Widgets/DesignerPlugins/CMakeLists.txt
+index 476e3621e4..b9e93b34d1 100644
+--- a/Modules/Loadable/Sequences/Widgets/DesignerPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Sequences/Widgets/DesignerPlugins/CMakeLists.txt
+@@ -29,5 +29,12 @@ ctkMacroBuildQtDesignerPlugin(
+   EXPORT_DIRECTIVE ${${KIT}_EXPORT}
+   FOLDER "Module-${MODULE_NAME}"
+   SRCS ${${KIT}_SRCS}
++  MOC_SRCS
++    qSlicer${MODULE_NAME}ModuleWidgetsAbstractPlugin.h
++    qSlicer${MODULE_NAME}ModuleWidgetsPlugin.h
++    qMRMLSequenceBrowserPlayWidgetPlugin.h
++    qMRMLSequenceBrowserSeekWidgetPlugin.h
++    qMRMLSequenceBrowserToolBarPlugin.h
++    qMRMLSequenceEditWidgetPlugin.h
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   )
+-- 
+2.52.0
+

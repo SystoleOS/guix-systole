@@ -1,0 +1,174 @@
+From cc7be1ce0ad16951efd1b9f419d49a4140787111 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 9 Apr 2026 06:03:32 +0200
+Subject: [PATCH] ENH: Add standalone build support for VolumeRendering module
+ (5.10)
+
+- Add cmake_minimum_required/find_package(Slicer) preamble to top-level
+- Replace _SOURCE_DIR/_BINARY_DIR with _INCLUDE_DIRS in Logic, MRMLDM, Widgets, MRML
+- Add ITK_INCLUDE_DIRS to MRMLDM include directories
+- Add LINK_DIRECTORIES to all macro calls
+- Add MOC_SRCS to ctkMacroBuildQtDesignerPlugin for Q_OBJECT headers
+---
+ Modules/Loadable/VolumeRendering/CMakeLists.txt   | 15 +++++++++++++++
+ .../Loadable/VolumeRendering/Logic/CMakeLists.txt |  4 ++--
+ .../Loadable/VolumeRendering/MRML/CMakeLists.txt  |  3 ++-
+ .../VolumeRendering/MRMLDM/CMakeLists.txt         |  8 ++++----
+ .../SubjectHierarchyPlugins/CMakeLists.txt        |  1 +
+ .../VolumeRendering/Widgets/CMakeLists.txt        |  4 ++--
+ .../Widgets/DesignerPlugins/CMakeLists.txt        |  6 ++++++
+ 7 files changed, 32 insertions(+), 9 deletions(-)
+
+diff --git a/Modules/Loadable/VolumeRendering/CMakeLists.txt b/Modules/Loadable/VolumeRendering/CMakeLists.txt
+index a495e66f5c..7ad79e34ff 100644
+--- a/Modules/Loadable/VolumeRendering/CMakeLists.txt
++++ b/Modules/Loadable/VolumeRendering/CMakeLists.txt
+@@ -1,9 +1,23 @@
+ 
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME VolumeRendering)
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++set(CMAKE_CXX_STANDARD "17")
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(MRML)
+ add_subdirectory(Logic)
+@@ -68,6 +82,7 @@ slicerMacroBuildLoadableModule(
+   UI_SRCS ${MODULE_UI_SRCS}
+   TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
+   RESOURCES ${MODULE_RESOURCES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   WITH_GENERIC_TESTS
+   )
+ 
+diff --git a/Modules/Loadable/VolumeRendering/Logic/CMakeLists.txt b/Modules/Loadable/VolumeRendering/Logic/CMakeLists.txt
+index 8b9ea819a3..8380b3cd72 100644
+--- a/Modules/Loadable/VolumeRendering/Logic/CMakeLists.txt
++++ b/Modules/Loadable/VolumeRendering/Logic/CMakeLists.txt
+@@ -5,8 +5,7 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_LOGIC_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+-  ${vtkSlicer${MODULE_NAME}ModuleMRML_SOURCE_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleMRML_BINARY_DIR}
++  ${vtkSlicer${MODULE_NAME}ModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+@@ -25,6 +24,7 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+ 
+ configure_file(
+diff --git a/Modules/Loadable/VolumeRendering/MRML/CMakeLists.txt b/Modules/Loadable/VolumeRendering/MRML/CMakeLists.txt
+index b0e7ccabe7..33f9d1aaf7 100644
+--- a/Modules/Loadable/VolumeRendering/MRML/CMakeLists.txt
++++ b/Modules/Loadable/VolumeRendering/MRML/CMakeLists.txt
+@@ -8,7 +8,7 @@ find_package(JsonCpp REQUIRED)
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+   ${JsonCpp_INCLUDE_DIR}
+-  ${vtkSlicerMarkupsModuleMRML_SOURCE_DIR}
++  ${vtkSlicerMarkupsModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+@@ -46,4 +46,5 @@ SlicerMacroBuildModuleMRML(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+diff --git a/Modules/Loadable/VolumeRendering/MRMLDM/CMakeLists.txt b/Modules/Loadable/VolumeRendering/MRMLDM/CMakeLists.txt
+index a39523a973..abd904036b 100644
+--- a/Modules/Loadable/VolumeRendering/MRMLDM/CMakeLists.txt
++++ b/Modules/Loadable/VolumeRendering/MRMLDM/CMakeLists.txt
+@@ -5,10 +5,9 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_MRMLDISPLAYABLEMANAGER_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+-  ${vtkSlicer${MODULE_NAME}ModuleLogic_SOURCE_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleLogic_BINARY_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleMRML_SOURCE_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleMRML_BINARY_DIR}
++  ${vtkSlicer${MODULE_NAME}ModuleLogic_INCLUDE_DIRS}
++  ${vtkSlicer${MODULE_NAME}ModuleMRML_INCLUDE_DIRS}
++  ${ITK_INCLUDE_DIRS}
+   )
+ 
+ set(displayable_manager_SRCS
+@@ -49,4 +48,5 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+diff --git a/Modules/Loadable/VolumeRendering/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/VolumeRendering/SubjectHierarchyPlugins/CMakeLists.txt
+index f7e3b4255c..6af9fc9e78 100644
+--- a/Modules/Loadable/VolumeRendering/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Loadable/VolumeRendering/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -47,5 +47,6 @@ SlicerMacroBuildModuleQtLibrary(
+   UI_SRCS ${${KIT}_UI_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   RESOURCES ${${KIT}_RESOURCES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   WRAP_PYTHONQT
+   )
+diff --git a/Modules/Loadable/VolumeRendering/Widgets/CMakeLists.txt b/Modules/Loadable/VolumeRendering/Widgets/CMakeLists.txt
+index 5b8414e811..2acf9742b5 100644
+--- a/Modules/Loadable/VolumeRendering/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/VolumeRendering/Widgets/CMakeLists.txt
+@@ -5,8 +5,7 @@ set(KIT ${PROJECT_NAME})
+ set(${KIT}_EXPORT_DIRECTIVE "Q_SLICER_MODULE_${MODULE_NAME_UPPER}_WIDGETS_EXPORT")
+ 
+ set(${KIT}_INCLUDE_DIRECTORIES
+-  ${vtkSlicer${MODULE_NAME}ModuleMRML_SOURCE_DIR}
+-  ${vtkSlicer${MODULE_NAME}ModuleMRML_BINARY_DIR}
++  ${vtkSlicer${MODULE_NAME}ModuleMRML_INCLUDE_DIRS}
+   )
+ 
+ set(${KIT}_SRCS
+@@ -54,6 +53,7 @@ SlicerMacroBuildModuleWidgets(
+   UI_SRCS ${${KIT}_UI_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   RESOURCES ${${KIT}_RESOURCES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   WRAP_PYTHONQT
+   )
+ 
+diff --git a/Modules/Loadable/VolumeRendering/Widgets/DesignerPlugins/CMakeLists.txt b/Modules/Loadable/VolumeRendering/Widgets/DesignerPlugins/CMakeLists.txt
+index fe803ea82d..8a071a259c 100644
+--- a/Modules/Loadable/VolumeRendering/Widgets/DesignerPlugins/CMakeLists.txt
++++ b/Modules/Loadable/VolumeRendering/Widgets/DesignerPlugins/CMakeLists.txt
+@@ -29,5 +29,11 @@ ctkMacroBuildQtDesignerPlugin(
+   EXPORT_DIRECTIVE ${${KIT}_EXPORT}
+   FOLDER "Module-${MODULE_NAME}"
+   SRCS ${${KIT}_SRCS}
++  MOC_SRCS
++    qSlicer${MODULE_NAME}ModuleWidgetsPlugin.h
++    qMRMLVolumePropertyNodeWidgetPlugin.h
++    qSlicerPresetComboBoxPlugin.h
++    qSlicerVolumeRenderingPresetComboBoxPlugin.h
++    qSlicerGPUMemoryComboBoxPlugin.h
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   )
+-- 
+2.52.0
+

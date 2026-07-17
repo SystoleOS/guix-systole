@@ -1,0 +1,36 @@
+From fd55defcbbf9586f8d422df66a29c2e9ac7062c0 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Wed, 8 Apr 2026 20:36:05 +0200
+Subject: [PATCH] COMP: Add vtkSlicerTerminologiesModuleLogic and
+ LINK_DIRECTORIES to Markups SHP
+
+Add vtkSlicerTerminologiesModuleLogic to TARGET_LIBRARIES and
+LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS} to SlicerMacroBuildModuleQtLibrary
+in SubjectHierarchyPlugins so the terminologies logic symbols are found
+during standalone module build.
+---
+ Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt
+index 66a9bbbc35..2796c94f2b 100644
+--- a/Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Markups/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -35,6 +35,7 @@ set(${KIT}_TARGET_LIBRARIES
+   qSlicerSubjectHierarchyModuleWidgets
+   vtkSlicerSubjectHierarchyModuleLogic
+   qSlicerTerminologiesModuleWidgets
++  vtkSlicerTerminologiesModuleLogic
+   qMRMLWidgets
+   MRMLLogic
+   MRMLCore
+@@ -51,5 +52,6 @@ SlicerMacroBuildModuleQtLibrary(
+   UI_SRCS ${${KIT}_UI_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   RESOURCES ${${KIT}_RESOURCES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   WRAP_PYTHONQT
+   )
+-- 
+2.52.0
+

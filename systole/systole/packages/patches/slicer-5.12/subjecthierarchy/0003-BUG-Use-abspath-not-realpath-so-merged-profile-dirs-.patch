@@ -1,0 +1,32 @@
+From 5864088ae8b2afa50f959c56bb2ce6da13420d53 Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 9 Apr 2026 16:17:04 +0200
+Subject: [PATCH] BUG: Use abspath not realpath so merged profile dirs expose
+ all plugins
+
+In Guix the SubjectHierarchyPlugins directory is assembled by merging
+symlinks from multiple packages (subjecthierarchy, segmenteditor,
+segmentstatistics).  os.path.realpath dereferences __init__.py's symlink
+to the subjecthierarchy store output, where os.listdir only finds that
+package's own plugin files.  Use os.path.abspath to stay in the merged
+profile directory so sibling plugins from other packages are discovered.
+---
+ .../Widgets/Python/SubjectHierarchyPlugins/__init__.py          | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Modules/Loadable/SubjectHierarchy/Widgets/Python/SubjectHierarchyPlugins/__init__.py b/Modules/Loadable/SubjectHierarchy/Widgets/Python/SubjectHierarchyPlugins/__init__.py
+index 2cbe1bc73a..1c7a843575 100644
+--- a/Modules/Loadable/SubjectHierarchy/Widgets/Python/SubjectHierarchyPlugins/__init__.py
++++ b/Modules/Loadable/SubjectHierarchy/Widgets/Python/SubjectHierarchyPlugins/__init__.py
+@@ -5,7 +5,7 @@ import traceback
+ import logging
+ import sys
+ 
+-currentDir = os.path.dirname(os.path.realpath(__file__))
++currentDir = os.path.dirname(os.path.abspath(__file__))
+ sys.path.append(currentDir)
+ for fileName in os.listdir(currentDir):
+     fileNameNoExtension = os.path.splitext(fileName)[0]
+-- 
+2.52.0
+

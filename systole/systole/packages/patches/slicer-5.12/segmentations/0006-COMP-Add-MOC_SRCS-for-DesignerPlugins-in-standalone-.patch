@@ -1,0 +1,45 @@
+From 1ab2b6e0752a7e1c77ea5d8f7b19bdd8b63ba29a Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 9 Apr 2026 08:27:58 +0200
+Subject: [PATCH] COMP: Add MOC_SRCS for DesignerPlugins in standalone
+ Segmentations 5.10
+
+ctkMacroBuildQtDesignerPlugin does not use AUTOMOC; Q_OBJECT headers
+need explicit MOC_SRCS to generate vtable symbols.
+---
+ .../Widgets/DesignerPlugins/CMakeLists.txt          | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/Modules/Loadable/Segmentations/Widgets/DesignerPlugins/CMakeLists.txt b/Modules/Loadable/Segmentations/Widgets/DesignerPlugins/CMakeLists.txt
+index cd9883c9da..73733b8300 100644
+--- a/Modules/Loadable/Segmentations/Widgets/DesignerPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Segmentations/Widgets/DesignerPlugins/CMakeLists.txt
+@@ -25,6 +25,18 @@ set(${KIT}_SRCS
+   qMRMLSegmentationFileExportWidgetPlugin.h
+   )
+ 
++set(${KIT}_MOC_SRCS
++  qSlicerSegmentationsModuleWidgetsPlugin.h
++  qMRMLSegmentsTableViewPlugin.h
++  qMRMLSegmentationRepresentationsListViewPlugin.h
++  qMRMLSegmentationConversionParametersWidgetPlugin.h
++  qMRMLSegmentationShow3DButtonPlugin.h
++  qMRMLSegmentSelectorWidgetPlugin.h
++  qMRMLSegmentEditorWidgetPlugin.h
++  qMRMLSegmentationDisplayNodeWidgetPlugin.h
++  qMRMLSegmentationFileExportWidgetPlugin.h
++  )
++
+ set(${KIT}_TARGET_LIBRARIES
+   qSlicerSegmentationsModuleWidgets
+   )
+@@ -35,5 +47,6 @@ ctkMacroBuildQtDesignerPlugin(
+   EXPORT_DIRECTIVE ${${KIT}_EXPORT}
+   FOLDER "Module-${MODULE_NAME}"
+   SRCS ${${KIT}_SRCS}
++  MOC_SRCS ${${KIT}_MOC_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   )
+-- 
+2.52.0
+

@@ -1,0 +1,111 @@
+From 822d46d662591d9a727449483fbcdcc027e609fb Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 9 Apr 2026 05:24:12 +0200
+Subject: [PATCH] ENH: Add standalone build support for Volumes module (5.10)
+
+- Add cmake_minimum_required/find_package(Slicer) preamble to top-level
+- Add LINK_DIRECTORIES to slicerMacroBuildLoadableModule,
+  SlicerMacroBuildModuleLogic (Logic), SlicerMacroBuildModuleWidgets,
+  and SlicerMacroBuildModuleQtLibrary (SHP)
+- Add MOC_SRCS to ctkMacroBuildQtDesignerPlugin for Q_OBJECT headers
+---
+ Modules/Loadable/Volumes/CMakeLists.txt           | 15 +++++++++++++++
+ Modules/Loadable/Volumes/Logic/CMakeLists.txt     |  1 +
+ .../SubjectHierarchyPlugins/CMakeLists.txt        |  1 +
+ Modules/Loadable/Volumes/Widgets/CMakeLists.txt   |  1 +
+ .../Widgets/DesignerPlugins/CMakeLists.txt        |  9 +++++++++
+ 5 files changed, 27 insertions(+)
+
+diff --git a/Modules/Loadable/Volumes/CMakeLists.txt b/Modules/Loadable/Volumes/CMakeLists.txt
+index e7dbc71eea..784e22d45d 100644
+--- a/Modules/Loadable/Volumes/CMakeLists.txt
++++ b/Modules/Loadable/Volumes/CMakeLists.txt
+@@ -1,9 +1,23 @@
+ 
++cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
++
+ #-----------------------------------------------------------------------------
+ set(MODULE_NAME Volumes)
+ 
+ string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
+ 
++set(CMAKE_CXX_STANDARD "17")
++find_package(Slicer REQUIRED)
++include(${Slicer_USE_FILE})
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR
++    "./share/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++if(NOT Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR)
++  set(Slicer_INSTALL_QTLOADABLEMODULES_LIB_DIR
++    "./lib/Slicer-${Slicer_VERSION}/qt-loadable-modules")
++endif()
++
+ #-----------------------------------------------------------------------------
+ add_subdirectory(Logic)
+ add_subdirectory(SubjectHierarchyPlugins)
+@@ -64,6 +78,7 @@ slicerMacroBuildLoadableModule(
+   UI_SRCS ${MODULE_UI_SRCS}
+   TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
+   RESOURCES ${MODULE_RESOURCES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   WITH_GENERIC_TESTS
+   )
+ 
+diff --git a/Modules/Loadable/Volumes/Logic/CMakeLists.txt b/Modules/Loadable/Volumes/Logic/CMakeLists.txt
+index ed57afef75..5700267925 100644
+--- a/Modules/Loadable/Volumes/Logic/CMakeLists.txt
++++ b/Modules/Loadable/Volumes/Logic/CMakeLists.txt
+@@ -26,6 +26,7 @@ SlicerMacroBuildModuleLogic(
+   INCLUDE_DIRECTORIES ${${KIT}_INCLUDE_DIRECTORIES}
+   SRCS ${${KIT}_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   )
+ 
+ #-----------------------------------------------------------------------------
+diff --git a/Modules/Loadable/Volumes/SubjectHierarchyPlugins/CMakeLists.txt b/Modules/Loadable/Volumes/SubjectHierarchyPlugins/CMakeLists.txt
+index add264a69d..8195bf245f 100644
+--- a/Modules/Loadable/Volumes/SubjectHierarchyPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Volumes/SubjectHierarchyPlugins/CMakeLists.txt
+@@ -51,5 +51,6 @@ SlicerMacroBuildModuleQtLibrary(
+   UI_SRCS ${${KIT}_UI_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   RESOURCES ${${KIT}_RESOURCES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   WRAP_PYTHONQT
+   )
+diff --git a/Modules/Loadable/Volumes/Widgets/CMakeLists.txt b/Modules/Loadable/Volumes/Widgets/CMakeLists.txt
+index 8782665492..f5b240b36c 100644
+--- a/Modules/Loadable/Volumes/Widgets/CMakeLists.txt
++++ b/Modules/Loadable/Volumes/Widgets/CMakeLists.txt
+@@ -47,6 +47,7 @@ SlicerMacroBuildModuleWidgets(
+   UI_SRCS ${${KIT}_UI_SRCS}
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   RESOURCES ${${KIT}_RESOURCES}
++  LINK_DIRECTORIES ${EXTRA_MODULE_LIB_DIRS}
+   WRAP_PYTHONQT
+   )
+ 
+diff --git a/Modules/Loadable/Volumes/Widgets/DesignerPlugins/CMakeLists.txt b/Modules/Loadable/Volumes/Widgets/DesignerPlugins/CMakeLists.txt
+index f50cdd3f67..c524f33425 100644
+--- a/Modules/Loadable/Volumes/Widgets/DesignerPlugins/CMakeLists.txt
++++ b/Modules/Loadable/Volumes/Widgets/DesignerPlugins/CMakeLists.txt
+@@ -33,5 +33,14 @@ ctkMacroBuildQtDesignerPlugin(
+   EXPORT_DIRECTIVE ${${KIT}_EXPORT}
+   FOLDER "Module-${MODULE_NAME}"
+   SRCS ${${KIT}_SRCS}
++  MOC_SRCS
++    qSlicer${MODULE_NAME}ModuleWidgetsAbstractPlugin.h
++    qSlicer${MODULE_NAME}ModuleWidgetsPlugin.h
++    qSlicerDiffusionTensorVolumeDisplayWidgetPlugin.h
++    qSlicerDiffusionWeightedVolumeDisplayWidgetPlugin.h
++    qSlicerDTISliceDisplayWidgetPlugin.h
++    qSlicerLabelMapVolumeDisplayWidgetPlugin.h
++    qSlicerScalarVolumeDisplayWidgetPlugin.h
++    qSlicerVolumeDisplayWidgetPlugin.h
+   TARGET_LIBRARIES ${${KIT}_TARGET_LIBRARIES}
+   )
+-- 
+2.52.0
+
