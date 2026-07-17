@@ -113,14 +113,13 @@
                    (ld-linux (string-append
                               #$(this-package-input "glibc")
                               "/lib/ld-linux-x86-64.so.2"))
-                   (gcc-lib-path
-                    ;; gcc "lib" output lives at a separate store path
-                    ;; (-gcc-14.x-lib).  Resolve via %build-inputs.
-                    (or (assoc-ref %build-inputs "gcc:lib")
-                        (error "gcc:lib input not found")))
                    (rpath (string-append
                            out "/lib:"
-                           gcc-lib-path "/lib:"
+                           ;; gcc "lib" output lives at a separate store
+                           ;; path (-gcc-14.x-lib); this-package-input
+                           ;; drops output specifiers, so reference the
+                           ;; output directly.
+                           #$gcc:lib "/lib:"
                            #$(this-package-input "glibc") "/lib")))
               (for-each
                (lambda (bin)
@@ -134,8 +133,8 @@
            (@ (gnu packages compression) gzip)
            (@ (gnu packages elf) patchelf)))
     (inputs
-     `(("glibc" ,(@ (gnu packages base) glibc))
-       ("gcc:lib" ,(@ (gnu packages gcc) gcc) "lib")))
+     (list glibc
+           `(,gcc "lib")))
     (supported-systems '("x86_64-linux"))
     (home-page "https://www.3dsystems.com/haptics-devices/touch")
     (synopsis "3D Systems Touch USB user-space driver (proprietary)")
@@ -232,8 +231,10 @@ from their public S3 bucket under a proprietary EULA.")
             (let ((rpath
                    (string-append
                     "$ORIGIN:"
-                    #$(this-package-input "ncurses") "/lib:"
-                    #$(this-package-input "gcc:lib") "/lib")))
+                    #$(this-package-input "ncurses-with-tinfo") "/lib:"
+                    ;; this-package-input drops output specifiers, so
+                    ;; reference the gcc "lib" output directly.
+                    #$gcc:lib "/lib")))
               (for-each
                (lambda (f)
                  (invoke patchelf "--set-rpath" rpath
@@ -267,9 +268,9 @@ from their public S3 bucket under a proprietary EULA.")
      ;; libHD needs libncurses.so.5 + libtinfo.so.5 (legacy ABI).
      ;; Must use ncurses/tinfo-5 (not ncurses-5) so libtinfo.so.5 is
      ;; split out as a separate shared library — libHD DT_NEEDs it
-     ;; independently.  gcc:lib gives libstdc++/libgcc_s.
-     `(("ncurses" ,(@ (nongnu packages ncurses) ncurses/tinfo-5))
-       ("gcc:lib" ,(@ (gnu packages gcc) gcc) "lib")))
+     ;; independently.  gcc "lib" gives libstdc++/libgcc_s.
+     (list ncurses/tinfo-5
+           `(,gcc "lib")))
     ;; libHD DT_NEEDED's libPhantomIOLib42.so which lives in
     ;; touch-driver; propagate so anything that installs
     ;; openhaptics-sdk also gets the driver on LD_LIBRARY_PATH.

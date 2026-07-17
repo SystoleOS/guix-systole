@@ -34,7 +34,7 @@
   (package
     (inherit python-sans-pip-wrapper)
     (version (package-version python-3.12))
-    (propagated-inputs `(("python" ,python-3.12)))))
+    (propagated-inputs (list python-3.12))))
 
 ;; Rewriter that swaps the Python interpreter used to build Python packages
 ;; from the default (Python 3.11) to Python 3.12.  Applied narrowly — only

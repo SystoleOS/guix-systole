@@ -2815,9 +2815,9 @@ Guix); used by @code{rosbag2_storage_sqlite3}."))
   ;; so we must explicitly request it via the (pkg output) tuple.
   (rosbag2-subpkg
    "zstd_vendor"
-   #:propagated-inputs `(,ros-ament-cmake-jazzy
-                         ,ros-ament-cmake-vendor-package-jazzy
-                         (,zstd "lib"))
+   #:propagated-inputs (list ros-ament-cmake-jazzy
+                             ros-ament-cmake-vendor-package-jazzy
+                             `(,zstd "lib"))
    #:synopsis "ROS 2 vendor wrapper around libzstd"
    #:description
    "Vendor wrapper around the upstream Zstandard compression library
