@@ -18,7 +18,7 @@
 (define-module (systole packages openigtlink)
   #:use-module ((guix licenses)
                 #:prefix license:)
-  #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix build-system cmake)
   #:use-module (guix packages)
   #:use-module (gnu packages)
@@ -51,7 +51,6 @@
   #:use-module (gnu packages xorg)
   #:use-module (guix build-system cmake)
   #:use-module (guix build-system qt)
-  #:use-module (guix download)
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (guix utils)
@@ -67,16 +66,20 @@
   #:use-module (srfi srfi-1))
 
 (define-public openigtlink
+  (let ((commit "c512727425c2b7a594fabb9cd1fbfac512bf376e") ;commit used by PlusBuild (Plus 2.8)
+        (revision "0"))
   (package
    (name "openigtlink")
-   (version "0.0.0-c512727") ;version used by PlusBuild (Plus 2.8)
+   (version (git-version "0.0.0" revision commit))
    (source
     (origin
-     (method url-fetch)
-     (uri
-      "https://github.com/openigtlink/OpenIGTLink/archive/c512727425c2b7a594fabb9cd1fbfac512bf376e.tar.gz")
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/openigtlink/OpenIGTLink")
+           (commit commit)))
+     (file-name (git-file-name name version))
      (sha256
-      (base32 "0s2rxa4igs2d354205vnp57bf81yj5fpqh91hy5v3zz34gri46j5"))))
+      (base32 "17gpkq4c4rh1pglm327958b5mi94bxqgwim8qkwsqia02hq1xg4x"))))
    (build-system cmake-build-system)
    (arguments
     `(#:configure-flags (list "-DBUILD_EXAMPLES:BOOL=OFF"
@@ -104,18 +107,23 @@ seamless data flow among those components and enable a closed-loop process of
 planning, control, delivery, and feedback. The specification of OpenIGTLink is
 open, and can be used without any license fee; hence OpenIGTLink is suitable for
 both industrial and academic developers.")
-   (license license:bsd-3)))
+   (license license:bsd-3))))
 
 (define-public slicer-openigtlink
+  (let ((commit "6fbdadf16d6ccee8e840d9d408422bec4c95e867")
+        (revision "0"))
   (package
    (name "slicer-openigtlink")
-   (version "0.0.0-6fbdadf1")
+   (version (git-version "0.0.0" revision commit))
    (source
     (origin
-     (method url-fetch)
-     (uri "https://github.com/openigtlink/SlicerOpenIGTLink/archive/6fbdadf16d6ccee8e840d9d408422bec4c95e867.tar.gz")
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/openigtlink/SlicerOpenIGTLink")
+           (commit commit)))
+     (file-name (git-file-name name version))
      (sha256
-      (base32 "0m56zqjdv87iv0p6g269kj9bjknjsaq18ijpsjawh9wi2w8ybsaj"))
+      (base32 "03vipywwds2hmnrw1rk27x51mlph66rqirlhj55dl6g05bbw9356"))
      (patches (search-patches
                "0001-COMP-Add-conditional-build-of-UltrasoundRemoteContro.patch"
                "0002-COMP-Fix-include-directories-and-use-CMake-variables.patch"))))
@@ -252,18 +260,23 @@ both industrial and academic developers.")
    (synopsis "Slicer Extension for communication of IGT data")
    (description "SlicerOpenIGTLink is a 3D Slicer extension designed to facilitate the communication between 3D Slicer and other platforms via OpenIGTLink.")
    (license license:bsd-2)
-   (home-page "https://github.com/openigtlink/SlicerOpenIGTLink")))
+   (home-page "https://github.com/openigtlink/SlicerOpenIGTLink"))))
 
 (define-public openigtlinkio
+  (let ((commit "a262c1f5e63c00831cbf67d5284f4734f8a7b143")
+        (revision "0"))
   (package
    (name "openigtlinkio")
-   (version "0.0.0-a262c1f")
+   (version (git-version "0.0.0" revision commit))
    (source
     (origin
-     (method url-fetch)
-     (uri "https://github.com/IGSIO/OpenIGTLinkIO/archive/a262c1f5e63c00831cbf67d5284f4734f8a7b143.tar.gz")
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/IGSIO/OpenIGTLinkIO")
+           (commit commit)))
+     (file-name (git-file-name name version))
      (sha256
-      (base32 "01y6nhv7c5m57clpql8vg1g43k4k37mvb0bvasl28r90mqm4dvsm"))
+      (base32 "0rrcwm4sh4xrdidfci17srqqh9yfsl85nc0nfksd0d8x3mw2lywp"))
      (patches
       (search-patches
        "openigtlinkio/0001-COMP-Install-igtlioLogic.h-as-a-public-header.patch"))))
@@ -341,5 +354,5 @@ both industrial and academic developers.")
   (synopsis "Library for interfacing to openigtlink/OpenIGTLink, dependent on VTK and Qt. Based on openigtlink/OpenIGTLinkIF")
   (description "OpenIGTLinkIO contains several wrapper layers on top of OpenIGTLink. The code originates from OpenIGTLink/OpenIGTLinkIF. The main intent of the library is to share igtl code between Slicer, CustusX, IBIS, MITK and other systems.")
   (license license:bsd-2)
-  (home-page "https://github.com/IGSIO/OpenIGTLinkIO")))
+  (home-page "https://github.com/IGSIO/OpenIGTLinkIO"))))
 
