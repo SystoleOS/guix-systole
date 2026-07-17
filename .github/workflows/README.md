@@ -1,111 +1,73 @@
 # GitHub Actions Workflows
 
-This directory contains CI/CD workflows for automated testing.
+CI for guix-systole. The three testing workflows share one design:
+they bootstrap the Ubuntu `apt` Guix as a launcher only, then run the
+relevant `scripts/run-tests.sh` category through
+`guix time-machine -C channels-lock.scm` — so every check executes
+against the exact Guix + channel commits the project actually ships
+with, not whatever Ubuntu packaged. Locally you reproduce a CI run
+with:
 
-## Available Workflows
+```bash
+GUIX="guix time-machine -C channels-lock.scm --" ./scripts/run-tests.sh <category>
+```
+
+## Workflows
 
 ### package-tests.yml
-**Triggers:** PR and push to main/dev when package files change
-**Tests:**
-- Module loading (all package modules)
-- Package definitions verification (13 packages)
-
-**Note:** Full package linting of all packages is disabled in CI because some system modules require the `nonguix` channel. Medical imaging packages are linted via guix-lint-check.yml. Run full lint locally:
-```bash
-./scripts/run-tests.sh lint
-```
+**Triggers:** PR and push to main/dev when `systole/`, `tests/`,
+`scripts/run-tests.sh`, or `channels-lock.scm` change.
+**Runs:** `./scripts/run-tests.sh packages` —
+`tests/packages/check-packages.scm` in `guix repl` script mode:
+discovers and loads every `(systole ...)` module, touches every
+exported package (name + version), and verifies the channel's public
+API contract (load-bearing names like `slicer-5.8`, `slicer-all-5.10`).
 
 ### installer-tests.yml
-**Triggers:** PR and push when installer files change
-**Tests:**
-- Installer module loading
-- Module import verification
+**Triggers:** PR and push when `system/`, `systole/`,
+`tests/installer/`, or `channels-lock.scm` change (installer modules
+import `(systole ...)` modules, so channel changes re-run these too).
+**Runs:** `./scripts/run-tests.sh installer` —
+`tests/installer/check-installer.scm` inside
+`guix shell guile guile-newt guile-parted guile-webutils`, loading all
+installer/OS modules and verifying the ISO-build entry points.
+`(os install)` imports nonguix modules, which is why the pinned channel
+set is required — the apt Guix alone could never load them.
 
 ### guix-lint-check.yml
-**Triggers:** PR and push to main/dev
-**Tests:**
-- Module syntax validation
-- Package linting for all 13 medical imaging packages
-- Excludes system modules that require nonguix
+**Triggers:** PR and push to main/dev when `systole/`,
+`tests/lint-allowlist.regex`, `scripts/run-tests.sh`, or
+`channels-lock.scm` change.
+**Runs:** `./scripts/run-tests.sh lint`. The package list lives in the
+`LINT_PACKAGES` array in `scripts/run-tests.sh` and the accepted
+warnings in `tests/lint-allowlist.regex` — single sources of truth
+shared with local runs. `guix lint` exits 0 even on warnings, so the
+runner gates on filtered output: anything not matching the allowlist
+fails the check.
 
-**Packages linted:** vtk-slicer, vtkaddon, itk-slicer, slicer-5.8, slicer-volumes-5.8, ctk, ctkapplauncher, teem-slicer, netcdf-slicer, libarchive-slicer, qrestapi, openigtlink, slicer-openigtlink
+### commit-message-check.yml
+**Triggers:** every PR event and push to main.
+**Runs:** the `SystoleOS/guix-systole-check-commit-message-action`,
+enforcing the `[Prefix][Component] Title` commit format
+(see CONTRIBUTING.md).
 
-**Note:** Full linting of system modules (transformations, installer) requires local setup with nonguix channel.
+## What is *not* run in CI
 
-## Why Some Tests Are Disabled in CI
+- **Package builds** — hours per package; run locally with
+  `./scripts/run-tests.sh build` or `guix build -m manifest.scm`.
+- **VM installer tests** — `tests/installer/installer.scm` (module
+  `(tests installer installer)`) boots full QEMU VMs and needs KVM plus
+  long build times; run locally or on a self-hosted runner:
+  `./scripts/run-vm-tests.sh [basic|deploy-key|no-ssh|all]`.
+- **Installer ISO builds** — multi-gigabyte artifacts; built locally
+  with `scripts/build-installer-with-deploy.sh` (which uses the same
+  `channels-lock.scm` pin by default).
 
-### Full Lint Tests
-**Problem:** System modules (transformations, installer) depend on external channels:
-- `nonguix` - For Linux kernel, NVIDIA drivers
-- `systole-artwork` - For branding assets
+## Maintenance notes
 
-**What works in CI:**
-- ✅ Medical imaging packages (slicer, vtk, itk, ctk, qrestapi, etc.) - don't need nonguix
-- ❌ System modules (transformations.scm, installer modules) - require nonguix
-
-**Solution:** Run full lint locally with channel configuration:
-```bash
-# Make sure channels are configured in ~/.config/guix/channels.scm
-guix pull
-./scripts/run-tests.sh lint
-```
-
-### Build Tests
-**Problem:** Build tests take 2-8 hours per package
-**Solution:** Run manually when needed:
-```bash
-./scripts/run-tests.sh build
-```
-
-## Running Full Tests Locally
-
-For complete validation before pushing:
-
-```bash
-# Fast tests (always run these)
-./scripts/run-tests.sh
-
-# Lint tests (requires channel configuration)
-guix pull  # Update channels first
-./scripts/run-tests.sh lint
-
-# Build tests (very slow!)
-./scripts/run-tests.sh build
-```
-
-## CI Workflow Status
-
-| Workflow | Enabled | Reason if Disabled |
-|----------|---------|-------------------|
-| Module loading | ✅ Yes | Fast, no external deps |
-| Package definitions | ✅ Yes | Fast, no external deps |
-| Package linting (medical imaging) | ✅ Yes | No nonguix dependency |
-| Package linting (system modules) | ❌ No | Requires nonguix channel |
-| Build testing | ❌ No | Too slow (2-8h per package) |
-| Installer modules | ✅ Yes | Fast, basic checks only |
-
-## Expected Warnings
-
-When running lint locally, these warnings are expected:
-
-1. **Module name mismatches**
-   ```
-   warning: module name (systole packages foo) does not match file name 'systole/systole/packages/foo.scm'
-   ```
-   This is due to the nested `systole/systole/` directory structure and doesn't affect functionality.
-
-2. **Style warnings**
-   - Long lines in package definitions
-   - Missing upstream status in patches
-   - Synopsis/description formatting
-
-These are documented as technical debt in ROADMAP.md.
-
-## Future Improvements
-
-- [ ] Set up nonguix channel in CI (if possible)
-- [ ] Add caching for faster test runs
-- [ ] Implement VM-based installer testing
-- [ ] Add performance benchmarking
-
-See ROADMAP.md for detailed enhancement plans.
+- Add lint packages to `LINT_PACKAGES` in `scripts/run-tests.sh`, not
+  to the workflow files.
+- Accept a new lint warning by adding a pattern to
+  `tests/lint-allowlist.regex` in the same commit that introduces it.
+- Bump `channels-lock.scm` and the `.guix-channel` dependency pins
+  together; the workflows re-run automatically on lock changes.
