@@ -31,8 +31,6 @@
   #:use-module (gnu packages base)
   #:use-module (guix build-system cmake)
   #:use-module (guix build-system copy)
-  #:use-module (guix build-system trivial)
-  #:use-module (guix download)
   #:use-module (guix gexp)
   #:use-module (guix git-download)
   #:use-module ((guix licenses)
@@ -49,11 +47,13 @@
     (version "5.4.0")
     (source
      (origin
-       (method url-fetch)
-       (uri
-        "https://github.com/Slicer/ITK/archive/29b78d73c81d6c00c393416598d16058704c535c.tar.gz")
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/Slicer/ITK")
+             (commit "29b78d73c81d6c00c393416598d16058704c535c")))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "1cqy2rzcskfjaszww4isp6g2mg4viqcp7qacfvrc97pq1qvrs5lb"))))
+        (base32 "13iz2f8r5rr9xi8w2j42iidrpn18yi9mkvnw47n6d2wyrvjjl1aj"))))
     (arguments
      `(#:tests? #f
        #:configure-flags (list ;Tests
@@ -155,23 +155,14 @@
     (name "itk-slicer-source")
     (source (origin (inherit (package-source itk-slicer))
                     (patches '())))
-    (build-system trivial-build-system)
+    (build-system copy-build-system)
     (outputs '("out"))
-    (native-inputs (list tar gzip))
     (inputs '())
     (propagated-inputs '())
     (native-search-paths '())
     (arguments
-     (list #:builder
-           (with-imported-modules '((guix build utils))
-             #~(begin
-                 (use-modules (guix build utils))
-                 (setenv "PATH"
-                         (string-append #$(file-append tar "/bin") ":"
-                                        #$(file-append gzip "/bin")))
-                 (mkdir-p #$output)
-                 (invoke "tar" "xf" #$source
-                         "--strip-components=1" "-C" #$output)))))
+     ;; The git checkout is already the bare source tree; install it as-is.
+     (list #:install-plan #~'(("." "/"))))
     (synopsis "ITK source tree (Slicer variant)")
     (description
      "Upstream ITK source tree at the exact commit used by @code{itk-slicer},
@@ -192,11 +183,13 @@ code search and API exploration.")))
     (version "5.4.4")
     (source
      (origin
-       (method url-fetch)
-       (uri
-        "https://github.com/Slicer/ITK/archive/e5dd69339bf0c436db3650eadd3c2a940c330b77.tar.gz")
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/Slicer/ITK")
+             (commit "e5dd69339bf0c436db3650eadd3c2a940c330b77")))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "1ygqqjncskl56g7yvp42id30kj9wa3b26aazb3cl78cb26hq074q"))))
+        (base32 "1dxkpd6ws691a4km48w5waii1148wnmkjrd84xv0pkdbbbay46k7"))))
     (inputs (modify-inputs (package-inputs itk-slicer)
               (replace "vtk-slicer" vtk-slicer-9.5)
               (prepend python-3.12)))
@@ -215,11 +208,13 @@ code search and API exploration.")))
     (version "0.2.1")
     (source
      (origin
-       (method url-fetch)
-       (uri
-        "https://github.com/InsightSoftwareConsortium/ITKGrowCut/archive/cbf93ab65117abfbf5798745117e34f22ff04728.tar.gz")
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/InsightSoftwareConsortium/ITKGrowCut")
+             (commit "cbf93ab65117abfbf5798745117e34f22ff04728")))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "0is0a2lic6r3d2h4md7csmlbpphfwgqkjmwlh7yvwfbyy1mdngbd"))))
+        (base32 "03fzj55bczip5mmis4b074yq7bwjiwzgy49yvqfnnlhhjr9lzkm9"))))
     (build-system copy-build-system)
     (arguments
      `(#:install-plan '(("." "/"))
@@ -236,11 +231,13 @@ code search and API exploration.")))
     (version "5.1.0")
     (source
      (origin
-       (method url-fetch)
-       (uri
-        "https://github.com/InsightSoftwareConsortium/ITKMGHImageIO/archive/0adac35fa22945c7a5f3a63dd8d01454577c24d3.tar.gz")
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/InsightSoftwareConsortium/ITKMGHImageIO")
+             (commit "0adac35fa22945c7a5f3a63dd8d01454577c24d3")))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "10b3qzxwk2jq17dbcihfj6l2arr27wa6z7p9pvj7jjxfp512khqy"))))
+        (base32 "1x6f9b3vcawfdh8lp7492cvx41p70768a0cy11qiqx9xb2hvhnl9"))))
     (build-system copy-build-system)
     (arguments
      `(#:install-plan '(("." "Modules/Remote/ITKMGHImageIO/"))
@@ -257,11 +254,13 @@ code search and API exploration.")))
     (version "5.1.0")
     (source
      (origin
-       (method url-fetch)
-       (uri
-        "https://github.com/ntustison/ITKAdaptiveDenoising/archive/012ba8882167b64405f7cefc489655f8395093ea.tar.gz")
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/ntustison/ITKAdaptiveDenoising")
+             (commit "012ba8882167b64405f7cefc489655f8395093ea")))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "0mmxx2csrn67a9b6bhixwna7kgphijwz20312b0qwlriw54c61r5"))))
+        (base32 "0wl4zsjjska3ar6nhp9bppqh3f2xm8wvy8mb57r86iaaq4dff3fg"))))
     (build-system copy-build-system)
     (arguments
      `(#:install-plan '(("." "/"))
@@ -278,11 +277,13 @@ code search and API exploration.")))
     (version "5.1.0")
     (source
      (origin
-       (method url-fetch)
-       (uri
-        "https://github.com/KitwareMedical/ITKIOScanco/archive/12fc12b01a964ccbd30bc8743f4e6cabaa2dcd5e.tar.gz")
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/KitwareMedical/ITKIOScanco")
+             (commit "12fc12b01a964ccbd30bc8743f4e6cabaa2dcd5e")))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "1fv5qr8jax820rabn1vrv7bjxziwk0lwmcvc5mq86q2kclnjlyz4"))))
+        (base32 "0n3h9bhpg3fq7p0bqsipwi06h80zn0h11qnpsgqbn4vq2paw4pw4"))))
     (build-system copy-build-system)
     (arguments
      `(#:install-plan '(("." "/"))
@@ -299,11 +300,13 @@ code search and API exploration.")))
     (version "5.1.0")
     (source
      (origin
-       (method url-fetch)
-       (uri
-        "https://github.com/KitwareMedical/ITKMorphologicalContourInterpolation/archive/439e40c41ff2676126f5572722e7b2a46a41e776.tar.gz")
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/KitwareMedical/ITKMorphologicalContourInterpolation")
+             (commit "439e40c41ff2676126f5572722e7b2a46a41e776")))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "07s260k29gvra5wnxjn19wr3cbd6rdvd9pcnkawis0c7ji33g0lm"))))
+        (base32 "03vm94yyia2sddn7c67x20zcz31n56szdnxmxr33snfl6jw54354"))))
     (build-system copy-build-system)
     (arguments
      `(#:install-plan '(("." "/"))
@@ -322,11 +325,13 @@ code search and API exploration.")))
     (version "5.1.0")
     (source
      (origin
-       (method url-fetch)
-       (uri
-        "https://github.com/InsightSoftwareConsortium/ITKIOTransformDCMTK/archive/e97e0e8c27809eea1834dd534a47fc06168e3e45.tar.gz")
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/InsightSoftwareConsortium/ITKIOTransformDCMTK")
+             (commit "e97e0e8c27809eea1834dd534a47fc06168e3e45")))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "0f2bv3rwbcdyqw4xwpar1461haxlm9gp2nlpcavy6xcq5y0ms1c7"))))
+        (base32 "0808y78q4z2dp9djh0r52h9bv5jm4ypp0c66xvkh2sm8glhw984f"))))
     (build-system copy-build-system)
     (arguments
      `(#:install-plan '(("." "/"))
