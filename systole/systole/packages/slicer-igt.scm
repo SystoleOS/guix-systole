@@ -21,7 +21,7 @@
   #:use-module (gnu packages)
   #:use-module (guix build-system cmake)
   #:use-module (guix build-system trivial)
-  #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (guix utils)
@@ -37,16 +37,17 @@
 ;;;
 
 (define %slicer-igt-commit "42091cddf620d760cdb0e22564edb8c55338edd9")
-(define %slicer-igt-version "0.0.0-42091cd")
+(define %slicer-igt-version (git-version "0.0.0" "0" %slicer-igt-commit))
 
 (define %slicer-igt-source
   (origin
-   (method url-fetch)
-   (uri (string-append
-         "https://github.com/SlicerIGT/SlicerIGT/archive/"
-         %slicer-igt-commit ".tar.gz"))
+   (method git-fetch)
+   (uri (git-reference
+         (url "https://github.com/SlicerIGT/SlicerIGT")
+         (commit %slicer-igt-commit)))
+   (file-name (git-file-name "slicer-igt" %slicer-igt-version))
    (sha256
-    (base32 "127ni5kdg7qbs4ibg6wfklm3rxc17mhh427gi3k8j0ymmc66j0c5"))))
+    (base32 "1laslq1vw4j4sx65m84mg09hig3ga5rglb6blc70g4hv3bsbcnlq"))))
 
 ;;;
 ;;; Factory for standalone SlicerIGT loadable-module packages.
