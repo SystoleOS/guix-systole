@@ -33,6 +33,7 @@
 ;;; Code:
 
 (use-modules (guix packages)
+             (guix gexp)
              (ice-9 ftw)
              (ice-9 format)
              (srfi srfi-1))
@@ -99,7 +100,21 @@
           (catch #t
             (lambda ()
               (package-name val)
-              (package-version val))
+              (package-version val)
+              ;; local-file patches resolve lazily, so a missing file
+              ;; only explodes at derivation time -- stat them here.
+              ;; (Caught for real once: a 5.12 patch reference whose
+              ;; file kept its 5.10 name.)
+              (let ((source (package-source val)))
+                (when (origin? source)
+                  (for-each
+                   (lambda (patch)
+                     (when (local-file? patch)
+                       (let ((path (local-file-absolute-file-name patch)))
+                         (unless (file-exists? path)
+                           (fail! "package ~a in ~s references missing patch ~a"
+                                  sym (car mod+iface) path)))))
+                   (origin-patches source)))))
             (lambda (key . args)
               (fail! "package ~a in ~s is malformed: ~s ~s"
                      sym (car mod+iface) key args))))))
