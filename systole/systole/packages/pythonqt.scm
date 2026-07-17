@@ -21,7 +21,7 @@
   #:use-module (gnu packages python)
   #:use-module (guix gexp)
   #:use-module (guix packages)
-  #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix build-system cmake)
   #:use-module ((guix licenses)
                 #:prefix license:))
@@ -48,11 +48,13 @@
     (version "0.1")
     (source
      (origin
-       (method url-fetch)
-       (uri
-        "https://github.com/commontk/PythonQt/archive/0580304d8119caaa6c6a985d43f7109d180af880.tar.gz")
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/commontk/PythonQt")
+             (commit "0580304d8119caaa6c6a985d43f7109d180af880")))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "0d7kijid6rj9s2wrfbfx2d5552xxxbxpgvjn6iccsa35ssgsj1hz"))))
+        (base32 "0alm2lzg5pvckcaskjzvw8qrrcm07pp5hzy3sljc669gqv6pnaiy"))))
     (build-system cmake-build-system)
     ;; The commontk fork ships its own SIP generator — python-sip is NOT needed.
     (inputs (list qtbase-5
