@@ -1,6 +1,11 @@
 ;;; GNU Systole
 ;;; Modified from the original in the GNU Guix project:
-;;;   https://codeberg.org/guix/guix
+;;;   https://codeberg.org/guix/guix (gnu/installer/final.scm)
+;;;
+;;; VENDORED FORK -- vendored 2026-01 (repo commit a92e8a5).  Diff
+;;; against gnu/installer/final.scm at the channels-lock.scm guix pin on
+;;; every lock bump; keep local deltas (deploy-key ACL authorization,
+;;; channels embedding) minimal and commented.
 ;;;
 ;;; Copyright © 2018, 2020 Mathieu Othacehe <m.othacehe@gmail.com>
 ;;; Copyright © 2019, 2020, 2022 Ludovic Courtès <ludo@gnu.org>

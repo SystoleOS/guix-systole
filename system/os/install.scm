@@ -61,6 +61,43 @@
 
 (define %systole-installer (systole-installer-program))
 
+(define %systole-installation-base-os
+  ;; The untransformed installer OS, shared verbatim by both entry
+  ;; points below -- keep all installer customization here.
+  (operating-system
+   (inherit installation-os)
+   (kernel linux)
+   (firmware (list linux-firmware))
+   (keyboard-layout (keyboard-layout "us" #:options '("ctrl:nocaps")))
+   (kernel-arguments '("quiet" "net.ifnames=0"))
+
+   (bootloader
+    (let ((base (operating-system-bootloader installation-os)))
+      (bootloader-configuration
+       (inherit base)
+       ;; target/device is ignored for ISO builds, any string is fine
+       (targets "/dev/null")
+       (theme
+        (grub-theme
+         (resolution '(1280 . 1024))
+         (color-normal '((fg . light-gray) (bg . black)))
+         (color-highlight '((fg . black ) (bg . yellow)))
+         (image (file-append systole-grub-theme
+                             "/share/grub/themes/systole/systole.png")))))))
+
+   (label "GNU Systole installation")
+
+   (services
+    (modify-services (operating-system-user-services installation-os)
+                     (kmscon-service-type cfg =>
+                                          (kmscon-configuration
+                                           (inherit cfg)
+                                           (login-program %systole-installer)))))
+
+   (packages
+    (append (list git curl vim lvm2 gptfdisk xfsprogs e2fsprogs guile-gcrypt guile-newt)
+            (operating-system-packages installation-os)))))
+
 (define systole-os-installation
 
   ;; community-substitutes? is an explicit opt-in: the public installer
@@ -71,41 +108,7 @@
                                          #:community-substitutes? #t)
             ;; FIXME: ‘microcode-initrd’ results in unbootable live system.
             (systole-transformation-linux #:initrd base-initrd))
-
-   (operating-system
-    (inherit installation-os)
-    (kernel linux)
-    (firmware (list linux-firmware))
-    (keyboard-layout (keyboard-layout "us" #:options '("ctrl:nocaps")))
-    (kernel-arguments '("quiet" "net.ifnames=0"))
-
-    (bootloader
-     (let ((base (operating-system-bootloader installation-os)))
-       (bootloader-configuration
-        (inherit base)
-        ;; target/device is ignored for ISO builds, any string is fine
-        (targets "/dev/null")
-        (theme
-         (grub-theme
-          (resolution '(1280 . 1024))
-          (color-normal '((fg . light-gray) (bg . black)))
-          (color-highlight '((fg . black ) (bg . yellow)))
-          (image (file-append systole-grub-theme
-                              "/share/grub/themes/systole/systole.png")))))))
-
-    (label "GNU Systole installation")
-
-    (services
-     (modify-services (operating-system-user-services installation-os)
-                      (kmscon-service-type cfg =>
-                                           (kmscon-configuration
-                                            (inherit cfg)
-                                            (login-program %systole-installer)))))
-
-
-    (packages
-     (append (list git curl vim lvm2 gptfdisk xfsprogs e2fsprogs guile-gcrypt guile-newt)
-             (operating-system-packages installation-os))))))
+   %systole-installation-base-os))
 
 (define* (systole-os-installation-with-deploy-key
           #:key
@@ -170,40 +173,6 @@ Examples:
                              (load* channels-file
                                     (make-user-module '((guix channels))))))
             (systole-transformation-linux #:initrd base-initrd))
-
-   (operating-system
-    (inherit installation-os)
-    (kernel linux)
-    (firmware (list linux-firmware))
-    (keyboard-layout (keyboard-layout "us" #:options '("ctrl:nocaps")))
-    (kernel-arguments '("quiet" "net.ifnames=0"))
-
-    (bootloader
-     (let ((base (operating-system-bootloader installation-os)))
-       (bootloader-configuration
-        (inherit base)
-        (targets "/dev/null")
-        (theme
-         (grub-theme
-          (resolution '(1280 . 1024))
-          (color-normal '((fg . light-gray) (bg . black)))
-          (color-highlight '((fg . black ) (bg . yellow)))
-          (image (file-append systole-grub-theme
-                              "/share/grub/themes/systole/systole.png")))))))
-
-    (label "GNU Systole installation")
-
-    (services
-     ;; Just modify kmscon for custom installer
-     ;; Note: deploy key and channels are handled by systole-transformation-deploy
-     (modify-services (operating-system-user-services installation-os)
-                      (kmscon-service-type cfg =>
-                                           (kmscon-configuration
-                                            (inherit cfg)
-                                            (login-program %systole-installer)))))
-
-    (packages
-     (append (list git curl vim lvm2 gptfdisk xfsprogs e2fsprogs guile-gcrypt guile-newt)
-             (operating-system-packages installation-os))))))
+   %systole-installation-base-os))
 
 systole-os-installation

@@ -34,3 +34,4 @@ result-*
 *.go
 .aider*
 cisstLog.txt
+deployment.scm
