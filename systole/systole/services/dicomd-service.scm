@@ -1,35 +1,32 @@
-;; 
+;;
 ;; Copyright @ 2025 Oslo University Hospital
 ;;
 ;; This file is part of SystoleOS.
 ;;
-;; SystoleOS is free software: you can redistribute it and/or modify it under the 
-;; terms of the GNU General Public License as published by the Free Software 
+;; SystoleOS is free software: you can redistribute it and/or modify it under the
+;; terms of the GNU General Public License as published by the Free Software
 ;; Foundation, either version 3 of the License, or (at your option) any later version.
 ;;
-;; SystoleOS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-;; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+;; SystoleOS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+;; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
 ;; PURPOSE. See the GNU General Public License for more details.
 ;;
-;; You should have received a copy of the GNU General Public License along 
+;; You should have received a copy of the GNU General Public License along
 ;; with SystoleOS. If not, see <https://www.gnu.org/licenses/>.
-;; 
+;;
 
 (define-module (systole services dicomd-service)
   #:autoload   (guix least-authority) (least-authority-wrapper)
-  #:use-module (ice-9 match)
   #:use-module (gnu packages admin)
   #:use-module (gnu packages image-processing)
   #:use-module (gnu services)
-  #:use-module (gnu services networking)
+  #:use-module (gnu services configuration)
   #:use-module ((gnu system file-systems) #:select (file-system-mapping))
   #:use-module (gnu services shepherd)
-  #:use-module (gnu services configuration)
   #:use-module (gnu system shadow)
   #:use-module (guix gexp)
-  #:use-module (srfi srfi-1)
   #:use-module (guix packages)
-  #:use-module (guix records)
+  #:use-module (srfi srfi-1)
   #:use-module (gnu build linux-container)
   #:export (dicomd-configuration
             dicomd-configuration?
@@ -49,64 +46,79 @@
          (id 1031)
          (system? #t))))
 
-(define-record-type* <dicomd-configuration>
-  dicomd-configuration make-dicomd-configuration dicomd-configuration?
-  (package dicomd-configuration-package
-           (default dcmtk))
-  (port dicomd-configuration-port
-        (default 1104))
-  (aetitle dicomd-configuration-aetitle
-           (default "DICOMD"))
-  (output-directory dicomd-configuration-output-directory
-                    (default "/var/dicom-store"))
-  (account dicomd-configuration-account
-           (default (car %dicomd-account-service)))
-  (group dicomd-configuration-group
-         (default (cadr %dicomd-account-service))))
+(define-configuration/no-serialization dicomd-configuration
+  (package
+    (package dcmtk)
+    "The DCMTK package providing the @command{storescp} executable.")
+  (port
+   (integer 1104)
+   "TCP port on which the DICOM store SCP listens.")
+  (aetitle
+   (string "DICOMD")
+   "DICOM Application Entity title announced by the daemon.")
+  (output-directory
+   (string "/var/dicom-store")
+   "Directory where received DICOM objects are stored.  It is created at
+activation time and owned by the service account.")
+  (account
+   (user-account (car %dicomd-account-service))
+   "System account the daemon runs as.")
+  (group
+   (user-group (cadr %dicomd-account-service))
+   "System group of the service account."))
 
-(define dicomd-shepherd-service
-  (match-lambda
-    (($ <dicomd-configuration> package port aetitle output-directory account)
-     (let ((dicomd (least-authority-wrapper
-                    (file-append package "/bin/storescp")
-                    #:name "dicomd"
-                    #:namespaces
-                    (fold delq %namespaces '(net))
-                    #:mappings (list (file-system-mapping
-                                      (source output-directory)
-                                      (target output-directory)
-                                      (writable? #t))))))
-       (shepherd-service
-        (provision '(dicom-daemon))
-        (requirement '(user-processes))
-        (documentation "DICOMD Service")
-        (auto-start? #t)
-        (start #~(make-forkexec-constructor
-                  (list #$dicomd
-                        "--aetitle" #$aetitle
-                        "--output-directory" #$output-directory
-                        "-sp"
-                        #$(number->string port))
-                  #:user #$(user-account-name account)
-                  #:group #$(user-account-group account)
-                  #:file-creation-mask #o002))
-        (stop #~(make-kill-destructor)))))))
+(define (dicomd-shepherd-service config)
+  (let* ((package (dicomd-configuration-package config))
+         (port (dicomd-configuration-port config))
+         (aetitle (dicomd-configuration-aetitle config))
+         (output-directory (dicomd-configuration-output-directory config))
+         (account (dicomd-configuration-account config))
+         (dicomd (least-authority-wrapper
+                  (file-append package "/bin/storescp")
+                  #:name "dicomd"
+                  #:namespaces
+                  (fold delq %namespaces '(net))
+                  #:mappings (list (file-system-mapping
+                                    (source output-directory)
+                                    (target output-directory)
+                                    (writable? #t))))))
+    (shepherd-service
+     (provision '(dicom-daemon))
+     ;; storescp binds a TCP port; wait for the network to be up.
+     (requirement '(user-processes networking))
+     (documentation
+      "Run storescp, a DICOM Store SCP, inside a least-authority wrapper.")
+     (auto-start? #t)
+     (start #~(make-forkexec-constructor
+               (list #$dicomd
+                     "--aetitle" #$aetitle
+                     "--output-directory" #$output-directory
+                     "-sp"
+                     #$(number->string port))
+               #:user #$(user-account-name account)
+               #:group #$(user-account-group account)
+               #:file-creation-mask #o002))
+     (stop #~(make-kill-destructor)))))
 
 (define (dicomd-activation config)
   (with-imported-modules '((guix build utils))
-                         #~(begin
-                             (use-modules (guix build utils))
-                             (let* ((user (getpw #$(user-account-name (dicomd-configuration-account config))))
-                                    (directory #$(dicomd-configuration-output-directory config)))
-                               ;; dicomd creates a Unix-domain socket in DIRECTORY.
-                               (mkdir-p directory)
-                               (chown directory (passwd:uid user) (passwd:gid user))
-                               (chmod directory #o775)))))
+    #~(begin
+        (use-modules (guix build utils))
+        (let* ((user (getpw #$(user-account-name
+                               (dicomd-configuration-account config))))
+               (directory #$(dicomd-configuration-output-directory config)))
+          ;; dicomd creates a Unix-domain socket in DIRECTORY.
+          (mkdir-p directory)
+          (chown directory (passwd:uid user) (passwd:gid user))
+          (chmod directory #o775)))))
 
 (define dicomd-service-type
   (service-type
    (name 'dicomd)
-   (description "DICOMD Service")
+   (description
+    "Run @command{storescp} from DCMTK as a namespace-isolated DICOM Store
+SCP daemon: it listens on a TCP port for incoming DICOM associations and
+writes received objects to a dedicated store directory.")
    (extensions
     (list (service-extension account-service-type
                              (lambda (config)
