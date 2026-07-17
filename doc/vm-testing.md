@@ -130,7 +130,12 @@ Example:
 
 ## Test Implementation
 
-Tests are defined in `systole/systole/tests/installer.scm`:
+Tests are defined in `tests/installer/installer.scm`, in the module
+`(tests installer installer)` — namespaced under `tests` so it cannot
+collide with `system/installer/installer.scm` when both load roots are
+on the path. Loading it therefore needs the repository root on the
+load path (`-L .` for the *test* module, in addition to `-L systole`
+and `-L system` for the channel and OS modules):
 
 ```scheme
 (define %test-systole-installer-basic
@@ -151,9 +156,11 @@ Each test:
 ### Using Guix Directly
 
 ```bash
-# Build and run a specific test
-guix build -L systole -L system --expression \
-  '(use-modules (systole tests installer)) %test-systole-installer-basic'
+# Build and run a specific test (this is what run-vm-tests.sh does)
+guix build -L systole -L system -L . --expression \
+  '((@ (srfi srfi-1) first)
+    ((@ (gnu tests) system-test-value)
+     (@ (tests installer installer) %test-systole-installer-basic)))'
 
 # The result is a derivation in /gnu/store
 # Output contains test results
@@ -169,10 +176,10 @@ guix build -L systole -L system --expression \
 2. **Run test interactively:**
    ```bash
    # Start guix repl
-   guix repl -L systole -L system
+   guix repl -L systole -L system -L .
 
    # Load test module
-   ,use (systole tests installer)
+   ,use (tests installer installer)
 
    # Examine test definition
    ,pp %test-systole-installer-basic
