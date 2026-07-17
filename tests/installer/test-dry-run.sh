@@ -1,30 +1,23 @@
 #!/usr/bin/env bash
-# Test installer in dry-run mode
+# Load all installer/OS modules and verify the ISO-build entry points.
+#
+# Runs check-installer.scm in guix repl *script mode* so failures
+# propagate.  guile + guile-newt/guile-parted/guile-webutils are needed
+# because (gnu installer newt ...) imports (newt)/(parted)/(webutils
+# multipart) at load time; guile itself must be in the shell profile so
+# GUILE_LOAD_PATH gets populated.
+#
+# Set GUIX to override the guix invocation, e.g. for pinned CI runs:
+#   GUIX="guix time-machine -C channels-lock.scm --" ./test-dry-run.sh
+# ((os install) imports nonguix modules, so the guix that runs the repl
+# must have the channels from channels-lock.scm available.)
 
-set -e
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-cd "$REPO_ROOT"
+GUIX=${GUIX:-guix}
 
-echo "Testing installer dry-run..."
-
-# Test that installer modules load
-echo "  Testing installer module loading..."
-if ! guix repl -L "$REPO_ROOT/system" <<'EOF' >/dev/null 2>&1
-,m (installer installer)
-,m (installer steps)
-,m (installer final)
-(display "Modules loaded successfully\n")
-EOF
-then
-    echo "✗ Failed to load installer modules"
-    exit 1
-fi
-
-echo "✓ Installer modules loaded successfully"
-
-# TODO: Add actual dry-run test when we have the infrastructure
-echo "  Note: Full dry-run test not yet implemented"
-echo "  This would test: (run-installer #:dry-run? #t)"
-
-exit 0
+# shellcheck disable=SC2086
+exec $GUIX shell guile guile-newt guile-parted guile-webutils -- \
+    $GUIX repl -L "$REPO_ROOT/system" -L "$REPO_ROOT/systole" -- \
+    "$REPO_ROOT/tests/installer/check-installer.scm"

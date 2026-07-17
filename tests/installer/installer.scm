@@ -16,7 +16,10 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with GNU Systole.  If not, see <http://www.gnu.org/licenses/>.
 
-(define-module (installer installer)
+;; Named (tests installer installer) -- NOT (installer installer) -- so it
+;; cannot collide with system/installer/installer.scm when both load roots
+;; are on the path.  Load with -L <repo-root>.
+(define-module (tests installer installer)
   #:use-module (gnu tests)
   #:use-module (gnu system)
   #:use-module (gnu system vm)

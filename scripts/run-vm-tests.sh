@@ -80,7 +80,7 @@ run_test() {
     TOTAL_TESTS=$((TOTAL_TESTS + 1))
 
     # Run the test
-    if guix build -L "$REPO_DIR/systole" -L "$REPO_DIR/system" -L "$REPO_DIR/tests" \
+    if guix build -L "$REPO_DIR/systole" -L "$REPO_DIR/system" -L "$REPO_DIR" \
                   -e "$test_expression" 2>&1 | tee /tmp/test-${test_name}.log; then
         success "${test_name} passed"
         echo ""
@@ -127,20 +127,20 @@ sleep 2
 # Run selected tests
 if [[ "$TEST_SELECTION" == "all" ]] || [[ "$TEST_SELECTION" == "basic" ]]; then
     run_test "systole-installer-basic" \
-             "((@ (srfi srfi-1) first) ((@ (gnu tests) system-test-value) (@ (installer installer) %test-systole-installer-basic)))" \
-             "Test basic Systole installer boots and has expected characteristics"
+             "((@ (srfi srfi-1) first) ((@ (gnu tests) system-test-value) (@ (tests installer installer) %test-systole-installer-basic)))" \
+             "Test basic Systole installer boots and has expected characteristics" || true
 fi
 
 if [[ "$TEST_SELECTION" == "all" ]] || [[ "$TEST_SELECTION" == "deploy-key" ]]; then
     run_test "systole-installer-deploy-key" \
-             "((@ (srfi srfi-1) first) ((@ (gnu tests) system-test-value) (@ (installer installer) %test-systole-installer-deploy-key)))" \
-             "Test Systole installer with SSH deploy key boots and SSH is configured"
+             "((@ (srfi srfi-1) first) ((@ (gnu tests) system-test-value) (@ (tests installer installer) %test-systole-installer-deploy-key)))" \
+             "Test Systole installer with SSH deploy key boots and SSH is configured" || true
 fi
 
 if [[ "$TEST_SELECTION" == "all" ]] || [[ "$TEST_SELECTION" == "no-ssh" ]]; then
     run_test "systole-installer-no-ssh-without-key" \
-             "((@ (srfi srfi-1) first) ((@ (gnu tests) system-test-value) (@ (installer installer) %test-systole-installer-no-ssh-without-key)))" \
-             "Test Systole installer without deploy key has no SSH daemon"
+             "((@ (srfi srfi-1) first) ((@ (gnu tests) system-test-value) (@ (tests installer installer) %test-systole-installer-no-ssh-without-key)))" \
+             "Test Systole installer without deploy key has no SSH daemon" || true
 fi
 
 # Print summary
