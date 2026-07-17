@@ -82,18 +82,20 @@
       (base32 "17gpkq4c4rh1pglm327958b5mi94bxqgwim8qkwsqia02hq1xg4x"))))
    (build-system cmake-build-system)
    (arguments
-    `(#:configure-flags (list "-DBUILD_EXAMPLES:BOOL=OFF"
-                              "-DBUILD_TESTING:BOOL=OFF"
-                              "-DOpenIGTLink_SUPERBUILD:BOOL=OFF"
-                              "-DOpenIGTLink_PROTOCOL_VERSION_2:BOOL=OFF"
-                              "-DOpenIGTLink_PROTOCOL_VERSION_3:BOOL=ON"
-                              "-DOpenIGTLink_ENABLE_VIDEOSTREAMING:BOOL=ON"
-                              "-DOpenIGTLink_USE_VP9:BOOL=OFF"
-                              ;;"-DOpenIGTLink_INSTALL_PACKAGE_DIR:PATH=lib/cmake/OpenIGTLink"
-                              "-DBUILD_SHARED_LIBS:BOOL=ON")
-      #:tests? #f))
+    (list
+     #:tests? #f
+     #:configure-flags
+     #~(list "-DBUILD_EXAMPLES:BOOL=OFF"
+             "-DBUILD_TESTING:BOOL=OFF"
+             "-DOpenIGTLink_SUPERBUILD:BOOL=OFF"
+             "-DOpenIGTLink_PROTOCOL_VERSION_2:BOOL=OFF"
+             "-DOpenIGTLink_PROTOCOL_VERSION_3:BOOL=ON"
+             "-DOpenIGTLink_ENABLE_VIDEOSTREAMING:BOOL=ON"
+             "-DOpenIGTLink_USE_VP9:BOOL=OFF"
+             ;;"-DOpenIGTLink_INSTALL_PACKAGE_DIR:PATH=lib/cmake/OpenIGTLink"
+             "-DBUILD_SHARED_LIBS:BOOL=ON")))
    (inputs (list glew))
-   (home-page "openigtlink.org")
+   (home-page "https://openigtlink.org/")
    (synopsis
     "Free, open-source network communication library for image-guided therapy")
    (description
@@ -175,32 +177,33 @@ both industrial and academic developers.")
                             #$(this-package-input "slicer-colors-5.8")
                             "/lib/Slicer-5.8/qt-loadable-modules"))
 
-         #:phases
-           #~(modify-phases %standard-phases
-            (add-after 'install 'symlink-so-files
-               (lambda* (#:key outputs #:allow-other-keys)
-                  (let* ((out (assoc-ref outputs "out"))
-                        (lib-dir (string-append out "/lib"))
-                        (modules-dir (string-append lib-dir "/Slicer-5.8/SlicerModules")))
-                     (mkdir-p modules-dir)
-                     (for-each
+          #:phases
+          #~(modify-phases %standard-phases
+              (add-after 'install 'symlink-so-files
+                (lambda _
+                  (let* ((lib-dir (string-append #$output "/lib"))
+                         (modules-dir (string-append
+                                       lib-dir "/Slicer-5.8/SlicerModules")))
+                    (mkdir-p modules-dir)
+                    (for-each
                      (lambda (file)
-                        (let ((target (string-append modules-dir "/" (basename file))))
-                           (symlink file target)))
+                       (symlink file
+                                (string-append modules-dir "/"
+                                               (basename file))))
                      (find-files lib-dir "\\.so$")))))
-            (add-after 'symlink-so-files 'patch-runpath
-               ;; Each library in qt-loadable-modules must be able to find its
-               ;; sibling libraries (e.g. libqSlicerOpenIGTLinkIFModule.so needs
-               ;; libqSlicerOpenIGTLinkIFModuleWidgets.so).  Adding $ORIGIN ensures
-               ;; the dynamic linker searches the library's own directory first.
-               (lambda* (#:key outputs #:allow-other-keys)
-                  (let* ((out (assoc-ref outputs "out"))
-                         (modules-dir (string-append out "/lib/Slicer-5.8/qt-loadable-modules")))
-                     (for-each
+              (add-after 'symlink-so-files 'patch-runpath
+                ;; Each library in qt-loadable-modules must be able to find its
+                ;; sibling libraries (e.g. libqSlicerOpenIGTLinkIFModule.so needs
+                ;; libqSlicerOpenIGTLinkIFModuleWidgets.so).  Adding $ORIGIN ensures
+                ;; the dynamic linker searches the library's own directory first.
+                (lambda _
+                  (let ((modules-dir
+                         (string-append
+                          #$output "/lib/Slicer-5.8/qt-loadable-modules")))
+                    (for-each
                      (lambda (lib)
-                        (invoke "patchelf" "--add-rpath" "$ORIGIN" lib))
-                     (find-files modules-dir "\\.so$"))))))
-                            ))
+                       (invoke "patchelf" "--add-rpath" "$ORIGIN" lib))
+                     (find-files modules-dir "\\.so$"))))))))
    (inputs
     (list slicer-5.8
           python
@@ -257,8 +260,11 @@ both industrial and academic developers.")
           slicer-colors-5.8
           ))
    (native-inputs (list patchelf))
-   (synopsis "Slicer Extension for communication of IGT data")
-   (description "SlicerOpenIGTLink is a 3D Slicer extension designed to facilitate the communication between 3D Slicer and other platforms via OpenIGTLink.")
+   (synopsis "Slicer extension for communication of IGT data")
+   (description
+    "SlicerOpenIGTLink is a 3D Slicer extension designed to facilitate the
+communication between 3D Slicer and other platforms via the OpenIGTLink
+protocol.")
    (license license:bsd-2)
    (home-page "https://github.com/openigtlink/SlicerOpenIGTLink"))))
 
@@ -351,8 +357,12 @@ both industrial and academic developers.")
          vtkaddon
          qrestapi
          openigtlink))
-  (synopsis "Library for interfacing to openigtlink/OpenIGTLink, dependent on VTK and Qt. Based on openigtlink/OpenIGTLinkIF")
-  (description "OpenIGTLinkIO contains several wrapper layers on top of OpenIGTLink. The code originates from OpenIGTLink/OpenIGTLinkIF. The main intent of the library is to share igtl code between Slicer, CustusX, IBIS, MITK and other systems.")
+  (synopsis "VTK- and Qt-based wrapper library around OpenIGTLink")
+  (description
+    "OpenIGTLinkIO contains several wrapper layers on top of the OpenIGTLink
+library.  The code originates from OpenIGTLink/OpenIGTLinkIF.  The main intent
+of the library is to share igtl code between Slicer, CustusX, IBIS, MITK and
+other systems.")
   (license license:bsd-2)
   (home-page "https://github.com/IGSIO/OpenIGTLinkIO"))))
 
