@@ -268,8 +268,11 @@ code search and API exploration.")))
        #:phases (modify-phases %standard-phases
                   (delete 'build))))
     (home-page "https://github.com/ntustison/ITKAdaptiveDenoising")
-    (synopsis "ITK IO for storing MGH images")
-    (description "ITK IO for images stored in mgh, mgz and mgh.gz formats.")
+    (synopsis "ITK module for adaptive nonlocal-means image denoising")
+    (description
+     "This ITK remote module implements an adaptive nonlocal-means image
+denoising filter with optional Rician noise modeling, ported from the
+@code{DenoiseImage} tool of the ANTs toolkit.")
     (license license:asl2.0)))
 
 (define itk-ioscanco
@@ -291,8 +294,10 @@ code search and API exploration.")))
        #:phases (modify-phases %standard-phases
                   (delete 'build))))
     (home-page "https://itk-io-scanco-app.on.fleek.co/")
-    (synopsis "ITK Image IO for Scanco MicroCT .ISQ files")
-    (description "ITK Image IO for Scanco MicroCT .ISQ files")
+    (synopsis "ITK image IO for Scanco MicroCT .ISQ files")
+    (description
+     "This ITK remote module reads and writes the @file{.ISQ} image file
+format produced by Scanco microcomputed-tomography scanners.")
     (license license:asl2.0)))
 
 (define itk-morphologicalcontourinterpolation
@@ -314,10 +319,11 @@ code search and API exploration.")))
        #:phases (modify-phases %standard-phases
                   (delete 'build))))
     (home-page "https://insight-journal.org/browse/publication/977")
-    (synopsis
-     "An ITK-based implementation of morphological contour interpolation")
+    (synopsis "ITK-based implementation of morphological contour interpolation")
     (description
-     "An ITK-based implementation of morphological contour interpolation")
+     "This ITK remote module interpolates segmentation contours between
+sparsely segmented slices using mathematical morphology, reconstructing a
+complete 3D segmentation from a subset of manually segmented slices.")
     (license license:asl2.0)))
 
 (define itk-iotransformdcmtk
@@ -340,6 +346,9 @@ code search and API exploration.")))
                   (delete 'build))))
     (home-page
      "https://github.com/InsightSoftwareConsortium/ITKIOTransformDCMTK")
-    (synopsis "An ITK module to read DICOM spatial transforms.")
-    (description "An ITK module to read DICOM spatial transforms.")
+    (synopsis "ITK module to read DICOM spatial transforms")
+    (description
+     "This ITK remote module reads spatial transforms stored in DICOM
+files, such as DICOM Spatial Registration Objects, using the DCMTK
+library.")
     (license license:asl2.0)))
