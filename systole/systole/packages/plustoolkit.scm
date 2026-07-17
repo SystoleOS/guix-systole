@@ -18,9 +18,9 @@
 (define-module (systole packages plustoolkit)
   #:use-module ((guix licenses)
                 #:prefix license:)
-  #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix build-system cmake)
-  #:use-module (guix build-system trivial)
+  #:use-module (guix build-system copy)
   #:use-module (guix packages)
   #:use-module (guix gexp)
   #:use-module (gnu packages base)
@@ -51,7 +51,8 @@
 ;;;
 
 (define %pluslibdata-commit "51dcbb76d9f29fad94cf80788a7a0b7c704fb5dc")
-(define %pluslibdata-version (string-append "2.9.0-" (string-take %pluslibdata-commit 7)))
+;; Base version matches the PlusLib 2.9 series this data set accompanies.
+(define %pluslibdata-version (git-version "2.9.0" "0" %pluslibdata-commit))
 
 (define-public pluslibdata
   (package
@@ -59,29 +60,20 @@
    (version %pluslibdata-version)
    (source
     (origin
-     (method url-fetch)
-     (uri (string-append
-           "https://github.com/PlusToolkit/PlusLibData/archive/"
-           %pluslibdata-commit ".tar.gz"))
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/PlusToolkit/PlusLibData")
+           (commit %pluslibdata-commit)))
+     (file-name (git-file-name name version))
      (sha256
-      (base32 "1zsagn5k74dqsi2l4vayf0qbwqk93i0r66gv2sd1fapi04blj21i"))))
-   (build-system trivial-build-system)
-   (native-inputs (list gzip tar))
+      (base32 "0j0ffnqpgm9455qfn8425fa0d5dbyw29kni2zgfh3lx4d0vpjm0w"))))
+   (build-system copy-build-system)
    (arguments
-    (list
-     #:modules '((guix build utils))
-     #:builder
-     #~(begin
-         (use-modules (guix build utils))
-         ;; tar -z invokes gzip as a subprocess; put it on PATH.
-         (setenv "PATH" (string-append #$(this-package-native-input "gzip") "/bin:"
-                                       #$(this-package-native-input "tar") "/bin"))
-         (let ((share (string-append #$output "/share/PlusLib-2.9")))
-           (mkdir-p share)
-           ;; Extract tarball, stripping the top-level archive directory so
-           ;; ConfigFiles/, TestImages/, and CADModels/ land directly under
-           ;; share/PlusLib-2.9/ — the path PlusLib's PlusConfig.xml expects.
-           (invoke "tar" "-xzf" #$source "--strip-components=1" "-C" share)))))
+    ;; Install the checkout so ConfigFiles/, TestImages/, and CADModels/
+    ;; land directly under share/PlusLib-2.9/ — the path PlusLib's
+    ;; PlusConfig.xml expects.  "PlusLib-2.9" is the upstream
+    ;; PLUSLIB_SHARE_INSTALL layout, independent of the package version.
+    (list #:install-plan #~'(("." "share/PlusLib-2.9"))))
    (home-page "https://plustoolkit.github.io/")
    (synopsis "Data files for the PlusLib medical imaging toolkit")
    (description
@@ -106,7 +98,7 @@ data by the PlusLib test suite.
 ;;;
 
 (define %pluslib-commit "0c75fc06b030540ff304cefe584e58cc4c0e5c2d")
-(define %pluslib-version "2.9.0-0c75fc0")
+(define %pluslib-version (git-version "2.9.0" "0" %pluslib-commit))
 (define %pluslib-patches
   (list (search-patch
          "plustoolkit/0001-COMP-Find-vtkAddon-for-transitively-required-headers.patch")
@@ -119,12 +111,13 @@ data by the PlusLib test suite.
    (version %pluslib-version)
    (source
     (origin
-     (method url-fetch)
-     (uri (string-append
-           "https://github.com/PlusToolkit/PlusLib/archive/"
-           %pluslib-commit ".tar.gz"))
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/PlusToolkit/PlusLib")
+           (commit %pluslib-commit)))
+     (file-name (git-file-name name version))
      (sha256
-      (base32 "0k33jhmw3lsqabr11w3nnpsxkn0yafc4p6i0vjdmfpqzih0zkcz3"))
+      (base32 "0y55dmdkbl9m8cs3jnr1wr4d347wxcz43b5w0jnxn2p82jzpdds9"))
      (patches %pluslib-patches)))
    (build-system cmake-build-system)
    (arguments
@@ -247,7 +240,7 @@ require proprietary vendor SDKs.  The virtual and network data sources
 ;;;
 
 (define %plusapp-commit "17011e5df15ca2cfdd6ba3f285ab7a8568d942a1")
-(define %plusapp-version "2.9.0-17011e5")
+(define %plusapp-version (git-version "2.9.0" "0" %plusapp-commit))
 (define %plusapp-patches
   (list (search-patch
          "plusapp/0001-COMP-Guard-CPack-inclusion-behind-PLUSAPP_BUILD_PACK.patch")))
@@ -258,12 +251,13 @@ require proprietary vendor SDKs.  The virtual and network data sources
    (version %plusapp-version)
    (source
     (origin
-     (method url-fetch)
-     (uri (string-append
-           "https://github.com/PlusToolkit/PlusApp/archive/"
-           %plusapp-commit ".tar.gz"))
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/PlusToolkit/PlusApp")
+           (commit %plusapp-commit)))
+     (file-name (git-file-name name version))
      (sha256
-      (base32 "05zr1rdpi2kp5j1jrqa4x2j4z2fgypp01pvzay3c6ki3chrl37a2"))
+      (base32 "1c4yic8izscgjcmhmix2jq79j71ads4m28smfqiab1igds8w11zg"))
      (patches %plusapp-patches)))
    (build-system cmake-build-system)
    (arguments
