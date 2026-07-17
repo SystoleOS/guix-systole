@@ -55,68 +55,69 @@
        (sha256
         (base32 "13iz2f8r5rr9xi8w2j42iidrpn18yi9mkvnw47n6d2wyrvjjl1aj"))))
     (arguments
-     `(#:tests? #f
-       #:configure-flags (list ;Tests
-                          "-DITK_USE_SYSTEM_GOOGLETEST:BOOL=OFF"
-                          "-DBUILD_TESTING:BOOL=OFF"
+     (list
+      #:tests? #f
+      #:configure-flags
+      #~(list ;Tests
+         "-DITK_USE_SYSTEM_GOOGLETEST:BOOL=OFF"
+         "-DBUILD_TESTING:BOOL=OFF"
 
-                          ;; Libraries
-                          "-DITK_USE_SYSTEM_LIBRARIES:BOOL=ON"
-                          "-DBUILD_SHARED_LIBS:BOOL=ON"
+         ;; Libraries
+         "-DITK_USE_SYSTEM_LIBRARIES:BOOL=ON"
+         "-DBUILD_SHARED_LIBS:BOOL=ON"
 
-                          ;; Misc
-                          "-DITK_USE_GPU:BOOL=OFF"
-                          "-DBUILD_EXAMPLES:BOOL=OFF"
-                          "-DITK_WRAPPING:BOOL=OFF"
-                          "-DITK_BUILD_DEFAULT_MODULES:BOOL=ON"
-                          "-DITK_WRAP_PYTHON:BOOL=OFF"
-                          "-DKWSYS_USE_MD5:BOOL=ON" ;Required by SlicerExecutionModel
-                          "-DITK_USE_SYSTEM_DCMTK:BOOL=ON"
-                          "-DITK_USE_SYSTEM_ZLIB:BOOL=ON"
+         ;; Misc
+         "-DITK_USE_GPU:BOOL=OFF"
+         "-DBUILD_EXAMPLES:BOOL=OFF"
+         "-DITK_WRAPPING:BOOL=OFF"
+         "-DITK_BUILD_DEFAULT_MODULES:BOOL=ON"
+         "-DITK_WRAP_PYTHON:BOOL=OFF"
+         "-DKWSYS_USE_MD5:BOOL=ON" ;Required by SlicerExecutionModel
+         "-DITK_USE_SYSTEM_DCMTK:BOOL=ON"
+         "-DITK_USE_SYSTEM_ZLIB:BOOL=ON"
 
-                          ;; Modules
-                          ;; "-DModule_ITKReview:BOOL=ON"
-                          "-DModule_ITKIODCMTK:BOOL=ON"
-                          "-DModule_MGHIO:BOOL=ON"
-                          ;; "-DModule_ITKIOMINC:BOOL=ON"
-                          "-DModule_IOScanco:BOOL=ON"
-                          "-DModule_MorphologicalContourInterpolation:BOOL=ON"
-                          "-DModule_GrowCut:BOOL=ON"
-                          "-DModule_AdaptiveDenoising:BOOL=ON"
-                          "-DModule_SimpleITKFilters:BOOL=ON"
-                          "-DModule_GenericLabelInterpolator:BOOL=ON"
-                          "-DModule_ITKVtkGlue:BOOL=ON"
-                          "-DITK_FORBID_DOWNLOADS:BOOL=ON"
+         ;; Modules
+         ;; "-DModule_ITKReview:BOOL=ON"
+         "-DModule_ITKIODCMTK:BOOL=ON"
+         "-DModule_MGHIO:BOOL=ON"
+         ;; "-DModule_ITKIOMINC:BOOL=ON"
+         "-DModule_IOScanco:BOOL=ON"
+         "-DModule_MorphologicalContourInterpolation:BOOL=ON"
+         "-DModule_GrowCut:BOOL=ON"
+         "-DModule_AdaptiveDenoising:BOOL=ON"
+         "-DModule_SimpleITKFilters:BOOL=ON"
+         "-DModule_GenericLabelInterpolator:BOOL=ON"
+         "-DModule_ITKVtkGlue:BOOL=ON"
+         "-DITK_FORBID_DOWNLOADS:BOOL=ON"
 
-                          ;; Legacy
-                          "-DITK_LEGACY_REMOVE:BOOL=OFF" ;<-- Allow LEGACY ITKv4 features for now.
-                          "-DITK_LEGACY_SILENT:BOOL=OFF" ;<-- Use of legacy code will produce compiler warnings
-                          "-DModule_ITKDeprecated:BOOL=ON" ;<-- Needed for ITKv5 now. (itkMultiThreader.h and MutexLock backwards compatibility.)
+         ;; Legacy
+         "-DITK_LEGACY_REMOVE:BOOL=OFF" ;<-- Allow LEGACY ITKv4 features for now.
+         "-DITK_LEGACY_SILENT:BOOL=OFF" ;<-- Use of legacy code will produce compiler warnings
+         "-DModule_ITKDeprecated:BOOL=ON" ;<-- Needed for ITKv5 now. (itkMultiThreader.h and MutexLock backwards compatibility.)
 
-                          ;; Optimization
-                          "-DITK_CXX_OPTIMIZATION_FLAGS:STRING=" ;Force compiler-default instruction set to ensure compatibility with older CPUs
-                          "-DITK_C_OPTIMIZATION_FLAGS:STRING=" ;Force compiler-default instruction set to ensure compatibility with older CPUs
-                          )
+         ;; Optimization: force the compiler-default instruction set
+         ;; to ensure compatibility with older CPUs.
+         "-DITK_CXX_OPTIMIZATION_FLAGS:STRING="
+         "-DITK_C_OPTIMIZATION_FLAGS:STRING=")
 
-       #:phases (modify-phases %standard-phases
-                  ;; Symlink modules
-                  (add-before 'configure 'modules-symlink
-                    (lambda* (#:key inputs outputs #:allow-other-keys)
-                      (symlink (assoc-ref inputs "itk-growcut")
-                               "Modules/Remote/ITKGrowCut")
-                      (symlink (assoc-ref inputs "itk-mghimageio")
-                               "Modules/Remote/ITKMGHIO")
-                      (symlink (assoc-ref inputs "itk-adaptivedenoising")
-                               "Modules/Remote/ITKAdaptiveDenoising")
-                      (symlink (assoc-ref inputs "itk-ioscanco")
-                               "Modules/Remote/ITKIOScanco")
-                      (symlink (assoc-ref inputs
-                                "itk-morphologicalcontourinterpolation")
+      #:phases
+      #~(modify-phases %standard-phases
+          ;; Symlink the remote-module source trees into the ITK tree.
+          (add-before 'configure 'modules-symlink
+            (lambda _
+              (symlink #$(this-package-input "itk-growcut")
+                       "Modules/Remote/ITKGrowCut")
+              (symlink #$(this-package-input "itk-mghimageio")
+                       "Modules/Remote/ITKMGHIO")
+              (symlink #$(this-package-input "itk-adaptivedenoising")
+                       "Modules/Remote/ITKAdaptiveDenoising")
+              (symlink #$(this-package-input "itk-ioscanco")
+                       "Modules/Remote/ITKIOScanco")
+              (symlink #$(this-package-input
+                          "itk-morphologicalcontourinterpolation")
                        "Modules/Remote/ITKMorphologicalContourInterpolation")
-                      (symlink (assoc-ref inputs "itk-iotransformdcmtk")
-                               "Modules/Remote/ITKIOTransformDCMTK")
-
-                      #t)))))
+              (symlink #$(this-package-input "itk-iotransformdcmtk")
+                       "Modules/Remote/ITKIOTransformDCMTK"))))))
 
     (inputs (modify-inputs (package-inputs insight-toolkit)
                            (replace "hdf5" hdf5-1.10)
