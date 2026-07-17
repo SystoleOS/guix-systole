@@ -1,0 +1,11 @@
+;; This file, which is best viewed as -*- Scheme -*-, lists the OpenPGP
+;; keys currently authorized to sign commits in this repository.
+;;
+;; Authentication only takes effect once users pull with a channel
+;; introduction naming the first signed commit; until then this file is
+;; inert.  See doc/channel-authentication.md for the activation runbook.
+
+(authorizations
+ (version 0)
+ (("6513 C724 8D7B ECE2 EC1B  D34B 7035 0DAD 507F A72F"
+   (name "rafael"))))

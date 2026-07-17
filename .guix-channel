@@ -1,12 +1,18 @@
 (channel
  (version 0)
  (directory "systole")
+ (news-file "etc/news.scm")
  (dependencies
+  ;; Dependencies are pinned by commit so that pulling this channel
+  ;; cannot silently change meaning when a dependency's branch moves;
+  ;; bump the pins together with channels-lock.scm.
   (channel
    (name nonguix)
    (url "https://gitlab.com/nonguix/nonguix")
-   (branch "master"))
+   (branch "master")
+   (commit "a8326a5b325400f25c0520c8ef9127fff6d4796d"))
   (channel
    (name systole-artwork)
    (url "https://github.com/systoleos/guix-systole-artwork")
-   (branch "main"))))
+   (branch "main")
+   (commit "26e4f71bf518a03c646d42d7c65ec8529f3c63a6"))))
