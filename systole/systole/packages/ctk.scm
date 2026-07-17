@@ -35,8 +35,8 @@
   #:use-module (gnu packages)                   ; libxml2, expat
   #:use-module (gnu packages base)
   #:use-module (guix build-system cmake)
-  #:use-module (guix build-system trivial)
-  #:use-module (guix download)
+  #:use-module (guix build-system copy)
+  #:use-module (guix git-download)
   #:use-module (guix gexp)
   #:use-module ((guix licenses)
                 #:prefix license:)
@@ -55,11 +55,13 @@
    (version "0.1")
    (source
     (origin
-     (method url-fetch)
-     (uri
-      "https://github.com/commontk/CTK/archive/82cae5781621845486bad2697aed095f04cfbe76.tar.gz")
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/commontk/CTK")
+           (commit "82cae5781621845486bad2697aed095f04cfbe76")))
+     (file-name (git-file-name name version))
      (sha256
-      (base32 "1g2jv4hjimf4baqbmpmc29ara2f8gk8604g1v8k243x882f0ls9z"))
+      (base32 "1hy9hhpsyg8zi8n9hfn4ngjimkw28120f6ra6p756mdvk313imdq"))
      (patches (search-patches
                "0001-ENH-Fix-locating-DCMTK-when-using-CTK.patch"
                "0002-ENH-Add-FindPythonQt.cmake-to-installed-cmake-modules.patch"
@@ -165,22 +167,13 @@ Plugin Framework.")
     (name "ctk-source")
     (source (origin (inherit (package-source %ctk))
                     (patches '())))
-    (build-system trivial-build-system)
-    (native-inputs (list tar gzip))
+    (build-system copy-build-system)
     (inputs '())
     (propagated-inputs '())
     (native-search-paths '())
     (arguments
-     (list #:builder
-           (with-imported-modules '((guix build utils))
-             #~(begin
-                 (use-modules (guix build utils))
-                 (setenv "PATH"
-                         (string-append #$(file-append tar "/bin") ":"
-                                        #$(file-append gzip "/bin")))
-                 (mkdir-p #$output)
-                 (invoke "tar" "xf" #$source
-                         "--strip-components=1" "-C" #$output)))))
+     ;; The git checkout is already the bare source tree; install it as-is.
+     (list #:install-plan #~'(("." "/"))))
     (synopsis "CTK (Common Toolkit) source tree")
     (description
      "Upstream CTK source tree at the exact commit used by @code{ctk},
@@ -193,11 +186,13 @@ code search and API exploration.")))
    (version "0.1")
    (source
     (origin
-     (method url-fetch)
-     (uri
-      "https://github.com/commontk/AppLauncher/archive/8759e03985738b8a8f3eb74ab516ba4e8ef29988.tar.gz")
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/commontk/AppLauncher")
+           (commit "8759e03985738b8a8f3eb74ab516ba4e8ef29988")))
+     (file-name (git-file-name name version))
      (sha256
-      (base32 "1lrrcg9s39n357z2dhfhv8ff99biivdnwwxaggwvnpv9knppaz83"))))
+      (base32 "1d74gkpnl0rn9fbkij111zzwsxir57cgirgr4pj7xlslkiplg26i"))))
    (build-system cmake-build-system)
    (arguments
     '(#:tests? #f
