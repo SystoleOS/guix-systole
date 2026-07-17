@@ -72,55 +72,57 @@
         (search-patches
          "0001-COMP-Install-vtkOpenGLResourceFreeCallback-header.patch"))))
     (arguments
-     `(#:tests? #f
-       #:build-type "Release"
-       #:configure-flags (list "-DBUILD_TESTING:BOOL=OFF"
-                          "-DVTK_USE_EXTERNAL:BOOL=OFF"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_doubleconversion:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_eigen:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_expat:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_freetype:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_gl2ps:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_glew:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_hdf5:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_jpeg:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_jsoncpp:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_libharu:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_libproj:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_libxml2:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_lz4:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_netcdf:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_ogg:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_png:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_sqlite:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_theora:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_tiff:BOOL=ON"
-                          "-DVTK_MODULE_USE_EXTERNAL_VTK_zlib:BOOL=ON"
-                          "-DVTK_MODULE_ENABLE_VTK_RenderingExternal:STRING=YES" ;for F3D
-                          "-DVTK_WRAP_PYTHON:BOOL=OFF"
-                          "-DVTK_SMP_ENABLE_TBB:BOOL=ON"
-                          "-DVTK_USE_MPI:BOOL=ON"
-                          "-DVTK_USE_TK:BOOL=OFF"
-                          "-DVTK_INSTALL_NO_DEVELOPMENT:BOOL=OFF"
+     (list
+      #:tests? #f
+      #:build-type "Release"
+      #:configure-flags
+      #~(list "-DBUILD_TESTING:BOOL=OFF"
+              "-DVTK_USE_EXTERNAL:BOOL=OFF"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_doubleconversion:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_eigen:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_expat:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_freetype:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_gl2ps:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_glew:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_hdf5:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_jpeg:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_jsoncpp:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_libharu:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_libproj:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_libxml2:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_lz4:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_netcdf:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_ogg:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_png:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_sqlite:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_theora:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_tiff:BOOL=ON"
+              "-DVTK_MODULE_USE_EXTERNAL_VTK_zlib:BOOL=ON"
+              "-DVTK_MODULE_ENABLE_VTK_RenderingExternal:STRING=YES" ;for F3D
+              "-DVTK_WRAP_PYTHON:BOOL=OFF"
+              "-DVTK_SMP_ENABLE_TBB:BOOL=ON"
+              "-DVTK_USE_MPI:BOOL=ON"
+              "-DVTK_USE_TK:BOOL=OFF"
+              "-DVTK_INSTALL_NO_DEVELOPMENT:BOOL=OFF"
 
-                          ;; Enable VTK modules
-                          "-DVTK_MODULE_ENABLE_VTK_ChartsCore:STRING=YES"
-                          "-DVTK_MODULE_ENABLE_VTK_ViewsContext2D:STRING=YES"
-                          "-DVTK_MODULE_ENABLE_VTK_RenderingContext2D:STRING=YES"
-                          "-DVTK_MODULE_ENABLE_VTK_RenderingContextOpenGL2:STRING=YES"
-                          "-DVTK_MODULE_ENABLE_VTK_GUISupportQt:STRING=YES"
-                          "-DVTK_MODULE_ENABLE_VTK_IOExportGL2PS:STRING=YES"
+              ;; Enable VTK modules
+              "-DVTK_MODULE_ENABLE_VTK_ChartsCore:STRING=YES"
+              "-DVTK_MODULE_ENABLE_VTK_ViewsContext2D:STRING=YES"
+              "-DVTK_MODULE_ENABLE_VTK_RenderingContext2D:STRING=YES"
+              "-DVTK_MODULE_ENABLE_VTK_RenderingContextOpenGL2:STRING=YES"
+              "-DVTK_MODULE_ENABLE_VTK_GUISupportQt:STRING=YES"
+              "-DVTK_MODULE_ENABLE_VTK_IOExportGL2PS:STRING=YES"
 
-                          "-DVTK_GROUP_ENABLE_Qt:STRING=YES"
-                          "-DVTK_QT_VERSION:STRING=5"
-                          "-DVTK_Group_Qt:BOOL=ON"
-                          "-DVTK_BUILD_TESTING:BOOL=OFF"
-                          ;; Force value to prevent lib64 from being used on Linux
-                          "-DCMAKE_INSTALL_LIBDIR:STRING=lib"
-                          "-DVTK_MODULE_ENABLE_VTK_GUISupportQtQuick:STRING=NO"
-                          "-DVTK_LEGACY_REMOVE:BOOL=ON"
-                          "-DVTK_Group_Qt:BOOL=ON"
-                          "-DVTK_ENABLE_KITS:BOOL=ON")))
+              "-DVTK_GROUP_ENABLE_Qt:STRING=YES"
+              "-DVTK_QT_VERSION:STRING=5"
+              "-DVTK_Group_Qt:BOOL=ON"
+              "-DVTK_BUILD_TESTING:BOOL=OFF"
+              ;; Force value to prevent lib64 from being used on Linux
+              "-DCMAKE_INSTALL_LIBDIR:STRING=lib"
+              "-DVTK_MODULE_ENABLE_VTK_GUISupportQtQuick:STRING=NO"
+              "-DVTK_LEGACY_REMOVE:BOOL=ON"
+              "-DVTK_Group_Qt:BOOL=ON"
+              "-DVTK_ENABLE_KITS:BOOL=ON")))
     (inputs (modify-inputs (package-inputs imgproc:vtk)
             (replace "hdf5" hdf5-1.10)
             (replace "netcdf" netcdf-slicer)
@@ -136,8 +138,8 @@
     (arguments
      (substitute-keyword-arguments (package-arguments %vtk-slicer)
        ((#:configure-flags flags)
-        `(cons "-DVTK_WRAP_PYTHON:BOOL=ON"
-               (delete "-DVTK_WRAP_PYTHON:BOOL=OFF" ,flags)))))
+        #~(cons "-DVTK_WRAP_PYTHON:BOOL=ON"
+                (delete "-DVTK_WRAP_PYTHON:BOOL=OFF" #$flags)))))
     (inputs
      (modify-inputs (package-inputs %vtk-slicer)
        (prepend python)))))
@@ -184,14 +186,16 @@ code search and API exploration.")))
                  "0001-COMP-Fix-Python-detection-in-vtkMacroKitPythonWrap-f.patch"))))
     (build-system cmake-build-system)
     (arguments
-     `(#:tests? #f
-       #:configure-flags (list "-DBUILD_SHARED_LIBS:BOOL=ON"
-                               "-DBUILD_TESTING:BOOL=OFF"
-                               "-DvtkAddon_INSTALL_NO_DEVELOPMENT:BOOL=OFF" ;Required to install header files
-                               ;; "-DvtkAddon_USE_UTF8:BOOL=ON"
-                               "-DvtkAddon_WRAP_PYTHON:BOOL=OFF" ;Enable whenever Python support is enabled
-                               ;; "-DvtkAddon_LAUNCH_COMMAND:STRING=" ;; Needs testing
-                               "-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON")))
+     (list
+      #:tests? #f
+      #:configure-flags
+      #~(list "-DBUILD_SHARED_LIBS:BOOL=ON"
+              "-DBUILD_TESTING:BOOL=OFF"
+              "-DvtkAddon_INSTALL_NO_DEVELOPMENT:BOOL=OFF" ;Required to install header files
+              ;; "-DvtkAddon_USE_UTF8:BOOL=ON"
+              "-DvtkAddon_WRAP_PYTHON:BOOL=OFF" ;Enable whenever Python support is enabled
+              ;; "-DvtkAddon_LAUNCH_COMMAND:STRING=" ;; Needs testing
+              "-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON")))
     (inputs (list %vtk-slicer
                   eigen
                   expat
@@ -213,10 +217,11 @@ code search and API exploration.")))
                   qtbase-5
                   tbb))
     (home-page "https://github.com/Slicer/vtkAddon/")
-    (synopsis
-     "General-purpose features that may be integrated into VTK library in the future.")
+    (synopsis "General-purpose extensions to the VTK library")
     (description
-     "General-purpose features that may be integrated into VTK library in the future.")
+     "vtkAddon provides general-purpose classes developed by the 3D Slicer
+project that extend VTK and may be integrated into the VTK library in the
+future.")
     (license license:bsd-3))))
 
 ;; Python-enabled vtkAddon.  Links against vtk-slicer so the generated
@@ -228,8 +233,8 @@ code search and API exploration.")))
     (arguments
      (substitute-keyword-arguments (package-arguments %vtkaddon)
        ((#:configure-flags flags)
-        `(cons "-DvtkAddon_WRAP_PYTHON:BOOL=ON"
-               (delete "-DvtkAddon_WRAP_PYTHON:BOOL=OFF" ,flags)))))
+        #~(cons "-DvtkAddon_WRAP_PYTHON:BOOL=ON"
+                (delete "-DvtkAddon_WRAP_PYTHON:BOOL=OFF" #$flags)))))
     (inputs
      (modify-inputs (package-inputs %vtkaddon)
        (replace "vtk-slicer" vtk-slicer)
@@ -263,8 +268,8 @@ code search and API exploration.")))
     (arguments
      (substitute-keyword-arguments (package-arguments %vtk-slicer-9.5)
        ((#:configure-flags flags)
-        `(cons "-DVTK_WRAP_PYTHON:BOOL=ON"
-               (delete "-DVTK_WRAP_PYTHON:BOOL=OFF" ,flags)))))
+        #~(cons "-DVTK_WRAP_PYTHON:BOOL=ON"
+                (delete "-DVTK_WRAP_PYTHON:BOOL=OFF" #$flags)))))
     (inputs
      (modify-inputs (package-inputs %vtk-slicer-9.5)
        (prepend python-3.12)))))
@@ -299,8 +304,8 @@ code search and API exploration.")))
     (arguments
      (substitute-keyword-arguments (package-arguments %vtkaddon-9.5)
        ((#:configure-flags flags)
-        `(cons "-DvtkAddon_WRAP_PYTHON:BOOL=ON"
-               (delete "-DvtkAddon_WRAP_PYTHON:BOOL=OFF" ,flags)))))
+        #~(cons "-DvtkAddon_WRAP_PYTHON:BOOL=ON"
+                (delete "-DvtkAddon_WRAP_PYTHON:BOOL=OFF" #$flags)))))
     (inputs
      (modify-inputs (package-inputs %vtkaddon-9.5)
        (replace "vtk-slicer" vtk-slicer-9.5)
