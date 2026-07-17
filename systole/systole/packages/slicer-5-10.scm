@@ -485,13 +485,6 @@ visualization and medical image computing.")
                      ;; importable from Python 3.12.  Compiled extensions (numpy,
                      ;; scipy) will still fail to import because the .so files have
                      ;; cpython-311 in their names, but pure Python packages work.
-                     "lib/python3.11/site-packages")))
-           (search-path-specification
-            (variable "PYTHONPATH")
-            (files '("bin/Python"
-                     "lib/Slicer-5.10"
-                     "lib/Slicer-5.10/qt-loadable-modules"
-                     "lib/python3.12/site-packages"
                      "lib/python3.11/site-packages")))))))
 
 ;;;
@@ -1447,7 +1440,7 @@ the @file{Modules/Scripted/LineProfile} subtree."))
 ;; Runtime Python packages for Slicer 5.10.
 ;;
 ;; Slicer 5.10 embeds Python 3.12.  Pure-Python packages (requests, pydicom, pip)
-;; are imported from lib/python3.11/site-packages via PYTHONPATH.  numpy has
+;; are imported from lib/python3.11/site-packages via SLICER_PYTHONPATH.  numpy has
 ;; compiled C extensions, so it is built against Python 3.12 explicitly via
 ;; python-numpy-3.12 (see systole/packages/python-xyz.scm).
 (define-public slicer-all-5.10

@@ -562,10 +562,10 @@ visualization and medical image computing. It provides capabilities for:
                               (not (string-contains rel "/"))))))))))
             ;; vtkAddonPython.so is installed by the vtkaddon package to its
             ;; lib/ directory rather than a Python-standard location, so it is
-            ;; not on PYTHONPATH.  Symlink it into lib/Slicer-5.8/ (which IS
-            ;; on PYTHONPATH via the native-search-path declared above) so that
-            ;; `from vtkAddonPython import *` succeeds in a standalone python3
-            ;; session started inside a profile that includes slicer-5.8.
+            ;; not on any Python search path.  Symlink it into lib/Slicer-5.8/
+            ;; (which IS on SLICER_PYTHONPATH via the native-search-path
+            ;; declared below) so that `from vtkAddonPython import *` succeeds
+            ;; in Slicer's embedded Python.
             (add-after 'patch-python-extension-runpath 'link-vtkaddon-python
               (lambda* (#:key inputs outputs #:allow-other-keys)
                 (symlink
@@ -659,21 +659,6 @@ visualization and medical image computing. It provides capabilities for:
             ;; lib/python3.11/site-packages: numpy, vtk, vtkAddon, user pkgs.
             (files '("bin/Python"
                      "lib/Slicer-5.8"
-                     "lib/python3.11/site-packages")))
-           ;; PYTHONPATH mirrors SLICER_PYTHONPATH so that a plain `python3`
-           ;; launched inside `guix shell slicer-all-5.8` (or any profile that
-           ;; includes slicer-5.8) can `import slicer`, `import vtk`, `import ctk`
-           ;; and work with MRML nodes, VTK pipelines, and slicer.util functions
-           ;; without launching the full Slicer GUI.
-           ;;
-           ;; qt-loadable-modules is added so that loadable-module Python wrappers
-           ;; (vtkSlicerVolumesModuleLogicPython.so etc.) are also importable when
-           ;; the relevant module packages (slicer-volumes-5.8 …) are in the profile.
-           (search-path-specification
-            (variable "PYTHONPATH")
-            (files '("bin/Python"
-                     "lib/Slicer-5.8"
-                     "lib/Slicer-5.8/qt-loadable-modules"
                      "lib/python3.11/site-packages")))))))
 
 ;;;
