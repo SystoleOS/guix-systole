@@ -42,7 +42,9 @@
           #:key
           (name "pythonqt-commontk")
           (python-pkg python)
-          (python-version "3.11"))
+          (python-version "3.11")
+          (commit "0580304d8119caaa6c6a985d43f7109d180af880")
+          (hash (base32 "0alm2lzg5pvckcaskjzvw8qrrcm07pp5hzy3sljc669gqv6pnaiy")))
   (package
     (name name)
     (version "0.1")
@@ -51,10 +53,9 @@
        (method git-fetch)
        (uri (git-reference
              (url "https://github.com/commontk/PythonQt")
-             (commit "0580304d8119caaa6c6a985d43f7109d180af880")))
+             (commit commit)))
        (file-name (git-file-name name version))
-       (sha256
-        (base32 "0alm2lzg5pvckcaskjzvw8qrrcm07pp5hzy3sljc669gqv6pnaiy"))))
+       (sha256 hash)))
     (build-system cmake-build-system)
     ;; The commontk fork ships its own SIP generator — python-sip is NOT needed.
     (inputs (list qtbase-5
@@ -94,3 +95,13 @@
   (make-pythonqt-commontk #:name "pythonqt-commontk-for-slicer-5.10"
                            #:python-pkg python-3.12
                            #:python-version "3.12"))
+
+;; Slicer 5.12 stack.  Pin from commontk/CTK 5056664a
+;; (CMakeExternals/PythonQt.cmake: patched-v4.1.0-2026-06-05-9992368e9),
+;; the CTK revision referenced by Slicer v5.12.2.
+(define-public pythonqt-commontk-for-slicer-5.12
+  (make-pythonqt-commontk #:name "pythonqt-commontk-for-slicer-5.12"
+                           #:python-pkg python-3.12
+                           #:python-version "3.12"
+                           #:commit "74dcd675e1515324cd7467a328d63dd25d263679"
+                           #:hash (base32 "11wkjv2yskpjhjv15bc2d7a891ybry9w8sadh81bllj0dywrhpqq")))
