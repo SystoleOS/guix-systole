@@ -258,9 +258,7 @@ unused dependencies.")
               "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"
               (string-append "-Dcisst_DIR="
                              #$(this-package-input "cisst")
-                             "/share/cisst-1.4/cmake"))
-      #:phases
-      #~(modify-phases %standard-phases)))
+                             "/share/cisst-1.4/cmake"))))
     (inputs (list cisst cisst-netlib
                   ;; cisst's CMake config re-invokes find_package(Qt5*)
                   ;; on downstream consumers because cisst is Qt-enabled.
@@ -312,14 +310,12 @@ terminal key presses into cisst events.  It is a build dependency of
       #:phases
       #~(modify-phases %standard-phases
           (replace 'configure
-            (lambda* (#:key outputs configure-flags #:allow-other-keys)
-              (let ((source (getcwd))
-                    (out (assoc-ref outputs "out")))
-                (apply invoke "cmake"
-                       "-S" (string-append source "/core/components")
-                       "-B" "build"
-                       (string-append "-DCMAKE_INSTALL_PREFIX=" out)
-                       configure-flags))))
+            (lambda* (#:key configure-flags #:allow-other-keys)
+              (apply invoke "cmake"
+                     "-S" (string-append (getcwd) "/core/components")
+                     "-B" "build"
+                     (string-append "-DCMAKE_INSTALL_PREFIX=" #$output)
+                     configure-flags)))
           (replace 'build
             (lambda* (#:key parallel-build? #:allow-other-keys)
               (invoke "cmake" "--build" "build"
@@ -383,14 +379,12 @@ and are not needed for the Touch demo.")
       #~(modify-phases %standard-phases
           ;; Build only core/components; core/examples requires Qt.
           (replace 'configure
-            (lambda* (#:key outputs configure-flags #:allow-other-keys)
-              (let ((source (getcwd))
-                    (out (assoc-ref outputs "out")))
-                (apply invoke "cmake"
-                       "-S" (string-append source "/core/components")
-                       "-B" "build"
-                       (string-append "-DCMAKE_INSTALL_PREFIX=" out)
-                       configure-flags))))
+            (lambda* (#:key configure-flags #:allow-other-keys)
+              (apply invoke "cmake"
+                     "-S" (string-append (getcwd) "/core/components")
+                     "-B" "build"
+                     (string-append "-DCMAKE_INSTALL_PREFIX=" #$output)
+                     configure-flags)))
           (replace 'build
             (lambda* (#:key parallel-build? #:allow-other-keys)
               (invoke "cmake" "--build" "build"
@@ -403,9 +397,9 @@ and are not needed for the Touch demo.")
           ;; These are not installed by core/components/CMakeLists.txt
           ;; but are needed at runtime (e.g. -j <path>/sawSensablePhantomDefaultDevice.json).
           (add-after 'install 'install-share
-            (lambda* (#:key outputs #:allow-other-keys)
-              (let ((share (string-append (assoc-ref outputs "out")
-                                         "/share/sawSensablePhantom")))
+            (lambda _
+              (let ((share (string-append #$output
+                                          "/share/sawSensablePhantom")))
                 (for-each
                  (lambda (f)
                    (let ((src (string-append (getcwd) "/core/share/" f)))
