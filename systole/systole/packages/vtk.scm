@@ -25,9 +25,9 @@
   #:use-module (gnu packages base)
   #:use-module (gnu packages python)
   #:use-module (gnu packages xml)
-  #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix build-system cmake)
-  #:use-module (guix build-system trivial)
+  #:use-module (guix build-system copy)
   #:use-module (guix gexp)
   #:use-module (guix utils)
   #:use-module (gnu packages qt)
@@ -60,12 +60,14 @@
     (version "9.2")
     (source
      (origin
-       (method url-fetch)
-       ;; URI from VTK version: slicer-v9.2.20230607-1ff325c54-2
-       (uri (string-append "https://github.com/Slicer/VTK/archive/"
-                           "59ec450206012e86d4855bc669800499254bfc77.tar.gz"))
+       (method git-fetch)
+       ;; Commit from VTK version: slicer-v9.2.20230607-1ff325c54-2
+       (uri (git-reference
+             (url "https://github.com/Slicer/VTK")
+             (commit "59ec450206012e86d4855bc669800499254bfc77")))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "0dmibmx170aj59qqqfgh28dhlvkakpdfnzgh4zn4hvn24i9j0id9"))
+        (base32 "1hszz2kzy9z8fwx0h0xl4qfhij49z8sk2vlcrx7n9pi0dah0h3gb"))
        (patches
         (search-patches
          "0001-COMP-Install-vtkOpenGLResourceFreeCallback-header.patch"))))
@@ -148,22 +150,13 @@
     (name "vtk-slicer-source")
     (source (origin (inherit (package-source %vtk-slicer))
                     (patches '())))
-    (build-system trivial-build-system)
-    (native-inputs (list tar gzip))
+    (build-system copy-build-system)
     (inputs '())
     (propagated-inputs '())
     (native-search-paths '())
     (arguments
-     (list #:builder
-           (with-imported-modules '((guix build utils))
-             #~(begin
-                 (use-modules (guix build utils))
-                 (setenv "PATH"
-                         (string-append #$(file-append tar "/bin") ":"
-                                        #$(file-append gzip "/bin")))
-                 (mkdir-p #$output)
-                 (invoke "tar" "xf" #$source
-                         "--strip-components=1" "-C" #$output)))))
+     ;; The git checkout is already the bare source tree; install it as-is.
+     (list #:install-plan #~'(("." "/"))))
     (synopsis "VTK source tree (Slicer variant)")
     (description
      "Upstream VTK source tree at the exact commit used by @code{vtk-slicer},
@@ -172,16 +165,20 @@ code search and API exploration.")))
 
 ;; Private non-Python base — used only for (inherit) in vtkaddon (Python).
 (define %vtkaddon
+  (let ((commit "b5aa0615a6486b6bdceeb13bd59c2fb9f89cce42")
+        (revision "0"))
   (package
     (name "vtkaddon")
-    (version "b5aa061")
+    (version (git-version "0.0.0" revision commit))
     (source
      (origin
-       (method url-fetch)
-       (uri
-        "https://github.com/Slicer/vtkAddon/archive/b5aa0615a6486b6bdceeb13bd59c2fb9f89cce42.tar.gz")
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/Slicer/vtkAddon")
+             (commit commit)))
+       (file-name (git-file-name name version))
        (sha256
-        (base32 "0wazsirav972mxkawfaw0lpnkylxfr19xjrd5s03blr2kid50a91"))
+        (base32 "149bmya3sz1y7xp8j16z7rhp64xjvvd6avh2mnn8izwpds4nm8dh"))
        (patches (search-patches
                  "0007-ENH-packages-vtk-use-CMAKE-GNUInstallDirs.patch"
                  "0001-COMP-Fix-Python-detection-in-vtkMacroKitPythonWrap-f.patch"))))
@@ -220,7 +217,7 @@ code search and API exploration.")))
      "General-purpose features that may be integrated into VTK library in the future.")
     (description
      "General-purpose features that may be integrated into VTK library in the future.")
-    (license license:bsd-3)))
+    (license license:bsd-3))))
 
 ;; Python-enabled vtkAddon.  Links against vtk-slicer so the generated
 ;; Python wrappers are consistent with the Python-enabled VTK build.
@@ -249,12 +246,14 @@ code search and API exploration.")))
     (version "9.5.2")
     (source
      (origin
-       (method url-fetch)
-       ;; URI from VTK version: slicer-v9.5.2-2025-09-16-7c0494a68
-       (uri (string-append "https://github.com/Slicer/VTK/archive/"
-                           "e21c90bd874fb15f1dc34986c238462b8aab4af8.tar.gz"))
+       (method git-fetch)
+       ;; Commit from VTK version: slicer-v9.5.2-2025-09-16-7c0494a68
+       (uri (git-reference
+             (url "https://github.com/Slicer/VTK")
+             (commit "e21c90bd874fb15f1dc34986c238462b8aab4af8")))
+       (file-name (git-file-name "vtk-slicer" version))
        (sha256
-        (base32 "0n4yg042f38sgk4gvqcvlxlm5jihhdnn79irj5m391vaf3sxvr8p"))))))
+        (base32 "195zmpl61c0fg8xmgrwg3bv7ksp4i6533fm01zcfcnklhprr4j8g"))))))
 
 ;; Python-enabled VTK 9.5 for use by the Slicer 5.10 stack.
 (define-public vtk-slicer-9.5
@@ -272,21 +271,25 @@ code search and API exploration.")))
 
 ;; Private non-Python base for vtkAddon (Slicer 5.10).
 (define %vtkaddon-9.5
+  (let ((commit "b1fa5034077fc04b10457fe25004c65af6091a37")
+        (revision "0"))
   (package
     (inherit %vtkaddon)
-    (version "b1fa503")
+    (version (git-version "0.0.0" revision commit))
     (source
      (origin
-       (method url-fetch)
-       (uri
-        "https://github.com/Slicer/vtkAddon/archive/b1fa5034077fc04b10457fe25004c65af6091a37.tar.gz")
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/Slicer/vtkAddon")
+             (commit commit)))
+       (file-name (git-file-name "vtkaddon" (git-version "0.0.0" revision commit)))
        (sha256
-        (base32 "1hg2s54mgg83aw5rahawwyl284362985pchkskxajb2mgwsmxz94"))
+        (base32 "13pshj9m9mr1kiiwbfrzafbv13i5x21xkchwpi7v6d49m9l5h3y1"))
        (patches (search-patches
                  "0007-ENH-packages-vtk-use-CMAKE-GNUInstallDirs.patch"
                  "0001-COMP-Fix-Python-detection-in-vtkMacroKitPythonWrap-f.patch"))))
     (inputs (modify-inputs (package-inputs %vtkaddon)
-              (replace "vtk-slicer" %vtk-slicer-9.5)))))
+              (replace "vtk-slicer" %vtk-slicer-9.5))))))
 
 ;; Python-enabled vtkAddon for Slicer 5.10.
 (define-public vtkaddon-9.5
