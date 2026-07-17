@@ -22,38 +22,26 @@
   #:use-module ((guix licenses)
                 #:prefix license:))
 
-;; Resolve assets relative to THIS module's own on-disk location, not the
-;; repo root.  We locate the module's .scm file on %load-path and take its
-;; directory; the `assets/' directory ships alongside the module in BOTH
-;; layouts -- a git checkout (systole/systole/packages/grub-themes.scm) and
-;; an installed channel (share/guile/site/3.0/systole/packages/grub-themes.scm).
-;;
-;; Why not `(current-filename)': it returns #f when the module is loaded
-;; from its compiled .go (which is exactly how `guix pull' / Cuirass load an
-;; installed channel), so a current-filename-based path throws at load time
-;; and aborts channel evaluation.  `search-path %load-path' is valid from
-;; compiled code -- it is the same idiom `%distro-root-directory' (in
-;; (gnu packages)) and `%systole-root-directory' (in (systole packages)) use.
-;;
-;; The previous 4x`dirname' walked to the repo root, which only exists in a
-;; checkout; under a channel it resolved to share/guile/site (which has no
-;; assets/), throwing canonicalize-path and aborting the ENTIRE channel
-;; evaluation -- so a Cuirass build hub pointed at guix-systole did no work.
-(define %assets
-  ;; `search-path' may return a path relative to a `-L' load-path entry in a
-  ;; checkout (e.g. "systole/systole/packages/..."); canonicalize so the
-  ;; resulting `local-file' is absolute in both the checkout and the
-  ;; (already-absolute store path) installed-channel layouts.
-  (string-append
-   (canonicalize-path
-    (dirname (search-path %load-path "systole/packages/grub-themes.scm")))
-   "/assets"))
-
 (define-public systole-grub-theme
   (package
     (name "systole-grub-theme")
     (version "1.0.0")
-    (source (local-file (string-append %assets "/grub-theme")
+    ;; The theme assets ship INSIDE the channel, next to this module
+    ;; (systole/packages/assets/grub-theme) -- never move them outside
+    ;; systole/, because only systole/ is the channel root when the
+    ;; channel is consumed from the store.
+    ;;
+    ;; A relative name makes `local-file' resolve it via
+    ;; `current-source-directory': the module's file name is captured at
+    ;; expansion time and searched for on %load-path at run time (then
+    ;; canonicalized).  That is exactly the mechanism the previous
+    ;; hand-rolled `search-path %load-path' + `canonicalize-path' code
+    ;; used, and unlike `(current-filename)' it stays valid when the
+    ;; module is loaded from its compiled .go -- which is how `guix pull'
+    ;; and Cuirass load an installed channel.  It therefore works in both
+    ;; layouts: a git checkout (with an absolute -L load path) and an
+    ;; installed channel under share/guile/site/3.0/.
+    (source (local-file "assets/grub-theme"
                         #:recursive? #t))
     (build-system copy-build-system)
     (arguments
