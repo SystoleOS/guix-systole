@@ -35,13 +35,19 @@ Located in the repository root, this file pins specific channel commits:
 (list (channel
         (name 'guix)
         (url "https://codeberg.org/guix/guix.git")
-        (commit "f75080db69716891c46d5795f5d29ad8cc54700e"))
+        (commit "...")
+        (introduction ...))
       (channel
         (name 'nonguix)
         (url "https://gitlab.com/nonguix/nonguix")
-        (commit "6c0ea215e0bd089bf3b2097e5c59dd726fbbe304"))
+        (commit "...")
+        (introduction ...))
       ...)
 ```
+
+The lock currently pins `guix`, `nonguix`, `guix-xlibre`, `tailscale`,
+`guix-systole` itself, `systole-artwork`, `guix-hermes`, and
+`sops-guix` — see the file for the authoritative list and commits.
 
 **Purpose:**
 - Defines exact channel versions for builds
@@ -49,6 +55,22 @@ Located in the repository root, this file pins specific channel commits:
 - Updated explicitly when testing new channel versions
 
 **Last updated:** See file header for date and tested configurations
+
+### `.guix-channel`
+
+The channel's own metadata file declares two things that matter here:
+
+- **Dependency pins**: the `nonguix` and `systole-artwork` channel
+  dependencies are pinned *by commit*, so pulling `guix-systole` cannot
+  silently change meaning when a dependency's branch moves. **Bump
+  these pins together with `channels-lock.scm`.**
+- **News file**: `(news-file "etc/news.scm")` — user-visible changes
+  (package renames, defaults changes, security updates) get an entry
+  there and show up in `guix pull --news`.
+
+Channel authentication (`.guix-authorizations` + signed commits) is
+scaffolded but not yet activated; see
+[channel-authentication.md](channel-authentication.md).
 
 ### `scripts/build-installer-with-deploy.sh`
 
@@ -62,10 +84,10 @@ Builds installer ISOs using `guix time-machine` for reproducibility.
 **Usage:**
 ```bash
 # Standard build with locked channels (recommended)
-./scripts/build-installer-with-deploy.sh --key-file test-key.pub
+./scripts/build-installer-with-deploy.sh --ssh-deploy-key-file test-key.pub
 
 # Build with current channels (testing only)
-./scripts/build-installer-with-deploy.sh --key-file test-key.pub --no-time-machine
+./scripts/build-installer-with-deploy.sh --ssh-deploy-key-file test-key.pub --no-time-machine
 ```
 
 ### `scripts/sync-and-deploy.sh`
@@ -116,13 +138,13 @@ git commit -m "[ENH][misc.] Add locked channel versions"
 Build with locked channels for reproducibility:
 
 ```bash
-./scripts/build-installer-with-deploy.sh --key-file ~/.ssh/deploy_key.pub
+./scripts/build-installer-with-deploy.sh --ssh-deploy-key-file ~/.ssh/deploy_key.pub
 ```
 
 This will:
 - Use `guix time-machine` with `channels-lock.scm`
 - Build an ISO with exact channel versions
-- Produce `systole-installer-deploy-YYYYMMDD-HHMMSS.iso`
+- Produce `artifacts/systole-installer-deploy-YYYYMMDD-HHMMSS.iso`
 
 **Output includes:**
 - ISO file path
@@ -187,9 +209,12 @@ hash guix
 ### 2. Test the New Channels
 
 ```bash
-# Test building packages
-guix build -L . vtk-slicer
-guix build -L . slicer-5.8
+# Test building packages (channel root is the systole/ subdirectory)
+guix build -L systole vtk-slicer
+guix build -L systole slicer-5.8
+
+# Or build everything the channel publishes
+guix build -m manifest.scm
 
 # Test system operations
 guix system build config.scm  # if you have a test config
@@ -221,7 +246,7 @@ git commit -m "[ENH][misc.] Update locked channels to YYYY-MM-DD versions
 
 ```bash
 # Rebuild installer with new channels
-./scripts/build-installer-with-deploy.sh --key-file ~/.ssh/deploy_key.pub
+./scripts/build-installer-with-deploy.sh --ssh-deploy-key-file ~/.ssh/deploy_key.pub
 
 # Sync existing systems
 ./scripts/sync-and-deploy.sh deployment.scm
@@ -317,18 +342,17 @@ guix describe -f channels > channels-lock.scm
 
 ## CI/CD Integration
 
-For continuous integration:
+The GitHub Actions test workflows (`package-tests`, `installer-tests`,
+`guix-lint-check`) already pin every check to the lock file by routing
+the test runner through time-machine:
 
-```yaml
-# .github/workflows/build-installer.yml
-- name: Build installer with locked channels
-  run: |
-    ./scripts/build-installer-with-deploy.sh \
-      --key-file test-key.pub \
-      --output systole-installer.iso
+```bash
+GUIX="guix time-machine -C channels-lock.scm --" ./scripts/run-tests.sh <category>
 ```
 
-This ensures CI builds use the same channel versions as local development.
+Installer ISO builds are not run in CI (they are multi-gigabyte,
+hours-long builds); `build-installer-with-deploy.sh` uses the same lock
+file by default, so local builds match what CI validated.
 
 ## References
 
