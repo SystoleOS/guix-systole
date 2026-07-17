@@ -50,6 +50,7 @@
   #:use-module (nongnu packages linux)
   #:use-module (guix)
   #:use-module (guix channels)
+  #:use-module (guix ui)
   #:use-module (systole)
   #:use-module (systole transformations)
   #:use-module (systole packages grub-themes)
@@ -151,13 +152,16 @@ Examples:
              #:guix-source? #t
              #:channels (and channels-file
                              (file-exists? channels-file)
-                             ;; Load the whole file: channels-lock files often start with
-                             ;; (define-module ...) so reading only the first form would
-                             ;; return a module object instead of the channels list.
-                             ;; primitive-load evaluates all forms and returns the last value.
-                             (save-module-excursion
-                              (lambda ()
-                                (primitive-load channels-file)))))
+                             ;; Evaluate the channels file in a *fresh sandbox module*
+                             ;; that imports only (guix channels) -- the same idiom
+                             ;; `guix pull -C' uses.  load* evaluates every form and
+                             ;; returns the last value (the channel list), so bare-list
+                             ;; locks resolve `channel'/`make-channel-introduction'
+                             ;; without dragging in the heavy (os install) graph
+                             ;; (which would re-pull (installer installer) -> newt/parted
+                             ;; and (nongnu packages linux) -> unbound nonfree licenses).
+                             (load* channels-file
+                                    (make-user-module '((guix channels))))))
             (systole-transformation-linux #:initrd base-initrd))
 
    (operating-system
