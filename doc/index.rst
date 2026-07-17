@@ -9,12 +9,15 @@ A GNU Guix channel providing packages for medical image computing:
    :caption: User Guide
 
    channel-management
+   channel-authentication
    remote-deployment
 
 .. toctree::
    :maxdepth: 2
    :caption: Development
 
+   architecture
+   slicer-packaging-notes
    testing
    vm-testing
    contributing
