@@ -1,0 +1,7 @@
+file names of patches should start with the package name
+resolving '.*' relative to current directory
+server is somewhat slow
+try .--no-network.
+TLS error
+connection timed out
+^guix lint: warning: '.*' is deprecated, use '.*' instead$
