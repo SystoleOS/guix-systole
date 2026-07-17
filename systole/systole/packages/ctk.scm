@@ -349,3 +349,39 @@ as 3D Slicer.")
                                  "0004-COMP-Fix-vtkStdString-to-QString-conversion-for-VTK-9.5.patch")
                                 (search-patch
                                  "0005-COMP-Add-currentComponent-API-to-ctkVTKVolumePropert.patch")))))))))
+
+;; Slicer 5.12 variant — CTK 5056664a, VTK 9.6, ITK 5.4.6, Python 3.12.
+;;
+;; Unlike ctk-for-slicer-5.10 (which reuses the %ctk source pin), this variant
+;; bumps the CTK commit to the exact revision referenced by Slicer v5.12.2's
+;; SuperBuild/External_CTK.cmake.  The patch list is rebuilt for that commit:
+;;   - 0006 replaces 0001 (DCMTK locating; rebased, upstream reordered the
+;;     CMakeExternals/DCMTK.cmake blocks).
+;;   - 0002 (FindPythonQt.cmake install) still applies unchanged.
+;;   - 0007 replaces 0003 (VTK include dirs with PYTHONQT_USE_VTK; rebased,
+;;     upstream dropped the VTK 8.90 version conditional).
+;;   - 0004 (vtkStdString→QString) is upstreamed at this commit and dropped.
+;;   - 0005 (ctkVTKVolumeProperty currentComponent API) still applies unchanged.
+(define-public ctk-for-slicer-5.12
+  (let ((base (make-ctk #:vtk-pkg vtk-slicer-9.6
+                        #:itk-pkg itk-slicer-5.4.6
+                        #:python-pkg python-3.12
+                        #:python-version "3.12"
+                        #:pythonqt-pkg pythonqt-commontk-for-slicer-5.12)))
+    (package
+      (inherit base)
+      (name "ctk-for-slicer-5.12")
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference
+               (url "https://github.com/commontk/CTK")
+               (commit "5056664a20a3d0a393bb6d91f040525581e0dcdf")))
+         (file-name (git-file-name "ctk-for-slicer-5.12" "0.1"))
+         (sha256
+          (base32 "1izfcc5png7sswprcp8i0ij2mfpsn11h10y9y8a8sbxfnvdpf9a8"))
+         (patches (search-patches
+                   "0006-ENH-Fix-locating-DCMTK-when-using-CTK-5.12.patch"
+                   "0002-ENH-Add-FindPythonQt.cmake-to-installed-cmake-modules.patch"
+                   "0007-COMP-Fix-VTK-include-dirs-missing-when-PYTHONQT-USE-VTK-5.12.patch"
+                   "0005-COMP-Add-currentComponent-API-to-ctkVTKVolumePropert.patch")))))))

@@ -1,0 +1,54 @@
+From 20df3a7cbc7a44e932cfea0854b6fa899597a648 Mon Sep 17 00:00:00 2001
+From: SystoleOS <systole@example.org>
+Date: Fri, 17 Jul 2026 14:16:55 +0200
+Subject: [PATCH] COMP: Fix VTK include dirs missing when PYTHONQT_USE_VTK
+
+Rebased onto commontk/CTK 5056664a for the Slicer 5.12 stack.
+---
+ Libs/Visualization/VTK/Core/CMakeLists.txt | 25 ++++++++++++++++++++--
+ 1 file changed, 23 insertions(+), 2 deletions(-)
+
+diff --git a/Libs/Visualization/VTK/Core/CMakeLists.txt b/Libs/Visualization/VTK/Core/CMakeLists.txt
+index 20e9a6d..68dfcf1 100644
+--- a/Libs/Visualization/VTK/Core/CMakeLists.txt
++++ b/Libs/Visualization/VTK/Core/CMakeLists.txt
+@@ -94,13 +94,34 @@ endif()
+ 
+ if(CTK_LIB_Scripting/Python/Core AND CTK_LIB_Scripting/Python/Core_PYTHONQT_USE_VTK)
+   include_directories(
+-    ${PYTHON_INCLUDE_DIRS}
++    ${Python3_INCLUDE_DIRS}
+     ${PYTHONQT_INCLUDE_DIR}
+     )
+ endif()
+ 
+ # Set VTK_LIBRARIES variable
+-# VTK_LIBRARIES is automatically set based on selected components
++# Rebuild VTK_LIBRARIES from IMPORTED component targets.  vtk-config.cmake
++# resets VTK_LIBRARIES on every find_package(VTK) call, repopulating it only
++# when VTK_FOUND is not yet defined (the first call).  CTK's top-level
++# CMakeLists.txt already calls find_package(VTK REQUIRED) before this
++# subdirectory is processed, so VTK_FOUND is already set and the per-library
++# find_package(VTK COMPONENTS ...) call above clears VTK_LIBRARIES without
++# refilling it.  Rebuild it explicitly so ctkMacroBuildLib receives the
++# correct TARGET_LIBRARIES and VTK include dirs propagate to the target.
++set(VTK_LIBRARIES)
++foreach(_comp
++    ChartsCore CommonCore CommonDataModel FiltersCore FiltersGeneral
++    FiltersModeling FiltersSources FiltersStatistics IOLegacy IOXML
++    InfovisCore InfovisLayout InteractionStyle RenderingAnnotation
++    RenderingCore RenderingFreeType RenderingOpenGL2 ViewsCore
++    ViewsInfovis ViewsContext2D
++    ${_python_components}
++    ${_test_components})
++  if(TARGET "VTK::${_comp}")
++    list(APPEND VTK_LIBRARIES "VTK::${_comp}")
++  endif()
++endforeach()
++unset(_comp)
+ 
+ if(CTK_LIB_Visualization/VTK/Widgets_USE_TRANSFER_FUNCTION_CHARTS)
+   set(KIT_SRCS
+-- 
+2.54.0
+

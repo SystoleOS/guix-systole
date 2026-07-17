@@ -1,0 +1,58 @@
+From 9d0a0de990f6c0f56a679f5e5489223d5d6ee87b Mon Sep 17 00:00:00 2001
+From: SystoleOS <systole@example.org>
+Date: Fri, 17 Jul 2026 14:16:40 +0200
+Subject: [PATCH] ENH: Fix locating DCMTK when using CTK
+
+Rebased onto commontk/CTK 5056664a for the Slicer 5.12 stack.
+---
+ CMake/CTKConfig.cmake.in   |  4 ++++
+ CMakeExternals/DCMTK.cmake | 14 +++++++-------
+ 2 files changed, 11 insertions(+), 7 deletions(-)
+
+diff --git a/CMake/CTKConfig.cmake.in b/CMake/CTKConfig.cmake.in
+index 8cc9b28..87f4b33 100644
+--- a/CMake/CTKConfig.cmake.in
++++ b/CMake/CTKConfig.cmake.in
+@@ -125,3 +125,7 @@ SET(CTK_BUILD_TYPE @CTK_BUILD_TYPE_CONFIG@)
+ 
+ # CTK external projects variables
+ @CTK_SUPERBUILD_EP_VARS_CONFIG@
++
++set(DCMTK_DIR @DCMTK_DIR@)
++include(CMakeFindDependencyMacro)
++find_dependency(DCMTK)
+diff --git a/CMakeExternals/DCMTK.cmake b/CMakeExternals/DCMTK.cmake
+index 3bde6cb..ec3b766 100644
+--- a/CMakeExternals/DCMTK.cmake
++++ b/CMakeExternals/DCMTK.cmake
+@@ -6,13 +6,6 @@ set(proj DCMTK)
+ 
+ set(${proj}_DEPENDENCIES "")
+ 
+-ExternalProject_Include_Dependencies(${proj}
+-  PROJECT_VAR proj
+-  DEPENDS_VAR ${proj}_DEPENDENCIES
+-  EP_ARGS_VAR ${proj}_EXTERNAL_PROJECT_ARGS
+-  USE_SYSTEM_VAR ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj}
+-  )
+-
+ # Let the user to chose whether to use libs installed in the system
+ option(${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj} "Use installed ${proj} library in the system" OFF)
+ mark_as_advanced(${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
+@@ -27,6 +20,13 @@ if(DEFINED DCMTK_DIR AND NOT EXISTS ${DCMTK_DIR})
+   message(FATAL_ERROR "DCMTK_DIR variable is defined but corresponds to non-existing directory")
+ endif()
+ 
++ExternalProject_Include_Dependencies(${proj}
++  PROJECT_VAR proj
++  DEPENDS_VAR ${proj}_DEPENDENCIES
++  EP_ARGS_VAR ${proj}_EXTERNAL_PROJECT_ARGS
++  USE_SYSTEM_VAR ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj}
++  )
++
+ if(NOT DEFINED DCMTK_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
+   set(revision_tag "f390821c469c0897c1b5437164c8826e080a2581") # patched-DCMTK-3.6.8_20241024
+   if(${proj}_REVISION_TAG)
+-- 
+2.54.0
+
