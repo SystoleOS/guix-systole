@@ -42,7 +42,10 @@
        (name 'guix-hermes)
        (url "https://github.com/OUH-MESHLab/guix-hermes")
        (branch "main")
-       (commit "9116b6ce8f3e1586193322e0ab7b910df9ecee68"))
+       ;; Not 9116b6c: that commit references python-pygments through a
+       ;; module path that has since moved in upstream Guix (see
+       ;; ivs-infrastructure channels-lock notes).
+       (commit "e93f670a1de32f5e7568ef6e4ad09b82add068bd"))
       (channel
        (name 'sops-guix)
        (url "https://github.com/fishinthecalculator/sops-guix.git")
