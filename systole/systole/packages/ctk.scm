@@ -363,12 +363,14 @@ as 3D Slicer.")
 ;;   - 0007 replaces 0003 (VTK include dirs with PYTHONQT_USE_VTK; rebased,
 ;;     upstream dropped the VTK 8.90 version conditional).
 ;;   - 0004 (vtkStdString→QString) is upstreamed at this commit and dropped.
-;;   - 0005 (ctkVTKVolumeProperty currentComponent API) still applies unchanged.
+;;   - 0005 (ctkVTKVolumeProperty currentComponent API) is ALSO upstreamed
+;;     and dropped: it still applied textually (different spot in the same
+;;     header) but duplicated the now-upstream declarations -- caught as
+;;     "cannot be overloaded" on the first real build.
 (define-public ctk-for-slicer-5.12
   (let ((base (make-ctk #:vtk-pkg vtk-slicer-9.6
                         #:itk-pkg itk-slicer-5.4.6
                         #:python-pkg python-3.12
-                        #:python-version "3.12"
                         #:pythonqt-pkg pythonqt-commontk-for-slicer-5.12)))
     (package
       (inherit base)
@@ -385,5 +387,4 @@ as 3D Slicer.")
          (patches (search-patches
                    "0006-ENH-Fix-locating-DCMTK-when-using-CTK-5.12.patch"
                    "0002-ENH-Add-FindPythonQt.cmake-to-installed-cmake-modules.patch"
-                   "0007-COMP-Fix-VTK-include-dirs-missing-when-PYTHONQT-USE-VTK-5.12.patch"
-                   "0005-COMP-Add-currentComponent-API-to-ctkVTKVolumePropert.patch")))))))
+                   "0007-COMP-Fix-VTK-include-dirs-missing-when-PYTHONQT-USE-VTK-5.12.patch")))))))
