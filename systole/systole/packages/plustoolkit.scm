@@ -22,6 +22,7 @@
   #:use-module (guix build-system cmake)
   #:use-module (guix build-system copy)
   #:use-module (guix packages)
+  #:use-module (guix utils)
   #:use-module (guix gexp)
   #:use-module (gnu packages base)
   #:use-module (gnu packages algebra)
@@ -137,10 +138,12 @@ data by the PlusLib test suite.
                             #$(this-package-input "python") "/bin/python3")
              (string-append "-DPython3_INCLUDE_DIR="
                             #$(this-package-input "python")
-                            "/include/python3.11")
+                            "/include/python"
+                            #$(version-major+minor (package-version python)))
              (string-append "-DPython3_LIBRARY="
                             #$(this-package-input "python")
-                            "/lib/libpython3.11.so")
+                            "/lib/libpython"
+                            #$(version-major+minor (package-version python)) ".so")
              ;; Use Guix's system zlib instead of VTK's bundled zlib target
              "-DPLUS_USE_SYSTEM_ZLIB:BOOL=ON"
              (string-append "-DZLIB_LIBRARY="
@@ -291,10 +294,12 @@ require proprietary vendor SDKs.  The virtual and network data sources
                             #$(this-package-input "python") "/bin/python3")
              (string-append "-DPython3_INCLUDE_DIR="
                             #$(this-package-input "python")
-                            "/include/python3.11")
+                            "/include/python"
+                            #$(version-major+minor (package-version python)))
              (string-append "-DPython3_LIBRARY="
                             #$(this-package-input "python")
-                            "/lib/libpython3.11.so")
+                            "/lib/libpython"
+                            #$(version-major+minor (package-version python)) ".so")
              ;; Override PlusApp's hardcoded relative config paths (../config,
              ;; ../data) so PlusConfig.xml points to the pluslibdata store
              ;; path rather than non-existent siblings of the bin/ directory.

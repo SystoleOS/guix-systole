@@ -257,10 +257,12 @@ intersection component.")
                              #$(this-package-input "python") "/bin/python3")
               (string-append "-DPYTHON_LIBRARIES="
                              #$(this-package-input "python")
-                             "/lib/libpython3.11.so")
+                             "/lib/libpython"
+                             #$(version-major+minor (package-version python)) ".so")
               (string-append "-DPYTHON_INCLUDE_DIRS="
                              #$(this-package-input "python")
-                             "/include/python3.11")
+                             "/include/python"
+                             #$(version-major+minor (package-version python)))
               (string-append "-Dpybind11_DIR="
                              #$(this-package-input "pybind11")
                              "/share/cmake/pybind11")
@@ -276,20 +278,22 @@ intersection component.")
                #$sofa-plugin-cosserat))
       #:phases
       #~(modify-phases %standard-phases
-          ;; SofaPython3 creates ~/.local/lib/python3.11/site-packages
+          ;; SofaPython3 creates ~/.local/lib/pythonX.Y/site-packages
           ;; at configure time.  The build sandbox has no writable HOME.
           (add-before 'configure 'set-home
             (lambda _
               (setenv "HOME" (getcwd))))
           ;; SOFA installs Python modules into non-standard paths
           ;; under plugins/<name>/lib/python3/site-packages/.  Create
-          ;; symlinks into lib/python3.11/site-packages/ so Guix's
+          ;; symlinks into lib/pythonX.Y/site-packages/ so Guix's
           ;; profile hooks and Slicer's PYTHONPATH pick them up.
           (add-after 'install 'symlink-python-packages
             (lambda _
               (use-modules (ice-9 ftw))
               (let ((out #$output))
-                (let ((pydir (string-append out "/lib/python3.11/site-packages"))
+                (let ((pydir (string-append out "/lib/python"
+                                    #$(version-major+minor (package-version python))
+                                    "/site-packages"))
                       (pdir  (string-append out "/plugins")))
                   (mkdir-p pydir)
                   (when (file-exists? pdir)

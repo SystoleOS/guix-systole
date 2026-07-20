@@ -41,6 +41,7 @@
   #:use-module ((guix licenses)
                 #:prefix license:)
   #:use-module (guix packages)
+  #:use-module (guix utils)
   #:use-module (systole packages itk)
   #:use-module (systole packages maths)
   #:use-module (systole packages pythonqt)
@@ -226,8 +227,10 @@ as 3D Slicer.")
           #:key
           (vtk-pkg vtk-slicer)
           (itk-pkg itk-slicer)
+          ;; The "X.Y" path fragment is derived from python-pkg so include/
+          ;; library paths can never disagree with the interpreter.
           (python-pkg python)
-          (python-version "3.11")
+          (python-version (version-major+minor (package-version python-pkg)))
           (pythonqt-pkg pythonqt-commontk))
   (package
     (inherit %ctk)
@@ -327,7 +330,7 @@ as 3D Slicer.")
 ;;; Public instances
 ;;;
 
-;; Default CTK — VTK 9.2, ITK 5.4.0, Python 3.11 (Slicer 5.8 stack)
+;; Default CTK — VTK 9.2, ITK 5.4.0, Guix default Python (Slicer 5.8 stack)
 (define-public ctk
   (make-ctk))
 
@@ -336,7 +339,6 @@ as 3D Slicer.")
   (let ((base (make-ctk #:vtk-pkg vtk-slicer-9.5
                         #:itk-pkg itk-slicer-5.4.4
                         #:python-pkg python-3.12
-                        #:python-version "3.12"
                         #:pythonqt-pkg pythonqt-commontk-for-slicer-5.10)))
     (package
       (inherit base)

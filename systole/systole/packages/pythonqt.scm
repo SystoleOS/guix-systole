@@ -21,6 +21,7 @@
   #:use-module (gnu packages python)
   #:use-module (guix gexp)
   #:use-module (guix packages)
+  #:use-module (guix utils)
   #:use-module (guix git-download)
   #:use-module (guix build-system cmake)
   #:use-module ((guix licenses)
@@ -32,8 +33,10 @@
 
 ;; make-pythonqt-commontk generates a PythonQt package linked against a
 ;; specific Python interpreter.  The python-pkg argument must be the Guix
-;; package object; python-version is the "X.Y" string used to construct
-;; include/library paths (defaults match python 3.11).
+;; package object; the "X.Y" version string used to construct
+;; include/library paths is DERIVED from that package, so the paths can
+;; never disagree with the interpreter (the guix default python moving
+;; from 3.11 to 3.12 broke exactly that hardcode on 2026-07-18).
 ;;
 ;; The python package is captured directly in the gexp via #$python-pkg
 ;; instead of this-package-input, which avoids hard-coding the input key
@@ -42,7 +45,7 @@
           #:key
           (name "pythonqt-commontk")
           (python-pkg python)
-          (python-version "3.11")
+          (python-version (version-major+minor (package-version python-pkg)))
           (commit "0580304d8119caaa6c6a985d43f7109d180af880")
           (hash (base32 "0alm2lzg5pvckcaskjzvw8qrrcm07pp5hzy3sljc669gqv6pnaiy")))
   (package
@@ -89,12 +92,11 @@
 ;;;
 
 (define-public pythonqt-commontk
-  (make-pythonqt-commontk))                     ; python 3.11 (Guix default)
+  (make-pythonqt-commontk))                     ; Guix default python
 
 (define-public pythonqt-commontk-for-slicer-5.10
   (make-pythonqt-commontk #:name "pythonqt-commontk-for-slicer-5.10"
-                           #:python-pkg python-3.12
-                           #:python-version "3.12"))
+                           #:python-pkg python-3.12))
 
 ;; Slicer 5.12 stack.  Pin from commontk/CTK 5056664a
 ;; (CMakeExternals/PythonQt.cmake: patched-v4.1.0-2026-06-05-9992368e9),

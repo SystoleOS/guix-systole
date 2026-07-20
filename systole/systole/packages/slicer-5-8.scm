@@ -500,9 +500,11 @@ visualization and medical image computing.  It provides capabilities for:
             (string-append "-DPython3_EXECUTABLE="
                            #$(this-package-input "python") "/bin/python3")
             (string-append "-DPython3_INCLUDE_DIR="
-                           #$(this-package-input "python") "/include/python3.11")
+                           #$(this-package-input "python")
+                           "/include/python" #$(version-major+minor (package-version python)))
             (string-append "-DPython3_LIBRARY="
-                           #$(this-package-input "python") "/lib/libpython3.11.so")
+                           #$(this-package-input "python")
+                           "/lib/libpython" #$(version-major+minor (package-version python)) ".so")
             "-DVTK_WRAP_PYTHON:BOOL=ON"
             "-DSlicer_USE_PYTHONQT:BOOL=ON"
             "-DSlicer_USE_SYSTEM_python:BOOL=ON"
@@ -650,9 +652,12 @@ visualization and medical image computing.  It provides capabilities for:
             ;;   SLICER_PYTHONPATH native-search-path.
             ;; lib/Slicer-5.8: C-extension .so (MRMLCorePython, …).
             ;; lib/python3.11/site-packages: numpy, vtk, vtkAddon, user pkgs.
-            (files '("bin/Python"
-                     "lib/Slicer-5.8"
-                     "lib/python3.11/site-packages")))))))
+            (files (list "bin/Python"
+                         "lib/Slicer-5.8"
+                         (string-append "lib/python"
+                                        (version-major+minor
+                                         (package-version python))
+                                        "/site-packages"))))))))
 
 ;;;
 ;;; Slicer 5.8 — module factory wrappers
