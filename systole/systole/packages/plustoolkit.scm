@@ -135,13 +135,13 @@ data by the PlusLib test suite.
              ;; Python3 hints — VTK's cmake config calls find_package(Python3)
              ;; unconditionally; provide explicit paths so it finds Guix Python.
              (string-append "-DPython3_EXECUTABLE="
-                            #$(this-package-input "python") "/bin/python3")
+                            #$python "/bin/python3")
              (string-append "-DPython3_INCLUDE_DIR="
-                            #$(this-package-input "python")
+                            #$python
                             "/include/python"
                             #$(version-major+minor (package-version python)))
              (string-append "-DPython3_LIBRARY="
-                            #$(this-package-input "python")
+                            #$python
                             "/lib/libpython"
                             #$(version-major+minor (package-version python)) ".so")
              ;; Use Guix's system zlib instead of VTK's bundled zlib target
@@ -291,13 +291,13 @@ require proprietary vendor SDKs.  The virtual and network data sources
              ;; PlusLibConfig.cmake calls find_package(VTK) which in turn
              ;; calls find_package(Python3); provide explicit paths.
              (string-append "-DPython3_EXECUTABLE="
-                            #$(this-package-input "python") "/bin/python3")
+                            #$python "/bin/python3")
              (string-append "-DPython3_INCLUDE_DIR="
-                            #$(this-package-input "python")
+                            #$python
                             "/include/python"
                             #$(version-major+minor (package-version python)))
              (string-append "-DPython3_LIBRARY="
-                            #$(this-package-input "python")
+                            #$python
                             "/lib/libpython"
                             #$(version-major+minor (package-version python)) ".so")
              ;; Override PlusApp's hardcoded relative config paths (../config,

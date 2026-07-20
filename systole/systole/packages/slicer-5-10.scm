@@ -396,13 +396,18 @@ visualization and medical image computing.")
        ((#:configure-flags flags)
         #~(append
            (list
-            ;; Python 3.12 (upstream package name is still "python-next")
+            ;; Python 3.12.  Capture the package binding directly -- input
+            ;; labels follow upstream package NAMES, and python-3.12's name
+            ;; changed from "python-next" to "python" when it became the
+            ;; default, silently turning label lookups into #f.
             (string-append "-DPython3_EXECUTABLE="
-                           #$(this-package-input "python-next") "/bin/python3")
+                           #$python-3.12 "/bin/python3")
             (string-append "-DPython3_INCLUDE_DIR="
-                           #$(this-package-input "python-next") "/include/python3.12")
+                           #$python-3.12 "/include/python"
+                           #$(version-major+minor (package-version python-3.12)))
             (string-append "-DPython3_LIBRARY="
-                           #$(this-package-input "python-next") "/lib/libpython3.12.so")
+                           #$python-3.12 "/lib/libpython"
+                           #$(version-major+minor (package-version python-3.12)) ".so")
             "-DVTK_WRAP_PYTHON:BOOL=ON"
             "-DSlicer_USE_PYTHONQT:BOOL=ON"
             "-DSlicer_USE_SYSTEM_python:BOOL=ON"

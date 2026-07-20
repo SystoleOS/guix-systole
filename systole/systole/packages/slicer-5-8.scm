@@ -497,13 +497,15 @@ visualization and medical image computing.  It provides capabilities for:
         #~(append
            (list
             ;; Python — Guix Python 3.11
+            ;; Capture the package binding directly (not an input-label
+            ;; lookup): labels follow upstream package names and drift.
             (string-append "-DPython3_EXECUTABLE="
-                           #$(this-package-input "python") "/bin/python3")
+                           #$python "/bin/python3")
             (string-append "-DPython3_INCLUDE_DIR="
-                           #$(this-package-input "python")
+                           #$python
                            "/include/python" #$(version-major+minor (package-version python)))
             (string-append "-DPython3_LIBRARY="
-                           #$(this-package-input "python")
+                           #$python
                            "/lib/libpython" #$(version-major+minor (package-version python)) ".so")
             "-DVTK_WRAP_PYTHON:BOOL=ON"
             "-DSlicer_USE_PYTHONQT:BOOL=ON"

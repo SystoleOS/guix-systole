@@ -250,17 +250,17 @@ intersection component.")
                              #$(this-package-input "zlib") "/lib/libz.so")
               ;; SofaPython3:
               (string-append "-DPYTHON_EXECUTABLE="
-                             #$(this-package-input "python") "/bin/python3")
+                             #$python "/bin/python3")
               (string-append "-DPython3_EXECUTABLE="
-                             #$(this-package-input "python") "/bin/python3")
+                             #$python "/bin/python3")
               (string-append "-DPython_EXECUTABLE="
-                             #$(this-package-input "python") "/bin/python3")
+                             #$python "/bin/python3")
               (string-append "-DPYTHON_LIBRARIES="
-                             #$(this-package-input "python")
+                             #$python
                              "/lib/libpython"
                              #$(version-major+minor (package-version python)) ".so")
               (string-append "-DPYTHON_INCLUDE_DIRS="
-                             #$(this-package-input "python")
+                             #$python
                              "/include/python"
                              #$(version-major+minor (package-version python)))
               (string-append "-Dpybind11_DIR="
