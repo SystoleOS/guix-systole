@@ -101,11 +101,11 @@
                   ;; TODO check whether these could not be picked up from Slicer
                   ;; cmake configuration files instead
                   (string-append "-DPython3_EXECUTABLE="
-                                 #$(this-package-input "python") "/bin/python3")
+                                 #$python "/bin/python3")
                   (string-append "-DPython3_INCLUDE_DIR="
-                                 #$(this-package-input "python") "/include/python3.11")
+                                 #$python "/include/python" #$(version-major+minor (package-version python)))
                   (string-append "-DPython3_LIBRARY="
-                                 #$(this-package-input "python") "/lib/libpython3.11.so")
+                                 #$python "/lib/libpython" #$(version-major+minor (package-version python)) ".so")
                   (string-append "-DGLEW_INCLUDE_DIR="
                                  #$(this-package-input "glew") "/include/GL")
                   (string-append "-DGLEW_LIBRARY="

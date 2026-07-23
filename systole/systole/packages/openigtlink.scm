@@ -140,14 +140,14 @@ developers.")
              "-DBUILD_TESTING:BOOL=OFF"
              ;; vtk-slicer's cmake config calls find_package(Python3)
              (string-append "-DPython3_EXECUTABLE="
-                            #$(this-package-input "python")
+                            #$python
                             "/bin/python3")
              (string-append "-DPython3_INCLUDE_DIR="
-                            #$(this-package-input "python")
-                            "/include/python3.11")
+                            #$python
+                            "/include/python" #$(version-major+minor (package-version python)))
              (string-append "-DPython3_LIBRARY="
-                            #$(this-package-input "python")
-                            "/lib/libpython3.11.so")
+                            #$python
+                            "/lib/libpython" #$(version-major+minor (package-version python)) ".so")
              ;; SlicerConfig.cmake forces Slicer_USE_PYTHONQT=ON; WRAP_PYTHONQT in
              ;; Widgets/CMakeLists.txt then requires PythonQt to be findable.
              (string-append "-DPYTHONQT_INSTALL_DIR="
@@ -298,14 +298,14 @@ protocol.")
              ;; vtk-slicer VTK cmake config calls find_package(Python3)
              ;; unconditionally; provide paths so it finds Guix Python.
              (string-append "-DPython3_EXECUTABLE="
-                            #$(this-package-input "python")
+                            #$python
                             "/bin/python3")
              (string-append "-DPython3_INCLUDE_DIR="
-                            #$(this-package-input "python")
-                            "/include/python3.11")
+                            #$python
+                            "/include/python" #$(version-major+minor (package-version python)))
              (string-append "-DPython3_LIBRARY="
-                            #$(this-package-input "python")
-                            "/lib/libpython3.11.so")
+                            #$python
+                            "/lib/libpython" #$(version-major+minor (package-version python)) ".so")
              (string-append "-DSlicer_DIR:PATH="
                             #$(this-package-input "slicer-5.8")
                             "/lib/Slicer-5.8")

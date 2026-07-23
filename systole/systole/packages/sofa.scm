@@ -329,7 +329,10 @@ intersection component.")
             (separator #f))
            (search-path-specification
             (variable "PYTHONPATH")
-            (files '("lib/python3.11/site-packages")))))
+            (files (list (string-append
+                          "lib/python"
+                          (version-major+minor (package-version python))
+                          "/site-packages"))))))
     (home-page "https://www.sofa-framework.org/")
     (synopsis "SOFA real-time physics simulation framework (Slicer fork, v25.12)")
     (description
