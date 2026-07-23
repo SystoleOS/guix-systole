@@ -166,10 +166,10 @@
    "0085-COMP-Fix-MOC-processing-for-qSlicerIconEnginePlugin.patch"
    "0086-ENH-Install-SlicerWizard-regardless-of-extension-man.patch"
    "0087-ENH-Also-descend-into-SlicerWizard-subdir-without-ex.patch"
-   ;; 0088: upstream 5.12 removed the configured headers but left
-   ;; ${configure_header_file} dangling in five install(FILES) lines;
-   ;; fatal only with development install ON (our standalone build).
-   "0088-COMP-Drop-stale-configure_header_file-from-developme.patch"))
+   ;; 0088: upstream 5.12 switched seven libraries to GenerateExportHeader
+   ;; but left ${configure_header_file} (never set) in their development
+   ;; install lines; install the generated *Export.h explicitly instead.
+   "0088-COMP-Install-the-generated-export-headers-in-develop.patch"))
 
 ;; Slicer stable 5.12.2 (tag v5.12.2).  The 88 guix-systole patches are the
 ;; 5.10 patch series rebased onto v5.12.2 (branch guix-systole-slicer-5.12 in
