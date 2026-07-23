@@ -1,30 +1,42 @@
-From 29bc6c8af795df647854fd5d085adf873d1b60b9 Mon Sep 17 00:00:00 2001
+From 3b597f52f6da23d1621e04d9ca4cf9bdb4a297f5 Mon Sep 17 00:00:00 2001
 From: Rafael Palomar <rafael.palomar@ous-research.no>
 Date: Thu, 23 Jul 2026 12:22:13 +0200
 Subject: [PATCH] COMP: Install the generated export headers in development
  installs
 
-Slicer 5.12 switched seven libraries (Base/CLI, Base/Logic,
-Libs/MRML/{CLI,IDImageIO,Logic}, Libs/RemoteIO, Libs/vtkTeem) from
-checked-in export headers to GenerateExportHeader output in the build
-tree, but left the old ${configure_header_file} variable -- never set
-anymore -- in their development install(FILES) lines.  The item
-degenerates to the bare binary dir and CMake fails with 'install FILES
-given directory'; and simply dropping it instead leaves the generated
-*Export.h out of the installed tree, breaking every downstream
-standalone module build on '<lib>Export.h: No such file or directory'.
+Slicer 5.12 removed the checked-in per-library export headers
+(vtkMRMLExport.h and friends) in favour of GenerateExportHeader output
+in the build tree, but never taught the development install(FILES)
+lines about them:
 
-Install the correct generated header explicitly per library, which is
-what upstream's half-finished migration evidently intended.
+- In seven libraries (Base/CLI, Base/Logic, Libs/MRML/{CLI,IDImageIO,
+  Logic}, Libs/RemoteIO, Libs/vtkTeem) the old configured header is
+  gone too, leaving ${configure_header_file} unset -- the install item
+  degenerates to the bare binary dir and configure fails with 'install
+  FILES given directory'.  Replace the item with the generated export
+  header.
+- In four more (Libs/MRML/Core, Libs/MRML/DisplayableManager,
+  Libs/vtkITK, Libs/vtkSegmentationCore) the configured header install
+  still works, but the generated export header is simply never
+  installed.  Append it.
+
+Without this every consumer of the installed development tree fails
+with '<lib>Export.h: No such file or directory' (the checked-in
+headers used to ride along the ${headers} glob).  Only visible with
+*_INSTALL_NO_DEVELOPMENT=OFF as in the standalone Guix build.
 ---
- Base/CLI/CMakeLists.txt            | 2 +-
- Base/Logic/CMakeLists.txt          | 2 +-
- Libs/MRML/CLI/CMakeLists.txt       | 2 +-
- Libs/MRML/IDImageIO/CMakeLists.txt | 2 +-
- Libs/MRML/Logic/CMakeLists.txt     | 2 +-
- Libs/RemoteIO/CMakeLists.txt       | 2 +-
- Libs/vtkTeem/CMakeLists.txt        | 2 +-
- 7 files changed, 7 insertions(+), 7 deletions(-)
+ Base/CLI/CMakeLists.txt                     | 2 +-
+ Base/Logic/CMakeLists.txt                   | 2 +-
+ Libs/MRML/CLI/CMakeLists.txt                | 2 +-
+ Libs/MRML/Core/CMakeLists.txt               | 2 +-
+ Libs/MRML/DisplayableManager/CMakeLists.txt | 2 +-
+ Libs/MRML/IDImageIO/CMakeLists.txt          | 2 +-
+ Libs/MRML/Logic/CMakeLists.txt              | 2 +-
+ Libs/RemoteIO/CMakeLists.txt                | 2 +-
+ Libs/vtkITK/CMakeLists.txt                  | 2 +-
+ Libs/vtkSegmentationCore/CMakeLists.txt     | 2 +-
+ Libs/vtkTeem/CMakeLists.txt                 | 2 +-
+ 11 files changed, 11 insertions(+), 11 deletions(-)
 
 diff --git a/Base/CLI/CMakeLists.txt b/Base/CLI/CMakeLists.txt
 index 0bf3963c6f..0f9712b6f8 100644
@@ -65,6 +77,32 @@ index 5d7cdc9f3b..71ef70b5a9 100644
      DESTINATION include/${PROJECT_NAME} COMPONENT Development)
  endif()
  
+diff --git a/Libs/MRML/Core/CMakeLists.txt b/Libs/MRML/Core/CMakeLists.txt
+index 770c3a9930..7f96962cb6 100644
+--- a/Libs/MRML/Core/CMakeLists.txt
++++ b/Libs/MRML/Core/CMakeLists.txt
+@@ -132,7 +132,7 @@ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+   file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
+                     "${CMAKE_CURRENT_SOURCE_DIR}/*.txx")
+   install(
+-    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
++    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file} ${CMAKE_CURRENT_BINARY_DIR}/vtkMRMLExport.h
+     DESTINATION include/${PROJECT_NAME} COMPONENT Development)
+ endif()
+ 
+diff --git a/Libs/MRML/DisplayableManager/CMakeLists.txt b/Libs/MRML/DisplayableManager/CMakeLists.txt
+index 4fd9861e0b..098c89c60f 100644
+--- a/Libs/MRML/DisplayableManager/CMakeLists.txt
++++ b/Libs/MRML/DisplayableManager/CMakeLists.txt
+@@ -61,7 +61,7 @@ endif()
+ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+   file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+   install(
+-    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
++    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file} ${CMAKE_CURRENT_BINARY_DIR}/vtkMRMLDisplayableManagerExport.h
+     DESTINATION include/${PROJECT_NAME} COMPONENT Development)
+ endif()
+ 
 diff --git a/Libs/MRML/IDImageIO/CMakeLists.txt b/Libs/MRML/IDImageIO/CMakeLists.txt
 index 4bb4baf0d2..dee21e2415 100644
 --- a/Libs/MRML/IDImageIO/CMakeLists.txt
@@ -101,6 +139,32 @@ index 7945c21ace..e755bd98ae 100644
    install(
 -    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
 +    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/vtkRemoteIOExport.h
+     DESTINATION include/${PROJECT_NAME} COMPONENT Development)
+ endif()
+ 
+diff --git a/Libs/vtkITK/CMakeLists.txt b/Libs/vtkITK/CMakeLists.txt
+index 13b9bf67c4..dcf30a20d2 100644
+--- a/Libs/vtkITK/CMakeLists.txt
++++ b/Libs/vtkITK/CMakeLists.txt
+@@ -97,7 +97,7 @@ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+     "${CMAKE_CURRENT_SOURCE_DIR}/*.hxx"
+     "${CMAKE_CURRENT_SOURCE_DIR}/*.txx")
+   install(
+-    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
++    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file} ${CMAKE_CURRENT_BINARY_DIR}/vtkITKExport.h
+     DESTINATION include/${PROJECT_NAME} COMPONENT Development)
+ endif()
+ 
+diff --git a/Libs/vtkSegmentationCore/CMakeLists.txt b/Libs/vtkSegmentationCore/CMakeLists.txt
+index e03d3008cd..68b5fb56cc 100644
+--- a/Libs/vtkSegmentationCore/CMakeLists.txt
++++ b/Libs/vtkSegmentationCore/CMakeLists.txt
+@@ -28,7 +28,7 @@ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+     "${CMAKE_CURRENT_SOURCE_DIR}/*.hxx"
+     "${CMAKE_CURRENT_SOURCE_DIR}/*.txx")
+   install(
+-    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
++    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file} ${CMAKE_CURRENT_BINARY_DIR}/vtkSegmentationCoreExport.h
      DESTINATION include/${PROJECT_NAME} COMPONENT Development)
  endif()
  
