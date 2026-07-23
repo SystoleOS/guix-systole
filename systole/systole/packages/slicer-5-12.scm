@@ -165,9 +165,13 @@
    "0084-COMP-Fix-missing-endif-for-Slicer_BUILD_CLI_SUPPORT-.patch"
    "0085-COMP-Fix-MOC-processing-for-qSlicerIconEnginePlugin.patch"
    "0086-ENH-Install-SlicerWizard-regardless-of-extension-man.patch"
-   "0087-ENH-Also-descend-into-SlicerWizard-subdir-without-ex.patch"))
+   "0087-ENH-Also-descend-into-SlicerWizard-subdir-without-ex.patch"
+   ;; 0088: upstream 5.12 removed the configured headers but left
+   ;; ${configure_header_file} dangling in five install(FILES) lines;
+   ;; fatal only with development install ON (our standalone build).
+   "0088-COMP-Drop-stale-configure_header_file-from-developme.patch"))
 
-;; Slicer stable 5.12.2 (tag v5.12.2).  The 87 guix-systole patches are the
+;; Slicer stable 5.12.2 (tag v5.12.2).  The 88 guix-systole patches are the
 ;; 5.10 patch series rebased onto v5.12.2 (branch guix-systole-slicer-5.12 in
 ;; the Slicer-Systole repository); see patches/slicer-5.12/.
 (define %slicer-5.12-commit "f7879b5651239865f336e5731e7f9e9a65d63871")

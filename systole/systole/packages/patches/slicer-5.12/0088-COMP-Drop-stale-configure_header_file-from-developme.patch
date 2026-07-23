@@ -1,0 +1,89 @@
+From cd1eb7fa1342fcd16b094460032409f19794225e Mon Sep 17 00:00:00 2001
+From: Rafael Palomar <rafael.palomar@ous-research.no>
+Date: Thu, 23 Jul 2026 12:22:13 +0200
+Subject: [PATCH] COMP: Drop stale configure_header_file from development
+ installs
+
+Slicer 5.12 removed the configured headers (vtkRemoteIOConfigure.h.in
+and friends are gone) but left ${configure_header_file} in five
+install(FILES ...) lines.  The variable is never set in these files,
+so the item degenerates to the bare ${CMAKE_CURRENT_BINARY_DIR}/ and
+CMake errors with 'install FILES given directory' -- latent upstream,
+exposed only when *_INSTALL_NO_DEVELOPMENT is OFF as in the standalone
+Guix build.
+---
+ Libs/MRML/CLI/CMakeLists.txt       | 2 +-
+ Libs/MRML/IDImageIO/CMakeLists.txt | 2 +-
+ Libs/MRML/Logic/CMakeLists.txt     | 2 +-
+ Libs/RemoteIO/CMakeLists.txt       | 2 +-
+ Libs/vtkTeem/CMakeLists.txt        | 2 +-
+ 5 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/Libs/MRML/CLI/CMakeLists.txt b/Libs/MRML/CLI/CMakeLists.txt
+index 5d7cdc9f3b..c5abce2057 100644
+--- a/Libs/MRML/CLI/CMakeLists.txt
++++ b/Libs/MRML/CLI/CMakeLists.txt
+@@ -56,7 +56,7 @@ endif()
+ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+   file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+   install(
+-    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
++    FILES ${headers}
+     DESTINATION include/${PROJECT_NAME} COMPONENT Development)
+ endif()
+ 
+diff --git a/Libs/MRML/IDImageIO/CMakeLists.txt b/Libs/MRML/IDImageIO/CMakeLists.txt
+index 4bb4baf0d2..4187f889b8 100644
+--- a/Libs/MRML/IDImageIO/CMakeLists.txt
++++ b/Libs/MRML/IDImageIO/CMakeLists.txt
+@@ -60,7 +60,7 @@ endif()
+ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+   file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+   install(
+-    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
++    FILES ${headers}
+     DESTINATION include/${PROJECT_NAME} COMPONENT Development)
+ endif()
+ 
+diff --git a/Libs/MRML/Logic/CMakeLists.txt b/Libs/MRML/Logic/CMakeLists.txt
+index 06f04bbd28..efc07e04dd 100644
+--- a/Libs/MRML/Logic/CMakeLists.txt
++++ b/Libs/MRML/Logic/CMakeLists.txt
+@@ -45,7 +45,7 @@ endif()
+ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+   file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+   install(
+-    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
++    FILES ${headers}
+     DESTINATION include/${PROJECT_NAME} COMPONENT Development)
+ endif()
+ 
+diff --git a/Libs/RemoteIO/CMakeLists.txt b/Libs/RemoteIO/CMakeLists.txt
+index 7945c21ace..fd9ab1333f 100644
+--- a/Libs/RemoteIO/CMakeLists.txt
++++ b/Libs/RemoteIO/CMakeLists.txt
+@@ -64,7 +64,7 @@ endif()
+ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+   file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+   install(
+-    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
++    FILES ${headers}
+     DESTINATION include/${PROJECT_NAME} COMPONENT Development)
+ endif()
+ 
+diff --git a/Libs/vtkTeem/CMakeLists.txt b/Libs/vtkTeem/CMakeLists.txt
+index 4f92fc4762..5d438d3412 100644
+--- a/Libs/vtkTeem/CMakeLists.txt
++++ b/Libs/vtkTeem/CMakeLists.txt
+@@ -57,7 +57,7 @@ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+     "${CMAKE_CURRENT_SOURCE_DIR}/*.hxx"
+     "${CMAKE_CURRENT_SOURCE_DIR}/*.txx")
+   install(
+-    FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/${configure_header_file}
++    FILES ${headers}
+     DESTINATION include/${PROJECT_NAME} COMPONENT Development)
+ endif()
+ 
+-- 
+2.54.0
+
