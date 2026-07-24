@@ -283,6 +283,13 @@ Line Interface) modules.  It bundles @code{tclap} and
           ;; A gexp that evaluates to a (possibly empty) list of extra
           ;; CMake -D flags.  Defaults to the empty list.
           (extra-configure-flags #~'())
+          ;; Optional python package.  When set, pass explicit Python3
+          ;; hints so the FindPython3 call inside VTK's wrap machinery
+          ;; resolves the full Development component and the generated
+          ;; *Python.so wrapper links libpython -- required under
+          ;; Slicer's -Wl,--no-undefined (VTK 9.6 wrappers no longer
+          ;; get libpython transitively).
+          (python #f)
           ;; Packages that must be present in the profile at runtime.
           ;; Use this to declare inter-module runtime (dlopen) dependencies
           ;; (e.g. slicer-colors-5.8 for modules that load Colors widgets).
@@ -320,7 +327,20 @@ Line Interface) modules.  It bundles @code{tclap} and
                    ;; not locate PythonQt.h, leaving PYTHONQT_INCLUDE_DIR empty
                    ;; and the include_directories() call in UseSlicer a no-op.
                    (string-append "-DPYTHONQT_INSTALL_DIR="
-                                  #$pythonqt))
+                                  #$pythonqt)
+                   #$@(if python
+                          (let ((pyver (version-major+minor
+                                        (package-version python))))
+                            (list
+                             #~(string-append "-DPython3_EXECUTABLE="
+                                              #$python "/bin/python3")
+                             #~(string-append "-DPython3_INCLUDE_DIR="
+                                              #$python "/include/python"
+                                              #$pyver)
+                             #~(string-append "-DPython3_LIBRARY="
+                                              #$python "/lib/libpython"
+                                              #$pyver ".so")))
+                          '()))
              #$extra-configure-flags)
           #:phases
           #~(modify-phases %standard-phases
@@ -378,6 +398,13 @@ Line Interface) modules.  It bundles @code{tclap} and
           (extra-inputs '())
           ;; a gexp that evaluates to a (possibly empty) list of extra cmake -d flags.
           (extra-configure-flags #~'())
+          ;; Optional python package.  When set, pass explicit Python3
+          ;; hints so the FindPython3 call inside VTK's wrap machinery
+          ;; resolves the full Development component and the generated
+          ;; *Python.so wrapper links libpython -- required under
+          ;; Slicer's -Wl,--no-undefined (VTK 9.6 wrappers no longer
+          ;; get libpython transitively).
+          (python #f)
           ;; Packages that must be present in the profile at runtime.
           ;; Use this to declare inter-module runtime (dlopen) dependencies.
           (propagated-inputs '()))
@@ -401,7 +428,20 @@ Line Interface) modules.  It bundles @code{tclap} and
                    (string-append "-DSlicer_DIR="
                                   #$slicer
                                   #$(string-append "/lib/Slicer-"
-                                                   slicer-version)))
+                                                   slicer-version))
+                   #$@(if python
+                          (let ((pyver (version-major+minor
+                                        (package-version python))))
+                            (list
+                             #~(string-append "-DPython3_EXECUTABLE="
+                                              #$python "/bin/python3")
+                             #~(string-append "-DPython3_INCLUDE_DIR="
+                                              #$python "/include/python"
+                                              #$pyver)
+                             #~(string-append "-DPython3_LIBRARY="
+                                              #$python "/lib/libpython"
+                                              #$pyver ".so")))
+                          '()))
              #$extra-configure-flags)
           #:phases
           ;; build only the named scripted-module sub-directory.

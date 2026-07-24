@@ -510,12 +510,17 @@ visualization and medical image computing.")
          #:slicer slicer-5.12
          #:slicer-version "5.12"
          #:pythonqt pythonqt-commontk-for-slicer-5.12
+         ;; VTK 9.6 wrappers no longer inherit libpython transitively;
+         ;; explicit hints make the module's *Python.so link it (see the
+         ;; factory's #:python docstring).
+         #:python python-3.12
          args))
 
 (define (make-slicer-scripted-module-5.12 . args)
   (apply factory:make-slicer-scripted-module
          #:slicer slicer-5.12
          #:slicer-version "5.12"
+         #:python python-3.12
          args))
 
 ;;;
