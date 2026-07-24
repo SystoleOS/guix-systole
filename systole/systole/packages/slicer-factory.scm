@@ -339,6 +339,18 @@ Line Interface) modules.  It bundles @code{tclap} and
                                               #$pyver)
                              #~(string-append "-DPython3_LIBRARY="
                                               #$python "/lib/libpython"
+                                              #$pyver ".so")
+                             ;; vtkAddon 9.6's vtkWrapPython.cmake calls
+                             ;; find_package(Python3) but still reads the
+                             ;; FindPythonLibs-era PYTHON_LIBRARY when
+                             ;; setting VTK_Python3_LIBRARIES (upstream
+                             ;; half-migration); without it the wrapper
+                             ;; links an empty list and fails under
+                             ;; -Wl,--no-undefined.  The Slicer base build
+                             ;; is unaffected because Slicer's top-level
+                             ;; CMake sets the compat variable itself.
+                             #~(string-append "-DPYTHON_LIBRARY="
+                                              #$python "/lib/libpython"
                                               #$pyver ".so")))
                           '()))
              #$extra-configure-flags)
@@ -439,6 +451,18 @@ Line Interface) modules.  It bundles @code{tclap} and
                                               #$python "/include/python"
                                               #$pyver)
                              #~(string-append "-DPython3_LIBRARY="
+                                              #$python "/lib/libpython"
+                                              #$pyver ".so")
+                             ;; vtkAddon 9.6's vtkWrapPython.cmake calls
+                             ;; find_package(Python3) but still reads the
+                             ;; FindPythonLibs-era PYTHON_LIBRARY when
+                             ;; setting VTK_Python3_LIBRARIES (upstream
+                             ;; half-migration); without it the wrapper
+                             ;; links an empty list and fails under
+                             ;; -Wl,--no-undefined.  The Slicer base build
+                             ;; is unaffected because Slicer's top-level
+                             ;; CMake sets the compat variable itself.
+                             #~(string-append "-DPYTHON_LIBRARY="
                                               #$python "/lib/libpython"
                                               #$pyver ".so")))
                           '()))
