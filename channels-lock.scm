@@ -25,14 +25,22 @@
        (commit "876828a590c28881c649450588eb2e3eb2bc1f99"))
       (channel
        (name 'tailscale)
-       (url "https://codeberg.org/rafaelpalomar/guix-tailscale.git")
+       ;; Converged back to upstream 2026-07-24: 1.96.4 builds with the
+       ;; pinned guix, making the fork's go-1.24 bump obsolete.
+       (url "https://github.com/umanwizard/guix-tailscale")
        (branch "main")
-       (commit "bee82d89aa8b77eb25273398325c8f54e4fcd936"))
+       (commit "4fd673d378f1e82ded518c93624257eaefa5abcc"))
       (channel
        (name 'guix-systole)
        (url "https://github.com/systoleos/guix-systole")
        (branch "main")
-       (commit "def9078237a144d69fb58278f74b858409bf4108"))
+       ;; Must postdate the introduction commit for authentication.
+       (commit "c2c7f5facf684876c2d9143d3e3a57a9773c96be")
+       (introduction
+        (make-channel-introduction
+         "0898d41446ecbd6eddcbf5d78beae63f7e8a4069"
+         (openpgp-fingerprint
+          "53A2 D043 E0DC 9249 DF75  ABB6 65D8 96E0 0C10 1DDF"))))
       (channel
        (name 'systole-artwork)
        (url "https://github.com/systoleos/guix-systole-artwork")
