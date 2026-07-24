@@ -1,11 +1,16 @@
 ;; This file, which is best viewed as -*- Scheme -*-, lists the OpenPGP
 ;; keys currently authorized to sign commits in this repository.
 ;;
-;; Authentication only takes effect once users pull with a channel
-;; introduction naming the first signed commit; until then this file is
-;; inert.  See doc/channel-authentication.md for the activation runbook.
+;; NOTE: guix authenticates against the fingerprint of the key that
+;; actually made the signature -- for a primary key with signing
+;; subkeys, that is the SUBKEY fingerprint.  Both signing-capable
+;; subkeys of Rafael Palomar's primary key (6513 C724 8D7B ECE2 EC1B
+;; D34B 7035 0DAD 507F A72F, published on the 'keyring' branch) are
+;; authorized.  See doc/channel-authentication.md for key management.
 
 (authorizations
  (version 0)
- (("6513 C724 8D7B ECE2 EC1B  D34B 7035 0DAD 507F A72F"
-   (name "rafael"))))
+ (("53A2 D043 E0DC 9249 DF75  ABB6 65D8 96E0 0C10 1DDF"
+   (name "rafael"))
+  ("6535 1744 FC42 6D6D E571  B84A 3553 0619 B58A D70A"
+   (name "rafael-s"))))
