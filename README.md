@@ -16,7 +16,13 @@ Add the channel to `~/.config/guix/channels.scm`:
 (cons (channel
         (name 'systole)
         (url "https://github.com/SystoleOS/guix-systole.git")
-        (branch "main"))
+        (branch "main")
+        ;; Authenticate pulls against the channel introduction:
+        (introduction
+         (make-channel-introduction
+          "0898d41446ecbd6eddcbf5d78beae63f7e8a4069"
+          (openpgp-fingerprint
+           "53A2 D043 E0DC 9249 DF75  ABB6 65D8 96E0 0C10 1DDF"))))
       %default-channels)
 ```
 
@@ -93,11 +99,13 @@ in so Slicer-stack substitutes are available out of the box).
 
 ## Channel Authentication
 
-Channel authentication (signed commits + channel introduction) is
-scaffolded but **not yet activated**: the repository carries
-`.guix-authorizations`, and [doc/channel-authentication.md](doc/channel-authentication.md)
-contains the activation runbook. Until activation, pulls are not
-cryptographically authenticated.
+The channel is **authenticated**: every commit from the introduction
+(`0898d41`) onward is signed by a key in `.guix-authorizations`
+(Rafael Palomar's signing subkeys; primary key on the `keyring`
+branch).  Configure the channel with the introduction shown above so
+`guix pull` verifies the history; see
+[doc/channel-authentication.md](doc/channel-authentication.md) for key
+management.
 
 ## Testing
 

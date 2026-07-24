@@ -15,8 +15,15 @@ The repository already carries the two required files:
   channel should be signed by a dedicated project key instead).
 - This runbook.
 
-Authentication is **inert** until activated.  Activation is a one-time,
-operator-only sequence:
+**ACTIVATED 2026-07-24**: introduction commit
+`0898d41446ecbd6eddcbf5d78beae63f7e8a4069`, fingerprint
+`53A2 D043 E0DC 9249 DF75  ABB6 65D8 96E0 0C10 1DDF` (the ed25519 [SA]
+signing subkey -- guix authenticates against the fingerprint of the key
+that actually signs, i.e. the SUBKEY, not the primary; both signing
+subkeys are authorized in `.guix-authorizations`, the primary key is
+published on the `keyring` branch).  `guix git authenticate` passes and
+its pre-push/post-merge hooks are installed in maintainers' clones.
+The runbook below is kept for reference and for key additions/rotations:
 
 ## Activation runbook
 

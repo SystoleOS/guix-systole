@@ -98,7 +98,13 @@ FIXME: GUIX-SOURCE? is disabled by default due to performance issue."
     (channel
      (name 'guix-systole)
      (branch "main")
-     (url "https://github.com/systoleos/guix-systole")))
+     (url "https://github.com/systoleos/guix-systole")
+     ;; Enable signature verification (activated 2026-07-24):
+     (introduction
+      (make-channel-introduction
+       "0898d41446ecbd6eddcbf5d78beae63f7e8a4069"
+       (openpgp-fingerprint
+        "53A2 D043 E0DC 9249 DF75  ABB6 65D8 96E0 0C10 1DDF")))))
 
   (lambda (os)
     (operating-system
