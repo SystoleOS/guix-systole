@@ -195,7 +195,12 @@ development tools, code search, and documentation generation.")
                  "0074-COMP-Fix-designer-plugin-build-dir-and-install-path-.patch"
                  "0075-COMP-Install-Slicer-VTK-hierarchy-files-and-expose-p.patch"
                  "0076-ENH-Redirect-pip_install-to-user-home-and-update-sys.patch"
-                 "0079-ENH-Add-GUIX_ENVIRONMENT-module-path-to-LD_LIBRARY_P.patch")))))
+                 "0079-ENH-Add-GUIX_ENVIRONMENT-module-path-to-LD_LIBRARY_P.patch"
+                 ;; 0080: backport of upstream bb06cef09d -- Python 3.12
+                 ;; removed the imp module; without this, every scripted
+                 ;; module fails to load at runtime (found by the first
+                 ;; headless smoke of slicer-5.8 on the 3.12-default guix).
+                 "0080-ENH-Replace-deprecated-imp-module-with-importlib-to-.patch")))))
 
     (build-system cmake-build-system)
     (arguments

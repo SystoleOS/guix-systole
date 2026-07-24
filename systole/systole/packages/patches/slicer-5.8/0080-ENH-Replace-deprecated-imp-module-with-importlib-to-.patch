@@ -1,0 +1,514 @@
+From 9780918c51e6a34eb72bac17c4a5bfbfa52f90c8 Mon Sep 17 00:00:00 2001
+From: Jean-Christophe Fillion-Robin <jchris.fillionr@kitware.com>
+Date: Wed, 4 Jun 2025 01:53:04 -0400
+Subject: [PATCH] ENH: Replace deprecated imp module with importlib to support
+ Python 3.12+
+
+This commit replaces usage of the deprecated imp module with modern importlib-based APIs.
+The imp module was deprecated in Python 3.4 and removed in Python 3.12.
+
+Key updates:
+- Use `importlib.util.spec_from_file_location` and `module_from_spec` for loading modules from file paths.
+- Use `types.ModuleType` instead of `imp.new_module`.
+- Ensure modules are registered and accessed via `sys.modules`.
+- Avoid `PyImport_AddModule` when retrieving modules loaded with `importlib`.
+
+(cherry picked from commit bb06cef09d4ac8cdac5f95d97b28e7d080cd8c57)
+---
+ .../vtkSlicerScriptedLoadableModuleLogic.cxx  | 27 ++++++++----------
+ Base/Python/slicer/__init__.py                |  5 ++--
+ Base/Python/slicer/util.py                    | 19 +++++++------
+ Base/QTCore/qSlicerScriptedFileReader.cxx     |  7 +++--
+ Base/QTCore/qSlicerScriptedFileWriter.cxx     |  7 +++--
+ Base/QTCore/qSlicerScriptedUtils.cxx          | 28 +++++++++----------
+ Base/QTGUI/qSlicerScriptedFileDialog.cxx      |  7 +++--
+ Base/QTGUI/qSlicerScriptedLoadableModule.cxx  |  9 ++++--
+ .../qSlicerScriptedLoadableModuleWidget.cxx   | 11 ++++++--
+ .../vtkMRMLScriptedDisplayableManager.cxx     | 28 ++++++++-----------
+ .../qSlicerSegmentEditorScriptedEffect.cxx    | 11 ++++++--
+ ...SlicerSegmentEditorScriptedLabelEffect.cxx | 11 ++++++--
+ ...SlicerSegmentEditorScriptedPaintEffect.cxx | 11 ++++++--
+ .../qSlicerSubjectHierarchyScriptedPlugin.cxx | 11 ++++++--
+ Modules/Scripted/WebServer/WebServer.py       | 25 +++++++++++------
+ 15 files changed, 125 insertions(+), 92 deletions(-)
+
+diff --git a/Base/Logic/vtkSlicerScriptedLoadableModuleLogic.cxx b/Base/Logic/vtkSlicerScriptedLoadableModuleLogic.cxx
+index 2e1cb8606b..cdc52eafed 100644
+--- a/Base/Logic/vtkSlicerScriptedLoadableModuleLogic.cxx
++++ b/Base/Logic/vtkSlicerScriptedLoadableModuleLogic.cxx
+@@ -197,22 +197,17 @@ bool vtkSlicerScriptedLoadableModuleLogic::SetPythonSource(const std::string& fi
+   PyObject * classToInstantiate = PyDict_GetItemString(global_dict, className.c_str());
+   if (!classToInstantiate)
+   {
+-    PyObject * pyRes = nullptr;
+-    if (filePath.find(".pyc") != std::string::npos)
+-    {
+-      std::string pyRunStr = std::string("with open('") + filePath +
+-          std::string("', 'rb') as f:import imp;imp.load_module('__main__', f, '") + filePath +
+-          std::string("', ('.pyc', 'rb', 2))");
+-      pyRes = PyRun_String(
+-            pyRunStr.c_str(),
+-            Py_file_input, global_dict, global_dict);
+-    }
+-    else if (filePath.find(".py") != std::string::npos)
+-    {
+-      std::string pyRunStr = std::string("execfile('") + filePath + std::string("')");
+-      pyRes = PyRun_String(pyRunStr.c_str(),
+-        Py_file_input, global_dict, global_dict);
+-    }
++    std::ostringstream pyRunStream;
++
++    pyRunStream
++      << "import importlib.util;"
++      << "import sys;"
++      << "spec = importlib.util.spec_from_file_location('__main__', r'" << filePath << "');"
++      << "module = importlib.util.module_from_spec(spec);"
++      << "sys.modules['__main__'] = module;"
++      << "spec.loader.exec_module(module)";
++
++    PyObject* pyRes = PyRun_String(pyRunStream.str().c_str(), Py_file_input, global_dict, global_dict);
+     if (!pyRes)
+     {
+       vtkErrorMacro(<< "setPythonSource - Failed to execute file" << filePath << "!");
+diff --git a/Base/Python/slicer/__init__.py b/Base/Python/slicer/__init__.py
+index 88c8dadfc8..595522c409 100644
+--- a/Base/Python/slicer/__init__.py
++++ b/Base/Python/slicer/__init__.py
+@@ -128,13 +128,12 @@
+ 
+ # -----------------------------------------------------------------------------
+ def _createModule(name, globals, docstring):
+-    import imp
+     import sys
++    import types
+ 
+     moduleName = name.split(".")[-1]
+-    module = imp.new_module(moduleName)
++    module = types.ModuleType(moduleName, docstring)
+     module.__file__ = __file__
+-    module.__doc__ = docstring
+     sys.modules[name] = module
+     globals[moduleName] = module
+ 
+diff --git a/Base/Python/slicer/util.py b/Base/Python/slicer/util.py
+index d558bee945..b2e55692b6 100644
+--- a/Base/Python/slicer/util.py
++++ b/Base/Python/slicer/util.py
+@@ -189,10 +189,9 @@ def importModuleObjects(from_module_name, dest_module_name, type_info):
+         return
+ 
+     # Obtain a reference to the module identified by 'from_module_name'
+-    import imp
++    import importlib
+ 
+-    fp, pathname, description = imp.find_module(from_module_name)
+-    module = imp.load_module(from_module_name, fp, pathname, description)
++    module = importlib.import_module(from_module_name)
+ 
+     # Loop over content of the python module associated with the given python library
+     for item_name in dir(module):
+@@ -1401,8 +1400,7 @@ def reloadScriptedModule(moduleName):
+ 
+     The function performs the following:
+ 
+-    * Ensure ``sys.path`` includes the module path and use ``imp.load_module``
+-      to load the associated script.
++    * Ensure ``sys.path`` includes the module path and use ``importlib`` to load the associated script.
+     * For the current module widget representation:
+ 
+       * Hide all children widgets
+@@ -1413,7 +1411,8 @@ def reloadScriptedModule(moduleName):
+     * Call ``setup()`` function
+     * Update ``slicer.modules.<moduleName>Widget`` attribute
+     """
+-    import imp, sys, os
++    import importlib.util
++    import sys, os
+     import slicer
+ 
+     widgetName = moduleName + "Widget"
+@@ -1425,9 +1424,11 @@ def reloadScriptedModule(moduleName):
+     if p not in sys.path:
+         sys.path.insert(0, p)
+ 
+-    with open(filePath, encoding="utf8") as fp:
+-        reloaded_module = imp.load_module(
+-            moduleName, fp, filePath, (".py", "r", imp.PY_SOURCE))
++    # Use importlib to load the module from file path
++    spec = importlib.util.spec_from_file_location(moduleName, filePath)
++    reloaded_module = importlib.util.module_from_spec(spec)
++    sys.modules[moduleName] = reloaded_module
++    spec.loader.exec_module(reloaded_module)
+ 
+     # find and hide the existing widget
+     parent = eval("slicer.modules.%s.widgetRepresentation()" % moduleName.lower())
+diff --git a/Base/QTCore/qSlicerScriptedFileReader.cxx b/Base/QTCore/qSlicerScriptedFileReader.cxx
+index f726f76ea0..92485437fd 100644
+--- a/Base/QTCore/qSlicerScriptedFileReader.cxx
++++ b/Base/QTCore/qSlicerScriptedFileReader.cxx
+@@ -124,12 +124,13 @@ bool qSlicerScriptedFileReader::setPythonSource(const QString& filePath, const Q
+ 
+   d->PythonCppAPI.setObjectName(className);
+ 
+-  // Get a reference (or create if needed) the <moduleName> python module
+-  PyObject * module = PyImport_AddModule(moduleName.toUtf8());
++  // Get actual module from sys.modules
++  PyObject* sysModules = PyImport_GetModuleDict();
++  PyObject* module = PyDict_GetItemString(sysModules, moduleName.toUtf8());
+ 
+   // Get a reference to the python module class to instantiate
+   PythonQtObjectPtr classToInstantiate;
+-  if (PyObject_HasAttrString(module, className.toUtf8()))
++  if (module && PyObject_HasAttrString(module, className.toUtf8()))
+   {
+     classToInstantiate.setNewRef(PyObject_GetAttrString(module, className.toUtf8()));
+   }
+diff --git a/Base/QTCore/qSlicerScriptedFileWriter.cxx b/Base/QTCore/qSlicerScriptedFileWriter.cxx
+index 5f21776006..bfb02e4516 100644
+--- a/Base/QTCore/qSlicerScriptedFileWriter.cxx
++++ b/Base/QTCore/qSlicerScriptedFileWriter.cxx
+@@ -124,12 +124,13 @@ bool qSlicerScriptedFileWriter::setPythonSource(const QString& filePath, const Q
+ 
+   d->PythonCppAPI.setObjectName(className);
+ 
+-  // Get a reference (or create if needed) the <moduleName> python module
+-  PyObject * module = PyImport_AddModule(moduleName.toUtf8());
++  // Get actual module from sys.modules
++  PyObject* sysModules = PyImport_GetModuleDict();
++  PyObject* module = PyDict_GetItemString(sysModules, moduleName.toUtf8());
+ 
+   // Get a reference to the python module class to instantiate
+   PythonQtObjectPtr classToInstantiate;
+-  if (PyObject_HasAttrString(module, className.toUtf8()))
++  if (module && PyObject_HasAttrString(module, className.toUtf8()))
+   {
+     classToInstantiate.setNewRef(PyObject_GetAttrString(module, className.toUtf8()));
+   }
+diff --git a/Base/QTCore/qSlicerScriptedUtils.cxx b/Base/QTCore/qSlicerScriptedUtils.cxx
+index 396ae5768c..ddf8229449 100644
+--- a/Base/QTCore/qSlicerScriptedUtils.cxx
++++ b/Base/QTCore/qSlicerScriptedUtils.cxx
+@@ -40,21 +40,21 @@ bool qSlicerScriptedUtils::loadSourceAsModule(const QString& moduleName,
+                                        PyObject * local_dict)
+ {
+   PyObject* pyRes = nullptr;
+-  if (filePath.endsWith(".py"))
+-  {
+-    pyRes = PyRun_String(
+-          QString("import imp;imp.load_source(%2, %1);del imp;")
+-          .arg(qSlicerCorePythonManager::toPythonStringLiteral(filePath))
+-          .arg(qSlicerCorePythonManager::toPythonStringLiteral(moduleName)).toUtf8(),
+-          Py_file_input, global_dict, local_dict);
+-  }
+-  else if (filePath.endsWith(".pyc"))
++
++  if (filePath.endsWith(".py") || filePath.endsWith(".pyc"))
+   {
+-    pyRes = PyRun_String(
+-          QString("with open(%1, 'rb') as f:import imp;imp.load_module(%2, f, %1, ('.pyc', 'rb', 2));del imp")
+-          .arg(qSlicerCorePythonManager::toPythonStringLiteral(filePath))
+-          .arg(qSlicerCorePythonManager::toPythonStringLiteral(moduleName)).toUtf8(),
+-          Py_file_input, global_dict, local_dict);
++    QString pyRunStr = QString(
++        "import importlib.util;"
++        "import sys;"
++        "spec = importlib.util.spec_from_file_location(%2, %1);"
++        "module = importlib.util.module_from_spec(spec);"
++        "sys.modules[%2] = module;"
++        "spec.loader.exec_module(module)"
++      )
++      .arg(qSlicerCorePythonManager::toPythonStringLiteral(filePath))
++      .arg(qSlicerCorePythonManager::toPythonStringLiteral(moduleName));
++
++    pyRes = PyRun_String(pyRunStr.toUtf8(), Py_file_input, global_dict, local_dict);
+   }
+   if (!pyRes)
+   {
+diff --git a/Base/QTGUI/qSlicerScriptedFileDialog.cxx b/Base/QTGUI/qSlicerScriptedFileDialog.cxx
+index 1801466a85..a1b4b802d2 100644
+--- a/Base/QTGUI/qSlicerScriptedFileDialog.cxx
++++ b/Base/QTGUI/qSlicerScriptedFileDialog.cxx
+@@ -127,12 +127,13 @@ bool qSlicerScriptedFileDialog::setPythonSource(const QString& filePath, const Q
+   d->PythonCppAPI.setObjectName(className);
+   d->PythonClassName = className;
+ 
+-  // Get a reference (or create if needed) the <moduleName> python module
+-  PyObject * module = PyImport_AddModule(moduleName.toUtf8());
++  // Get actual module from sys.modules
++  PyObject* sysModules = PyImport_GetModuleDict();
++  PyObject* module = PyDict_GetItemString(sysModules, moduleName.toUtf8());
+ 
+   // Get a reference to the python module class to instantiate
+   PythonQtObjectPtr classToInstantiate;
+-  if (PyObject_HasAttrString(module, className.toUtf8()))
++  if (module && PyObject_HasAttrString(module, className.toUtf8()))
+   {
+     classToInstantiate.setNewRef(PyObject_GetAttrString(module, className.toUtf8()));
+   }
+diff --git a/Base/QTGUI/qSlicerScriptedLoadableModule.cxx b/Base/QTGUI/qSlicerScriptedLoadableModule.cxx
+index 33a8663b02..94b5050302 100644
+--- a/Base/QTGUI/qSlicerScriptedLoadableModule.cxx
++++ b/Base/QTGUI/qSlicerScriptedLoadableModule.cxx
+@@ -126,8 +126,9 @@ bool qSlicerScriptedLoadableModule::setPythonSource(const QString& filePath)
+   PyObject * main_module = PyImport_AddModule("__main__");
+   PyObject * global_dict = PyModule_GetDict(main_module);
+ 
+-  // Get a reference (or create if needed) the <moduleName> python module
+-  PyObject * module = PyImport_AddModule(moduleName.toUtf8());
++  // Get actual module from sys.modules
++  PyObject* sysModules = PyImport_GetModuleDict();
++  PyObject* module = PyDict_GetItemString(sysModules, moduleName.toUtf8());
+ 
+   // Get a reference to the python module class to instantiate
+   PythonQtObjectPtr classToInstantiate;
+@@ -143,6 +144,10 @@ bool qSlicerScriptedLoadableModule::setPythonSource(const QString& filePath)
+     {
+       return false;
+     }
++
++    // After loading, re-fetch actual module from sys.modules
++    module = PyDict_GetItemString(PyImport_GetModuleDict(), moduleName.toUtf8());
++
+     if (PyObject_HasAttrString(module, className.toUtf8()))
+     {
+       classToInstantiate.setNewRef(PyObject_GetAttrString(module, className.toUtf8()));
+diff --git a/Base/QTGUI/qSlicerScriptedLoadableModuleWidget.cxx b/Base/QTGUI/qSlicerScriptedLoadableModuleWidget.cxx
+index 388885a684..ed1ee1c258 100644
+--- a/Base/QTGUI/qSlicerScriptedLoadableModuleWidget.cxx
++++ b/Base/QTGUI/qSlicerScriptedLoadableModuleWidget.cxx
+@@ -123,12 +123,13 @@ bool qSlicerScriptedLoadableModuleWidget::setPythonSource(const QString& filePat
+   PyObject * main_module = PyImport_AddModule("__main__");
+   PyObject * global_dict = PyModule_GetDict(main_module);
+ 
+-  // Get a reference (or create if needed) the <moduleName> python module
+-  PyObject * module = PyImport_AddModule(moduleName.toUtf8());
++  // Get actual module from sys.modules
++  PyObject* sysModules = PyImport_GetModuleDict();
++  PyObject* module = PyDict_GetItemString(sysModules, moduleName.toUtf8());
+ 
+   // Get a reference to the python module class to instantiate
+   PythonQtObjectPtr classToInstantiate;
+-  if (PyObject_HasAttrString(module, className.toUtf8()))
++  if (module && PyObject_HasAttrString(module, className.toUtf8()))
+   {
+     classToInstantiate.setNewRef(PyObject_GetAttrString(module, className.toUtf8()));
+   }
+@@ -140,6 +141,10 @@ bool qSlicerScriptedLoadableModuleWidget::setPythonSource(const QString& filePat
+     {
+       return false;
+     }
++
++    // After loading, re-fetch actual module from sys.modules
++    module = PyDict_GetItemString(PyImport_GetModuleDict(), moduleName.toUtf8());
++
+     if (PyObject_HasAttrString(module, className.toUtf8()))
+     {
+       classToInstantiate.setNewRef(PyObject_GetAttrString(module, className.toUtf8()));
+diff --git a/Libs/MRML/DisplayableManager/vtkMRMLScriptedDisplayableManager.cxx b/Libs/MRML/DisplayableManager/vtkMRMLScriptedDisplayableManager.cxx
+index de2c6fc6a0..a61c959513 100644
+--- a/Libs/MRML/DisplayableManager/vtkMRMLScriptedDisplayableManager.cxx
++++ b/Libs/MRML/DisplayableManager/vtkMRMLScriptedDisplayableManager.cxx
+@@ -294,22 +294,18 @@ void vtkMRMLScriptedDisplayableManager::SetPythonSource(const std::string& fileP
+   PyObject * classToInstantiate = PyDict_GetItemString(global_dict, className.c_str());
+   if (!classToInstantiate)
+   {
+-    PyObject * pyRes = nullptr;
+-    if (filePath.find(".py") != std::string::npos)
+-    {
+-      std::string pyRunStr = std::string("exec(open('") + filePath + std::string("').read())");
+-      pyRes = PyRun_String(pyRunStr.c_str(),
+-                           Py_file_input, global_dict, global_dict);
+-    }
+-    else if (filePath.find(".pyc") != std::string::npos)
+-    {
+-      std::string pyRunStr = std::string("with open('") + filePath +
+-          std::string("', 'rb') as f:import imp;imp.load_module('__main__', f, '") + filePath +
+-          std::string("', ('.pyc', 'rb', 2))");
+-      pyRes = PyRun_String(
+-            pyRunStr.c_str(),
+-            Py_file_input, global_dict, global_dict);
+-    }
++    std::ostringstream pyRunStream;
++
++    // Use importlib to load the module dynamically
++    pyRunStream
++      << "import importlib.util;"
++      << "import sys;"
++      << "spec = importlib.util.spec_from_file_location('__main__', r'" << filePath << "');"
++      << "module = importlib.util.module_from_spec(spec);"
++      << "sys.modules['__main__'] = module;"
++      << "spec.loader.exec_module(module)";
++
++    PyObject* pyRes = PyRun_String(pyRunStream.str().c_str(), Py_file_input, global_dict, global_dict);
+     if (!pyRes)
+     {
+       vtkErrorMacro(<< "setPythonSource - Failed to execute file" << filePath << "!");
+diff --git a/Modules/Loadable/Segmentations/EditorEffects/qSlicerSegmentEditorScriptedEffect.cxx b/Modules/Loadable/Segmentations/EditorEffects/qSlicerSegmentEditorScriptedEffect.cxx
+index 9c97cd19f3..36d7952406 100644
+--- a/Modules/Loadable/Segmentations/EditorEffects/qSlicerSegmentEditorScriptedEffect.cxx
++++ b/Modules/Loadable/Segmentations/EditorEffects/qSlicerSegmentEditorScriptedEffect.cxx
+@@ -156,12 +156,13 @@ bool qSlicerSegmentEditorScriptedEffect::setPythonSource(const QString newPython
+   PyObject * main_module = PyImport_AddModule("__main__");
+   PyObject * global_dict = PyModule_GetDict(main_module);
+ 
+-  // Get a reference (or create if needed) the <moduleName> python module
+-  PyObject * module = PyImport_AddModule(moduleName.toUtf8());
++  // Get actual module from sys.modules
++  PyObject* sysModules = PyImport_GetModuleDict();
++  PyObject* module = PyDict_GetItemString(sysModules, moduleName.toUtf8());
+ 
+   // Get a reference to the python module class to instantiate
+   PythonQtObjectPtr classToInstantiate;
+-  if (PyObject_HasAttrString(module, className.toUtf8()))
++  if (module && PyObject_HasAttrString(module, className.toUtf8()))
+   {
+     classToInstantiate.setNewRef(PyObject_GetAttrString(module, className.toUtf8()));
+   }
+@@ -173,6 +174,10 @@ bool qSlicerSegmentEditorScriptedEffect::setPythonSource(const QString newPython
+     {
+       return false;
+     }
++
++    // After loading, re-fetch actual module from sys.modules
++    module = PyDict_GetItemString(PyImport_GetModuleDict(), moduleName.toUtf8());
++
+     if (PyObject_HasAttrString(module, className.toUtf8()))
+     {
+       classToInstantiate.setNewRef(PyObject_GetAttrString(module, className.toUtf8()));
+diff --git a/Modules/Loadable/Segmentations/EditorEffects/qSlicerSegmentEditorScriptedLabelEffect.cxx b/Modules/Loadable/Segmentations/EditorEffects/qSlicerSegmentEditorScriptedLabelEffect.cxx
+index 7507955687..08c370b420 100644
+--- a/Modules/Loadable/Segmentations/EditorEffects/qSlicerSegmentEditorScriptedLabelEffect.cxx
++++ b/Modules/Loadable/Segmentations/EditorEffects/qSlicerSegmentEditorScriptedLabelEffect.cxx
+@@ -152,12 +152,13 @@ bool qSlicerSegmentEditorScriptedLabelEffect::setPythonSource(const QString file
+   PyObject * main_module = PyImport_AddModule("__main__");
+   PyObject * global_dict = PyModule_GetDict(main_module);
+ 
+-  // Get a reference (or create if needed) the <moduleName> python module
+-  PyObject * module = PyImport_AddModule(moduleName.toUtf8());
++  // Get actual module from sys.modules
++  PyObject* sysModules = PyImport_GetModuleDict();
++  PyObject* module = PyDict_GetItemString(sysModules, moduleName.toUtf8());
+ 
+   // Get a reference to the python module class to instantiate
+   PythonQtObjectPtr classToInstantiate;
+-  if (PyObject_HasAttrString(module, className.toUtf8()))
++  if (module && PyObject_HasAttrString(module, className.toUtf8()))
+   {
+     classToInstantiate.setNewRef(PyObject_GetAttrString(module, className.toUtf8()));
+   }
+@@ -169,6 +170,10 @@ bool qSlicerSegmentEditorScriptedLabelEffect::setPythonSource(const QString file
+     {
+       return false;
+     }
++
++    // After loading, re-fetch actual module from sys.modules
++    module = PyDict_GetItemString(PyImport_GetModuleDict(), moduleName.toUtf8());
++
+     if (PyObject_HasAttrString(module, className.toUtf8()))
+     {
+       classToInstantiate.setNewRef(PyObject_GetAttrString(module, className.toUtf8()));
+diff --git a/Modules/Loadable/Segmentations/EditorEffects/qSlicerSegmentEditorScriptedPaintEffect.cxx b/Modules/Loadable/Segmentations/EditorEffects/qSlicerSegmentEditorScriptedPaintEffect.cxx
+index 25f6f32520..cd2d99a721 100644
+--- a/Modules/Loadable/Segmentations/EditorEffects/qSlicerSegmentEditorScriptedPaintEffect.cxx
++++ b/Modules/Loadable/Segmentations/EditorEffects/qSlicerSegmentEditorScriptedPaintEffect.cxx
+@@ -144,12 +144,13 @@ bool qSlicerSegmentEditorScriptedPaintEffect::setPythonSource(const QString file
+   PyObject * main_module = PyImport_AddModule("__main__");
+   PyObject * global_dict = PyModule_GetDict(main_module);
+ 
+-  // Get a reference (or create if needed) the <moduleName> python module
+-  PyObject * module = PyImport_AddModule(moduleName.toUtf8());
++  // Get actual module from sys.modules
++  PyObject* sysModules = PyImport_GetModuleDict();
++  PyObject* module = PyDict_GetItemString(sysModules, moduleName.toUtf8());
+ 
+   // Get a reference to the python module class to instantiate
+   PythonQtObjectPtr classToInstantiate;
+-  if (PyObject_HasAttrString(module, className.toUtf8()))
++  if (module && PyObject_HasAttrString(module, className.toUtf8()))
+   {
+     classToInstantiate.setNewRef(PyObject_GetAttrString(module, className.toUtf8()));
+   }
+@@ -161,6 +162,10 @@ bool qSlicerSegmentEditorScriptedPaintEffect::setPythonSource(const QString file
+     {
+       return false;
+     }
++
++    // After loading, re-fetch actual module from sys.modules
++    module = PyDict_GetItemString(PyImport_GetModuleDict(), moduleName.toUtf8());
++
+     if (PyObject_HasAttrString(module, className.toUtf8()))
+     {
+       classToInstantiate.setNewRef(PyObject_GetAttrString(module, className.toUtf8()));
+diff --git a/Modules/Loadable/SubjectHierarchy/Widgets/qSlicerSubjectHierarchyScriptedPlugin.cxx b/Modules/Loadable/SubjectHierarchy/Widgets/qSlicerSubjectHierarchyScriptedPlugin.cxx
+index 1a1963ffcf..f4ec7533a7 100644
+--- a/Modules/Loadable/SubjectHierarchy/Widgets/qSlicerSubjectHierarchyScriptedPlugin.cxx
++++ b/Modules/Loadable/SubjectHierarchy/Widgets/qSlicerSubjectHierarchyScriptedPlugin.cxx
+@@ -156,12 +156,13 @@ bool qSlicerSubjectHierarchyScriptedPlugin::setPythonSource(const QString filePa
+   PyObject * main_module = PyImport_AddModule("__main__");
+   PyObject * global_dict = PyModule_GetDict(main_module);
+ 
+-  // Get a reference (or create if needed) the <moduleName> python module
+-  PyObject * module = PyImport_AddModule(moduleName.toUtf8());
++  // Get actual module from sys.modules
++  PyObject* sysModules = PyImport_GetModuleDict();
++  PyObject* module = PyDict_GetItemString(sysModules, moduleName.toUtf8());
+ 
+   // Get a reference to the python module class to instantiate
+   PythonQtObjectPtr classToInstantiate;
+-  if (PyObject_HasAttrString(module, className.toUtf8()))
++  if (module && PyObject_HasAttrString(module, className.toUtf8()))
+   {
+     classToInstantiate.setNewRef(PyObject_GetAttrString(module, className.toUtf8()));
+   }
+@@ -173,6 +174,10 @@ bool qSlicerSubjectHierarchyScriptedPlugin::setPythonSource(const QString filePa
+     {
+       return false;
+     }
++
++    // After loading, re-fetch actual module from sys.modules
++    module = PyDict_GetItemString(PyImport_GetModuleDict(), moduleName.toUtf8());
++
+     if (PyObject_HasAttrString(module, className.toUtf8()))
+     {
+       classToInstantiate.setNewRef(PyObject_GetAttrString(module, className.toUtf8()));
+diff --git a/Modules/Scripted/WebServer/WebServer.py b/Modules/Scripted/WebServer/WebServer.py
+index 238fb8476a..be0d40fe83 100644
+--- a/Modules/Scripted/WebServer/WebServer.py
++++ b/Modules/Scripted/WebServer/WebServer.py
+@@ -230,16 +230,25 @@ class WebServerWidget(ScriptedLoadableModuleWidget):
+         if hasattr(slicer.modules, "dicom"):
+             submoduleNames.append("DICOMRequestHandler")
+ 
+-        import imp
++        import importlib.util
+ 
+-        f, filename, description = imp.find_module(packageName)
+-        package = imp.load_module(packageName, f, filename, description)
++        # Locate and reload package
++        spec = importlib.util.find_spec(packageName)
++        if spec is None:
++            raise ImportError(f"Cannot find package {packageName}")
++        package = importlib.util.module_from_spec(spec)
++        sys.modules[packageName] = package
++        spec.loader.exec_module(package)
++
++        # Reload each submodule from the package
+         for submoduleName in submoduleNames:
+-            f, filename, description = imp.find_module(submoduleName, package.__path__)
+-            try:
+-                imp.load_module(packageName + "." + submoduleName, f, filename, description)
+-            finally:
+-                f.close()
++            full_name = f"{packageName}.{submoduleName}"
++            sub_spec = importlib.util.find_spec(full_name)
++            if sub_spec is None:
++                raise ImportError(f"Cannot find submodule {full_name}")
++            submodule = importlib.util.module_from_spec(sub_spec)
++            sys.modules[full_name] = submodule
++            sub_spec.loader.exec_module(submodule)
+ 
+         ScriptedLoadableModuleWidget.onReload(self)
+ 
+-- 
+2.54.0
+
