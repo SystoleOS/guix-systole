@@ -10,7 +10,7 @@
    (name nonguix)
    (url "https://gitlab.com/nonguix/nonguix")
    (branch "master")
-   (commit "a8326a5b325400f25c0520c8ef9127fff6d4796d"))
+   (commit "accdba77be815bbe00868145dd66d68056eecf7a"))
   (channel
    (name systole-artwork)
    (url "https://github.com/systoleos/guix-systole-artwork")
