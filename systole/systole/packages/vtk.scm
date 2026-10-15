@@ -333,10 +333,10 @@ future.")
        ;; Commit from VTK version: slicer-v9.6.2-2026-05-15-f49a1dbaf
        (uri (git-reference
              (url "https://github.com/Slicer/VTK")
-             (commit "6181bb1223bbc499a340a1644f5356e7e152c318")))
+             (commit "c9cd17a377cbc7e488329e882a35b70c7f37fe76")))
        (file-name (git-file-name "vtk-slicer" version))
        (sha256
-        (base32 "06cvyq6z8gs83d8k9vbvwayyrx49vgyd2r0vvr0qwj1g34579m5w"))))))
+        (base32 "0scyzwcr0fr1a6s46hv783bbzf869zvxdja5zj9ms3kgg4mcx9n3"))))))
 
 ;; Python-enabled VTK 9.6 for use by the Slicer 5.12 stack.
 (define-public vtk-slicer-9.6

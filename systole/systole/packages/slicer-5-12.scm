@@ -171,11 +171,11 @@
    ;; install lines; install the generated *Export.h explicitly instead.
    "0088-COMP-Install-the-generated-export-headers-in-develop.patch"))
 
-;; Slicer stable 5.12.2 (tag v5.12.2).  The 88 guix-systole patches are the
+;; Slicer stable 5.12.4 (tag v5.12.4).  The 88 guix-systole patches are the
 ;; 5.10 patch series rebased onto v5.12.2 (branch guix-systole-slicer-5.12 in
 ;; the Slicer-Systole repository); see patches/slicer-5.12/.
-(define %slicer-5.12-commit "f7879b5651239865f336e5731e7f9e9a65d63871")
-(define %slicer-5.12-hash (base32 "0imnj4h187f213xzbihrkxl03m9cikvrfs421273m90pcllvg9cy"))
+(define %slicer-5.12-commit "4e21c19d8360242d88d6ca2490bf52400441b8e1")
+(define %slicer-5.12-hash (base32 "0696mlgfb8lp1igs22mi5aaaq9gb0z3am04ykh51i7ggrd6xa87c"))
 
 ;;;
 ;;; Slicer 5.12
@@ -184,7 +184,7 @@
 (define %slicer-5.12
   (package
     (name "slicer-5.12")
-    (version "5.12.2")
+    (version "5.12.4")
     (source
      (origin
        (method git-fetch)
