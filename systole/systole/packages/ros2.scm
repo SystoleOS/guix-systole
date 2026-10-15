@@ -40,7 +40,7 @@
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix build-system cmake)
   #:use-module (guix build-system pyproject)
-  #:use-module (guix build-system python)
+  #:use-module ((guix build-system python) #:select (python-build-system))
   #:use-module (guix build-system trivial)
   #:use-module (guix gexp)
   #:use-module (guix git-download)
