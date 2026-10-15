@@ -2,7 +2,7 @@
        (name 'guix)
        (url "https://codeberg.org/guix/guix.git")
        (branch "master")
-       (commit "21898c0a1aae913fe732ad81f01328e34acb5721")
+       (commit "6d10a594ac75999036747796036cda26e857ea02")
        (introduction
         (make-channel-introduction
          "9edb3f66fd807b096b48283debdcddccfea34bad"
@@ -12,7 +12,7 @@
        (name 'nonguix)
        (url "https://gitlab.com/nonguix/nonguix")
        (branch "master")
-       (commit "a8326a5b325400f25c0520c8ef9127fff6d4796d")
+       (commit "accdba77be815bbe00868145dd66d68056eecf7a")
        (introduction
         (make-channel-introduction
          "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
@@ -22,7 +22,7 @@
        (name 'guix-xlibre)
        (url "https://codeberg.org/rafaelpalomar/guix-xlibre.git")
        (branch "master")
-       (commit "876828a590c28881c649450588eb2e3eb2bc1f99"))
+       (commit "3ce2f91f12b21dc5ac15ad4ad11eb5807856c266"))
       (channel
        (name 'tailscale)
        ;; Converged back to upstream 2026-07-24: 1.96.4 builds with the
@@ -35,7 +35,7 @@
        (url "https://github.com/systoleos/guix-systole")
        (branch "main")
        ;; Must postdate the introduction commit for authentication.
-       (commit "c2c7f5facf684876c2d9143d3e3a57a9773c96be")
+       (commit "5e5b6d381afb4cb1c9866a5df3cdb10e3c578574")
        (introduction
         (make-channel-introduction
          "0898d41446ecbd6eddcbf5d78beae63f7e8a4069"
@@ -53,7 +53,7 @@
        ;; Not 9116b6c: that commit references python-pygments through a
        ;; module path that has since moved in upstream Guix (see
        ;; ivs-infrastructure channels-lock notes).
-       (commit "e93f670a1de32f5e7568ef6e4ad09b82add068bd"))
+       (commit "082bed56557c9e3e07245762c25e3eaa0d7f0066"))
       (channel
        (name 'sops-guix)
        (url "https://github.com/fishinthecalculator/sops-guix.git")
