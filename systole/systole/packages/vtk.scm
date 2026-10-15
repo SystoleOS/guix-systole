@@ -125,8 +125,8 @@
               "-DVTK_ENABLE_KITS:BOOL=ON")))
     (inputs (modify-inputs (package-inputs imgproc:vtk)
             (replace "hdf5" hdf5-1.10)
-            (replace "netcdf" netcdf-slicer)
-              (append python-pyqt qtbase-5 tbb openmpi)))))
+            (delete "netcdf")
+              (append netcdf-slicer python-pyqt qtbase-5 tbb openmpi)))))
 
 ;; Python-enabled VTK for use by the Slicer stack.
 ;; Adds VTK Python wrappers (vtkmodules/*.so) and the Guix python package.

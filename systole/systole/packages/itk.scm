@@ -192,7 +192,8 @@ code search and API exploration.")))
        (sha256
         (base32 "1dxkpd6ws691a4km48w5waii1148wnmkjrd84xv0pkdbbbay46k7"))))
     (inputs (modify-inputs (package-inputs itk-slicer)
-              (replace "vtk-slicer" vtk-slicer-9.5)
+              (delete "vtk-slicer")
+              (prepend vtk-slicer-9.5)
               (prepend python-3.12)))
     (home-page "https://github.com/Slicer/ITK/")))
 
@@ -377,6 +378,7 @@ library.")
        (sha256
         (base32 "0axahcv40wfw3bc8xn65zgmm412wmd2kl0vqzchhbz503dimyzcm"))))
     (inputs (modify-inputs (package-inputs itk-slicer)
-              (replace "vtk-slicer" vtk-slicer-9.6)
+              (delete "vtk-slicer")
+              (prepend vtk-slicer-9.6)
               (prepend python-3.12)))
     (home-page "https://github.com/Slicer/ITK/")))

@@ -1,3 +1,11 @@
+Install vtkAddon to the GNUInstallDirs layout instead of the hardcoded
+include/vtkAddon, lib and bin paths, and give the project a version so the
+include and doc directories are versioned (include/vtkAddon-0.1).  The
+Slicer packages locate vtkAddon headers, libraries and CMake files through
+these directories.
+
+Upstream status: Guix-specific; not submitted.
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index a900776..b70fc9e 100644
 --- a/CMakeLists.txt

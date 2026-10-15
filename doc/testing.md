@@ -73,7 +73,10 @@ from the `GUIX` time-machine override).
 
 `run-tests.sh` lints a fixed package list (the `LINT_PACKAGES` array in
 the script — single source of truth, shared with CI) using
-`guix lint -L systole --exclude=archival`. Since `guix lint` exits 0
+`guix lint -L systole --exclude=archival,refresh`.  The `refresh` checker
+reports new upstream releases, which accumulate on their own and need
+network access, so it is no pass/fail criterion; review them with
+`guix refresh -L systole`.  Since `guix lint` exits 0
 even when it emits warnings, the runner gates on output instead: any
 line not matching `tests/lint-allowlist.regex` (the allowlist of
 documented technical debt) fails the check. To accept a new warning,

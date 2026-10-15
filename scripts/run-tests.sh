@@ -106,7 +106,7 @@ lint_package() {
     local pkg="$1"
     local out
     # shellcheck disable=SC2086
-    out=$($GUIX lint -L "$REPO_ROOT/systole" --exclude=archival "$pkg" 2>&1 \
+    out=$($GUIX lint -L "$REPO_ROOT/systole" --exclude=archival,refresh "$pkg" 2>&1 \
               | grep -v '^;;;' || true)
     if [ -s "$LINT_ALLOWLIST" ]; then
         out=$(printf '%s\n' "$out" | grep -Ev -f "$LINT_ALLOWLIST" || true)

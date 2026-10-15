@@ -144,10 +144,13 @@ developers.")
                             "/bin/python3")
              (string-append "-DPython3_INCLUDE_DIR="
                             #$python
-                            "/include/python" #$(version-major+minor (package-version python)))
+                            "/include/python"
+                            #$(version-major+minor (package-version python)))
              (string-append "-DPython3_LIBRARY="
                             #$python
-                            "/lib/libpython" #$(version-major+minor (package-version python)) ".so")
+                            "/lib/libpython"
+                            #$(version-major+minor (package-version python))
+                            ".so")
              ;; SlicerConfig.cmake forces Slicer_USE_PYTHONQT=ON; WRAP_PYTHONQT in
              ;; Widgets/CMakeLists.txt then requires PythonQt to be findable.
              (string-append "-DPYTHONQT_INSTALL_DIR="
@@ -302,10 +305,13 @@ protocol.")
                             "/bin/python3")
              (string-append "-DPython3_INCLUDE_DIR="
                             #$python
-                            "/include/python" #$(version-major+minor (package-version python)))
+                            "/include/python"
+                            #$(version-major+minor (package-version python)))
              (string-append "-DPython3_LIBRARY="
                             #$python
-                            "/lib/libpython" #$(version-major+minor (package-version python)) ".so")
+                            "/lib/libpython"
+                            #$(version-major+minor (package-version python))
+                            ".so")
              (string-append "-DSlicer_DIR:PATH="
                             #$(this-package-input "slicer-5.8")
                             "/lib/Slicer-5.8")

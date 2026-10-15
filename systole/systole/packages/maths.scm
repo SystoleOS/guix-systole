@@ -26,4 +26,6 @@
     (inherit netcdf)
     (name "netcdf-slicer")
     (inputs (modify-inputs (package-inputs netcdf)
-            (replace "hdf5" hdf5-1.10)))))
+            (replace "hdf5" hdf5-1.10)))
+    ;; Inherited URL is a permanent redirect to this one.
+    (home-page "https://www.unidata.ucar.edu/software/netcdf")))

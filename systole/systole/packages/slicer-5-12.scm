@@ -441,7 +441,8 @@ visualization and medical image computing.")
               (lambda _
                 (setenv "CMAKE_PREFIX_PATH"
                         (string-append
-                         #$(this-package-input "pythonqt-commontk-for-slicer-5.12") "/lib/cmake:"
+                         #$(this-package-input "pythonqt-commontk-for-slicer-5.12")
+                         "/lib/cmake:"
                          #$(this-package-input "vtkaddon-9.6") "/lib/cmake:"
                          (or (getenv "CMAKE_PREFIX_PATH") "")))))
             (add-after 'install-slicer-symlink 'patch-python-extension-runpath
@@ -470,7 +471,8 @@ visualization and medical image computing.")
     (inputs
      (modify-inputs (package-inputs %slicer-5.12)
        (prepend python-3.12 pythonqt-commontk-for-slicer-5.12)))
-    (propagated-inputs (list vtk-slicer-9.6 ctk-for-slicer-5.12 vtkaddon-9.6 hdf5-1.10 libtheora
+    (propagated-inputs (list vtk-slicer-9.6 ctk-for-slicer-5.12 vtkaddon-9.6
+                             hdf5-1.10 libtheora
                              netcdf-slicer proj jsoncpp libharu gl2ps eigen
                              openmpi double-conversion lz4 libxml2
                              qtbase-5 qttools-5 qtxmlpatterns-5 qtsvg-5

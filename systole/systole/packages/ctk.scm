@@ -202,7 +202,7 @@ code search and API exploration.")))
              "-DCTKAppLauncher_QT_VERSION=5"
              "-DCTKAppLauncher_INSTALL_LauncherLibrary=ON")))
    (inputs (list qtbase-5))
-   (home-page "http://www.commontk.org/")
+   (home-page "https://github.com/commontk/AppLauncher")
    (synopsis "Launcher that sets up the environment of an executable")
    (description
     "CTKAppLauncher is a simple and small program that sets up the

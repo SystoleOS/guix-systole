@@ -508,10 +508,13 @@ visualization and medical image computing.  It provides capabilities for:
                            #$python "/bin/python3")
             (string-append "-DPython3_INCLUDE_DIR="
                            #$python
-                           "/include/python" #$(version-major+minor (package-version python)))
+                           "/include/python"
+                           #$(version-major+minor (package-version python)))
             (string-append "-DPython3_LIBRARY="
                            #$python
-                           "/lib/libpython" #$(version-major+minor (package-version python)) ".so")
+                           "/lib/libpython"
+                           #$(version-major+minor (package-version python))
+                           ".so")
             "-DVTK_WRAP_PYTHON:BOOL=ON"
             "-DSlicer_USE_PYTHONQT:BOOL=ON"
             "-DSlicer_USE_SYSTEM_python:BOOL=ON"
