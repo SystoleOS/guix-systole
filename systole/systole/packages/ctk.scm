@@ -317,14 +317,13 @@ as 3D Slicer.")
            freetype
            tbb
            pythonqt-pkg
-           qtmultimedia-5))
-    ;; bin/Python/ contains ctk/__init__.py and qt/__init__.py used by Slicer's
-    ;; Python environment.  Collected into SLICER_PYTHONPATH (merged into
-    ;; PYTHONPATH by Slicer at startup, patch 0046).
-    (native-search-paths
-     (list (search-path-specification
-            (variable "SLICER_PYTHONPATH")
-            (files '("bin/Python")))))))
+           ;; bin/Python/ (ctk/ and qt/ Python packages) reaches Slicer
+           ;; through the Slicer packages' SLICER_PYTHONPATH search path,
+           ;; which lists bin/Python.  Do not declare that search path
+           ;; here: a profile evaluates each spec for a variable separately
+           ;; and the last one wins, so a narrower CTK spec would hide
+           ;; lib/Slicer-<version> and site-packages from Slicer.
+           qtmultimedia-5))))
 
 ;;;
 ;;; Public instances
