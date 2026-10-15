@@ -1459,7 +1459,8 @@ the @file{Modules/Scripted/LineProfile} subtree."))
 ;; Slicer 5.12 embeds Python 3.12.  Pure-Python packages (requests, pydicom, pip)
 ;; are imported from lib/python3.11/site-packages via SLICER_PYTHONPATH.  numpy has
 ;; compiled C extensions, so it is built against Python 3.12 explicitly via
-;; python-numpy-3.12 (see systole/packages/python-xyz.scm).
+;; python-numpy-3.12 (see systole/packages/python-xyz.scm).  SimpleITK is the
+;; stock PyPI wheel, as upstream 5.12 bundles it (python-simpleitk-bin).
 (define-public slicer-all-5.12
   (package
     (name "slicer-all-5.12")
@@ -1470,6 +1471,7 @@ the @file{Modules/Scripted/LineProfile} subtree."))
     (propagated-inputs
      (append (list slicer-5.12
                    python-numpy-3.12
+                   python-simpleitk-bin
                    python-requests python-pydicom python-pip)
              %slicer-5.12-loadable-modules
              %slicer-5.12-scripted-modules))
