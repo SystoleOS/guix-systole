@@ -6,6 +6,29 @@
 (channel-news
  (version 0)
 
+ (entry (commit "d8ba47c2fbfc060342332bacec5c3fe0ce6d683e")
+        (title (en "Slicer 5.12.4, now with SimpleITK"))
+        (body
+         (en "@code{slicer-5.12} and its modules move to upstream's 5.12.4
+bug-fix release (markups, segment editor, layout and rendering fixes), with
+@code{vtk-slicer-9.6} following Slicer's VTK fork to its matching commit.
+The whole 5.12 stack rebuilds as a consequence.
+
+This update also fixes @code{slicer-all-5.12} profiles in which Slicer could
+not import its own Python modules or VTK and crashed at startup: the CTK
+packages no longer declare a @env{SLICER_PYTHONPATH} search path that
+overrode Slicer's.
+
+@code{slicer-all-5.12} now includes SimpleITK through the new
+@code{python-simpleitk-bin} package.  Since 5.12, upstream Slicer no longer
+builds its own SimpleITK fork: it installs the stock SimpleITK wheel from
+PyPI, with ITK linked statically inside it, and @code{sitkUtils} exchanges
+images with Slicer through numpy.  @code{python-simpleitk-bin} installs that
+same wheel (2.5.5, with the hashes Slicer pins) rather than building it from
+source, so Slicer's embedded Python sees exactly what upstream ships; it is
+available on x86_64 and aarch64 only.  The Slicer 5.8 and 5.10 stacks are
+unchanged and still ship without SimpleITK.")))
+
  (entry (commit "95b6be5bd1f0f44d6860add5fdb105667f454713")
         (title (en "Slicer 5.12.2 stack and slicer-next preview (scaffold)"))
         (body
