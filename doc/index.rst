@@ -11,6 +11,7 @@ A GNU Guix channel providing packages for medical image computing:
    channel-management
    channel-authentication
    remote-deployment
+   data-provenance
 
 .. toctree::
    :maxdepth: 2
