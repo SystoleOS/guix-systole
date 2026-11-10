@@ -1506,24 +1506,45 @@ dicom, extensionwizard, dicomlib, lineprofile).")
 ;;; Slicer preview (slicer-next)
 ;;;
 
-;; slicer-next tracks the Slicer main branch (5.13.0 development).  Upstream
-;; main currently uses the SAME dependency pins as v5.12.2 (VTK 9.6.2, ITK
-;; 5.4.6, CTK 5056664a, PythonQt 74dcd675, vtkAddon 2ed3e222, teem, libarchive,
-;; Python 3.12, Qt5), so slicer-next shares the whole 5.12 dependency stack and
-;; differs only in the Slicer source pin.
+;; slicer-next tracks the Slicer main branch (5.13.0 development) and shares
+;; the whole 5.12 dependency stack (VTK 9.6.2, ITK 5.4.6, CTK 5056664a,
+;; vtkAddon 2ed3e222, Python 3.12, Qt5), differing only in the Slicer source
+;; pin.  Upstream main has meanwhile moved its SuperBuild to ITK 5.4.7, a
+;; newer slicer-v9.6.2 VTK commit and newer CTK/vtkAddon; slicer-next keeps
+;; the 5.12 pins until a build shows main actually needs the newer ones.
 ;;
-;; The 87 base patches are shared with slicer-5.12, except 0007 (Scope CPack
-;; blocks), which needed a rebase against main (upstream main reworked the
-;; macOS qt_root_dir detection in CMake/SlicerCPack.cmake); the rebased
-;; variant lives at patches/slicer-5.12/next/ and is generated from the
-;; guix-systole-slicer-next branch in the Slicer-Systole repository.
+;; The base patches are the slicer-5.12 series with these exceptions
+;; (see %slicer-next-patch-names):
+;;   - dropped, upstreamed on main: 0003 (qRestAPI imported target, upstream
+;;     124d70f40), 0049 (numpy/scipy preload block removed upstream), 0067
+;;     (vtkWin32OutputWindow.h now guarded upstream);
+;;   - rebased, under patches/slicer-5.12/next/: 0007 (Scope CPack blocks;
+;;     main reworked the macOS qt_root_dir detection) and 0047 (CTK plugin
+;;     path; main added startup-timer code to preInitializeApplication).
 ;;
 ;; slicer-next is the base application package ONLY: no per-module
 ;; (slicer-<mod>-next) packages and no slicer-all-next meta-package are
 ;; provided.  Preview users build standalone modules on demand against
 ;; slicer-next using the factories in (systole packages slicer-factory).
-(define %slicer-next-commit "394cc5296300bf205c10d00937b2ee2b0126a226")
-(define %slicer-next-hash (base32 "0sysvn25857lrhp6hzg7wmsv3rc8wvrvsvvxxbyyh0q8bvlfmq2r"))
+(define %slicer-next-commit "b5d5d9e8350102329e87914bc68db9aee1d24ab8")
+(define %slicer-next-hash (base32 "0icinrys4cjn43xpxrpnvif32w1a1i837wcngyigkvnfbhvpynmi"))
+
+(define %slicer-next-dropped-patches
+  '("0003-COMP-Adapt-to-new-qRestAPI-cmake.patch"
+    "0049-COMP-Guard-Windows-11-numpy-scipy-preload-workaround.patch"
+    "0067-COMP-Guard-vtkWin32OutputWindow.h-include-behind-WIN.patch"))
+
+(define %slicer-next-rebased-patches
+  '("0007-COMP-Scope-CPack-blocks.patch"
+    "0047-ENH-Register-CTK-plugin-path-and-disable-QtWebEngine.patch"))
+
+(define %slicer-next-patch-names
+  (filter-map (lambda (p)
+                (cond ((member p %slicer-next-dropped-patches) #f)
+                      ((member p %slicer-next-rebased-patches)
+                       (string-append "next/" p))
+                      (else p)))
+              %slicer-5.12-patch-names))
 
 (define-public slicer-next
   (package
@@ -1538,12 +1559,8 @@ dicom, extensionwizard, dicomlib, lineprofile).")
              (commit %slicer-next-commit)))
        (file-name (git-file-name "slicer-next" (git-version "5.13.0" "0" %slicer-next-commit)))
        (sha256 %slicer-next-hash)
-       (patches (map (lambda (p)
-                       (slicer-patch "5.12"
-                                     (if (string=? p "0007-COMP-Scope-CPack-blocks.patch")
-                                         "next/0007-COMP-Scope-CPack-blocks.patch"
-                                         p)))
-                     %slicer-5.12-patch-names))))
+       (patches (map (lambda (p) (slicer-patch "5.12" p))
+                     %slicer-next-patch-names))))
     ;; A main-branch build installs into lib/Slicer-5.13 (Slicer_VERSION is
     ;; 5.13 on main), so every inherited phase and search path that hard-codes
     ;; the lib/Slicer-5.12 directory is overridden with its 5.13 equivalent.
