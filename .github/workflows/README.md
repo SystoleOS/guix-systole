@@ -1,6 +1,6 @@
 # GitHub Actions Workflows
 
-CI for guix-systole. The three testing workflows share one design:
+CI for guix-systole. The testing workflows share one design:
 they bootstrap a GNU Guix release binary as a launcher only
 (`.github/actions/install-guix`: signed release tarball, pinned
 SHA-256, root daemon with build users), then run the relevant
@@ -75,6 +75,16 @@ is older than 36 h, coverage is under 90 %, or the last relay-realize
 errored.  On failure it opens (or comments on) an issue labelled
 `substitute-health`; it closes it when healthy again.  One HTTP request,
 no Guix.
+
+### derivations-check.yml
+**Triggers:** PR and push to main/dev when `systole/`,
+`scripts/run-tests.sh`, or `channels-lock.scm` change.
+**Runs:** `./scripts/run-tests.sh derivations` -- `guix build --dry-run`
+of each entry in `DERIVATION_TARGETS` (the Slicer stacks), one guix
+invocation per target.  Computes every derivation in the closures
+(patches, origins, gexps, inputs) without building anything, so it
+catches breakage module loading cannot see.  Builds happen on the build
+hub (Cuirass on hamming), not here.
 
 ### commit-message-check.yml
 **Triggers:** every PR event and push to main.
