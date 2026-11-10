@@ -248,7 +248,7 @@ code search and API exploration.")))
     (home-page "https://github.com/InsightSoftwareConsortium/ITKMGHImageIO")
     (synopsis "ITK IO for storing MGH images")
     (description "ITK IO for images stored in mgh, mgz and mgh.gz formats.")
-    (license license:cc-by4.0)))
+    (license license:asl2.0)))
 
 (define itk-adaptivedenoising
   (package
