@@ -102,12 +102,30 @@ LINT_ALLOWLIST="$REPO_ROOT/tests/lint-allowlist.regex"
 # `guix lint` exits 0 even when it emits warnings, so gate on its
 # output: anything not matching the allowlist of documented technical
 # debt fails the check.
+#
+# --no-network runs only the deterministic, offline checkers.  The
+# network checkers (refresh, archival, home-page, source, cve, ...)
+# report facts about the outside world -- "can be upgraded to X",
+# "updater failed", redirects -- so the gate went red whenever an
+# upstream cut a release, independent of the commit under test.
+# Upstream freshness is tracked separately, not as a merge gate.
 lint_package() {
     local pkg="$1"
-    local out
+    local out status
     # shellcheck disable=SC2086
-    out=$($GUIX lint -L "$REPO_ROOT/systole" --exclude=archival,refresh "$pkg" 2>&1 \
-              | grep -v '^;;;' || true)
+    out=$($GUIX lint -L "$REPO_ROOT/systole" --no-network "$pkg" 2>&1)
+    status=$?
+    if [ $status -ne 0 ]; then
+        # Unknown package, module that fails to load, crashed checker.
+        printf '%s\n' "$out"
+        return 1
+    fi
+    # Gate only on diagnostics located in this channel's own files
+    # ("<repo>/systole/...scm:L:C: ...").  Everything else in the
+    # stream is the time-machine/inferior talking (channel
+    # authentication warnings, substitute progress, profile hooks) and
+    # varies with the host, not with the commit under test.
+    out=$(printf '%s\n' "$out" | grep -F "$REPO_ROOT/systole/" || true)
     if [ -s "$LINT_ALLOWLIST" ]; then
         out=$(printf '%s\n' "$out" | grep -Ev -f "$LINT_ALLOWLIST" || true)
     fi

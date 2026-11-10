@@ -4,8 +4,6 @@ server is somewhat slow
 try .--no-network.
 TLS error
 connection timed out
-^guix lint: warning: '.*' is deprecated, use '.*' instead$
+warning: '.*' is deprecated, use '.*' instead$
 file name is too long, which may break 'make dist'
 netcdf-date-time\.patch: patch lacks comment and upstream status
-^channels-lock\.scm:[0-9]+:[0-9]+: warning: channel '[^']+' lacks an introduction and cannot be authenticated$
-^channels-lock\.scm:[0-9]+:[0-9]+: warning: channel '[^']+' is not trusted$

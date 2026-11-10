@@ -73,14 +73,17 @@ from the `GUIX` time-machine override).
 
 `run-tests.sh` lints a fixed package list (the `LINT_PACKAGES` array in
 the script — single source of truth, shared with CI) using
-`guix lint -L systole --exclude=archival,refresh`.  The `refresh` checker
-reports new upstream releases, which accumulate on their own and need
-network access, so it is no pass/fail criterion; review them with
-`guix refresh -L systole`.  Since `guix lint` exits 0
-even when it emits warnings, the runner gates on output instead: any
-line not matching `tests/lint-allowlist.regex` (the allowlist of
-documented technical debt) fails the check. To accept a new warning,
-add a pattern to the allowlist in the same commit that introduces it.
+`guix lint -L systole --no-network`: only the deterministic, offline
+checkers gate.  The network checkers (refresh, archival, home-page,
+source, cve, ...) report facts about the outside world, such as new
+upstream releases or redirects, so they are no pass/fail criterion; a
+weekly workflow reports them instead (`lint-network`).  A non-zero
+exit of `guix lint` fails the check, and so does any diagnostic
+located in this channel's own files (`systole/...scm:L:C:`) that does
+not match `tests/lint-allowlist.regex` (the allowlist of documented
+technical debt).  Output from time-machine itself (channel
+authentication notes, substitute progress) is ignored.  To accept a
+new warning, add a pattern to the allowlist in the same commit that introduces it.
 
 ### Build tests (`build`, manual)
 
