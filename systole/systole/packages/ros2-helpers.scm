@@ -207,4 +207,6 @@ in-memory data structures defined by @code{urdfdom_headers}.  Used by
 Object Management Group's Data Distribution Service (DDS).  It is the
 default middleware behind @code{rmw_cyclonedds_cpp} in the ROS 2 Jazzy
 distribution provided by guix-systole.")
-      (license license:epl2.0))))
+      ;; Dual-licensed EPL-2.0 or EDL-1.0; Guix has no EDL-1.0, which is
+      ;; the BSD-3-Clause text.
+      (license (list license:epl2.0 license:bsd-3)))))
