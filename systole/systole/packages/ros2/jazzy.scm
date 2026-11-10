@@ -51,6 +51,7 @@
   #:use-module (gnu packages xml)          ; tinyxml2
   #:use-module (systole packages ros2)
   #:use-module (systole packages ros2-helpers) ; urdfdom, urdfdom-headers, console-bridge
+  #:use-module ((systole licenses) #:select (cisst-license))
   #:use-module (systole packages cisst)         ; cisst, cisst-netlib, saw-* (Touch demo)
   #:use-module (gnu packages qt)                ; qtbase-5 for the saw-*-ros wrappers
   #:use-module (srfi srfi-1)               ; delete-duplicates, append-map
@@ -108,6 +109,14 @@ ROS 2 package."))
 (define %ament-cmake-hash
   (base32 "0sysj073m00i2ji18kr3lg0jvzcmqljyrs640gqg36insql8zvk4"))
 (define %ament-cmake-version "2.5.6")
+
+;; Override the licence of a factory-built package.  The ROS factories
+;; default to Apache-2.0; packages whose package.xml declares something
+;; else are wrapped with this, which leaves the derivation unchanged.
+(define (with-license pkg license)
+  (package
+    (inherit pkg)
+    (license license)))
 
 (define* (ament-cmake-subpkg ros-name #:key
                              (propagated-inputs '())
@@ -446,6 +455,8 @@ manipulation, time helpers, and other low-level C utilities used by the
 ROS 2 client support library (@code{rcl}) and the rosidl runtime."))
 
 (define-public ros-rcpputils-jazzy
+  ;; package.xml declares: Apache License 2.0 | BSD-3-Clause
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "rcpputils"
@@ -461,7 +472,8 @@ ROS 2 client support library (@code{rcl}) and the rosidl runtime."))
    #:description
    "@code{rcpputils} is the C++ companion to @code{rcutils}, providing
 filesystem helpers, thread-safety primitives, version macros, and other
-C++ utilities used throughout the ROS 2 stack."))
+C++ utilities used throughout the ROS 2 stack.")
+   (list license:asl2.0 license:bsd-3)))
 
 ;;;
 ;;; rosidl — interface generation framework.  All sub-packages share a
@@ -1080,6 +1092,8 @@ runtime metrics from ROS 2 nodes."))
 nodes."))
 
 (define-public ros-unique-identifier-msgs-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-rosidl-interface-package
    #:distro jazzy-distro
    #:ros-name "unique_identifier_msgs"
@@ -1093,7 +1107,8 @@ nodes."))
    #:synopsis "Unique identifier (UUID) message types for ROS 2"
    #:description
    "Provides the @code{UUID} message used by ROS 2 actions and other
-APIs that need stable globally unique identifiers."))
+APIs that need stable globally unique identifiers.")
+   license:bsd-3))
 
 (define-public ros-action-msgs-jazzy
   (rcl-interfaces-msg
@@ -1399,6 +1414,8 @@ forwards every rmw call to it."))
 ;;;
 
 (define-public ros-libyaml-vendor-jazzy
+  ;; package.xml declares: Apache License 2.0 | MIT
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "libyaml_vendor"
@@ -1415,7 +1432,8 @@ forwards every rmw call to it."))
    #:description
    "Provides @code{find_package(libyaml_vendor)} that downstream ROS 2
 packages use to depend on libyaml.  In guix-systole the system libyaml
-is detected via pkg-config and re-used (no external project build)."))
+is detected via pkg-config and re-used (no external project build).")
+   (list license:asl2.0 license:expat)))
 
 ;;; rcl is a sub-package of the ros2/rcl monorepo.
 
@@ -1692,6 +1710,8 @@ action servers and clients."))
 ;;;
 
 (define-public ros-pybind11-vendor-jazzy
+  ;; package.xml declares: Apache License 2.0 | BSD
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "pybind11_vendor"
@@ -1708,7 +1728,8 @@ action servers and clients."))
    "Thin wrapper that lets ROS 2 packages depend on a known-good
 @code{pybind11} version.  In guix-systole the upstream pybind11 is used
 directly via @code{find_package(pybind11)}; no external project is
-built."))
+built.")
+   (list license:asl2.0 license:bsd-3)))
 
 ;;;
 ;;; rclpy — Python client library.
@@ -1784,6 +1805,8 @@ and have @code{find_package(TinyXML2)} succeed via the upstream
 @code{tinyxml2} library shipped by Guix."))
 
 (define-public ros-console-bridge-vendor-jazzy
+  ;; package.xml declares: Apache License 2.0 | BSD
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "console_bridge_vendor"
@@ -1799,13 +1822,16 @@ and have @code{find_package(TinyXML2)} succeed via the upstream
    #:description
    "Vendor wrapper around the upstream @code{console_bridge} logging
 shim.  Resolved via @code{find_package(console_bridge)} against the
-package shipped by guix-systole."))
+package shipped by guix-systole.")
+   (list license:asl2.0 license:bsd-3)))
 
 ;;;
 ;;; class_loader / pluginlib — runtime plugin loading framework.
 ;;;
 
 (define-public ros-class-loader-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "class_loader"
@@ -1822,9 +1848,12 @@ package shipped by guix-systole."))
    #:description
    "ROS-independent C++ library for loading plugins via dlopen at
 runtime.  Used as the foundation of @code{pluginlib} and the wider
-@code{rclcpp_components} infrastructure."))
+@code{rclcpp_components} infrastructure.")
+   license:bsd-3))
 
 (define-public ros-pluginlib-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "pluginlib"
@@ -1844,7 +1873,8 @@ runtime.  Used as the foundation of @code{pluginlib} and the wider
    #:description
    "@code{pluginlib} is the higher-level ROS 2 plugin loading library
 built on top of @code{class_loader}, used for runtime discovery and
-loading of plugins declared via @file{plugin_description.xml} files."))
+loading of plugins declared via @file{plugin_description.xml} files.")
+   license:bsd-3))
 
 ;;;
 ;;; urdf — ROS 2 wrapper around upstream urdfdom.
@@ -1857,6 +1887,8 @@ loading of plugins declared via @file{plugin_description.xml} files."))
 (define %urdf-version "2.10.0")
 
 (define-public ros-urdf-parser-plugin-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "urdf_parser_plugin"
@@ -1871,9 +1903,12 @@ loading of plugins declared via @file{plugin_description.xml} files."))
    #:synopsis "Plugin interface for ROS 2 URDF parsers"
    #:description
    "Defines the C++ plugin interface that ROS 2 URDF parsers implement,
-allowing @code{urdf} to dispatch to multiple parser back-ends."))
+allowing @code{urdf} to dispatch to multiple parser back-ends.")
+   license:bsd-3))
 
 (define-public ros-urdf-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "urdf"
@@ -1894,7 +1929,8 @@ allowing @code{urdf} to dispatch to multiple parser back-ends."))
    #:description
    "@code{urdf} is the ROS 2 entry point for parsing Unified Robot
 Description Format (URDF) files.  It dispatches to upstream
-@code{urdfdom} via @code{urdf_parser_plugin}."))
+@code{urdfdom} via @code{urdf_parser_plugin}.")
+   license:bsd-3))
 
 ;;;
 ;;; eigen3_cmake_module / orocos_kdl_vendor / kdl_parser.
@@ -1918,6 +1954,8 @@ available to downstream ROS 2 packages via @code{find_package
 (eigen3_cmake_module)} + @code{ament_export_dependencies(Eigen3)}."))
 
 (define-public ros-orocos-kdl-vendor-jazzy
+  ;; package.xml declares: Apache License 2.0 | LGPL-2.1-or-later
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "orocos_kdl_vendor"
@@ -1937,9 +1975,12 @@ available to downstream ROS 2 packages via @code{find_package
    "Vendor wrapper around the upstream Orocos Kinematics and Dynamics
 Library (KDL).  In guix-systole this resolves to the
 @code{orocos-kinematics-dynamics} package shipped by upstream Guix; no
-external project is built."))
+external project is built.")
+   (list license:asl2.0 license:lgpl2.1+)))
 
 (define-public ros-kdl-parser-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "kdl_parser"
@@ -1957,7 +1998,8 @@ external project is built."))
    #:synopsis "Build KDL trees from URDF robot models"
    #:description
    "@code{kdl_parser} converts URDF robot descriptions into KDL
-@code{Tree} objects used by motion planners and kinematic solvers."))
+@code{Tree} objects used by motion planners and kinematic solvers.")
+   license:bsd-3))
 
 ;;;
 ;;; composition_interfaces / rclcpp_components / message_filters.
@@ -2001,6 +2043,8 @@ loading and unloading ROS 2 nodes as plugins at runtime via
 @file{composition_interfaces} service API."))
 
 (define-public ros-message-filters-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "message_filters"
@@ -2022,7 +2066,8 @@ loading and unloading ROS 2 nodes as plugins at runtime via
    "@code{message_filters} provides filters that operate on ROS 2
 subscription message streams: exact/approximate time synchronisers,
 caches, chainable filters.  Used by @code{tf2_ros} and many
-perception/fusion pipelines."))
+perception/fusion pipelines.")
+   license:bsd-3))
 
 ;;;
 ;;; tf2 stack (ros2/geometry2@dc13549).
@@ -2051,6 +2096,8 @@ perception/fusion pipelines."))
    #:description description))
 
 (define-public ros-tf2-msgs-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-rosidl-interface-package
    #:distro jazzy-distro
    #:ros-name "tf2_msgs"
@@ -2070,9 +2117,12 @@ perception/fusion pipelines."))
    #:description
    "Message and service definitions used by @code{tf2_ros} to
 publish, lookup, and transform coordinate-frame data on the ROS 2
-transform graph."))
+transform graph.")
+   license:bsd-3))
 
 (define-public ros-tf2-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (geometry2-subpkg
    "tf2"
    #:propagated-inputs (list ros-ament-cmake-ros-jazzy
@@ -2085,9 +2135,12 @@ transform graph."))
    #:description
    "Core C++ transform library: maintains a buffer of coordinate-frame
 transforms and answers queries for the transform between two frames at
-a given time."))
+a given time.")
+   license:bsd-3))
 
 (define-public ros-tf2-eigen-kdl-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (geometry2-subpkg
    "tf2_eigen_kdl"
    #:propagated-inputs (list ros-ament-cmake-jazzy
@@ -2098,9 +2151,12 @@ a given time."))
    #:synopsis "Conversions between Eigen and KDL geometric types"
    #:description
    "Conversion utilities between Eigen and Orocos KDL geometric
-types."))
+types.")
+   license:bsd-3))
 
 (define-public ros-tf2-ros-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (geometry2-subpkg
    "tf2_ros"
    #:propagated-inputs (list ros-ament-cmake-jazzy
@@ -2116,9 +2172,12 @@ types."))
    #:synopsis "ROS 2 client interface for the tf2 transform library"
    #:description
    "C++ publisher/listener API for the ROS 2 transform graph on top of
-@code{tf2}, plus the @code{static_transform_publisher} executable."))
+@code{tf2}, plus the @code{static_transform_publisher} executable.")
+   license:bsd-3))
 
 (define-public ros-tf2-eigen-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (geometry2-subpkg
    "tf2_eigen"
    ;; tf2_eigen's CMakeLists find_package()s tf2_ros REQUIRED even
@@ -2132,9 +2191,12 @@ types."))
    #:synopsis "Eigen <-> tf2 conversions"
    #:description
    "Conversion utilities between @code{tf2} transforms and Eigen
-geometric types."))
+geometric types.")
+   license:bsd-3))
 
 (define-public ros-tf2-geometry-msgs-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (geometry2-subpkg
    "tf2_geometry_msgs"
    #:propagated-inputs (list ros-ament-cmake-jazzy
@@ -2148,9 +2210,12 @@ geometric types."))
    #:description
    "Glue code that converts between @code{tf2}'s internal transform
 types and @file{geometry_msgs/PointStamped}, @file{PoseStamped},
-@file{Vector3Stamped}, etc."))
+@file{Vector3Stamped}, etc.")
+   license:bsd-3))
 
 (define-public ros-tf2-kdl-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (geometry2-subpkg
    "tf2_kdl"
    #:propagated-inputs (list ros-ament-cmake-jazzy
@@ -2162,9 +2227,12 @@ types and @file{geometry_msgs/PointStamped}, @file{PoseStamped},
    #:synopsis "Conversions between tf2 transforms and KDL types"
    #:description
    "Glue code that converts between @code{tf2} internal transforms and
-Orocos KDL geometric types."))
+Orocos KDL geometric types.")
+   license:bsd-3))
 
 (define-public ros-tf2-py-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (geometry2-subpkg
    "tf2_py"
    #:propagated-inputs (list ros-ament-cmake-jazzy
@@ -2178,9 +2246,12 @@ Orocos KDL geometric types."))
                              ros-rpyutils-jazzy)
    #:synopsis "Python bindings for tf2"
    #:description
-   "pybind11-based Python bindings for @code{tf2}."))
+   "pybind11-based Python bindings for @code{tf2}.")
+   license:bsd-3))
 
 (define-public ros-tf2-sensor-msgs-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (geometry2-subpkg
    "tf2_sensor_msgs"
    #:propagated-inputs (list ros-ament-cmake-jazzy
@@ -2196,9 +2267,12 @@ Orocos KDL geometric types."))
    #:synopsis "Conversions between tf2 transforms and sensor_msgs types"
    #:description
    "Glue that transforms @file{sensor_msgs/PointCloud2} and related
-sensor messages between coordinate frames using @code{tf2}."))
+sensor messages between coordinate frames using @code{tf2}.")
+   license:bsd-3))
 
 (define-public ros-tf2-ros-py-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-ament-python-package
    #:distro jazzy-distro
    #:ros-name "tf2_ros_py"
@@ -2218,13 +2292,16 @@ sensor messages between coordinate frames using @code{tf2}."))
    #:synopsis "Python tf2 ROS 2 client library"
    #:description
    "Python client library for publishing and listening to the ROS 2
-transform graph, built on top of @code{tf2_py}."))
+transform graph, built on top of @code{tf2_py}.")
+   license:bsd-3))
 
 ;;;
 ;;; diagnostic_updater + robot_state_publisher.
 ;;;
 
 (define-public ros-diagnostic-updater-jazzy
+  ;; package.xml declares: BSD-3-Clause
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "diagnostic_updater"
@@ -2244,9 +2321,12 @@ transform graph, built on top of @code{tf2_py}."))
    #:description
    "@code{diagnostic_updater} is a C++/Python helper for publishing
 @file{diagnostic_msgs/DiagnosticStatus} at a regular rate, used by
-nodes that report driver/sensor health."))
+nodes that report driver/sensor health.")
+   license:bsd-3))
 
 (define-public ros-robot-state-publisher-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "robot_state_publisher"
@@ -2272,7 +2352,8 @@ nodes that report driver/sensor health."))
    "@code{robot_state_publisher} reads a URDF model and publishes the
 corresponding forward-kinematic transforms to the @code{tf2} graph as
 joint states change.  Essential for any mobile-manipulator or
-multi-joint robot in ROS 2."))
+multi-joint robot in ROS 2.")
+   license:bsd-3))
 
 ;;;
 ;;; launch framework (ros2/launch + ros2/launch_ros).
@@ -2361,6 +2442,8 @@ process manager."))
 launch descriptions as test fixtures."))
 
 (define-public ros-launch-testing-ament-cmake-jazzy
+  ;; package.xml declares: Apache License 2.0 | BSD
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "launch_testing_ament_cmake"
@@ -2378,7 +2461,8 @@ launch descriptions as test fixtures."))
    #:description
    "CMake macros (@code{add_launch_test}) that register
 @code{launch_testing} pytest-based integration tests with the ament
-test framework."))
+test framework.")
+   (list license:asl2.0 license:bsd-3)))
 
 ;;; ros2/launch_ros — ROS-aware launch actions (Node, LifecycleNode, ...).
 
@@ -2477,6 +2561,8 @@ into."))
    "Implements @command{ros2 node list} and @command{ros2 node info}."))
 
 (define-public ros-ros2topic-jazzy
+  ;; package.xml declares: Apache License 2.0 | BSD-3-Clause
+  (with-license
   (ros2cli-subpkg
    "ros2topic"
    #:propagated-inputs (list ros-rclpy-jazzy
@@ -2487,7 +2573,8 @@ into."))
    #:synopsis "ros2 topic — introspect and interact with ROS 2 topics"
    #:description
    "Implements @command{ros2 topic list}, @command{ros2 topic echo},
-@command{ros2 topic pub}, @command{ros2 topic hz}, ..."))
+@command{ros2 topic pub}, @command{ros2 topic hz}, ...")
+   (list license:asl2.0 license:bsd-3)))
 
 (define-public ros-ros2service-jazzy
   (ros2cli-subpkg
@@ -2609,6 +2696,8 @@ and friends."))
 ;;;
 
 (define-public ros-angles-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "angles"
@@ -2624,7 +2713,8 @@ and friends."))
    #:description
    "Small library of helpers for wrapping/unwrapping angles, computing
 shortest angular distances, and converting between degrees and
-radians.  Used by many ROS 2 control and navigation packages."))
+radians.  Used by many ROS 2 control and navigation packages.")
+   license:bsd-3))
 
 (define-public ros-example-interfaces-jazzy
   (make-ros2-rosidl-interface-package
@@ -2653,6 +2743,8 @@ radians.  Used by many ROS 2 control and navigation packages."))
 ;;;
 
 (define-public ros-yaml-cpp-vendor-jazzy
+  ;; package.xml declares: Apache License 2.0 | MIT
+  (with-license
   (package
     (inherit
      (make-ros2-ament-cmake-package
@@ -2687,7 +2779,8 @@ the upstream @code{yaml-cpp} library shipped by Guix."))
            #~(list "-DCMAKE_BUILD_TYPE=Release"
                    "-DBUILD_TESTING=OFF"
                    "-DCMAKE_INSTALL_RPATH=$ORIGIN;$ORIGIN/..;$ORIGIN/../../.."
-                   "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON")))))
+                   "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON"))))
+   (list license:asl2.0 license:expat)))
 
 (define-public ros-keyboard-handler-jazzy
   (make-ros2-ament-cmake-package
@@ -2812,6 +2905,8 @@ the upstream @code{yaml-cpp} library shipped by Guix."))
 Guix); used by @code{rosbag2_storage_sqlite3}."))
 
 (define-public ros-zstd-vendor-jazzy
+  ;; package.xml declares: Apache License 2.0 | BSD
+  (with-license
   ;; Upstream Guix zstd ships headers in the "lib" output, not "out",
   ;; so we must explicitly request it via the (pkg output) tuple.
   (rosbag2-subpkg
@@ -2822,7 +2917,8 @@ Guix); used by @code{rosbag2_storage_sqlite3}."))
    #:synopsis "ROS 2 vendor wrapper around libzstd"
    #:description
    "Vendor wrapper around the upstream Zstandard compression library
-(provided by Guix); used by @code{rosbag2_compression_zstd}."))
+(provided by Guix); used by @code{rosbag2_compression_zstd}.")
+   (list license:asl2.0 license:bsd-3)))
 
 (define-public ros-rosbag2-interfaces-jazzy
   (make-ros2-rosidl-interface-package
@@ -3002,6 +3098,8 @@ for working with @code{rosbag2} bags."))
 ;;;
 
 (define-public ros-turtlesim-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "turtlesim"
@@ -3032,9 +3130,12 @@ for working with @code{rosbag2} bags."))
 window with a turtle that responds to @file{geometry_msgs/Twist}
 commands.  Declared as a required dependency by the upstream
 @code{slicer_ros2_module} CMakeLists so it's needed to build the
-SlicerROS2 extension against @code{ros-jazzy}."))
+SlicerROS2 extension against @code{ros-jazzy}.")
+   license:bsd-3))
 
 (define-public ros-object-recognition-msgs-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-rosidl-interface-package
    #:distro jazzy-distro
    #:ros-name "object_recognition_msgs"
@@ -3058,9 +3159,12 @@ SlicerROS2 extension against @code{ros-jazzy}."))
    "Message, service, and action definitions used by ROS 2 object
 recognition pipelines (@code{RecognizedObject}, @code{Table},
 @code{ObjectType}).  Dependency of @code{moveit_msgs} and
-SlicerROS2."))
+SlicerROS2.")
+   license:bsd-3))
 
 (define-public ros-octomap-msgs-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-rosidl-interface-package
    #:distro jazzy-distro
    #:ros-name "octomap_msgs"
@@ -3081,9 +3185,12 @@ SlicerROS2."))
    #:synopsis "OctoMap message types for ROS 2"
    #:description
    "@code{Octomap} and related message types used to transport octree
-occupancy maps between ROS 2 nodes; required by @code{moveit_msgs}."))
+occupancy maps between ROS 2 nodes; required by @code{moveit_msgs}.")
+   license:bsd-3))
 
 (define-public ros-moveit-msgs-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-rosidl-interface-package
    #:distro jazzy-distro
    #:ros-name "moveit_msgs"
@@ -3110,7 +3217,8 @@ occupancy maps between ROS 2 nodes; required by @code{moveit_msgs}."))
    "Message, service, and action definitions used by MoveIt 2
 (@code{RobotState}, @code{PlanningScene}, @code{Constraints},
 @code{MotionPlanRequest}, @code{CollisionObject}, ...).  Pure interface
-package; required by the SlicerROS2 module."))
+package; required by the SlicerROS2 module.")
+   license:bsd-3))
 
 ;;;
 ;;; Touch haptic-device demo support (Laura Connolly's VirtualFixture
@@ -3127,6 +3235,8 @@ package; required by the SlicerROS2 module."))
 ;;;
 
 (define-public ros-xacro-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "xacro"
@@ -3145,9 +3255,12 @@ package; required by the SlicerROS2 module."))
 description files to generate URDF from parameterised templates.  The
 @command{xacro} command is invoked at launch time by the Touch demo's
 @code{sensable_phantom_rviz.launch.py} to expand the URDF shipped in
-@code{sensable_omni_model}."))
+@code{sensable_omni_model}.")
+   license:bsd-3))
 
 (define-public ros-joint-state-publisher-jazzy
+  ;; package.xml declares: BSD
+  (with-license
   (make-ros2-ament-python-package
    #:distro jazzy-distro
    #:ros-name "joint_state_publisher"
@@ -3166,7 +3279,8 @@ description files to generate URDF from parameterised templates.  The
 or more @code{sensor_msgs/JointState} topics (its @var{source_list}
 parameter) and republishes the merged state on @code{/joint_states}.
 Used by the Touch demo to forward @code{/arm/measured_js} from the
-Sensable Phantom driver into @code{robot_state_publisher}."))
+Sensable Phantom driver into @code{robot_state_publisher}.")
+   license:bsd-3))
 
 ;;
 ;; jhu-cisst/cisst-ros is a monorepo containing cisst_msgs,
@@ -3186,6 +3300,8 @@ Sensable Phantom driver into @code{robot_state_publisher}."))
   (base32 "105n9iqlark1yj0smjdffshxgac57qagi3ycww822vn86i72qi0d"))
 
 (define-public ros-crtk-msgs-jazzy
+  ;; package.xml declares: MIT
+  (with-license
   (make-ros2-rosidl-interface-package
    #:distro jazzy-distro
    #:ros-name "crtk_msgs"
@@ -3203,9 +3319,12 @@ Sensable Phantom driver into @code{robot_state_publisher}."))
    #:synopsis "CRTK (collaborative-robotics) ROS 2 message definitions"
    #:description
    "Interface package for the Collaborative Robotics Toolkit (CRTK)
-naming convention used by the JHU cisst-SAW stack."))
+naming convention used by the JHU cisst-SAW stack.")
+   license:expat))
 
 (define-public ros-cisst-msgs-jazzy
+  ;; package.xml declares: CISST
+  (with-license
   (make-ros2-rosidl-interface-package
    #:distro jazzy-distro
    #:ros-name "cisst_msgs"
@@ -3226,9 +3345,12 @@ naming convention used by the JHU cisst-SAW stack."))
    #:description
    "Interface package for cisst-specific ROS 2 messages (BoolStamped,
 DoubleVec, IntervalStatistics, ConvertFloat64Array).  Sub-package of
-the jhu-cisst/cisst-ros monorepo."))
+the jhu-cisst/cisst-ros monorepo.")
+   cisst-license))
 
 (define-public ros-cisst-ros-bridge-jazzy
+  ;; package.xml declares: CISST
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "cisst_ros_bridge"
@@ -3262,9 +3384,12 @@ the jhu-cisst/cisst-ros monorepo."))
 provides @code{mtsROSBridge} — the translation layer between cisst's
 @code{mtsComponent} interfaces and ROS 2 publishers/subscribers — plus
 the @code{cisst_ral} ROS 1/2 abstraction namespace consumed by the
-saw-components' ROS wrappers."))
+saw-components' ROS wrappers.")
+   cisst-license))
 
 (define-public ros-cisst-ros-crtk-jazzy
+  ;; package.xml declares: CISST
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "cisst_ros_crtk"
@@ -3298,7 +3423,8 @@ layers the CRTK naming convention on top of @code{cisst_ros_bridge}:
 @code{mts_ros_crtk_bridge_provided} exposes all CRTK interfaces
 (@code{measured_js}, @code{measured_cp}, @code{servo_cf},
 @code{operating_state}, ...) of an @code{mtsComponent} as ROS 2
-topics/services."))
+topics/services.")
+   cisst-license))
 
 (define-public ros-sensable-omni-model-jazzy
   (make-ros2-ament-python-package
@@ -3320,6 +3446,8 @@ Sensable Phantom Omni).  Consumed by @code{robot_state_publisher} when
 running Laura Connolly's SlicerROS2 Touch teleoperation demo."))
 
 (define-public ros-saw-controllers-ros-jazzy
+  ;; package.xml declares: cisst
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "saw_controllers_ros"
@@ -3351,9 +3479,12 @@ running Laura Connolly's SlicerROS2 Touch teleoperation demo."))
    "@code{saw_controllers_ros} exposes the JHU sawControllers PID /
 gravity-compensation / teleop components as ROS 2 CRTK-bridged nodes.
 Sub-package of jhu-saw/sawControllers built from the @file{ros/}
-subdirectory against our saw-controllers core package."))
+subdirectory against our saw-controllers core package.")
+   cisst-license))
 
 (define-public ros-sensable-phantom-jazzy
+  ;; package.xml declares: cisst
+  (with-license
   (make-ros2-ament-cmake-package
    #:distro jazzy-distro
    #:ros-name "sensable_phantom"
@@ -3418,7 +3549,8 @@ At runtime this package pulls in @code{touch-driver} and
 @code{openhaptics-sdk} transitively through @code{saw-sensable-phantom},
 so installing @code{ros-sensable-phantom-jazzy} into a profile gives
 a complete Touch ROS 2 node ready to @code{ros2 run sensable_phantom
-sensable_phantom}."))
+sensable_phantom}.")
+   cisst-license))
 
 ;;;
 ;;; Aggregation meta-package.
@@ -3721,7 +3853,9 @@ Set @env{RMW_IMPLEMENTATION=rmw_cyclonedds_cpp} to select the bundled
 DDS middleware (this is currently the only @code{rmw} implementation
 provided by guix-systole).")
     (home-page "https://docs.ros.org/en/jazzy/")
-    (license license:asl2.0)))
+    ;; The licences of the packages in the union.
+    (license (list license:asl2.0 license:bsd-3 license:expat
+                   license:lgpl2.1+ license:epl2.0 cisst-license))))
 
 ;;;
 ;;; ros-jazzy-touch — union meta-package for Laura Connolly's Touch demo.
