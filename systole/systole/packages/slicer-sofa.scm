@@ -19,8 +19,10 @@
 ;;;
 ;;; SlicerSOFA — a 3D Slicer extension that integrates the SOFA Framework
 ;;; for biomechanical simulation.  Built from the preview branch of
-;;; https://github.com/Slicer/SlicerSOFA against slicer-5.8 and
-;;; sofa-framework v25.12 (from (systole packages sofa)).
+;;; https://github.com/Slicer/SlicerSOFA (identical to main once
+;;; Slicer/SlicerSOFA#83 is merged; the ExtensionsIndex builds Slicer 5.12
+;;; and Preview from it) against slicer-5.12 and sofa-framework v26.06
+;;; (from (systole packages sofa)).
 ;;;
 ;;; All four modules are scripted (Python):
 ;;;   SlicerSofa, SoftTissueSimulation, SparseGridSimulation, SOFASceneLoader
@@ -41,11 +43,11 @@
   #:use-module (srfi srfi-1))
 
 (define-public slicer-sofa
-  (let ((commit "ff9f67fb8f318dcf02e9995d31f6a3278d529929")
+  (let ((commit "7f086b160704a62298f731f11a3ebcce8a023f19")
         (revision "0"))
     (package
       (name "slicer-sofa")
-      (version (git-version "25.06.1" revision commit))
+      (version (git-version "26.06.00" revision commit))
       (source
        (origin
          (method git-fetch)
@@ -54,7 +56,7 @@
                (commit commit)))
          (file-name (git-file-name name commit))
          (sha256
-          (base32 "14l603kwfb03849kx5nm2bgxx28wpkr5fcx546d4q3d4xy5k8g3g"))))
+          (base32 "10mppsvg72hwfs4j05zvhnal6rcfh6nc4hrs8fkrk80yxh08h13n"))))
       (build-system cmake-build-system)
       (arguments
        (list
@@ -63,10 +65,10 @@
         #~(list "-DCMAKE_BUILD_TYPE=Release"
                 "-DSlicerSOFA_SUPERBUILD=OFF"
                 (string-append "-DSlicer_DIR="
-                               #$(this-package-input "slicer-5.8")
-                               "/lib/Slicer-5.8")
+                               #$(this-package-input "slicer-5.12")
+                               "/lib/Slicer-5.12")
                 (string-append "-DPYTHONQT_INSTALL_DIR="
-                               #$(this-package-input "pythonqt-commontk")))
+                               #$(this-package-input "pythonqt-commontk-for-slicer-5.12")))
         #:phases
         #~(modify-phases %standard-phases
             ;; The inner build path in CMakeLists.txt adds the four
@@ -106,18 +108,18 @@
                       "sys.excepthook = defaultExecHook\n"
                       "__all__ = ['Sofa', 'SofaRuntime']\n")
                      port))))))))
-      ;; UseSlicer.cmake transitively requires all of slicer-5.8's
+      ;; UseSlicer.cmake transitively requires all of slicer-5.12's
       ;; build-time libraries at configure time.  Inherit the full
       ;; input set (same pattern as slicer-ros2-module-jazzy).
       (inputs
        (fold (lambda (pkg acc)
                (modify-inputs acc (prepend pkg)))
-             (modify-inputs (package-inputs slicer-5.8)
-               (prepend slicer-5.8))
+             (modify-inputs (package-inputs slicer-5.12)
+               (prepend slicer-5.12))
              (list sofa-framework
                    python)))
       (propagated-inputs
-       (list slicer-5.8
+       (list slicer-5.12
              sofa-framework))
       (home-page "https://github.com/Slicer/SlicerSOFA")
       (synopsis "3D Slicer extension for SOFA biomechanical simulation")

@@ -20,9 +20,9 @@
 ;;; SOFA Framework (Simulation Open Framework Architecture) — an open-source
 ;;; C++ library for real-time physics simulation, primarily used for
 ;;; soft-tissue mechanics and surgical simulation.  This module packages
-;;; the Slicer fork of SOFA v25.12 with bundled plugins (SofaPython3,
+;;; the Slicer fork of SOFA v26.06 with bundled plugins (SofaPython3,
 ;;; SofaSTLIB, BeamAdapter, Registration, Cosserat) built inline via
-;;; SOFA_EXTERNAL_DIRECTORIES, matching the SlicerSOFA preview branch.
+;;; SOFA_EXTERNAL_DIRECTORIES, matching SlicerSOFA's preview branch (main after Slicer/SlicerSOFA#83).
 ;;;
 ;;; Code:
 
@@ -132,68 +132,69 @@ intersection component.")
     (method git-fetch)
     (uri (git-reference
           (url "https://github.com/Slicer/SofaPython3")
-          (commit "d531197caff3a93080c8b66704f3185c2164043c")))
-    (file-name "SofaPython3-d531197.tar.gz")
+          (commit "64e02c2b0d610f6752442cb177227598b98dd110")))
+    (file-name (git-file-name "sofapython3" "64e02c2"))
     (sha256
-     (base32 "038mx7q2ywpwgpmbhgy1ydw34c32bc49hydbi9b2xr1zilv6bpgj"))))
+     (base32 "1244dph1discjjdnnffi97yhch8w7mq0wr44m0shp2f8zn6lj5li"))))
 
 (define sofa-plugin-stlib
   (origin
     (method git-fetch)
     (uri (git-reference
           (url "https://github.com/SofaDefrost/STLIB")
-          (commit "da062381847b26458390937c75c23968ea0a9c6a")))
-    (file-name "STLIB-da06238.tar.gz")
+          (commit "d33de40005b6a002ad1b869b972b214a6389fe67")))
+    (file-name (git-file-name "sofa-stlib" "d33de40"))
     (sha256
-     (base32 "0r0y3lmgdqsbrld7l8l280x56906n3qapga735ia4pdlqn7wwjzk"))))
+     (base32 "1rn6n58vy620yyzcrp0rr44ad9vhi8lyg3jakpdxlfmyc78pbcgk"))))
 
 (define sofa-plugin-beamadapter
   (origin
     (method git-fetch)
     (uri (git-reference
           (url "https://github.com/sofa-framework/beamadapter")
-          (commit "5d02b8322cc82fc8a04085862affb99b008ef175")))
-    (file-name "BeamAdapter-5d02b83.tar.gz")
+          (commit "cac4005bd7c9f266c5c775ab88cebbd7c7fa83c7")))
+    (file-name (git-file-name "sofa-beamadapter" "cac4005"))
     (sha256
-     (base32 "1rzgk9845hkgv2p5jfqmwcb8q1n95w7kgdk32rc8s3dz9ls93l9w"))))
+     (base32 "1fsfirihfvgjmr7a1aqchpkgnhpcax3mdplp8ybgwprgy8f72k57"))))
 
 (define sofa-plugin-registration
   (origin
     (method git-fetch)
     (uri (git-reference
           (url "https://github.com/sofa-framework/registration")
-          (commit "091ebecafafc3fc3ba1e493e855b09ec4918c857")))
-    (file-name "Registration-091ebec.tar.gz")
+          (commit "06ab29453a758b675cced5f3121f49016f84f836")))
+    (file-name (git-file-name "sofa-registration" "06ab294"))
     (sha256
-     (base32 "0vfiiy48b0w2v967nhhys2x2vhq13fnk2vri9flbmi4vqhsmjkzr"))))
+     (base32 "148m2p1saj11p10ggp7q0mp6ms9kcrh6wn6g02zninhgirlql1gm"))))
 
 (define sofa-plugin-cosserat
   (origin
     (method git-fetch)
     (uri (git-reference
           (url "https://github.com/SofaDefrost/Cosserat")
-          (commit "f6a4f35075c5fc0364c4d96dd130e22f2c5bb1e3")))
-    (file-name "Cosserat-f6a4f35.tar.gz")
+          (commit "31aaf6d9af1b1d4feb7412c4b074aff50c92cec8")))
+    (file-name (git-file-name "sofa-cosserat" "31aaf6d"))
     (sha256
-     (base32 "01arfhq78hidnyizw576r4vxh3l8b492wc9wc81p6v0wpwfa7j5d"))))
+     (base32 "0vzwf7g1w1na3w209i3pgidl4vr4617fiz0mxzzlrhpybygki6y7"))))
 
 ;;;
-;;; SOFA Framework v25.12 (Slicer fork) with bundled plugins.
+;;; SOFA Framework v26.06 (Slicer fork) with bundled plugins.
 ;;;
 
 (define-public sofa-framework
   (package
     (name "sofa-framework")
-    (version "25.12.00")
+    (version "26.06.00")
     (source
      (origin
        (method git-fetch)
        (uri (git-reference
              (url "https://github.com/Slicer/sofa")
-             (commit "9f48bc12fa974fb3d8d4d5b2ec8ed154181d8c11")))
+             ;; Branch slicer-26.06.00-2026-08-24-389df6376.
+             (commit "389df6376a893351a9786b9ae25fe7635a1ce61c")))
        (file-name (git-file-name name version))
        (sha256
-        (base32 "1qwllykc72nyjz5f8rrccd2vyxxpcpkaz17kbi2bknhd4689r939"))
+        (base32 "0w48ap404dg7bqblnlja946y5p2qakhjgzlfnj7a57b31fvj39h0"))
        (patches
         (search-patches
          "sofa/0001-COMP-Fix-GCC-14-build-with-OpenMP-SIMD-enabled.patch"))))
@@ -208,25 +209,21 @@ intersection component.")
               "-DSOFA_ALLOW_FETCH_DEPENDENCIES=OFF"
               "-DBUILD_SHARED_LIBS=ON"
               "-DSOFA_INSTALL_RESOURCES_FILES=OFF"
-              ;; Collections/plugins matching SlicerSOFA preview SuperBuild:
+              ;; Options matching SlicerSOFA's SuperBuild/External_Sofa.cmake
+              ;; at 7f086b1 (SOFA 26.06).  26.06 removed the COLLECTION_*
+              ;; options and the in-tree Qt GUI (Sofa/GUI/Qt), so those
+              ;; flags are gone.
               "-DAPPLICATION_RUNSOFA=OFF"
               "-DAPPLICATION_SCENECHECKING=ON"
-              "-DCOLLECTION_SOFACONSTRAINT=ON"
-              "-DCOLLECTION_SOFAGENERAL=ON"
-              "-DCOLLECTION_SOFAGRAPHCOMPONENT=ON"
-              "-DCOLLECTION_SOFAGUI=ON"
-              "-DCOLLECTION_SOFAGUICOMMON=ON"
-              "-DCOLLECTION_SOFAGUIQT=ON"
-              "-DCOLLECTION_SOFAMISCCOLLISION=ON"
-              "-DCOLLECTION_SOFAUSERINTERACTION=ON"
-              "-DSOFA_GUI_QT_ENABLE_QDOCBROWSER=OFF"
               "-DLIBRARY_SOFA_GUI=ON"
               "-DLIBRARY_SOFA_GUI_COMMON=ON"
               "-DMODULE_SOFA_GUI_COMPONENT=ON"
               "-DPLUGIN_SOFA_GUI_BATCH=ON"
-              "-DPLUGIN_SOFA_GUI_QT=ON"
               "-DSOFA_WITH_OPENGL=ON"
               "-DSofaSTLIB_ENABLED=ON"
+              "-DSofaBeamAdapter_ENABLED=ON"
+              "-DRegistration_ENABLED=ON"
+              "-DCosserat_ENABLED=ON"
               ;; Performance: enable OpenMP + SIMD.
               "-DSOFA_OPENMP=ON"
               "-DSOFA_ENABLE_SIMD=ON"
@@ -334,12 +331,12 @@ intersection component.")
                           (version-major+minor (package-version python))
                           "/site-packages"))))))
     (home-page "https://www.sofa-framework.org/")
-    (synopsis "SOFA real-time physics simulation framework (Slicer fork, v25.12)")
+    (synopsis "SOFA real-time physics simulation framework (Slicer fork, v26.06)")
     (description
      "SOFA (Simulation Open Framework Architecture) is an open-source C++
 library for real-time simulation of soft-tissue deformation, contact
 mechanics, and multiphysics coupling.  This Guix package builds the
-Slicer fork at v25.12 with the following plugins compiled inline:
+Slicer fork at v26.06 with the following plugins compiled inline:
 SofaPython3, SofaSTLIB, BeamAdapter, Registration, and Cosserat.
 It is the simulation backend for the SlicerSOFA 3D Slicer extension.")
     ;; SOFA itself is LGPL-2.1+; the components built inline add:
