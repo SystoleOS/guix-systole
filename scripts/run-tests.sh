@@ -165,6 +165,50 @@ test_build() {
     done
 }
 
+# Network-dependent lint checkers: facts about the outside world (new
+# upstream releases, dead or redirected home pages, unreachable sources,
+# known CVEs, Software Heritage archival).  Never a merge gate -- they
+# change without any commit -- so they run weekly in a REPORT-ONLY job
+# (.github/workflows/lint-network-weekly.yml).  CVE findings are reviewed,
+# never allowlisted.
+NETWORK_CHECKERS="home-page,source,github-url,cve,refresh,archival,synopsis,gnu-description"
+NETWORK_LINT_EXTRA=(
+    "slicer-all-5.12"
+    "slicer-next"
+)
+
+# Print a report (Markdown) of every network-checker diagnostic located in
+# this channel's files, CVEs first.  Always returns 0: report, not gate.
+lint_network_report() {
+    local pkg out
+    local all cves
+    all=$(mktemp); cves=$(mktemp)
+    for pkg in "${LINT_PACKAGES[@]}" "${NETWORK_LINT_EXTRA[@]}"; do
+        # shellcheck disable=SC2086
+        out=$($GUIX lint -L "$REPO_ROOT/systole" -c "$NETWORK_CHECKERS" "$pkg" 2>&1)
+        # Diagnostics located in our files, plus lint's own errors
+        # (unknown package, crashed checker) so nothing fails silently.
+        out=$(printf '%s\n' "$out" | grep -E -e "^$REPO_ROOT/systole/" -e '^guix lint: error' \
+                  | sed "s#$REPO_ROOT/##" || true)
+        [ -n "$out" ] || continue
+        printf '%s\n' "$out" | grep -iE 'CVE-[0-9]{4}-' >>"$cves" || true
+        printf '%s\n' "$out" | grep -viE 'CVE-[0-9]{4}-' \
+            | sed "s#^#- \`$pkg\` #" >>"$all" || true
+    done
+    echo "## Network lint report ($(date -u +%F))"
+    echo
+    echo "Checkers: \`$NETWORK_CHECKERS\`."
+    echo "Packages: ${LINT_PACKAGES[*]} ${NETWORK_LINT_EXTRA[*]}."
+    echo
+    echo "### CVEs (review each; never allowlist)"
+    if [ -s "$cves" ]; then sort -u "$cves" | sed "s/^/- /"; else echo "None reported."; fi
+    echo
+    echo "### Other findings"
+    if [ -s "$all" ]; then cat "$all"; else echo "None."; fi
+    rm -f "$all" "$cves"
+    return 0
+}
+
 # Print usage
 usage() {
     cat <<EOF
@@ -176,7 +220,8 @@ CATEGORIES:
     all         Run packages + installer + lint tests (default; no builds)
     packages    Run package tests
     installer   Run installer tests (module loading only)
-    lint        Run lint tests
+    lint        Run lint tests (offline checkers only: the merge gate)
+    lint-network  Report network-checker findings (weekly job; never fails)
     build       Run build tests (slow!)
 
 OPTIONS:
@@ -220,6 +265,10 @@ main() {
             ;;
         lint)
             test_lint
+            ;;
+        lint-network)
+            lint_network_report
+            exit 0
             ;;
         build)
             test_build
