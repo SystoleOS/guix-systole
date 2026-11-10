@@ -17,6 +17,7 @@
 
 (define-module (systole licenses)
   #:export (slul
+            cisst-license
             openhaptics-eula
             3ds-touch-driver-eula))
 
@@ -27,6 +28,14 @@
   (license "Simple Library Usage License"
            "https://svn.code.sf.net/p/teem/code/teem/trunk/LICENSE.txt"
            "A simple permissive license for library usage."))
+
+;; The CISST Software License 1.0 (JHU): BSD-like, but with its own
+;; attribution and endorsement clauses, so it is declared as such rather
+;; than approximated by bsd-3.
+(define cisst-license
+  (license "CISST Software License 1.0"
+           "https://github.com/jhu-cisst/cisst/blob/main/license.txt"
+           "BSD-like licence of the JHU cisst libraries."))
 
 ;; 3D Systems proprietary EULA that ships with OpenHaptics 3.4 Developer
 ;; Edition and the Touch device driver.  The SDK and driver are freely

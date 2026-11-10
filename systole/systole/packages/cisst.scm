@@ -22,14 +22,14 @@
 ;;; entire JHU saw- stack, including sawSensablePhantom and, through
 ;;; it, Laura Connolly's SlicerROS2 Touch demo.
 ;;;
-;;; cisst ships a small Custom BSD-like license ("cisst license") that
-;;; is documented at http://www.cisst.org/cisst/license.txt; we map it
-;;; to @code{license:bsd-3} which closely matches its terms.
+;;; cisst ships its own BSD-like licence, the CISST Software License 1.0
+;;; (cisst-license in (systole licenses)).
 ;;;
 ;;; Code:
 
 (define-module (systole packages cisst)
   #:use-module ((guix licenses) #:prefix license:)
+  #:use-module ((systole licenses) #:select (cisst-license))
   #:use-module (guix build-system cmake)
   #:use-module (guix gexp)
   #:use-module (guix git-download)
@@ -127,7 +127,9 @@ backend used by @code{cisstNumerical} and, transitively, any cisst
 component that performs matrix factorisations — including the trajectory
 generation and inverse kinematics used by the sawControllers stack that
 drives the 3D Systems Touch.")
-    (license license:bsd-3)))
+    ;; JHU wrappers under the cisst licence, CLAPACK (BSD-3) and the
+    ;; SLATEC / Lawson-Hanson netlib Fortran sources (public domain).
+    (license (list cisst-license license:bsd-3 license:public-domain))))
 
 ;;;
 ;;; cisst — JHU's Computer Integrated Surgical Systems and Technology
@@ -228,7 +230,7 @@ the optional @code{cisstMesh}/@code{cisstStereoVision}/
 @code{cisst3DUserInterface} libraries are all disabled — they are not
 needed for the haptic-device control path and would pull in large
 unused dependencies.")
-    (license license:bsd-3)))
+    (license cisst-license)))
 
 ;;;
 ;;; sawKeyboard — cisst/SAW keyboard-input component.  Pure cisst,
@@ -271,7 +273,7 @@ unused dependencies.")
      "@code{sawKeyboard} is a cisst @code{mtsComponent} that turns
 terminal key presses into cisst events.  It is a build dependency of
 @code{sawControllers} and, transitively, @code{sawSensablePhantom}.")
-    (license license:bsd-3)))
+    (license cisst-license)))
 
 ;;;
 ;;; sawControllers (core) — cisst/SAW PID, gravity-compensation, and
@@ -340,7 +342,7 @@ used by JHU's haptic-device stack.  This Guix package builds only the
 @code{core/components} subtree (the shared library); the example
 programs in @code{core/examples} are skipped because they pull in Qt
 and are not needed for the Touch demo.")
-    (license license:bsd-3)))
+    (license cisst-license)))
 
 ;;;
 ;;; sawSensablePhantom (core) — cisst/SAW component that talks to
@@ -428,4 +430,4 @@ and are not needed for the Touch demo.")
 wraps the OpenHaptics HD SDK to talk to the 3D Systems Touch.  Links
 against the proprietary @code{openhaptics-sdk} and pulls in
 @code{touch-driver} at runtime.")
-    (license license:bsd-3)))
+    (license cisst-license)))
