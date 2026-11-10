@@ -120,7 +120,7 @@
      "A C++ library for conservative Continuous Collision Detection (CCD)
 using tight inclusion.  Required by SOFA's collision detection
 intersection component.")
-    (license license:lgpl2.1+)))
+    (license license:expat)))
 
 ;;;
 ;;; Plugin sources — pre-fetched so SOFA's build doesn't need network.
