@@ -138,7 +138,7 @@ developers.")
           #~(list
              "-DSlicerOpenIGTLink_SUPERBUILD:BOOL=OFF"
              "-DBUILD_TESTING:BOOL=OFF"
-             ;; vtk-slicer's cmake config calls find_package(Python3)
+             ;; vtk-slicer-9.6's cmake config calls find_package(Python3)
              (string-append "-DPython3_EXECUTABLE="
                             #$python
                             "/bin/python3")
@@ -154,10 +154,10 @@ developers.")
              ;; SlicerConfig.cmake forces Slicer_USE_PYTHONQT=ON; WRAP_PYTHONQT in
              ;; Widgets/CMakeLists.txt then requires PythonQt to be findable.
              (string-append "-DPYTHONQT_INSTALL_DIR="
-                            #$(this-package-input "pythonqt-commontk"))
+                            #$(this-package-input "pythonqt-commontk-for-slicer-5.12"))
              (string-append "-DSlicer_DIR:PATH="
-                            #$(this-package-input "slicer-5.8")
-                            "/lib/Slicer-5.8")
+                            #$(this-package-input "slicer-5.12")
+                            "/lib/Slicer-5.12")
              (string-append "-DOpenIGTLink_DIR:PATH="
                             #$(this-package-input "openigtlink")
                             "/lib/igtl/cmake/igtl-3.1")
@@ -165,24 +165,24 @@ developers.")
                             #$(this-package-input "openigtlinkio")
                             "/lib/cmake/igtlio")
              (string-append "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
-                            #$(this-package-input "slicer-markups-5.8")
-                            "/include/Slicer-5.8/qt-loadable-modules/"
+                            #$(this-package-input "slicer-markups-5.12")
+                            "/include/Slicer-5.12/qt-loadable-modules/"
                             "vtkSlicerMarkupsModuleMRML")
              (string-append "-DvtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS="
-                            #$(this-package-input "slicer-annotations-5.8")
-                            "/include/Slicer-5.8/qt-loadable-modules/"
+                            #$(this-package-input "slicer-annotations-5.12")
+                            "/include/Slicer-5.12/qt-loadable-modules/"
                             "vtkSlicerAnnotationsModuleMRML")
              (string-append "-DvtkSlicerColorsModuleLogic_INCLUDE_DIRS="
-                            #$(this-package-input "slicer-colors-5.8")
-                            "/include/Slicer-5.8/qt-loadable-modules/"
+                            #$(this-package-input "slicer-colors-5.12")
+                            "/include/Slicer-5.12/qt-loadable-modules/"
                             "vtkSlicerColorsModuleLogic")
              (string-append "-DEXTRA_MODULE_LIB_DIRS="
-                            #$(this-package-input "slicer-markups-5.8")
-                            "/lib/Slicer-5.8/qt-loadable-modules;"
-                            #$(this-package-input "slicer-annotations-5.8")
-                            "/lib/Slicer-5.8/qt-loadable-modules;"
-                            #$(this-package-input "slicer-colors-5.8")
-                            "/lib/Slicer-5.8/qt-loadable-modules"))
+                            #$(this-package-input "slicer-markups-5.12")
+                            "/lib/Slicer-5.12/qt-loadable-modules;"
+                            #$(this-package-input "slicer-annotations-5.12")
+                            "/lib/Slicer-5.12/qt-loadable-modules;"
+                            #$(this-package-input "slicer-colors-5.12")
+                            "/lib/Slicer-5.12/qt-loadable-modules"))
 
           #:phases
           #~(modify-phases %standard-phases
@@ -190,7 +190,7 @@ developers.")
                 (lambda _
                   (let* ((lib-dir (string-append #$output "/lib"))
                          (modules-dir (string-append
-                                       lib-dir "/Slicer-5.8/SlicerModules")))
+                                       lib-dir "/Slicer-5.12/SlicerModules")))
                     (mkdir-p modules-dir)
                     (for-each
                      (lambda (file)
@@ -206,13 +206,13 @@ developers.")
                 (lambda _
                   (let ((modules-dir
                          (string-append
-                          #$output "/lib/Slicer-5.8/qt-loadable-modules")))
+                          #$output "/lib/Slicer-5.12/qt-loadable-modules")))
                     (for-each
                      (lambda (lib)
                        (invoke "patchelf" "--add-rpath" "$ORIGIN" lib))
                      (find-files modules-dir "\\.so$"))))))))
    (inputs
-    (list slicer-5.8
+    (list slicer-5.12
           python
           mesa
           ;; QT5
@@ -226,8 +226,8 @@ developers.")
           qtwebchannel-5
           qttools-5
           ;;VTK
-          vtk-slicer
-          itk-slicer
+          vtk-slicer-9.6
+          itk-slicer-5.4.6
           double-conversion
           freetype
           gl2ps
@@ -237,7 +237,7 @@ developers.")
           libtheora
           libxml++
           lz4
-          mpich
+          openmpi
           netcdf
           proj
           libxt
@@ -252,19 +252,19 @@ developers.")
           mesa ;libGL equivalent
           rapidjson
           tbb
-          pythonqt-commontk
-          ctk
+          pythonqt-commontk-for-slicer-5.12
+          ctk-for-slicer-5.12
           ctkapplauncher
           libarchive-slicer
           teem-slicer
-          vtkaddon
+          vtkaddon-9.6
           qrestapi
           openigtlink
           openigtlinkio
           ;; Extra Slicer loadable modules needed for headers/libs
-          slicer-markups-5.8
-          slicer-annotations-5.8
-          slicer-colors-5.8))
+          slicer-markups-5.12
+          slicer-annotations-5.12
+          slicer-colors-5.12))
    (native-inputs (list patchelf))
    (synopsis "Slicer extension for communication of IGT data")
    (description
@@ -298,7 +298,7 @@ protocol.")
           #:validate-runpath? #f
           #:configure-flags
           #~(list
-             ;; vtk-slicer VTK cmake config calls find_package(Python3)
+             ;; vtk-slicer-9.6 VTK cmake config calls find_package(Python3)
              ;; unconditionally; provide paths so it finds Guix Python.
              (string-append "-DPython3_EXECUTABLE="
                             #$python
@@ -313,13 +313,13 @@ protocol.")
                             #$(version-major+minor (package-version python))
                             ".so")
              (string-append "-DSlicer_DIR:PATH="
-                            #$(this-package-input "slicer-5.8")
-                            "/lib/Slicer-5.8")
+                            #$(this-package-input "slicer-5.12")
+                            "/lib/Slicer-5.12")
              (string-append "-DOpenIGTLink_DIR:PATH="
                             #$(this-package-input "openigtlink")
                             "/lib/igtl/cmake/igtl-3.1"))))
   (inputs
-   (list slicer-5.8
+   (list slicer-5.12
          python
          mesa
          ;; QT5
@@ -333,8 +333,8 @@ protocol.")
          qtwebchannel-5
          qttools-5
          ;;VTK
-         vtk-slicer
-         itk-slicer
+         vtk-slicer-9.6
+         itk-slicer-5.4.6
          double-conversion
          freetype
          gl2ps
@@ -344,7 +344,7 @@ protocol.")
          libtheora
          libxml++
          lz4
-         mpich
+         openmpi
          netcdf
          proj
          libxt
@@ -359,11 +359,11 @@ protocol.")
          mesa ;libGL equivalent
          rapidjson
          tbb
-         ctk
+         ctk-for-slicer-5.12
          ctkapplauncher
          libarchive-slicer
          teem-slicer
-         vtkaddon
+         vtkaddon-9.6
          qrestapi
          openigtlink))
   (synopsis "VTK- and Qt-based wrapper library around OpenIGTLink")
