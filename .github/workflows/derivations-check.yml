@@ -1,0 +1,47 @@
+name: "Derivation Check"
+
+# Cheap evaluation gate: compute (dry-run) the derivations of the
+# user-facing Slicer stacks against the pinned channels.  Nothing is
+# built here -- package builds run on the build hub (Cuirass on
+# hamming), never on GitHub-hosted runners.
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'systole/**'
+      - 'scripts/run-tests.sh'
+      - 'channels-lock.scm'
+      - '.github/workflows/derivations-check.yml'
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'systole/**'
+      - 'channels-lock.scm'
+
+jobs:
+  derivations:
+    name: guix build --dry-run (pinned Guix)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Bootstrap only; evaluation runs through time-machine so it uses
+      # the pinned Guix + channels from channels-lock.scm.
+      - name: Install Guix (bootstrap)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y guix
+
+      # The target list lives in DERIVATION_TARGETS in
+      # scripts/run-tests.sh -- single source of truth with local runs.
+      - name: Compute derivations against pinned channels
+        env:
+          GUIX: guix time-machine -C channels-lock.scm --
+        run: ./scripts/run-tests.sh derivations
