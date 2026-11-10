@@ -82,17 +82,21 @@ test_installer() {
 # Single source of truth for the lint list -- CI calls this script, so
 # keep additions here rather than in the workflow files.
 LINT_PACKAGES=(
-    "vtk-slicer"
-    "vtkaddon"
-    "itk-slicer"
-    "slicer-5.8"
-    "slicer-volumes-5.8"
-    "ctk"
+    # The current Slicer stack (5.12) and the packages it builds on.  The
+    # 5.8 stack is frozen; lint follows the stack under active work.
+    "vtk-slicer-9.6"
+    "vtkaddon-9.6"
+    "itk-slicer@5.4.6"
+    "pythonqt-commontk-for-slicer-5.12"
+    "ctk-for-slicer-5.12"
+    "slicer-5.12"
+    "slicer-volumes-5.12"
     "ctkapplauncher"
     "teem-slicer"
     "netcdf-slicer"
     "libarchive-slicer"
     "qrestapi"
+    # Still built against slicer-5.8 (no 5.12 variant yet).
     "openigtlink"
     "slicer-openigtlink"
 )
