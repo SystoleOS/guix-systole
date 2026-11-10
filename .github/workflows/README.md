@@ -1,6 +1,6 @@
 # GitHub Actions Workflows
 
-CI for guix-systole. The three testing workflows share one design:
+CI for guix-systole. The testing workflows share one design:
 they bootstrap the Ubuntu `apt` Guix as a launcher only, then run the
 relevant `scripts/run-tests.sh` category through
 `guix time-machine -C channels-lock.scm` — so every check executes
@@ -44,6 +44,16 @@ warnings in `tests/lint-allowlist.regex` — single sources of truth
 shared with local runs. `guix lint` exits 0 even on warnings, so the
 runner gates on filtered output: anything not matching the allowlist
 fails the check.
+
+### derivations-check.yml
+**Triggers:** PR and push to main/dev when `systole/`,
+`scripts/run-tests.sh`, or `channels-lock.scm` change.
+**Runs:** `./scripts/run-tests.sh derivations` -- `guix build --dry-run`
+of each entry in `DERIVATION_TARGETS` (the Slicer stacks), one guix
+invocation per target.  Computes every derivation in the closures
+(patches, origins, gexps, inputs) without building anything, so it
+catches breakage module loading cannot see.  Builds happen on the build
+hub (Cuirass on hamming), not here.
 
 ### commit-message-check.yml
 **Triggers:** every PR event and push to main.
