@@ -178,12 +178,16 @@ aggregation meta-package."
           (extra-native-inputs '())
           (extra-configure-flags #~'())
           (propagated-inputs '())
-          (tests? #f))
+          (tests? #f)
+          (substitutable? #t))
   "Build a ROS 2 ament_cmake component as a standalone cmake package.
 
 When MODULE-SUBDIR is given, only that subtree of REPO is configured
 (mirroring Slicer's make-slicer-loadable-module pattern for sub-packages
-of monorepos such as ament_cmake or rcl_interfaces)."
+of monorepos such as ament_cmake or rcl_interfaces).
+
+Pass #:substitutable? #f for packages whose output may not be
+redistributed (e.g. anything linking the OpenHaptics SDK)."
   (package
     (name (ros-package-name distro ros-name))
     (version version)
@@ -191,7 +195,11 @@ of monorepos such as ament_cmake or rcl_interfaces)."
                              #:patches (map search-patch patches)))
     (build-system cmake-build-system)
     (arguments
-     (list #:tests? tests?
+     (append
+      ;; Only emitted when #f, so substitutable packages keep their
+      ;; existing derivations.
+      (if substitutable? '() (list #:substitutable? #f))
+      (list #:tests? tests?
            #:configure-flags
            #~(append
               (list "-DCMAKE_BUILD_TYPE=Release"
@@ -223,7 +231,7 @@ of monorepos such as ament_cmake or rcl_interfaces)."
                                                    #$output)
                                     configure-flags)
                              (chdir "build"))))
-                      #~()))))
+                      #~())))))
     ;; Python is needed at configure time by virtually every ament_cmake
     ;; package (cmake/core/python.cmake calls find_package(Python3)).
     (native-inputs (cons (ros-distro-python distro) extra-native-inputs))

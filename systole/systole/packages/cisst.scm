@@ -364,6 +364,9 @@ and are not needed for the Touch demo.")
     (build-system cmake-build-system)
     (arguments
      (list
+      ;; Links libHD and its closure holds the OpenHaptics SDK and the
+      ;; Touch driver, whose EULAs forbid redistribution.
+      #:substitutable? #f
       #:tests? #f
       #:configure-flags
       #~(list "-DCMAKE_BUILD_TYPE=Release"

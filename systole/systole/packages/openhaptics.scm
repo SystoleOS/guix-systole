@@ -37,7 +37,7 @@
 ;;; Code:
 
 (define-module (systole packages openhaptics)
-  #:use-module (guix build-system trivial)
+  #:use-module (systole build-system nonfree)
   #:use-module (guix download)
   #:use-module (guix gexp)
   #:use-module (guix packages)
@@ -64,7 +64,8 @@
        (uri "https://s3.amazonaws.com/dl.3dsystems.com/binaries/Sensable/Linux/TouchDriver2022_04_04.tgz")
        (sha256
         (base32 "0qygavn85mvaaawsy9swqn6y2snxdnl4bz4nam8nydzykz7qsxkv"))))
-    (build-system trivial-build-system)
+    ;; The EULA forbids copying and redistribution: never substitute.
+    (build-system nonsubstitutable-trivial-build-system)
     (arguments
      (list
       #:modules '((guix build utils))
@@ -167,7 +168,8 @@ from their public S3 bucket under a proprietary EULA.")
              "openhaptics_" version "-developer-edition-amd64.tar.gz"))
        (sha256
         (base32 "07r7f9pgvqmzljwq32yp14apjkpy3p2a2wn6bsic1n54lhwy0s4h"))))
-    (build-system trivial-build-system)
+    ;; The EULA forbids copying and redistribution: never substitute.
+    (build-system nonsubstitutable-trivial-build-system)
     (arguments
      (list
       #:modules '((guix build utils))

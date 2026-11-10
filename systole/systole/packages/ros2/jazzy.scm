@@ -29,6 +29,7 @@
 (define-module (systole packages ros2 jazzy)
   #:use-module ((guix licenses) #:prefix license:)
   #:use-module (guix build-system trivial)
+  #:use-module (systole build-system nonfree)
   #:use-module (guix download)
   #:use-module (guix gexp)
   #:use-module (guix packages)
@@ -3357,6 +3358,9 @@ subdirectory against our saw-controllers core package."))
    #:distro jazzy-distro
    #:ros-name "sensable_phantom"
    #:version "1.1.0"
+   ;; Links libHD; its closure holds the OpenHaptics SDK and the Touch
+   ;; driver, whose EULAs forbid redistribution.
+   #:substitutable? #f
    #:repo "https://github.com/jhu-saw/sawSensablePhantom"
    #:commit "64c8b05ec2263a93a1ebd1a2bd508c2c46d024a9"
    #:hash (base32 "1a32y6qdsrpyvq9i2v0w5kw1xbngbi4nkm4rxvn83kaddwy4jm6b")
@@ -3752,7 +3756,9 @@ provided by guix-systole).")
     (name "ros-jazzy-touch")
     (version "0.1.0")
     (source #f)
-    (build-system trivial-build-system)
+    ;; The union holds the OpenHaptics SDK and the Touch driver, whose
+    ;; EULAs forbid redistribution: never substitute.
+    (build-system nonsubstitutable-trivial-build-system)
     (arguments
      (list #:modules '((guix build union)
                        (guix build utils)
@@ -3843,4 +3849,6 @@ guix shell ros-jazzy-touch
 ros2 run sensable_phantom sensable_phantom -D
 @end example")
     (home-page "https://github.com/jhu-saw/sawSensablePhantom")
-    (license license:asl2.0)))
+    (license (list license:asl2.0 license:bsd-3 license:expat
+                   (@ (systole licenses) openhaptics-eula)
+                   (@ (systole licenses) 3ds-touch-driver-eula)))))

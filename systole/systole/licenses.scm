@@ -35,6 +35,12 @@
 ;; These packages are non-free; they are provided in this channel to
 ;; make the JHU sawSensablePhantom stack buildable against the 3D
 ;; Systems Touch haptic device.
+;;
+;; "Freely downloadable" is not "redistributable": both EULAs forbid
+;; copying and distribution.  Every package carrying either licence, or
+;; holding the SDK or driver in its output, must be non-substitutable
+;; (#:substitutable? #f, or nonsubstitutable-trivial-build-system from
+;; (systole build-system nonfree)).
 (define openhaptics-eula
   (license "OpenHaptics Developer Edition EULA"
            "https://www.3dsystems.com/software/openhaptics-developer-license"
