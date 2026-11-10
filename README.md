@@ -100,9 +100,10 @@ in so Slicer-stack substitutes are available out of the box).
 ## Channel Authentication
 
 The channel is **authenticated**: every commit from the introduction
-(`0898d41`) onward is signed by a key in `.guix-authorizations`
-(Rafael Palomar's signing subkeys; primary key on the `keyring`
-branch).  Configure the channel with the introduction shown above so
+(`0898d41`) onward is signed by a key in `.guix-authorizations`:
+the signing subkeys of the dedicated **SystoleOS** identities
+(`systole-maintainer`, and `systole-automation` for CI and agents),
+whose public keys are on the `keyring` branch.  Configure the channel with the introduction shown above so
 `guix pull` verifies the history; see
 [doc/channel-authentication.md](doc/channel-authentication.md) for key
 management.
