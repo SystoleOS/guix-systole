@@ -380,7 +380,8 @@
            libtheora
            libxml++
            lz4
-           mpich
+           ;; The MPI vtk-slicer-9.6 links (and that slicer-5.12 propagates).
+           openmpi
            netcdf
            proj
 

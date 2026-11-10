@@ -380,5 +380,8 @@ library.")
     (inputs (modify-inputs (package-inputs itk-slicer)
               (delete "vtk-slicer")
               (prepend vtk-slicer-9.6)
-              (prepend python-3.12)))
+              (prepend python-3.12)
+              ;; vtk-slicer-9.6 is built with Open MPI; use the same MPI
+              ;; so the 5.12 stack never loads both libmpi ABIs.
+              (replace "mpich" openmpi)))
     (home-page "https://github.com/Slicer/ITK/")))

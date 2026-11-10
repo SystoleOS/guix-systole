@@ -376,7 +376,9 @@ future.")
        (patches (search-patches
                  "0007-ENH-packages-vtk-use-CMAKE-GNUInstallDirs.patch"))))
     (inputs (modify-inputs (package-inputs %vtkaddon)
-              (replace "vtk-slicer" %vtk-slicer-9.6))))))
+              (replace "vtk-slicer" %vtk-slicer-9.6)
+              ;; Match VTK's MPI (Open MPI); see itk-slicer-5.4.6.
+              (replace "mpich" openmpi))))))
 
 ;; Python-enabled vtkAddon for Slicer 5.12.
 (define-public vtkaddon-9.6
