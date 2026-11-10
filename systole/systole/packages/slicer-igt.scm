@@ -55,7 +55,7 @@
 ;; Analogous to make-slicer-loadable-module (slicer.scm) but:
 ;;  - Source is the SlicerIGT tarball, not the Slicer source tree.
 ;;  - cmake -S points to <source>/<module-subdir>/ (top-level in repo).
-;;  - All modules are built against slicer-5.8 (Python-enabled, canonical).
+;;  - All modules are built against slicer-5.12 (Python-enabled, canonical).
 ;;  - No Slicer_INSTALL_DEVELOPMENT=ON (no downstream C++ inter-IGT deps).
 (define* (make-slicer-igt-loadable-module
           #:key
@@ -64,7 +64,7 @@
           patches       ; list of patch filename strings
           synopsis      ; one-line synopsis string
           description   ; multi-line description string
-          ;; Extra packages added to inputs before slicer-5.8's own inputs.
+          ;; Extra packages added to inputs before slicer-5.12's own inputs.
           (extra-inputs '())
           ;; Packages propagated to consumers (runtime Slicer module deps).
           (propagated-inputs '())
@@ -87,9 +87,9 @@
              (list "-DCMAKE_BUILD_TYPE:STRING=Release"
                    "-DBUILD_TESTING:BOOL=OFF"
                    (string-append "-DSlicer_DIR="
-                                  #$slicer-5.8 "/lib/Slicer-5.8")
+                                  #$slicer-5.12 "/lib/Slicer-5.12")
                    (string-append "-DPYTHONQT_INSTALL_DIR="
-                                  #$pythonqt-commontk))
+                                  #$pythonqt-commontk-for-slicer-5.12))
              #$extra-configure-flags)
           #:phases
           #~(modify-phases %standard-phases
@@ -103,12 +103,12 @@
                   (chdir "build"))))))
    (inputs (fold (lambda (pkg acc)
                    (modify-inputs acc (prepend pkg)))
-                 (modify-inputs (package-inputs slicer-5.8)
-                   (prepend slicer-5.8))
+                 (modify-inputs (package-inputs slicer-5.12)
+                   (prepend slicer-5.12))
                  extra-inputs))
    ;; Propagate the Slicer variant so "guix shell slicer-igt-<name>" gives
    ;; a usable Slicer in the profile.
-   (propagated-inputs (cons slicer-5.8 propagated-inputs))
+   (propagated-inputs (cons slicer-5.12 propagated-inputs))
    (home-page "https://github.com/SlicerIGT/SlicerIGT")
    (synopsis synopsis)
    (description description)
@@ -117,7 +117,7 @@
 ;;;
 ;;; Factory for standalone SlicerIGT scripted-module packages.
 ;;;
-;; Always uses slicer-5.8; cmake -S points to <source>/<module-subdir>/.
+;; Always uses slicer-5.12; cmake -S points to <source>/<module-subdir>/.
 (define* (make-slicer-igt-scripted-module
           #:key
           name          ; package name string
@@ -145,7 +145,7 @@
              (list "-DCMAKE_BUILD_TYPE:STRING=Release"
                    "-DBUILD_TESTING:BOOL=OFF"
                    (string-append "-DSlicer_DIR="
-                                  #$slicer-5.8 "/lib/Slicer-5.8"))
+                                  #$slicer-5.12 "/lib/Slicer-5.12"))
              #$extra-configure-flags)
           #:phases
           #~(modify-phases %standard-phases
@@ -159,12 +159,12 @@
                   (chdir "build"))))))
    (inputs (fold (lambda (pkg acc)
                    (modify-inputs acc (prepend pkg)))
-                 (modify-inputs (package-inputs slicer-5.8)
-                   (prepend slicer-5.8))
+                 (modify-inputs (package-inputs slicer-5.12)
+                   (prepend slicer-5.12))
                  extra-inputs))
    ;; Propagate Slicer so "guix shell slicer-igt-<name>" gives a usable
    ;; Slicer in the profile.
-   (propagated-inputs (cons slicer-5.8 propagated-inputs))
+   (propagated-inputs (cons slicer-5.12 propagated-inputs))
    (home-page "https://github.com/SlicerIGT/SlicerIGT")
    (synopsis synopsis)
    (description description)
@@ -187,17 +187,17 @@
 distance between a tracked tool and a surface model and provides visual and
 audio alerts when the tool approaches or breaches the surface.  Built from
 the @file{BreachWarning} sub-directory of the SlicerIGT source tree."
-   #:extra-inputs (list slicer-markups-5.8)
-   #:propagated-inputs (list slicer-markups-5.8)
+   #:extra-inputs (list slicer-markups-5.12)
+   #:propagated-inputs (list slicer-markups-5.12)
    #:extra-configure-flags
    #~(list
       (string-append
        "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
-       #$slicer-markups-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+       #$slicer-markups-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
       (string-append
        "-DEXTRA_MODULE_LIB_DIRS="
-       #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
+       #$slicer-markups-5.12 "/lib/Slicer-5.12/qt-loadable-modules"))))
 
 
 (define-public slicer-igt-collectpoints
@@ -207,17 +207,17 @@ the @file{BreachWarning} sub-directory of the SlicerIGT source tree."
    #:patches (list "collectpoints/0001-ENH-Add-standalone-CMake-preamble-for-CollectPoints.patch"
                    "collectpoints/0002-COMP-Add-markups-includes-LINK_DIRECTORIES-and-qMRMLWidgets.patch")
    #:synopsis "SlicerIGT CollectPoints loadable module"
-   #:extra-inputs (list slicer-markups-5.8)
-   #:propagated-inputs (list slicer-markups-5.8)
+   #:extra-inputs (list slicer-markups-5.12)
+   #:propagated-inputs (list slicer-markups-5.12)
    #:extra-configure-flags
    #~(list
       (string-append
        "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
-       #$slicer-markups-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+       #$slicer-markups-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
       (string-append
        "-DEXTRA_MODULE_LIB_DIRS="
-       #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))
+       #$slicer-markups-5.12 "/lib/Slicer-5.12/qt-loadable-modules"))
    #:description
    "The CollectPoints module from the SlicerIGT extension.  It records the
 positions of a tracked tool as a fiducial markup list, suitable for
@@ -253,26 +253,26 @@ guided workflow for point-based rigid registration between image and
 physical space using fiducial landmarks.  Depends on the Markups module
 for landmark placement.  Built from the @file{FiducialRegistrationWizard}
 sub-directory of the SlicerIGT source tree."
-   #:extra-inputs (list slicer-markups-5.8)
-   #:propagated-inputs (list slicer-markups-5.8)
+   #:extra-inputs (list slicer-markups-5.12)
+   #:propagated-inputs (list slicer-markups-5.12)
    #:extra-configure-flags
    #~(list
       (string-append
        "-DqSlicerMarkupsModuleWidgets_INCLUDE_DIRS="
-       #$slicer-markups-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/qSlicerMarkupsModuleWidgets")
+       #$slicer-markups-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/qSlicerMarkupsModuleWidgets")
       (string-append
        "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
-       #$slicer-markups-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+       #$slicer-markups-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
       (string-append
        "-DvtkSlicerMarkupsModuleLogic_INCLUDE_DIRS="
-       #$slicer-markups-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleLogic")
+       #$slicer-markups-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerMarkupsModuleLogic")
       (string-append
        "-DEXTRA_MODULE_LIB_DIRS="
-       #$slicer-markups-5.8
-       "/lib/Slicer-5.8/qt-loadable-modules"))))
+       #$slicer-markups-5.12
+       "/lib/Slicer-5.12/qt-loadable-modules"))))
 
 
 (define-public slicer-igt-landmarkdetection
@@ -287,8 +287,8 @@ sub-directory of the SlicerIGT source tree."
 anatomical landmarks from tracked tool trajectories using the IGSIO
 calibration library.  Built from the @file{LandmarkDetection} sub-directory
 of the SlicerIGT source tree."
-   #:extra-inputs (list igsio slicer-markups-5.8)
-   #:propagated-inputs (list igsio slicer-markups-5.8)
+   #:extra-inputs (list igsio slicer-markups-5.12)
+   #:propagated-inputs (list igsio slicer-markups-5.12)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -296,13 +296,13 @@ of the SlicerIGT source tree."
        #$igsio "/include/IGSIO-1.0")
       (string-append
        "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
-       #$slicer-markups-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+       #$slicer-markups-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
       (string-append
        "-DEXTRA_MODULE_LIB_DIRS="
        #$igsio "/lib;"
-       #$slicer-markups-5.8
-       "/lib/Slicer-5.8/qt-loadable-modules"))))
+       #$slicer-markups-5.12
+       "/lib/Slicer-5.12/qt-loadable-modules"))))
 
 
 (define-public slicer-igt-pathexplorer
@@ -317,31 +317,31 @@ of the SlicerIGT source tree."
 cross-sectional images along a user-defined curved path (e.g. for needle
 trajectory planning), with reslicing views and a subject-hierarchy plugin.
 Built from the @file{PathExplorer} sub-directory of the SlicerIGT source tree."
-   #:extra-inputs (list slicer-markups-5.8 slicer-subjecthierarchy-5.8 slicer-plots-5.8)
-   #:propagated-inputs (list slicer-markups-5.8 slicer-subjecthierarchy-5.8 slicer-plots-5.8)
+   #:extra-inputs (list slicer-markups-5.12 slicer-subjecthierarchy-5.12 slicer-plots-5.12)
+   #:propagated-inputs (list slicer-markups-5.12 slicer-subjecthierarchy-5.12 slicer-plots-5.12)
    #:extra-configure-flags
    #~(list
       (string-append
        "-DqSlicerMarkupsModuleWidgets_INCLUDE_DIRS="
-       #$slicer-markups-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/qSlicerMarkupsModuleWidgets")
+       #$slicer-markups-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/qSlicerMarkupsModuleWidgets")
       (string-append
        "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
-       #$slicer-markups-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+       #$slicer-markups-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
       (string-append
        "-DqSlicerSubjectHierarchyModuleWidgets_INCLUDE_DIRS="
-       #$slicer-subjecthierarchy-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
+       #$slicer-subjecthierarchy-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/qSlicerSubjectHierarchyModuleWidgets")
       (string-append
        "-DvtkSlicerSubjectHierarchyModuleLogic_INCLUDE_DIRS="
-       #$slicer-subjecthierarchy-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
+       #$slicer-subjecthierarchy-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerSubjectHierarchyModuleLogic")
       (string-append
        "-DEXTRA_MODULE_LIB_DIRS="
-       #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
-       #$slicer-subjecthierarchy-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
-       #$slicer-plots-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
+       #$slicer-markups-5.12 "/lib/Slicer-5.12/qt-loadable-modules;"
+       #$slicer-subjecthierarchy-5.12 "/lib/Slicer-5.12/qt-loadable-modules;"
+       #$slicer-plots-5.12 "/lib/Slicer-5.12/qt-loadable-modules"))))
 
 
 (define-public slicer-igt-pivotcalibration
@@ -412,22 +412,22 @@ planes of 2D slice views to follow a tracked tool or a user-defined
 transform node in real time, enabling live image guidance workflows.
 Built from the @file{VolumeResliceDriver} sub-directory of the SlicerIGT
 source tree."
-   #:extra-inputs (list slicer-markups-5.8 slicer-annotations-5.8)
-   #:propagated-inputs (list slicer-markups-5.8 slicer-annotations-5.8)
+   #:extra-inputs (list slicer-markups-5.12 slicer-annotations-5.12)
+   #:propagated-inputs (list slicer-markups-5.12 slicer-annotations-5.12)
    #:extra-configure-flags
    #~(list
       (string-append
        "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
-       #$slicer-markups-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+       #$slicer-markups-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
       (string-append
        "-DvtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS="
-       #$slicer-annotations-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML")
+       #$slicer-annotations-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML")
       (string-append
        "-DEXTRA_MODULE_LIB_DIRS="
-       #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
-       #$slicer-annotations-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
+       #$slicer-markups-5.12 "/lib/Slicer-5.12/qt-loadable-modules;"
+       #$slicer-annotations-5.12 "/lib/Slicer-5.12/qt-loadable-modules"))))
 
 
 (define-public slicer-igt-watchdog
@@ -460,16 +460,16 @@ library.  Built from the @file{VolumeReconstruction} sub-directory of the
 SlicerIGT source tree."
    #:extra-inputs (list igsio
                         slicer-igsio-common
-                        slicer-annotations-5.8
-                        slicer-markups-5.8
-                        slicer-sequences-5.8
-                        slicer-volumes-5.8)
+                        slicer-annotations-5.12
+                        slicer-markups-5.12
+                        slicer-sequences-5.12
+                        slicer-volumes-5.12)
    #:propagated-inputs (list igsio
                              slicer-igsio-common
-                             slicer-annotations-5.8
-                             slicer-markups-5.8
-                             slicer-sequences-5.8
-                             slicer-volumes-5.8)
+                             slicer-annotations-5.12
+                             slicer-markups-5.12
+                             slicer-sequences-5.12
+                             slicer-volumes-5.12)
    #:extra-configure-flags
    #~(list
       (string-append
@@ -481,31 +481,31 @@ SlicerIGT source tree."
       (string-append
        "-DSlicerIGSIOCommon_INCLUDE_DIRS="
        #$slicer-igsio-common
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerIGSIOCommon")
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerIGSIOCommon")
       (string-append
        "-DvtkSlicerSequencesModuleMRML_INCLUDE_DIRS="
-       #$slicer-sequences-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSequencesModuleMRML")
+       #$slicer-sequences-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerSequencesModuleMRML")
       (string-append
        "-DvtkSlicerAnnotationsModuleMRML_INCLUDE_DIRS="
-       #$slicer-annotations-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML")
+       #$slicer-annotations-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerAnnotationsModuleMRML")
       (string-append
        "-DvtkSlicerMarkupsModuleMRML_INCLUDE_DIRS="
-       #$slicer-markups-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
+       #$slicer-markups-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerMarkupsModuleMRML")
       (string-append
        "-DvtkSlicerVolumesModuleLogic_INCLUDE_DIRS="
-       #$slicer-volumes-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerVolumesModuleLogic")
+       #$slicer-volumes-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerVolumesModuleLogic")
       (string-append
        "-DEXTRA_MODULE_LIB_DIRS="
        #$igsio "/lib;"
-       #$slicer-igsio-common "/lib/Slicer-5.8/qt-loadable-modules;"
-       #$slicer-annotations-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
-       #$slicer-markups-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
-       #$slicer-sequences-5.8 "/lib/Slicer-5.8/qt-loadable-modules;"
-       #$slicer-volumes-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
+       #$slicer-igsio-common "/lib/Slicer-5.12/qt-loadable-modules;"
+       #$slicer-annotations-5.12 "/lib/Slicer-5.12/qt-loadable-modules;"
+       #$slicer-markups-5.12 "/lib/Slicer-5.12/qt-loadable-modules;"
+       #$slicer-sequences-5.12 "/lib/Slicer-5.12/qt-loadable-modules;"
+       #$slicer-volumes-5.12 "/lib/Slicer-5.12/qt-loadable-modules"))))
 
 
 ;;;
@@ -590,7 +590,7 @@ target, and saving/restoring camera positions.  Built from the
 ;;;
 
 (define-public %slicer-igt-loadable-modules
-  ;; Loadable modules (built against slicer-5.8, Python-enabled).
+  ;; Loadable modules (built against slicer-5.12, Python-enabled).
   (list slicer-igt-breachwarning
         slicer-igt-collectpoints
         slicer-igt-createmodels
@@ -617,7 +617,7 @@ target, and saving/restoring camera positions.  Built from the
 (define-public slicer-igt
   ;; Meta-package: non-Python loadable modules + slicer-openigtlink.
   ;; Pulls in only the Slicer modules each IGT module actually needs at
-  ;; runtime (via their propagated-inputs), not all of slicer-all-5.8.
+  ;; runtime (via their propagated-inputs), not all of slicer-all-5.12.
   (package
    (name "slicer-igt")
    (version %slicer-igt-version)
@@ -625,7 +625,7 @@ target, and saving/restoring camera positions.  Built from the
    (build-system trivial-build-system)
    (arguments (list #:builder #~(mkdir #$output)))
    (propagated-inputs
-    (append (list slicer-5.8
+    (append (list slicer-5.12
                   slicer-openigtlink)
             %slicer-igt-loadable-modules
             %slicer-igt-scripted-modules))
