@@ -177,6 +177,21 @@ NETWORK_LINT_EXTRA=(
     "slicer-next"
 )
 
+# Closures whose derivations must compute on every PR: the user-facing
+# Slicer stacks.  `guix build -n` (dry run) evaluates the full closure --
+# gexps, patches (search-patches/slicer-patch), origins, inputs -- without
+# building anything, so it catches what module loading alone cannot
+# (a missing patch file, a bad input reference, a broken gexp) in
+# minutes on a GitHub-hosted runner.  Builds themselves happen on the
+# build hub (Cuirass on hamming), never in GitHub Actions.  One guix
+# invocation per target keeps each evaluation's memory bounded.
+DERIVATION_TARGETS=(
+    "slicer-all-5.8"
+    "slicer-all-5.10"
+    "slicer-all-5.12"
+    "slicer-next"
+)
+
 # Print a report (Markdown) of every network-checker diagnostic located in
 # this channel's files, CVEs first.  Always returns 0: report, not gate.
 lint_network_report() {
@@ -209,6 +224,20 @@ lint_network_report() {
     return 0
 }
 
+derivation_check() {
+    local pkg="$1"
+    # shellcheck disable=SC2086
+    $GUIX build -L "$REPO_ROOT/systole" --dry-run "$pkg"
+}
+
+test_derivations() {
+    log_info "=== Running Derivation (dry-run) Tests ==="
+
+    for package in "${DERIVATION_TARGETS[@]}"; do
+        run_test "Derivations $package" "derivation_check $package" || true
+    done
+}
+
 # Print usage
 usage() {
     cat <<EOF
@@ -222,6 +251,7 @@ CATEGORIES:
     installer   Run installer tests (module loading only)
     lint        Run lint tests (offline checkers only: the merge gate)
     lint-network  Report network-checker findings (weekly job; never fails)
+    derivations Compute (dry-run) the derivations of the Slicer stacks
     build       Run build tests (slow!)
 
 OPTIONS:
@@ -269,6 +299,9 @@ main() {
         lint-network)
             lint_network_report
             exit 0
+            ;;
+        derivations)
+            test_derivations
             ;;
         build)
             test_build
