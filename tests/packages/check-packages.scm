@@ -147,7 +147,8 @@
     ((systole packages ros2-helpers)
      python-catkin-pkg python-osrf-pycommon eclipse-cyclonedds
      console-bridge urdfdom-headers urdfdom)
-    ((systole packages ros2 jazzy) ros-jazzy)))
+    ((systole packages ros2 jazzy) ros-jazzy)
+    ((systole idc-download) idc-reference idc-fetch)))
 
 (for-each
  (lambda (spec)
