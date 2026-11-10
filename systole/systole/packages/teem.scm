@@ -70,4 +70,7 @@ and visualizing scientific raster data.  Teem includes command-line tools that
 permit the library functions to be quickly applied to files and streams,
 without having to write any code.  This package builds Slicer's fork of Teem,
 used by the @code{vtkTeem} layer of 3D Slicer.")
-      (license (list license:slul license:lgpl2.1)))))
+      ;; LGPL-2.1 "or (at your option) any later version", plus the
+      ;; Simple Library Usage License static-linking exception
+      ;; (LICENSE.txt).
+      (license (list license:slul license:lgpl2.1+)))))
