@@ -1,0 +1,91 @@
+name: "Substitute Health"
+
+# Daily check that the SystoleOS build hub is alive and useful, from the
+# outside, the way users see it.  The hub (Cuirass on hamming -> guix
+# publish -> relay to substitutes.systoleos.io) publishes a health beacon,
+# ci-status.txt, with every relay push; scripts/check-substitute-health.sh
+# fails when it is stale (relay stopped), when coverage of the Slicer
+# targets drops below COVERAGE_MIN, or when the last relay-realize run
+# errored.  Cheap: one HTTP request, no Guix.
+#
+# Alerting: the run fails (GitHub notifies) and an issue labelled
+# `substitute-health` is opened or updated; it is closed automatically
+# when the hub is healthy again.  Scheduled workflows run on the default
+# branch only.
+
+on:
+  schedule:
+    - cron: '0 8 * * *'   # after the 06:00 UTC relay push on the hub
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: substitute-health
+  cancel-in-progress: false
+
+jobs:
+  health:
+    name: substitutes.systoleos.io health
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PUBLIC_SUBSTITUTE_URL: https://substitutes.systoleos.io
+      MAX_AGE_HOURS: '36'
+      COVERAGE_MIN: '90'
+      GH_TOKEN: ${{ github.token }}
+      LABEL: substitute-health
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check the health beacon
+        id: check
+        run: |
+          set +e
+          ./scripts/check-substitute-health.sh | tee report.txt
+          rc=${PIPESTATUS[0]}
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          {
+            echo '### Substitute health'
+            echo '```'
+            cat report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 0
+
+      - name: Open or update the alert issue
+        if: steps.check.outputs.rc != '0'
+        run: |
+          gh label create "$LABEL" --color B60205 \
+            --description "Build hub / substitute mirror unhealthy" 2>/dev/null || true
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          {
+            echo "The daily substitute health check failed (exit ${{ steps.check.outputs.rc }}) on $(date -u +%F)."
+            echo
+            echo '```'
+            cat report.txt
+            echo '```'
+            echo
+            echo "Run: $run_url"
+          } > body.md
+          n=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$n" ]; then
+            gh issue comment "$n" --body-file body.md
+          else
+            gh issue create --title "Substitute mirror unhealthy (substitutes.systoleos.io)" \
+              --label "$LABEL" --body-file body.md
+          fi
+
+      - name: Close the alert issue when healthy
+        if: steps.check.outputs.rc == '0'
+        run: |
+          for n in $(gh issue list --label "$LABEL" --state open --json number --jq '.[].number'); do
+            gh issue close "$n" --comment "Healthy again on $(date -u +%F): ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          done
+
+      - name: Fail the run when unhealthy
+        if: steps.check.outputs.rc != '0'
+        run: exit 1

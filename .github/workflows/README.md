@@ -45,6 +45,17 @@ shared with local runs. `guix lint` exits 0 even on warnings, so the
 runner gates on filtered output: anything not matching the allowlist
 fails the check.
 
+### substitute-health.yml
+**Triggers:** daily at 08:00 UTC (schedule; default branch only) and
+`workflow_dispatch`.
+**Runs:** `scripts/check-substitute-health.sh` against the health beacon
+the build hub publishes with every relay push
+(`https://substitutes.systoleos.io/ci-status.txt`): fails when the beacon
+is older than 36 h, coverage is under 90 %, or the last relay-realize
+errored.  On failure it opens (or comments on) an issue labelled
+`substitute-health`; it closes it when healthy again.  One HTTP request,
+no Guix.
+
 ### commit-message-check.yml
 **Triggers:** every PR event and push to main.
 **Runs:** the `SystoleOS/guix-systole-check-commit-message-action`,
