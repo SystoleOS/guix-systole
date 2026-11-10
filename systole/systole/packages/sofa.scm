@@ -342,6 +342,12 @@ mechanics, and multiphysics coupling.  This Guix package builds the
 Slicer fork at v25.12 with the following plugins compiled inline:
 SofaPython3, SofaSTLIB, BeamAdapter, Registration, and Cosserat.
 It is the simulation backend for the SlicerSOFA 3D Slicer extension.")
-    (license license:lgpl2.1+)))
+    ;; SOFA itself is LGPL-2.1+; the components built inline add:
+    ;;   GPL-2+    Sofa/GUI/Batch
+    ;;   LGPL-3    STLIB, Cosserat
+    ;;   CeCILL-C  bundled CImg
+    ;;   MIT       bundled third-party headers
+    (license (list license:lgpl2.1+ license:gpl2+ license:lgpl3
+                   license:cecill-c license:expat))))
 
 
