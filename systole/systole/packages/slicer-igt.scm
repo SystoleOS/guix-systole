@@ -335,8 +335,12 @@ of the SlicerIGT source tree."
 cross-sectional images along a user-defined curved path (e.g. for needle
 trajectory planning), with reslicing views and a subject-hierarchy plugin.
 Built from the @file{PathExplorer} sub-directory of the SlicerIGT source tree."
-   #:extra-inputs (list slicer-markups-5.12 slicer-subjecthierarchy-5.12 slicer-plots-5.12)
-   #:propagated-inputs (list slicer-markups-5.12 slicer-subjecthierarchy-5.12 slicer-plots-5.12)
+   #:extra-inputs (list slicer-markups-5.12
+                        slicer-subjecthierarchy-5.12
+                        slicer-plots-5.12)
+   #:propagated-inputs (list slicer-markups-5.12
+                             slicer-subjecthierarchy-5.12
+                             slicer-plots-5.12)
    #:extra-configure-flags
    #~(list
       (string-append

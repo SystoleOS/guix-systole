@@ -120,7 +120,8 @@
             vtkaddon-9.6
             zlib
             ;; VTK external deps — VTK's cmake config (and ITK's UseITK.cmake, which
-            ;; calls find_package(VTK) internally) requires all packages that vtk-slicer-9.6
+            ;; calls find_package(VTK) internally) requires all packages that
+            ;; vtk-slicer-9.6
             ;; was built with to be findable at configure time.
             double-conversion
             eigen

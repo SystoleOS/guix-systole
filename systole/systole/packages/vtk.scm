@@ -378,7 +378,8 @@ future.")
     (inputs (modify-inputs (package-inputs %vtkaddon)
               (replace "vtk-slicer" %vtk-slicer-9.6)
               ;; Match VTK's MPI (Open MPI); see itk-slicer-5.4.6.
-              (replace "mpich" openmpi))))))
+              (delete "mpich")
+              (prepend openmpi))))))
 
 ;; Python-enabled vtkAddon for Slicer 5.12.
 (define-public vtkaddon-9.6

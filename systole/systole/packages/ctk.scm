@@ -383,7 +383,8 @@ as 3D Slicer.")
       (name "ctk-for-slicer-5.12")
       ;; Match VTK's MPI (Open MPI); see itk-slicer-5.4.6.
       (inputs (modify-inputs (package-inputs base)
-                (replace "mpich" openmpi)))
+                (delete "mpich")
+                (prepend openmpi)))
       (source
        (origin
          (method git-fetch)

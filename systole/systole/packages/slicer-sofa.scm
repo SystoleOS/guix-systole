@@ -68,7 +68,8 @@
                                #$(this-package-input "slicer-5.12")
                                "/lib/Slicer-5.12")
                 (string-append "-DPYTHONQT_INSTALL_DIR="
-                               #$(this-package-input "pythonqt-commontk-for-slicer-5.12")))
+                               #$(this-package-input
+                                  "pythonqt-commontk-for-slicer-5.12")))
         #:phases
         #~(modify-phases %standard-phases
             ;; The inner build path in CMakeLists.txt adds the four

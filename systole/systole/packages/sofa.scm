@@ -22,7 +22,8 @@
 ;;; soft-tissue mechanics and surgical simulation.  This module packages
 ;;; the Slicer fork of SOFA v26.06 with bundled plugins (SofaPython3,
 ;;; SofaSTLIB, BeamAdapter, Registration, Cosserat) built inline via
-;;; SOFA_EXTERNAL_DIRECTORIES, matching SlicerSOFA's preview branch (main after Slicer/SlicerSOFA#83).
+;;; SOFA_EXTERNAL_DIRECTORIES, matching SlicerSOFA's preview branch (main
+;;; after Slicer/SlicerSOFA#83).
 ;;;
 ;;; Code:
 

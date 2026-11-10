@@ -383,5 +383,6 @@ library.")
               (prepend python-3.12)
               ;; vtk-slicer-9.6 is built with Open MPI; use the same MPI
               ;; so the 5.12 stack never loads both libmpi ABIs.
-              (replace "mpich" openmpi)))
+              (delete "mpich")
+              (prepend openmpi)))
     (home-page "https://github.com/Slicer/ITK/")))
