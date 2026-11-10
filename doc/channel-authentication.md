@@ -10,9 +10,10 @@ push (or MITM the transport) can change what every deployment builds.
 The repository already carries the two required files:
 
 - `.guix-authorizations` — the set of OpenPGP keys allowed to sign
-  commits (currently the fingerprint of Rafael Palomar's key
-  `6513 C724 8D7B ECE2 EC1B D34B 7035 0DAD 507F A72F`; edit if the
-  channel should be signed by a dedicated project key instead).
+  commits.  These are the `[S]` **subkey** fingerprints of the SystoleOS
+  signing identities (see *Signing identities* below).  During the
+  transition it also keeps the two personal subkeys of
+  `6513 C724 8D7B ECE2 EC1B D34B 7035 0DAD 507F A72F`.
 - This runbook.
 
 **ACTIVATED 2026-07-24**: introduction commit
@@ -96,6 +97,56 @@ The runbook below is kept for reference and for key additions/rotations:
    key (and export their key to the keyring branch).  Removal works the
    same way.  There is no revocation of history — protect the private
    key accordingly.
+
+## Signing identities
+
+The channel is signed by dedicated **SystoleOS** keys rather than a
+personal key.  Each identity has an ed25519 `[C]` primary kept offline
+and an ed25519 `[S]` subkey that does the signing.  Guix checks the
+fingerprint of the key that made the signature, so
+`.guix-authorizations` lists the **subkeys**.
+
+| Identity | Primary `[C]` | Signing subkey `[S]` (authorized) | Expires |
+|---|---|---|---|
+| `systole-maintainer`: Rafael Palomar (SystoleOS) <rafael.palomar@ous-research.no> | `8E7F 490D 73D8 D873 C191  9D84 7719 CCA4 C78C EBEA` | `C9BB 8076 BC2B 5DDB ECA9  EC02 D5A6 8127 FEA4 6FE1` | 2028-11-09 |
+| `systole-automation`: SystoleOS automation <rafael.palomar@ous-research.no> (agents/CI) | `03E1 D895 EB03 768A B21D  B0C1 5479 B8F0 34BC 265C` | `5948 EF7B 52C5 212B 16AD  1EF2 2A70 6BA9 58F6 B1F3` | 2027-11-10 |
+
+The public keys are on the `keyring` branch (`systole-maintainer.key`,
+`systole-automation.key`).  The maintainer primary certifies the
+automation UID.
+
+**Signing as the maintainer** (in a maintainer clone):
+
+```sh
+git config user.signingkey C9BB8076BC2B5DDBECA9EC02D5A68127FEA46FE1!
+git config commit.gpgsign true
+```
+
+**Transition from the personal key.**
+
+1. A commit signed by a personal subkey (`rafael-s`) adds the two
+   SystoleOS subkeys, and the keyring branch gains their public keys.
+2. Maintainer and automation commits land on `main`; check that
+   `guix git authenticate` passes after each one.
+3. A commit signed by the **maintainer** subkey removes the
+   personal `rafael` and `rafael-s` entries.
+
+The introduction (`0898d41…`, signer `53A2 D043 …`) does **not**
+change.  It only anchors the first commit, and `rafael.key` stays on the
+keyring branch so that history remains verifiable.
+
+**Rotation and revocation.**  Guix ignores OpenPGP expiry and revocation.
+The only revocation it honours is removing a fingerprint from
+`.guix-authorizations`.
+- Before an `[S]` subkey expires, issue its successor from the offline
+  primary.
+- Add the successor here in a commit signed by a key that is still
+  authorized.
+- Remove the old subkey only after the successor has signed.
+
+Calendar: the automation subkey around 2027-10, the maintainer subkey
+around 2028-10.  If the automation key is compromised, remove its line
+in a maintainer-signed commit, then revoke the subkey (or its primary).
 
 ## Why not activated automatically
 

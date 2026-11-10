@@ -3,14 +3,30 @@
 ;;
 ;; NOTE: guix authenticates against the fingerprint of the key that
 ;; actually made the signature -- for a primary key with signing
-;; subkeys, that is the SUBKEY fingerprint.  Both signing-capable
-;; subkeys of Rafael Palomar's primary key (6513 C724 8D7B ECE2 EC1B
-;; D34B 7035 0DAD 507F A72F, published on the 'keyring' branch) are
-;; authorized.  See doc/channel-authentication.md for key management.
+;; subkeys, that is the SUBKEY fingerprint, so the entries below are
+;; [S] subkeys.  Rotating a subkey therefore means adding its successor
+;; here (signed by a still-authorized key) before removing it.
+;;
+;; SystoleOS signing identities (all public keys on the 'keyring' branch):
+;;   maintainer  primary 8E7F 490D 73D8 D873 C191  9D84 7719 CCA4 C78C EBEA
+;;               Rafael Palomar (SystoleOS) <rafael.palomar@ous-research.no>
+;;   automation  primary 03E1 D895 EB03 768A B21D  B0C1 5479 B8F0 34BC 265C
+;;               SystoleOS automation <rafael.palomar@ous-research.no>
+;;               (agents/CI; certified by the maintainer primary)
+;;
+;; TRANSITIONAL: the two personal subkeys of 6513 C724 8D7B ECE2 EC1B
+;; D34B 7035 0DAD 507F A72F stay authorized until the SystoleOS keys
+;; have signed commits on main; they are then removed in a commit
+;; signed by the SystoleOS maintainer key.  See
+;; doc/channel-authentication.md.
 
 (authorizations
  (version 0)
- (("53A2 D043 E0DC 9249 DF75  ABB6 65D8 96E0 0C10 1DDF"
+ (("C9BB 8076 BC2B 5DDB ECA9  EC02 D5A6 8127 FEA4 6FE1"
+   (name "systole-maintainer"))
+  ("5948 EF7B 52C5 212B 16AD  1EF2 2A70 6BA9 58F6 B1F3"
+   (name "systole-automation"))
+  ("53A2 D043 E0DC 9249 DF75  ABB6 65D8 96E0 0C10 1DDF"
    (name "rafael"))
   ("6535 1744 FC42 6D6D E571  B84A 3553 0619 B58A D70A"
    (name "rafael-s"))))
