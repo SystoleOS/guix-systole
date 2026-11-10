@@ -372,6 +372,6 @@ protocol.")
 library.  The code originates from OpenIGTLink/OpenIGTLinkIF.  The main intent
 of the library is to share igtl code between Slicer, CustusX, IBIS, MITK and
 other systems.")
-  (license license:bsd-2)
+  (license license:asl2.0)
   (home-page "https://github.com/IGSIO/OpenIGTLinkIO"))))
 
