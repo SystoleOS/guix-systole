@@ -143,6 +143,35 @@ test_build() {
     done
 }
 
+# Closures whose derivations must compute on every PR: the user-facing
+# Slicer stacks.  `guix build -n` (dry run) evaluates the full closure --
+# gexps, patches (search-patches/slicer-patch), origins, inputs -- without
+# building anything, so it catches what module loading alone cannot
+# (a missing patch file, a bad input reference, a broken gexp) in
+# minutes on a GitHub-hosted runner.  Builds themselves happen on the
+# build hub (Cuirass on hamming), never in GitHub Actions.  One guix
+# invocation per target keeps each evaluation's memory bounded.
+DERIVATION_TARGETS=(
+    "slicer-all-5.8"
+    "slicer-all-5.10"
+    "slicer-all-5.12"
+    "slicer-next"
+)
+
+derivation_check() {
+    local pkg="$1"
+    # shellcheck disable=SC2086
+    $GUIX build -L "$REPO_ROOT/systole" --dry-run "$pkg"
+}
+
+test_derivations() {
+    log_info "=== Running Derivation (dry-run) Tests ==="
+
+    for package in "${DERIVATION_TARGETS[@]}"; do
+        run_test "Derivations $package" "derivation_check $package" || true
+    done
+}
+
 # Print usage
 usage() {
     cat <<EOF
@@ -155,6 +184,7 @@ CATEGORIES:
     packages    Run package tests
     installer   Run installer tests (module loading only)
     lint        Run lint tests
+    derivations Compute (dry-run) the derivations of the Slicer stacks
     build       Run build tests (slow!)
 
 OPTIONS:
@@ -198,6 +228,9 @@ main() {
             ;;
         lint)
             test_lint
+            ;;
+        derivations)
+            test_derivations
             ;;
         build)
             test_build
