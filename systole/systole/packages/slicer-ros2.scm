@@ -25,7 +25,7 @@
 ;;; it calls `find_package(Slicer)' + `slicerMacroBuildLoadableModule'
 ;;; AND `find_package(ament_cmake)' + ROS 2 message/client-library
 ;;; find_package()s in the same CMakeLists.txt.  We build it against
-;;; the @code{slicer-5.8} package from (systole packages slicer) and
+;;; the @code{slicer-5.12} package from (systole packages slicer) and
 ;;; the ROS 2 Jazzy components from (systole packages ros2 jazzy).
 ;;;
 ;;; Code:
@@ -77,13 +77,13 @@
                 ;; Slicer modules must install into a consistent layout
                 ;; so SLICER_ADDITIONAL_MODULE_PATHS can find them.
                 (string-append "-DSlicer_INSTALL_QTLOADABLEMODULES_LIB_DIR="
-                               "lib/Slicer-5.8/qt-loadable-modules")
+                               "lib/Slicer-5.12/qt-loadable-modules")
                 (string-append "-DSlicer_INSTALL_QTLOADABLEMODULES_SHARE_DIR="
-                               "share/Slicer-5.8/qt-loadable-modules")
+                               "share/Slicer-5.12/qt-loadable-modules")
                 ;; Point cmake directly at Slicer's config dir.
                 (string-append "-DSlicer_DIR="
-                               #$(this-package-input "slicer-5.8")
-                               "/lib/Slicer-5.8"))
+                               #$(this-package-input "slicer-5.12")
+                               "/lib/Slicer-5.12"))
         #:phases
         #~(modify-phases %standard-phases
             (add-after 'unpack 'patch-install-layout
@@ -155,16 +155,16 @@
                       qttools "/include/qt5/QtUiTools\")\n"
                       "link_libraries(Qt5::UiTools)")))))))))
       (native-inputs (list python))
-      ;; UseSlicer.cmake transitively requires all of slicer-5.8's build-time
+      ;; UseSlicer.cmake transitively requires all of slicer-5.12's build-time
       ;; libraries (Qt5, VTK, ITK, PNG, EXPAT, HDF5, ...) at configure time,
-      ;; not just slicer-5.8 itself.  We start from slicer-5.8's own input
+      ;; not just slicer-5.12 itself.  We start from slicer-5.12's own input
       ;; list (same pattern as make-slicer-loadable-module) and prepend
-      ;; slicer-5.8 + the ROS 2 deps upstream SlicerROS2 declares.
+      ;; slicer-5.12 + the ROS 2 deps upstream SlicerROS2 declares.
       (inputs
        (fold (lambda (pkg acc)
                (modify-inputs acc (prepend pkg)))
-             (modify-inputs (package-inputs slicer-5.8)
-               (prepend slicer-5.8))
+             (modify-inputs (package-inputs slicer-5.12)
+               (prepend slicer-5.12))
              (list
               ;; ROS 2 packages from upstream SlicerROS2_ROS_DEPENDENCIES
               ;; (minus cisst_msgs, gated on USE_CISST_MSGS).
@@ -191,12 +191,12 @@
               qttools
               ;; Python 3 for the build-time code generator
               python)))
-      ;; Propagate slicer-5.8 so `guix install slicer-ros2-module-jazzy'
+      ;; Propagate slicer-5.12 so `guix install slicer-ros2-module-jazzy'
       ;; brings a usable Slicer alongside it; also propagate ros-jazzy
       ;; components whose .so files are dlopen'd by the module at
       ;; runtime for message (de)serialization.
       (propagated-inputs
-       (list slicer-5.8
+       (list slicer-5.12
              ros-rclcpp-jazzy
              ros-rmw-implementation-jazzy
              ros-rmw-cyclonedds-cpp-jazzy
@@ -210,7 +210,7 @@
        "@code{slicer_ros2_module} is a 3D Slicer loadable module that
 exposes ROS 2 nodes, publishers, subscribers, service clients,
 parameters, and a @code{tf2} buffer inside Slicer's MRML scene graph.
-It is built against the @code{slicer-5.8} package and the ROS 2
+It is built against the @code{slicer-5.12} package and the ROS 2
 Jazzy distribution provided by the @code{systole} channel.
 
 Set @env{RMW_IMPLEMENTATION=rmw_cyclonedds_cpp} in the profile that

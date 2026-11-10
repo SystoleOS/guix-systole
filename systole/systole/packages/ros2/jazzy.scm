@@ -3882,7 +3882,7 @@ provided by guix-systole).")
         ;; saw-sensable-phantom (core) for its share/ JSON configs.
         (@ (systole packages cisst) saw-sensable-phantom)
         ;; Slicer + all loadable/scripted modules + SlicerROS2.
-        (@ (systole packages slicer) slicer-all-5.8)
+        (@ (systole packages slicer) slicer-all-5.12)
         (@ (systole packages slicer-ros2) slicer-ros2-module-jazzy)))
 
 (define-public ros-jazzy-touch
@@ -3959,14 +3959,14 @@ provided by guix-systole).")
         eq?)))
     (native-search-paths
      (append (ros2-native-search-paths jazzy-distro)
-             ;; Slicer module discovery — same paths as slicer-5.8's
+             ;; Slicer module discovery — same paths as slicer-5.12's
              ;; native-search-paths so the profile hooks set
              ;; SLICER_ADDITIONAL_MODULE_PATHS without needing
-             ;; slicer-all-5.8 as a separate manifest entry.
+             ;; slicer-all-5.12 as a separate manifest entry.
              (list (search-path-specification
                     (variable "SLICER_ADDITIONAL_MODULE_PATHS")
-                    (files '("lib/Slicer-5.8/qt-loadable-modules"
-                             "lib/Slicer-5.8/cli-modules")))
+                    (files '("lib/Slicer-5.12/qt-loadable-modules"
+                             "lib/Slicer-5.12/cli-modules")))
                    (search-path-specification
                     (variable "SLICER_INIT_DIR")
                     (files '("share/slicer-init"))
