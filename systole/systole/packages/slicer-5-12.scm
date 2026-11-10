@@ -177,6 +177,18 @@
 (define %slicer-5.12-commit "4e21c19d8360242d88d6ca2490bf52400441b8e1")
 (define %slicer-5.12-hash (base32 "0696mlgfb8lp1igs22mi5aaaq9gb0z3am04ykh51i7ggrd6xa87c"))
 
+;; SlicerExecutionModel built against the 5.12 stack's ITK.  The shared
+;; `slicerexecutionmodel' in (systole packages slicer-factory) is built
+;; against itk-slicer 5.4.0 (and through it vtk-slicer 9.2), so using it
+;; here put a second ITK and a second VTK, with identical sonames, into the
+;; same Slicer process.  Only ITK is swapped: SEM has no other stack input.
+(define-public slicerexecutionmodel-for-slicer-5.12
+  (package
+    (inherit slicerexecutionmodel)
+    (name "slicerexecutionmodel-for-slicer-5.12")
+    (inputs (modify-inputs (package-inputs slicerexecutionmodel)
+              (replace "itk-slicer" itk-slicer-5.4.6)))))
+
 ;;;
 ;;; Slicer 5.12
 ;;;
@@ -222,10 +234,10 @@
               "-DSlicer_BUILD_CLI:BOOL=OFF"
               "-DSlicer_BUILD_CLI_SUPPORT:BOOL=ON"
               (string-append "-DSlicerExecutionModel_DIR="
-                             #$(this-package-input "slicerexecutionmodel")
+                             #$(this-package-input "slicerexecutionmodel-for-slicer-5.12")
                              "/lib")
               (string-append "-DGenerateCLP_DIR="
-                             #$(this-package-input "slicerexecutionmodel")
+                             #$(this-package-input "slicerexecutionmodel-for-slicer-5.12")
                              "/lib/GenerateCLP")
 
               ;; QT
@@ -379,7 +391,7 @@
            libarchive-slicer
            teem-slicer
            vtkaddon-9.6
-           slicerexecutionmodel
+           slicerexecutionmodel-for-slicer-5.12
            qrestapi))
     (native-inputs (list patchelf pkg-config))
     (native-search-paths
