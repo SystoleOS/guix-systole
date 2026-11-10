@@ -30,8 +30,8 @@ Then pull and build:
 
 ```bash
 guix pull
-guix build slicer-5.8          # Slicer application (Python-enabled)
-guix build slicer-all-5.8      # Slicer + all module packages
+guix build slicer-5.12         # Slicer application (Python-enabled)
+guix build slicer-all-5.12     # Slicer + all module packages
 ```
 
 Or from a local checkout (the channel root is the `systole/`
@@ -40,7 +40,7 @@ subdirectory, so always pass `-L systole` — not `-L .`):
 ```bash
 git clone https://github.com/SystoleOS/guix-systole.git
 cd guix-systole
-guix build -L systole slicer-all-5.8
+guix build -L systole slicer-all-5.12
 ```
 
 Search for channel packages by name:
@@ -61,12 +61,19 @@ guix weather -m manifest.scm                  # substitute coverage
 ## Available Packages
 
 ### Core Medical Imaging
-- **3D Slicer 5.8 and 5.10** — medical visualization and computing
-  platform, packaged as parallel stacks (`slicer-5.8`/`slicer-all-5.8`
-  and `slicer-5.10`/`slicer-all-5.10`); the application plus per-module
-  packages (loadable, scripted, and CLI modules). See
-  [doc/architecture.md](doc/architecture.md) for how the modularization
-  works.
+- **3D Slicer** — medical visualization and computing platform, packaged
+  as parallel stacks: the application plus per-module packages (loadable,
+  scripted, and CLI modules). See [doc/architecture.md](doc/architecture.md)
+  for how the modularization works.
+  - **Stable: 5.12** (`slicer-5.12`/`slicer-all-5.12`) — tracks upstream's
+    latest 5.12.x release. Maintained.
+  - **Preview: `slicer-next`** — tracks Slicer main (5.13 development) on
+    the 5.12 dependency stack; application only, no per-module packages.
+    Maintained, but expect breakage.
+  - **Frozen: 5.8 and 5.10** (`slicer-5.8`/`slicer-all-5.8`,
+    `slicer-5.10`/`slicer-all-5.10`) — kept so existing profiles keep
+    evaluating, but they receive no updates or fixes (including the
+    single-ITK/single-MPI fixes applied to 5.12). Move to 5.12.
 - **VTK / ITK** (`vtk-slicer`, `vtkaddon`, `itk-slicer`) — visualization
   and image processing, Slicer variants
 - **CTK** (`ctk`, `ctkapplauncher`) — Common Toolkit for biomedical

@@ -6,6 +6,23 @@
 (channel-news
  (version 0)
 
+ (entry (commit "2c00922dbe4b16e2b250c42f4bf77cbe1d00635e")
+        (title (en "Slicer 5.8 and 5.10 stacks are frozen"))
+        (body
+         (en "Only two Slicer stacks are maintained from now on: the stable
+@code{slicer-5.12}/@code{slicer-all-5.12}, which follows upstream 5.12.x
+releases, and the @code{slicer-next} preview, which follows Slicer main.
+
+The @code{slicer-5.8} and @code{slicer-5.10} stacks are frozen: their
+packages stay in the channel and keep evaluating, but they get no further
+updates or fixes.  Please move to @code{slicer-all-5.12}.
+
+The 5.12 stack also gets two fixes that rebuild it: SlicerExecutionModel is
+now built against the stack's own ITK (5.4.6), so Slicer no longer loads a
+second ITK (5.4.0) and VTK (9.2) alongside its own, and the whole stack now
+uses one MPI implementation (Open MPI) instead of mixing MPICH and Open
+MPI.  The frozen stacks keep both problems.")))
+
  (entry (commit "d8ba47c2fbfc060342332bacec5c3fe0ce6d683e")
         (title (en "Slicer 5.12.4, now with SimpleITK"))
         (body
