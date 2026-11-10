@@ -1,0 +1,68 @@
+name: "Network Lint (weekly report)"
+
+# REPORT-ONLY.  The merge gate (guix-lint-check.yml) runs `guix lint
+# --no-network`: deterministic, same result for the same commit.  The
+# network checkers -- home-page, source, github-url, cve, refresh,
+# archival, synopsis, gnu-description -- report facts about the outside
+# world (new upstream releases, dead links, known CVEs, Software Heritage
+# archival) that change without any commit, so they run here, weekly,
+# and never turn a badge red.  Findings land in the job summary and in
+# one issue labelled `lint-network` (its body is replaced every week;
+# closed when there is nothing to report).  CVE findings are reviewed by
+# a human, never allowlisted.
+
+on:
+  schedule:
+    - cron: '0 5 * * 1'   # Mondays 05:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: lint-network-weekly
+  cancel-in-progress: false
+
+jobs:
+  report:
+    name: guix lint network checkers (report)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      GH_TOKEN: ${{ github.token }}
+      LABEL: lint-network
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Guix (bootstrap)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y guix
+
+      # Package list: LINT_PACKAGES + NETWORK_LINT_EXTRA in
+      # scripts/run-tests.sh (single source of truth with local runs).
+      - name: Run the network checkers (never fails)
+        env:
+          GUIX: guix time-machine -C channels-lock.scm --
+        run: |
+          ./scripts/run-tests.sh lint-network | tee report.md || true
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Update the report issue
+        run: |
+          [ -s report.md ] || { echo "empty report (time-machine failed?)"; exit 0; }
+          gh label create "$LABEL" --color FBCA04 \
+            --description "Weekly network lint report (non-gating)" 2>/dev/null || true
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          printf '\n_Run: %s_\n' "$run_url" >> report.md
+          n=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number // empty')
+          if grep -q '^None reported\.$' report.md && grep -q '^None\.$' report.md; then
+            [ -z "$n" ] || gh issue close "$n" --comment "Nothing to report on $(date -u +%F): $run_url"
+          elif [ -n "$n" ]; then
+            gh issue edit "$n" --body-file report.md
+            gh issue comment "$n" --body "Report refreshed on $(date -u +%F): $run_url"
+          else
+            gh issue create --title "Weekly network lint report" --label "$LABEL" --body-file report.md
+          fi

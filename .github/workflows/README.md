@@ -42,8 +42,21 @@ set is required — the apt Guix alone could never load them.
 `LINT_PACKAGES` array in `scripts/run-tests.sh` and the accepted
 warnings in `tests/lint-allowlist.regex` — single sources of truth
 shared with local runs. `guix lint` exits 0 even on warnings, so the
-runner gates on filtered output: anything not matching the allowlist
-fails the check.
+runner gates on lint's exit status plus the diagnostics located in the
+channel's own files (time-machine output never reaches the gate);
+anything not matching the allowlist fails the check.  Only the offline
+checkers run (`--no-network`, which keeps `derivation`): the network
+checkers live in the weekly report below.
+
+### lint-network-weekly.yml (report only)
+**Triggers:** weekly (Mondays 05:00 UTC) and `workflow_dispatch`.
+**Runs:** `./scripts/run-tests.sh lint-network`: the network-dependent
+`guix lint` checkers (home-page, source, github-url, cve, refresh,
+archival, synopsis, gnu-description) on `LINT_PACKAGES` plus
+`NETWORK_LINT_EXTRA`.  Never fails: findings go to the job summary and
+to one issue labelled `lint-network` (body replaced weekly, closed when
+clean).  CVE findings are reviewed, never allowlisted.  The merge gate
+(`guix-lint-check.yml`) runs `guix lint --no-network` only.
 
 ### commit-message-check.yml
 **Triggers:** every PR event and push to main.
