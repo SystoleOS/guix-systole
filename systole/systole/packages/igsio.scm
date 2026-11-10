@@ -87,13 +87,13 @@
                   "-DIGSIO_USE_SYSTEM_ZLIB:BOOL=ON"
                   "-DIGSIO_USE_3DSlicer:BOOL=OFF"
                   (string-append "-DVTK_DIR="
-                                 #$(this-package-input "vtk-slicer")
-                                 "/lib/cmake/vtk-9.2")
+                                 #$(this-package-input "vtk-slicer-9.6")
+                                 "/lib/cmake/vtk-9.6")
                   (string-append "-DITK_DIR="
                                  #$(this-package-input "itk-slicer")
                                  "/lib/cmake/ITK-5.4")
                   (string-append "-DvtkAddon_DIR="
-                                 #$(this-package-input "vtkaddon")
+                                 #$(this-package-input "vtkaddon-9.6")
                                  "/lib/cmake")
                   (string-append "-DQt5_DIR="
                                  #$(this-package-input "qtbase")
@@ -113,12 +113,12 @@
 
                   )))
    (inputs (list
-            vtk-slicer
-            itk-slicer
-            vtkaddon
+            vtk-slicer-9.6
+            itk-slicer-5.4.6
+            vtkaddon-9.6
             zlib
             ;; VTK external deps — VTK's cmake config (and ITK's UseITK.cmake, which
-            ;; calls find_package(VTK) internally) requires all packages that vtk-slicer
+            ;; calls find_package(VTK) internally) requires all packages that vtk-slicer-9.6
             ;; was built with to be findable at configure time.
             double-conversion
             eigen
@@ -141,7 +141,7 @@
             tbb
             python))
 
-   (propagated-inputs (list vtk-slicer ctk vtkaddon))
+   (propagated-inputs (list vtk-slicer-9.6 ctk-for-slicer-5.12 vtkaddon-9.6))
 
    (home-page "https://github.com/IGSIO/IGSIO")
    (synopsis "Image Guided Surgery InterOperability library")
@@ -195,9 +195,9 @@ SlicerIGSIO 3D Slicer extensions.")
              (list "-DCMAKE_BUILD_TYPE:STRING=Release"
                    "-DBUILD_TESTING:BOOL=OFF"
                    (string-append "-DSlicer_DIR="
-                                  #$slicer-5.8 "/lib/Slicer-5.8")
+                                  #$slicer-5.12 "/lib/Slicer-5.12")
                    (string-append "-DPYTHONQT_INSTALL_DIR="
-                                  #$pythonqt-commontk)
+                                  #$pythonqt-commontk-for-slicer-5.12)
                    (string-append "-DIGSIO_DIR="
                                   #$igsio "/lib/cmake/IGSIO"))
              #$extra-configure-flags)
@@ -213,8 +213,8 @@ SlicerIGSIO 3D Slicer extensions.")
                   (chdir "build"))))))
    (inputs (fold (lambda (pkg acc)
                    (modify-inputs acc (prepend pkg)))
-                 (modify-inputs (package-inputs slicer-5.8)
-                   (prepend slicer-5.8)
+                 (modify-inputs (package-inputs slicer-5.12)
+                   (prepend slicer-5.12)
                    (prepend igsio))
                  extra-inputs))
    (home-page "https://github.com/IGSIO/SlicerIGSIO")
@@ -230,19 +230,19 @@ SlicerIGT.")
 (define-public slicer-igsio-common
   (make-slicer-igsio-common
    #:name "slicer-igsio-common"
-   #:extra-inputs (list slicer-sequences-5.8 slicer-volumes-5.8)
+   #:extra-inputs (list slicer-sequences-5.12 slicer-volumes-5.12)
    #:extra-configure-flags
    #~(list
       (string-append
        "-DvtkSlicerSequencesModuleMRML_INCLUDE_DIRS="
-       #$slicer-sequences-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerSequencesModuleMRML")
+       #$slicer-sequences-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerSequencesModuleMRML")
       (string-append
        "-DvtkSlicerVolumesModuleLogic_INCLUDE_DIRS="
-       #$slicer-volumes-5.8
-       "/include/Slicer-5.8/qt-loadable-modules/vtkSlicerVolumesModuleLogic")
+       #$slicer-volumes-5.12
+       "/include/Slicer-5.12/qt-loadable-modules/vtkSlicerVolumesModuleLogic")
       (string-append
        "-DEXTRA_MODULE_LIB_DIRS="
-       #$slicer-sequences-5.8 "/lib/Slicer-5.8/qt-loadable-modules"
-       ";" #$slicer-volumes-5.8 "/lib/Slicer-5.8/qt-loadable-modules"))))
+       #$slicer-sequences-5.12 "/lib/Slicer-5.12/qt-loadable-modules"
+       ";" #$slicer-volumes-5.12 "/lib/Slicer-5.12/qt-loadable-modules"))))
 

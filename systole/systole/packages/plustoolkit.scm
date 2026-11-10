@@ -152,8 +152,8 @@ data by the PlusLib test suite.
                             #$(this-package-input "zlib") "/include")
              ;; Dependency cmake config paths
              (string-append "-DVTK_DIR="
-                            #$(this-package-input "vtk-slicer")
-                            "/lib/cmake/vtk-9.2")
+                            #$(this-package-input "vtk-slicer-9.6")
+                            "/lib/cmake/vtk-9.6")
              (string-append "-DITK_DIR="
                             #$(this-package-input "itk-slicer")
                             "/lib/cmake/ITK-5.4")
@@ -161,7 +161,7 @@ data by the PlusLib test suite.
                             #$(this-package-input "igsio")
                             "/lib/cmake/IGSIO")
              (string-append "-DvtkAddon_DIR="
-                            #$(this-package-input "vtkaddon")
+                            #$(this-package-input "vtkaddon-9.6")
                             "/lib/cmake")
              (string-append "-DOpenIGTLink_DIR="
                             #$(this-package-input "openigtlink")
@@ -180,9 +180,9 @@ data by the PlusLib test suite.
                             #$(this-package-input "pluslibdata")
                             "/share/PlusLib-2.9"))))
    (inputs
-    (list vtk-slicer
-          itk-slicer
-          vtkaddon
+    (list vtk-slicer-9.6
+          itk-slicer-5.4.6
+          vtkaddon-9.6
           igsio
           openigtlink
           openigtlinkio
@@ -218,7 +218,7 @@ data by the PlusLib test suite.
     ;; (DeviceSetConfigurationDirectory, ImageDirectory, ModelDirectory) remains
     ;; valid as long as pluslib is in the profile — GC will not collect pluslibdata
     ;; independently.
-    (list igsio itk-slicer openigtlink openigtlinkio pluslibdata vtk-slicer))
+    (list igsio itk-slicer-5.4.6 openigtlink openigtlinkio pluslibdata vtk-slicer-9.6))
    (home-page "https://plustoolkit.github.io/")
    (synopsis "Platform for Ultrasound-guided Intervention Software — core library")
    (description
@@ -286,7 +286,7 @@ require proprietary vendor SDKs.  The virtual and network data sources
              ;; dirs (needed transitively via igsioVideoFrame.h). vtkAddon uses
              ;; a flat cmake directory, so we must provide the path explicitly.
              (string-append "-DvtkAddon_DIR="
-                            #$(this-package-input "vtkaddon")
+                            #$(this-package-input "vtkaddon-9.6")
                             "/lib/cmake")
              ;; PlusLibConfig.cmake calls find_package(VTK) which in turn
              ;; calls find_package(Python3); provide explicit paths.
@@ -315,8 +315,8 @@ require proprietary vendor SDKs.  The virtual and network data sources
    (inputs
     (list pluslib
           pluslibdata
-          itk-slicer
-          vtkaddon
+          itk-slicer-5.4.6
+          vtkaddon-9.6
           python
           ;; Qt5 components used by fCal and PlusServerLauncher
           qtbase-5
