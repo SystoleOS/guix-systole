@@ -61,3 +61,36 @@ any RESTful web services.  It supports multiple interfaces, including
 qRestAPI for general RESTful APIs, qGirderAPI for Girder, and qMidasAPI for
 Midas.")
     (license license:asl2.0)))
+
+;; Slicer main (slicer-next) pins qRestAPI f933aad, which includes upstream
+;; "ENH: Adopt vtkAddon-level packaging": the exported qRestAPI target carries
+;; its include directories, and Slicer main relies on that (it dropped both
+;; qRestAPI_USE_FILE and the explicit qRestAPI_INCLUDE_DIRS).  The 0001 backport
+;; above is part of this commit, so no patch is needed.
+(define-public qrestapi-for-slicer-next
+  (let ((commit "f933aadb440a8660fe02460142f82cc3cfd9db11")
+        (revision "0"))
+    (package
+      (inherit qrestapi)
+      (name "qrestapi-for-slicer-next")
+      (version (git-version "0.1" revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference
+               (url "https://github.com/commontk/qRestAPI")
+               (commit commit)))
+         (file-name (git-file-name name version))
+         (sha256
+          (base32 "11vcy3nx1xw77afmbiy3n0mw13xvqc1a73vf1pmfvpr5d87zxyvw"))))
+      (arguments
+       (list
+        #:tests? #f
+        #:configure-flags
+        #~(list "-DqRestAPI_QT_VERSION:STRING=5"
+                "-DBUILD_SHARED_LIBS:BOOL=ON"
+                "-DBUILD_TESTING:BOOL=OFF"
+                "-DqRestAPI_INSTALL_DEVELOPMENT:BOOL=ON"
+                ;; The default, cmake/qRestAPI, is not searched by
+                ;; find_package on GNU/Linux.
+                "-DqRestAPI_INSTALL_CMAKE_DIR:STRING=lib/cmake/qRestAPI"))))))

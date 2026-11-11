@@ -1507,16 +1507,19 @@ dicom, extensionwizard, dicomlib, lineprofile).")
 ;;;
 
 ;; slicer-next tracks the Slicer main branch (5.13.0 development) and shares
-;; the whole 5.12 dependency stack (VTK 9.6.2, ITK 5.4.6, CTK 5056664a,
-;; vtkAddon 2ed3e222, Python 3.12, Qt5), differing only in the Slicer source
-;; pin.  Upstream main has meanwhile moved its SuperBuild to ITK 5.4.7, a
-;; newer slicer-v9.6.2 VTK commit and newer CTK/vtkAddon; slicer-next keeps
-;; the 5.12 pins until a build shows main actually needs the newer ones.
+;; most of the 5.12 dependency stack (VTK 9.6.2, ITK 5.4.6, vtkAddon 2ed3e222,
+;; Python 3.12, Qt5).  Two dependencies follow main's SuperBuild pins because
+;; main needs them:
+;;   - qRestAPI f933aad: main uses the include directories of the exported
+;;     qRestAPI target (with qRestAPI 88c02c5 the build fails on qRestAPI.h);
+;;   - CTK d3a09b0: main's DICOM plugins call ctkDICOMDatabase::fileValues().
+;; Main's newer VTK (167845c, five bug-fix backports) and ITK (release-5.4
+;; backports) pins are not needed to build or run, so the 5.12 ones are kept.
 ;;
 ;; The base patches are the slicer-5.12 series with these exceptions
 ;; (see %slicer-next-patch-names):
 ;;   - dropped, upstreamed on main: 0003 (qRestAPI imported target, upstream
-;;     124d70f40), 0049 (numpy/scipy preload block removed upstream), 0067
+;;     124d70f40; needs qrestapi-for-slicer-next), 0049 (numpy/scipy preload block removed upstream), 0067
 ;;     (vtkWin32OutputWindow.h now guarded upstream);
 ;;   - rebased, under patches/slicer-5.12/next/: 0007 (Scope CPack blocks;
 ;;     main reworked the macOS qt_root_dir detection) and 0047 (CTK plugin
@@ -1561,6 +1564,11 @@ dicom, extensionwizard, dicomlib, lineprofile).")
        (sha256 %slicer-next-hash)
        (patches (map (lambda (p) (slicer-patch "5.12" p))
                      %slicer-next-patch-names))))
+    (inputs (modify-inputs (package-inputs slicer-5.12)
+              (replace "ctk-for-slicer-5.12" ctk-for-slicer-next)
+              (replace "qrestapi" qrestapi-for-slicer-next)))
+    (propagated-inputs (modify-inputs (package-propagated-inputs slicer-5.12)
+                         (replace "ctk-for-slicer-5.12" ctk-for-slicer-next)))
     ;; A main-branch build installs into lib/Slicer-5.13 (Slicer_VERSION is
     ;; 5.13 on main), so every inherited phase and search path that hard-codes
     ;; the lib/Slicer-5.12 directory is overridden with its 5.13 equivalent.
