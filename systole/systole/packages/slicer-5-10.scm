@@ -382,7 +382,7 @@
     (description
      "3D Slicer is a multi-platform, free and open source software package for
 visualization and medical image computing.")
-    (home-page "https://www.slicer.org/")
+    (home-page "https://slicer.org/")
     (license license:bsd-3)))
 
 ;; slicer-5.10 is the canonical public Slicer 5.10 package.  Python support is

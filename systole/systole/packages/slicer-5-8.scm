@@ -103,7 +103,7 @@
      "Upstream source tree of 3D Slicer 5.8 (commit @code{11eaf62e}), without
 any Guix-specific build patches.  Useful as a read-only reference for
 development tools, code search, and documentation generation.")
-    (home-page "https://www.slicer.org")
+    (home-page "https://slicer.org/")
     (license license:bsd-3)))
 
 (define %slicer-5.8
@@ -472,7 +472,7 @@ visualization and medical image computing.  It provides capabilities for:
 @item Three-dimensional visualization
 @item Support for various imaging modalities
 @end itemize")
-    (home-page "https://www.slicer.org/")
+    (home-page "https://slicer.org/")
     (license license:bsd-3)))
 
 ;;;
