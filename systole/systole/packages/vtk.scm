@@ -390,5 +390,5 @@ future.")
                 (delete "-DvtkAddon_WRAP_PYTHON:BOOL=OFF" #$flags)))))
     (inputs
      (modify-inputs (package-inputs %vtkaddon-9.6)
-       (replace "vtk-slicer" vtk-slicer-9.6)
-       (prepend python-3.12)))))
+       (delete "vtk-slicer")
+       (prepend vtk-slicer-9.6 python-3.12)))))

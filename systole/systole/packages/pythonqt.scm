@@ -78,13 +78,16 @@
          "-DPythonQt_Wrap_Qtmultimedia:BOOL=ON"
          ;; QtWebKit is absent from Qt 5.6+ → keep OFF
          (string-append "-DPython3_EXECUTABLE=" #$python-pkg "/bin/python3")
-         (string-append "-DPython3_INCLUDE_DIR=" #$python-pkg "/include/python" #$python-version)
-         (string-append "-DPython3_LIBRARY=" #$python-pkg "/lib/libpython" #$python-version ".so"))
+         (string-append "-DPython3_INCLUDE_DIR=" #$python-pkg
+                        "/include/python" #$python-version)
+         (string-append "-DPython3_LIBRARY=" #$python-pkg
+                        "/lib/libpython" #$python-version ".so"))
       #:tests? #f))
     (home-page "https://github.com/commontk/PythonQt")
     (synopsis "CMake-ified version of PythonQt")
     (description
-     "PythonQt is a dynamic Python binding for Qt. It offers an easy way to embed the Python scripting language into your Qt applications.")
+     "PythonQt is a dynamic Python binding for Qt.  It offers an easy way to
+embed the Python scripting language into your Qt applications.")
     (license license:lgpl2.1)))
 
 ;;;

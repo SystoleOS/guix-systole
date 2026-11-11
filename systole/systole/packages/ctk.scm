@@ -351,6 +351,13 @@ as 3D Slicer.")
                                 (search-patch
                                  "0005-COMP-Add-currentComponent-API-to-ctkVTKVolumePropert.patch")))))))))
 
+;; Listed at top level so that the long names (kept as they are: they
+;; follow the git format-patch series) fit in 90 columns.
+(define %ctk-for-slicer-5.12-patches
+  '("0006-ENH-Fix-locating-DCMTK-when-using-CTK-5.12.patch"
+    "0002-ENH-Add-FindPythonQt.cmake-to-installed-cmake-modules.patch"
+    "0007-COMP-Fix-VTK-include-dirs-missing-when-PYTHONQT-USE-VTK-5.12.patch"))
+
 ;; Slicer 5.12 variant — CTK 5056664a, VTK 9.6, ITK 5.4.6, Python 3.12.
 ;;
 ;; Unlike ctk-for-slicer-5.10 (which reuses the %ctk source pin), this variant
@@ -383,7 +390,4 @@ as 3D Slicer.")
          (file-name (git-file-name "ctk-for-slicer-5.12" "0.1"))
          (sha256
           (base32 "1izfcc5png7sswprcp8i0ij2mfpsn11h10y9y8a8sbxfnvdpf9a8"))
-         (patches (search-patches
-                   "0006-ENH-Fix-locating-DCMTK-when-using-CTK-5.12.patch"
-                   "0002-ENH-Add-FindPythonQt.cmake-to-installed-cmake-modules.patch"
-                   "0007-COMP-Fix-VTK-include-dirs-missing-when-PYTHONQT-USE-VTK-5.12.patch")))))))
+         (patches (map search-patch %ctk-for-slicer-5.12-patches)))))))
