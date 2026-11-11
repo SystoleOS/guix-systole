@@ -82,17 +82,21 @@ test_installer() {
 # Single source of truth for the lint list -- CI calls this script, so
 # keep additions here rather than in the workflow files.
 LINT_PACKAGES=(
-    "vtk-slicer"
-    "vtkaddon"
-    "itk-slicer"
-    "slicer-5.8"
-    "slicer-volumes-5.8"
-    "ctk"
+    # The current Slicer stack (5.12) and the packages it builds on.  The
+    # 5.8 stack is frozen; lint follows the stack under active work.
+    "vtk-slicer-9.6"
+    "vtkaddon-9.6"
+    "itk-slicer@5.4.6"
+    "pythonqt-commontk-for-slicer-5.12"
+    "ctk-for-slicer-5.12"
+    "slicer-5.12"
+    "slicer-volumes-5.12"
     "ctkapplauncher"
     "teem-slicer"
     "netcdf-slicer"
     "libarchive-slicer"
     "qrestapi"
+    # Still built against slicer-5.8 (no 5.12 variant yet).
     "openigtlink"
     "slicer-openigtlink"
 )
@@ -102,12 +106,30 @@ LINT_ALLOWLIST="$REPO_ROOT/tests/lint-allowlist.regex"
 # `guix lint` exits 0 even when it emits warnings, so gate on its
 # output: anything not matching the allowlist of documented technical
 # debt fails the check.
+#
+# --no-network runs only the deterministic, offline checkers.  The
+# network checkers (refresh, archival, home-page, source, cve, ...)
+# report facts about the outside world -- "can be upgraded to X",
+# "updater failed", redirects -- so the gate went red whenever an
+# upstream cut a release, independent of the commit under test.
+# Upstream freshness is tracked separately, not as a merge gate.
 lint_package() {
     local pkg="$1"
-    local out
+    local out status
     # shellcheck disable=SC2086
-    out=$($GUIX lint -L "$REPO_ROOT/systole" --exclude=archival,refresh "$pkg" 2>&1 \
-              | grep -v '^;;;' || true)
+    out=$($GUIX lint -L "$REPO_ROOT/systole" --no-network "$pkg" 2>&1)
+    status=$?
+    if [ $status -ne 0 ]; then
+        # Unknown package, module that fails to load, crashed checker.
+        printf '%s\n' "$out"
+        return 1
+    fi
+    # Gate only on diagnostics located in this channel's own files
+    # ("<repo>/systole/...scm:L:C: ...").  Everything else in the
+    # stream is the time-machine/inferior talking (channel
+    # authentication warnings, substitute progress, profile hooks) and
+    # varies with the host, not with the commit under test.
+    out=$(printf '%s\n' "$out" | grep -F "$REPO_ROOT/systole/" || true)
     if [ -s "$LINT_ALLOWLIST" ]; then
         out=$(printf '%s\n' "$out" | grep -Ev -f "$LINT_ALLOWLIST" || true)
     fi
@@ -143,6 +165,50 @@ test_build() {
     done
 }
 
+# Network-dependent lint checkers: facts about the outside world (new
+# upstream releases, dead or redirected home pages, unreachable sources,
+# known CVEs, Software Heritage archival).  Never a merge gate -- they
+# change without any commit -- so they run weekly in a REPORT-ONLY job
+# (.github/workflows/lint-network-weekly.yml).  CVE findings are reviewed,
+# never allowlisted.
+NETWORK_CHECKERS="home-page,source,github-url,cve,refresh,archival,synopsis,gnu-description"
+NETWORK_LINT_EXTRA=(
+    "slicer-all-5.12"
+    "slicer-next"
+)
+
+# Print a report (Markdown) of every network-checker diagnostic located in
+# this channel's files, CVEs first.  Always returns 0: report, not gate.
+lint_network_report() {
+    local pkg out
+    local all cves
+    all=$(mktemp); cves=$(mktemp)
+    for pkg in "${LINT_PACKAGES[@]}" "${NETWORK_LINT_EXTRA[@]}"; do
+        # shellcheck disable=SC2086
+        out=$($GUIX lint -L "$REPO_ROOT/systole" -c "$NETWORK_CHECKERS" "$pkg" 2>&1)
+        # Diagnostics located in our files, plus lint's own errors
+        # (unknown package, crashed checker) so nothing fails silently.
+        out=$(printf '%s\n' "$out" | grep -E -e "^$REPO_ROOT/systole/" -e '^guix lint: error' \
+                  | sed "s#$REPO_ROOT/##" || true)
+        [ -n "$out" ] || continue
+        printf '%s\n' "$out" | grep -iE 'CVE-[0-9]{4}-' >>"$cves" || true
+        printf '%s\n' "$out" | grep -viE 'CVE-[0-9]{4}-' \
+            | sed "s#^#- \`$pkg\` #" >>"$all" || true
+    done
+    echo "## Network lint report ($(date -u +%F))"
+    echo
+    echo "Checkers: \`$NETWORK_CHECKERS\`."
+    echo "Packages: ${LINT_PACKAGES[*]} ${NETWORK_LINT_EXTRA[*]}."
+    echo
+    echo "### CVEs (review each; never allowlist)"
+    if [ -s "$cves" ]; then sort -u "$cves" | sed "s/^/- /"; else echo "None reported."; fi
+    echo
+    echo "### Other findings"
+    if [ -s "$all" ]; then cat "$all"; else echo "None."; fi
+    rm -f "$all" "$cves"
+    return 0
+}
+
 # Print usage
 usage() {
     cat <<EOF
@@ -154,7 +220,8 @@ CATEGORIES:
     all         Run packages + installer + lint tests (default; no builds)
     packages    Run package tests
     installer   Run installer tests (module loading only)
-    lint        Run lint tests
+    lint        Run lint tests (offline checkers only: the merge gate)
+    lint-network  Report network-checker findings (weekly job; never fails)
     build       Run build tests (slow!)
 
 OPTIONS:
@@ -198,6 +265,10 @@ main() {
             ;;
         lint)
             test_lint
+            ;;
+        lint-network)
+            lint_network_report
+            exit 0
             ;;
         build)
             test_build

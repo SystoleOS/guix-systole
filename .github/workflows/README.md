@@ -1,11 +1,14 @@
 # GitHub Actions Workflows
 
 CI for guix-systole. The three testing workflows share one design:
-they bootstrap the Ubuntu `apt` Guix as a launcher only, then run the
-relevant `scripts/run-tests.sh` category through
+they bootstrap a GNU Guix release binary as a launcher only
+(`.github/actions/install-guix`: signed release tarball, pinned
+SHA-256, root daemon with build users), then run the relevant
+`scripts/run-tests.sh` category through
 `guix time-machine -C channels-lock.scm` — so every check executes
 against the exact Guix + channel commits the project actually ships
-with, not whatever Ubuntu packaged. Locally you reproduce a CI run
+with, not the bootstrap Guix. (Ubuntu's `apt` Guix 1.4.0 can no longer
+build the pinned Guix; see the action for how to bump the release.) Locally you reproduce a CI run
 with:
 
 ```bash
@@ -32,7 +35,7 @@ import `(systole ...)` modules, so channel changes re-run these too).
 `guix shell guile guile-newt guile-parted guile-webutils`, loading all
 installer/OS modules and verifying the ISO-build entry points.
 `(os install)` imports nonguix modules, which is why the pinned channel
-set is required — the apt Guix alone could never load them.
+set is required — the bootstrap Guix alone could never load them.
 
 ### guix-lint-check.yml
 **Triggers:** PR and push to main/dev when `systole/`,
@@ -42,8 +45,21 @@ set is required — the apt Guix alone could never load them.
 `LINT_PACKAGES` array in `scripts/run-tests.sh` and the accepted
 warnings in `tests/lint-allowlist.regex` — single sources of truth
 shared with local runs. `guix lint` exits 0 even on warnings, so the
-runner gates on filtered output: anything not matching the allowlist
-fails the check.
+runner gates on lint's exit status plus the diagnostics located in the
+channel's own files (time-machine output never reaches the gate);
+anything not matching the allowlist fails the check.  Only the offline
+checkers run (`--no-network`, which keeps `derivation`): the network
+checkers live in the weekly report below.
+
+### lint-network-weekly.yml (report only)
+**Triggers:** weekly (Mondays 05:00 UTC) and `workflow_dispatch`.
+**Runs:** `./scripts/run-tests.sh lint-network`: the network-dependent
+`guix lint` checkers (home-page, source, github-url, cve, refresh,
+archival, synopsis, gnu-description) on `LINT_PACKAGES` plus
+`NETWORK_LINT_EXTRA`.  Never fails: findings go to the job summary and
+to one issue labelled `lint-network` (body replaced weekly, closed when
+clean).  CVE findings are reviewed, never allowlisted.  The merge gate
+(`guix-lint-check.yml`) runs `guix lint --no-network` only.
 
 ### commit-message-check.yml
 **Triggers:** every PR event and push to main.
