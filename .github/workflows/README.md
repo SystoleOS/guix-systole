@@ -22,6 +22,10 @@ GUIX="guix time-machine -C channels-lock.scm --" ./scripts/run-tests.sh <categor
 discovers and loads every `(systole ...)` module, touches every
 exported package (name + version), and verifies the channel's public
 API contract (load-bearing names like `slicer-5.8`, `slicer-all-5.10`).
+It also runs `tests/packages/check-nonfree.scm`: every non-free package,
+and every package with a non-free package anywhere in its input closure,
+must be `#:substitutable? #f`, so the build hub (Cuirass on hamming)
+never builds, publishes or relays it.
 
 ### installer-tests.yml
 **Triggers:** PR and push when `system/`, `systole/`,
