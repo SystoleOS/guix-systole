@@ -11,6 +11,7 @@ on:
       - 'scripts/run-tests.sh'
       - 'channels-lock.scm'
       - '.github/workflows/guix-lint-check.yml'
+      - '.github/actions/install-guix/**'
   push:
     branches:
       - main
@@ -31,9 +32,7 @@ jobs:
       # Bootstrap only; the lint itself runs through time-machine so it
       # uses the pinned Guix + channels from channels-lock.scm.
       - name: Install Guix (bootstrap)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y guix
+        uses: ./.github/actions/install-guix
 
       # The package list and the warning allowlist live in
       # scripts/run-tests.sh and tests/lint-allowlist.regex -- single

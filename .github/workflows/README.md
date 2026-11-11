@@ -1,11 +1,14 @@
 # GitHub Actions Workflows
 
 CI for guix-systole. The three testing workflows share one design:
-they bootstrap the Ubuntu `apt` Guix as a launcher only, then run the
-relevant `scripts/run-tests.sh` category through
+they bootstrap a GNU Guix release binary as a launcher only
+(`.github/actions/install-guix`: signed release tarball, pinned
+SHA-256, root daemon with build users), then run the relevant
+`scripts/run-tests.sh` category through
 `guix time-machine -C channels-lock.scm` — so every check executes
 against the exact Guix + channel commits the project actually ships
-with, not whatever Ubuntu packaged. Locally you reproduce a CI run
+with, not the bootstrap Guix. (Ubuntu's `apt` Guix 1.4.0 can no longer
+build the pinned Guix; see the action for how to bump the release.) Locally you reproduce a CI run
 with:
 
 ```bash
@@ -32,7 +35,7 @@ import `(systole ...)` modules, so channel changes re-run these too).
 `guix shell guile guile-newt guile-parted guile-webutils`, loading all
 installer/OS modules and verifying the ISO-build entry points.
 `(os install)` imports nonguix modules, which is why the pinned channel
-set is required — the apt Guix alone could never load them.
+set is required — the bootstrap Guix alone could never load them.
 
 ### guix-lint-check.yml
 **Triggers:** PR and push to main/dev when `systole/`,

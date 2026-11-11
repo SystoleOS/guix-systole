@@ -11,6 +11,7 @@ on:
       - 'scripts/run-tests.sh'
       - 'channels-lock.scm'
       - '.github/workflows/package-tests.yml'
+      - '.github/actions/install-guix/**'
   push:
     branches:
       - main
@@ -29,14 +30,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # The apt Guix is only a bootstrap: every check runs through
+      # The release Guix is only a bootstrap: every check runs through
       # `guix time-machine -C channels-lock.scm`, i.e. against the
       # exact Guix + channel commits the project actually ships with,
-      # not whatever Ubuntu packaged.
+      # not the bootstrap Guix.
       - name: Install Guix (bootstrap)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y guix
+        uses: ./.github/actions/install-guix
 
       - name: Run package tests against pinned channels
         env:
