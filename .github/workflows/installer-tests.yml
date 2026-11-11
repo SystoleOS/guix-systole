@@ -14,6 +14,7 @@ on:
       - 'tests/installer/**'
       - 'channels-lock.scm'
       - '.github/workflows/installer-tests.yml'
+      - '.github/actions/install-guix/**'
   push:
     branches:
       - main
@@ -33,12 +34,10 @@ jobs:
 
       # Bootstrap only; the checks run through time-machine.  (os
       # install) imports nonguix modules, so the pinned channel set
-      # from channels-lock.scm is required -- the apt Guix alone could
+      # from channels-lock.scm is required -- the bootstrap Guix alone could
       # never load these modules.
       - name: Install Guix (bootstrap)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y guix
+        uses: ./.github/actions/install-guix
 
       - name: Run installer module checks against pinned channels
         env:
