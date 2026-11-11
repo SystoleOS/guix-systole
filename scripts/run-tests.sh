@@ -122,6 +122,14 @@ lint_package() {
 test_lint() {
     log_info "=== Running Lint Tests ==="
 
+    # Under 'guix time-machine' the first command builds the pinned
+    # channels and prints the build log, channel authentication warnings
+    # and deprecation notices.  None of that is lint output: build the
+    # inferior once up front so it is not charged to the first package.
+    # A failure here shows up again, with its output, in that first lint.
+    # shellcheck disable=SC2086
+    $GUIX describe >/dev/null 2>&1 || true
+
     for package in "${LINT_PACKAGES[@]}"; do
         run_test "Lint $package" "lint_package $package" || true
     done
