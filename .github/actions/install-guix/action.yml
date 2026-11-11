@@ -1,0 +1,73 @@
+name: Install Guix (release binary)
+description: >
+  Install a signed GNU Guix release binary, verified against a pinned
+  SHA-256, and start a root guix-daemon with build users.  Bootstrap
+  only: every check then runs through `guix time-machine -C
+  channels-lock.scm`, i.e. against the pinned Guix.
+
+# Why not `apt-get install guix`: Ubuntu 24.04 ships Guix 1.4.0, which
+# cannot build the build-self modules of the Guix pinned in
+# channels-lock.scm since 6d10a59 (time-machine fails on
+# module-import-compiled.drv -> compute-guix-derivation.drv).
+#
+# To bump: download guix-binary-<v>.x86_64-linux.tar.xz and its .sig
+# from https://ftp.gnu.org/gnu/guix/, check the signature against the
+# GNU keyring (https://ftp.gnu.org/gnu/gnu-keyring.gpg), then update
+# version and sha256 below.
+# 1.5.0: signed by Efraim Flashner,
+# A28B F40C 3E55 1372 662D  14F7 41AA E7DC CA3D 8351.
+
+inputs:
+  version:
+    description: Guix release version
+    default: "1.5.0"
+  sha256:
+    description: SHA-256 of guix-binary-<version>.x86_64-linux.tar.xz
+    default: "aa41025489c5061543e9c48873eaa829b900b2da75d40f9648913622f5f47817"
+
+runs:
+  using: composite
+  steps:
+    - name: Install Guix ${{ inputs.version }}
+      shell: bash
+      env:
+        GUIX_VERSION: ${{ inputs.version }}
+        GUIX_SHA256: ${{ inputs.sha256 }}
+      run: |
+        set -euo pipefail
+        f="guix-binary-${GUIX_VERSION}.x86_64-linux.tar.xz"
+        curl -sSfL --retry 5 --retry-delay 10 -o "$RUNNER_TEMP/$f" \
+          "https://ftp.gnu.org/gnu/guix/$f"
+        echo "${GUIX_SHA256}  $RUNNER_TEMP/$f" | sha256sum -c -
+        sudo tar --warning=no-timestamp -xJf "$RUNNER_TEMP/$f" -C /
+        rm -f "$RUNNER_TEMP/$f"
+
+        cur=/var/guix/profiles/per-user/root/current-guix
+        sudo mkdir -p /root/.config/guix
+        sudo ln -sfn "$cur" /root/.config/guix/current
+        sudo ln -sf "$cur/bin/guix" /usr/local/bin/guix
+
+        # Classic root daemon with build users.  The release's systemd
+        # unit runs it unprivileged (User=guix-daemon), which needs
+        # unprivileged user namespaces; Ubuntu 24.04's AppArmor policy
+        # restricts those.
+        sudo groupadd --system guixbuild
+        for i in $(seq -w 1 10); do
+          sudo useradd -g guixbuild -G guixbuild -d /var/empty \
+            -s "$(command -v nologin)" -c "Guix build user $i" \
+            --system "guixbuilder$i"
+        done
+        sudo systemd-run --unit=guix-daemon \
+          --setenv=GUIX_STATE_DIRECTORY=/var/guix \
+          "$cur/bin/guix-daemon" --build-users-group=guixbuild \
+          --discover=no \
+          --substitute-urls='https://bordeaux.guix.gnu.org https://ci.guix.gnu.org'
+        for i in $(seq 30); do
+          [ -S /var/guix/daemon-socket/socket ] && break
+          sleep 1
+        done
+
+        for k in bordeaux.guix.gnu.org ci.guix.gnu.org; do
+          sudo "$cur/bin/guix" archive --authorize < "$cur/share/guix/$k.pub"
+        done
+        guix --version | head -1
