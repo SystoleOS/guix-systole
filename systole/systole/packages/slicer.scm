@@ -28,7 +28,7 @@
 ;;;   (systole packages slicer-5-8)      everything Slicer 5.8.
 ;;;   (systole packages slicer-5-10)     everything Slicer 5.10.
 ;;;   (systole packages slicer-5-12)     everything Slicer 5.12, plus the
-;;;       slicer-next preview package tracking upstream main.
+;;;       slicer-preview package tracking upstream main.
 ;;;
 ;;; The per-version module names use "-5-8"/"-5-10" rather than
 ;;; "-5.8"/"-5.10": Guile's load-path search treats a dot in the last

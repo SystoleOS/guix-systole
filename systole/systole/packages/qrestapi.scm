@@ -62,17 +62,17 @@ qRestAPI for general RESTful APIs, qGirderAPI for Girder, and qMidasAPI for
 Midas.")
     (license license:asl2.0)))
 
-;; Slicer main (slicer-next) pins qRestAPI f933aad, which includes upstream
+;; Slicer main (slicer-preview) pins qRestAPI f933aad, which includes upstream
 ;; "ENH: Adopt vtkAddon-level packaging": the exported qRestAPI target carries
 ;; its include directories, and Slicer main relies on that (it dropped both
 ;; qRestAPI_USE_FILE and the explicit qRestAPI_INCLUDE_DIRS).  The 0001 backport
 ;; above is part of this commit, so no patch is needed.
-(define-public qrestapi-for-slicer-next
+(define-public qrestapi-for-slicer-preview
   (let ((commit "f933aadb440a8660fe02460142f82cc3cfd9db11")
         (revision "0"))
     (package
       (inherit qrestapi)
-      (name "qrestapi-for-slicer-next")
+      (name "qrestapi-for-slicer-preview")
       (version (git-version "0.1" revision commit))
       (source
        (origin
@@ -94,3 +94,6 @@ Midas.")
                 ;; The default, cmake/qRestAPI, is not searched by
                 ;; find_package on GNU/Linux.
                 "-DqRestAPI_INSTALL_CMAKE_DIR:STRING=lib/cmake/qRestAPI"))))))
+
+;; Called qrestapi-for-slicer-next until 2026-11 (see slicer-preview).
+(define-deprecated-package qrestapi-for-slicer-next qrestapi-for-slicer-preview)

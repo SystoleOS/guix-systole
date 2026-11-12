@@ -395,20 +395,23 @@ as 3D Slicer.")
           (base32 "1izfcc5png7sswprcp8i0ij2mfpsn11h10y9y8a8sbxfnvdpf9a8"))
          (patches (map search-patch %ctk-for-slicer-5.12-patches)))))))
 
-;; Slicer main (slicer-next) pins CTK d3a09b0 (33 commits after the 5.12 pin).
+;; Slicer main (slicer-preview) pins CTK d3a09b0 (33 commits after the 5.12 pin).
 ;; Its Python DICOM code calls ctkDICOMDatabase::fileValues(), which CTK
-;; 5056664a lacks, so slicer-next would build but fail to load DICOM data.
+;; 5056664a lacks, so slicer-preview would build but fail to load DICOM data.
 ;; The three 5.12 patches apply unchanged.
-(define-public ctk-for-slicer-next
+(define-public ctk-for-slicer-preview
   (package
     (inherit ctk-for-slicer-5.12)
-    (name "ctk-for-slicer-next")
+    (name "ctk-for-slicer-preview")
     (source
      (origin
        (inherit (package-source ctk-for-slicer-5.12))
        (uri (git-reference
              (url "https://github.com/commontk/CTK")
              (commit "d3a09b063cd3353ae7304b8604ed83632013a909")))
-       (file-name (git-file-name "ctk-for-slicer-next" "0.1"))
+       (file-name (git-file-name "ctk-for-slicer-preview" "0.1"))
        (sha256
         (base32 "14h1b809yaxndzm8g3jfk4xrbjf5x2vam3ih421prigv4j483fap"))))))
+
+;; Called ctk-for-slicer-next until 2026-11 (see slicer-preview).
+(define-deprecated-package ctk-for-slicer-next ctk-for-slicer-preview)

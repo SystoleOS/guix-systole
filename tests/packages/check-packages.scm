@@ -130,7 +130,8 @@
 (define %required-exports
   '(((systole packages slicer)
      slicer-5.8 slicer-all-5.8 slicer-5.10 slicer-all-5.10
-     slicer-5.12 slicer-all-5.12 slicer-next)
+     slicer-5.12 slicer-all-5.12 slicer-preview
+     slicer-next)
     ((systole packages vtk) vtk-slicer vtkaddon)
     ((systole packages itk) itk-slicer)
     ((systole packages ctk) ctk ctkapplauncher)

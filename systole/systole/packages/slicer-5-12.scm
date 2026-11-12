@@ -75,7 +75,7 @@
   #:use-module (srfi srfi-1)
   )
 
-;; The 87 base patches shared by slicer-5.12 and slicer-next (the latter
+;; The 87 base patches shared by slicer-5.12 and slicer-preview (the latter
 ;; substitutes a rebased 0007 from the next/ subdirectory, see below).
 (define %slicer-5.12-patch-names
   (list
@@ -1503,10 +1503,10 @@ dicom, extensionwizard, dicomlib, lineprofile).")
     (license (package-license slicer-5.12))))
 
 ;;;
-;;; Slicer preview (slicer-next)
+;;; Slicer preview (slicer-preview)
 ;;;
 
-;; slicer-next tracks the Slicer main branch (5.13.0 development) and shares
+;; slicer-preview tracks the Slicer main branch (5.13.0 development) and shares
 ;; most of the 5.12 dependency stack (VTK 9.6.2, ITK 5.4.6, vtkAddon 2ed3e222,
 ;; Python 3.12, Qt5).  Two dependencies follow main's SuperBuild pins because
 ;; main needs them:
@@ -1517,58 +1517,62 @@ dicom, extensionwizard, dicomlib, lineprofile).")
 ;; backports) pins are not needed to build or run, so the 5.12 ones are kept.
 ;;
 ;; The base patches are the slicer-5.12 series with these exceptions
-;; (see %slicer-next-patch-names):
+;; (see %slicer-preview-patch-names):
 ;;   - dropped, upstreamed on main: 0003 (qRestAPI imported target, upstream
-;;     124d70f40; needs qrestapi-for-slicer-next), 0049 (numpy/scipy preload block removed upstream), 0067
+;;     124d70f40; needs qrestapi-for-slicer-preview), 0049 (numpy/scipy preload block removed upstream), 0067
 ;;     (vtkWin32OutputWindow.h now guarded upstream);
-;;   - rebased, under patches/slicer-5.12/next/: 0007 (Scope CPack blocks;
+;;   - rebased, under patches/slicer-5.12/preview/: 0007 (Scope CPack blocks;
 ;;     main reworked the macOS qt_root_dir detection) and 0047 (CTK plugin
 ;;     path; main added startup-timer code to preInitializeApplication).
 ;;
-;; slicer-next is the base application package ONLY: no per-module
-;; (slicer-<mod>-next) packages and no slicer-all-next meta-package are
+;; slicer-preview is the base application package ONLY: no per-module
+;; (slicer-<mod>-preview) packages and no slicer-all-preview meta-package are
 ;; provided.  Preview users build standalone modules on demand against
-;; slicer-next using the factories in (systole packages slicer-factory).
-(define %slicer-next-commit "b5d5d9e8350102329e87914bc68db9aee1d24ab8")
-(define %slicer-next-hash (base32 "0icinrys4cjn43xpxrpnvif32w1a1i837wcngyigkvnfbhvpynmi"))
+;; slicer-preview using the factories in (systole packages slicer-factory).
+(define %slicer-preview-commit "b5d5d9e8350102329e87914bc68db9aee1d24ab8")
+(define %slicer-preview-hash (base32 "0icinrys4cjn43xpxrpnvif32w1a1i837wcngyigkvnfbhvpynmi"))
 
-(define %slicer-next-dropped-patches
+(define %slicer-preview-dropped-patches
   '("0003-COMP-Adapt-to-new-qRestAPI-cmake.patch"
     "0049-COMP-Guard-Windows-11-numpy-scipy-preload-workaround.patch"
     "0067-COMP-Guard-vtkWin32OutputWindow.h-include-behind-WIN.patch"))
 
-(define %slicer-next-rebased-patches
+(define %slicer-preview-rebased-patches
   '("0007-COMP-Scope-CPack-blocks.patch"
     "0047-ENH-Register-CTK-plugin-path-and-disable-QtWebEngine.patch"))
 
-(define %slicer-next-patch-names
+(define %slicer-preview-patch-names
   (filter-map (lambda (p)
-                (cond ((member p %slicer-next-dropped-patches) #f)
-                      ((member p %slicer-next-rebased-patches)
-                       (string-append "next/" p))
+                (cond ((member p %slicer-preview-dropped-patches) #f)
+                      ((member p %slicer-preview-rebased-patches)
+                       (string-append "preview/" p))
                       (else p)))
               %slicer-5.12-patch-names))
 
-(define-public slicer-next
+(define-public slicer-preview
   (package
     (inherit slicer-5.12)
-    (name "slicer-next")
-    (version (git-version "5.13.0" "0" %slicer-next-commit))
+    (name "slicer-preview")
+    (version (git-version "5.13.0" "0" %slicer-preview-commit))
     (source
      (origin
        (method git-fetch)
        (uri (git-reference
              (url "https://github.com/Slicer/Slicer")
-             (commit %slicer-next-commit)))
-       (file-name (git-file-name "slicer-next" (git-version "5.13.0" "0" %slicer-next-commit)))
-       (sha256 %slicer-next-hash)
+             (commit %slicer-preview-commit)))
+       (file-name (git-file-name "slicer-preview"
+                                 (git-version "5.13.0" "0" %slicer-preview-commit)))
+       (sha256 %slicer-preview-hash)
        (patches (map (lambda (p) (slicer-patch "5.12" p))
-                     %slicer-next-patch-names))))
+                     %slicer-preview-patch-names))))
+    ;; delete + prepend rather than replace: replace would keep the old
+    ;; input labels, which then no longer match the package names (lint).
     (inputs (modify-inputs (package-inputs slicer-5.12)
-              (replace "ctk-for-slicer-5.12" ctk-for-slicer-next)
-              (replace "qrestapi" qrestapi-for-slicer-next)))
+              (delete "ctk-for-slicer-5.12" "qrestapi")
+              (prepend ctk-for-slicer-preview qrestapi-for-slicer-preview)))
     (propagated-inputs (modify-inputs (package-propagated-inputs slicer-5.12)
-                         (replace "ctk-for-slicer-5.12" ctk-for-slicer-next)))
+                         (delete "ctk-for-slicer-5.12")
+                         (prepend ctk-for-slicer-preview)))
     ;; A main-branch build installs into lib/Slicer-5.13 (Slicer_VERSION is
     ;; 5.13 on main), so every inherited phase and search path that hard-codes
     ;; the lib/Slicer-5.12 directory is overridden with its 5.13 equivalent.
@@ -1641,9 +1645,14 @@ dicom, extensionwizard, dicomlib, lineprofile).")
                      "lib/Slicer-5.13"
                      "lib/python3.12/site-packages"
                      "lib/python3.11/site-packages")))))
-    (synopsis "3D Slicer preview (main branch) - Medical visualization and computing environment")
+    (synopsis "3D Slicer preview (main branch) - Medical visualization platform")
     (description
      "3D Slicer preview build tracking the upstream main branch (5.13.0
 development).  Base application only; standalone loadable/scripted module
 packages are not provided for the preview - build modules on demand against
 this package instead.")))
+
+;; slicer-preview was called slicer-next until 2026-11.  Keep the old name
+;; as a deprecated alias so existing profiles and manifests get a warning
+;; pointing at the new name instead of an "unknown package" error.
+(define-deprecated-package slicer-next slicer-preview)
