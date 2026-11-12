@@ -6,6 +6,24 @@
 (channel-news
  (version 0)
 
+ (entry (commit "378c8cb7b912f440b1907a12def2df02607f9ab2")
+        (title (en "slicer-next is now slicer-preview"))
+        (body
+         (en "The Slicer preview package, which follows Slicer main, is renamed
+from @code{slicer-next} to @code{slicer-preview}; its dependencies
+@code{ctk-for-slicer-next} and @code{qrestapi-for-slicer-next} become
+@code{ctk-for-slicer-preview} and @code{qrestapi-for-slicer-preview}.
+
+The old names still work for now, as deprecated aliases: Guix warns that
+they have been superseded and uses the new packages.  Please update your
+manifests and profiles, for example with:
+
+@example
+guix package -r slicer-next -i slicer-preview
+@end example
+
+The aliases will be removed in a later update.")))
+
  (entry (commit "2c00922dbe4b16e2b250c42f4bf77cbe1d00635e")
         (title (en "Slicer 5.8 and 5.10 stacks are frozen"))
         (body
