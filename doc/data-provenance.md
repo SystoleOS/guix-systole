@@ -81,6 +81,12 @@ when protected health information is found).  Set
 `(substitutable? #t)` in the `idc-reference` only for data you may
 redistribute.
 
+## Testing
+
+`tests/data/lidc-dx-dataset.scm` is a complete, small example (one
+LIDC-IDRI radiograph, ~6.9 MB); `./scripts/run-tests.sh data` fetches it
+and checks it is reproducible.
+
 ## Adding an IDC release
 
 Add an entry to `%idc-index-releases` in

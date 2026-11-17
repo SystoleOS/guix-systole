@@ -209,6 +209,50 @@ lint_network_report() {
     return 0
 }
 
+# Data tests fetch real imaging over the network (IDC's public bucket),
+# so they are opt-in and not part of `all' or CI.  Each fixture is a
+# file evaluating to a package; keep them small (a few MB).
+DATA_FIXTURES=(
+    "tests/data/lidc-dx-dataset.scm"
+)
+
+# Build FIXTURE, check its layout (manifest.csv + one directory per
+# series, none empty), then re-fetch the source with --check to prove
+# the download is reproducible.
+check_data_fixture() {
+    local fixture="$1"
+    local out
+    # shellcheck disable=SC2086
+    out=$(timeout 1800 $GUIX build -L "$REPO_ROOT/systole" -f "$fixture" | tail -1) \
+        || return 1
+    [ -f "$out/manifest.csv" ] || { echo "no manifest.csv in $out"; return 1; }
+    local rows series
+    rows=$(($(wc -l < "$out/manifest.csv") - 1))
+    series=$(find "$out" -mindepth 1 -maxdepth 1 -type d | wc -l)
+    [ "$rows" -ge 1 ] || { echo "empty cohort in $out"; return 1; }
+    [ "$rows" -eq "$series" ] || {
+        echo "manifest lists $rows series, $out has $series directories"
+        return 1
+    }
+    if find "$out" -mindepth 1 -maxdepth 1 -type d -empty | grep -q .; then
+        echo "empty series directory in $out"
+        return 1
+    fi
+    # shellcheck disable=SC2086
+    timeout 1800 $GUIX build -L "$REPO_ROOT/systole" -S --check -f "$fixture" \
+        >/dev/null
+}
+
+test_data() {
+    log_info "=== Running Data Tests ==="
+    log_warn "Data tests download imaging from IDC (network required)."
+
+    for fixture in "${DATA_FIXTURES[@]}"; do
+        run_test "Fetch $(basename "$fixture" .scm)" \
+            "check_data_fixture $fixture" || true
+    done
+}
+
 # Print usage
 usage() {
     cat <<EOF
@@ -223,6 +267,7 @@ CATEGORIES:
     lint        Run lint tests (offline checkers only: the merge gate)
     lint-network  Report network-checker findings (weekly job; never fails)
     build       Run build tests (slow!)
+    data        Fetch the idc-fetch data fixtures (network; small)
 
 OPTIONS:
     -h, --help      Show this help message
@@ -233,6 +278,7 @@ EXAMPLES:
     $0 lint             # Run only lint tests
     $0 packages         # Run only package tests
     $0 build            # Actually compile vtk-slicer/itk-slicer/ctk
+    $0 data             # Fetch tests/data/ fixtures from IDC (~7 MB)
 
 VM TESTS:
     For comprehensive VM-based system tests (boots full VMs):
@@ -272,6 +318,9 @@ main() {
             ;;
         build)
             test_build
+            ;;
+        data)
+            test_data
             ;;
         all)
             test_packages

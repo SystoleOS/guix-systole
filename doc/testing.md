@@ -8,6 +8,7 @@
 ./scripts/run-tests.sh installer       # installer/OS module checks
 ./scripts/run-tests.sh lint            # guix lint gated by the allowlist
 ./scripts/run-tests.sh build           # actually compile key packages (very slow)
+./scripts/run-tests.sh data            # fetch the idc-fetch fixtures (network, ~7 MB)
 ./scripts/run-vm-tests.sh              # VM integration tests (slow, needs KVM)
 ```
 
@@ -94,6 +95,16 @@ each). Not part of `all` and not run in CI. For broader coverage,
 ```bash
 guix build -m manifest.scm
 ```
+
+### Data tests (`data`, manual)
+
+Fetches each fixture in `tests/data/` with `idc-fetch` (see
+[data-provenance.md](data-provenance.md)), checks the layout
+(`manifest.csv` plus one non-empty directory per series) and re-fetches
+the source with `guix build --check` to prove the download is
+reproducible.  The fixture `lidc-dx-dataset.scm` pins one LIDC-IDRI
+chest radiograph (~6.9 MB), the smallest series of that collection.
+Needs network; not part of `all` and not run in CI.
 
 ### VM tests (slow)
 
