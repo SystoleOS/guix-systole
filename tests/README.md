@@ -36,6 +36,8 @@ tests/
 │   ├── test-dry-run.sh         # wrapper: runs check-installer.scm in script mode
 │   ├── check-installer.scm     # installer/OS module + entry-point checks
 │   └── installer.scm           # VM tests, module (tests installer installer)
+├── data/
+│   └── lidc-dx-dataset.scm     # idc-fetch fixture: one LIDC-IDRI radiograph
 ├── manual/                     # interactive end-to-end scripts (see its README)
 └── lint-allowlist.regex        # guix lint warnings accepted as technical debt
 ```
@@ -51,6 +53,9 @@ tests/
   wrapper handles this).
 - **Lint**: `guix lint -L systole` over the `LINT_PACKAGES` list in
   `scripts/run-tests.sh`, gated on `lint-allowlist.regex`.
+- **Data tests** (`tests/data/`, `run-tests.sh data`): fetch small
+  `idc-fetch` fixtures from IDC and check they are reproducible.  Needs
+  network; opt-in.
 - **VM tests**: Marionette system tests booting full QEMU VMs; run with
   `./scripts/run-vm-tests.sh [basic|deploy-key|no-ssh|all]`.
 - **Manual tests** (`tests/manual/`): deployment workflows that need
