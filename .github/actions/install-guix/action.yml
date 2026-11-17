@@ -46,7 +46,11 @@ runs:
                  https://ftp.fau.de/gnu/guix \
                  https://mirrors.ocf.berkeley.edu/gnu/guix; do
           echo "Fetching $m/$f"
-          if curl -sSfL --connect-timeout 20 --retry 2 --retry-delay 5 \
+          # A stalled transfer moves on to the next mirror instead of
+          # hanging until the job timeout: abort below 50 kB/s for 60 s,
+          # or after 10 min in total (the tarball is ~136 MB).
+          if curl -sSfL --connect-timeout 20 --speed-limit 50000 \
+                  --speed-time 60 --max-time 600 --retry 2 --retry-delay 5 \
                   -o "$RUNNER_TEMP/$f" "$m/$f" \
              && echo "${GUIX_SHA256}  $RUNNER_TEMP/$f" | sha256sum -c -; then
             ok=1; break
