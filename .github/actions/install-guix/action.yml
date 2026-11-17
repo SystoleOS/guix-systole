@@ -36,9 +36,24 @@ runs:
       run: |
         set -euo pipefail
         f="guix-binary-${GUIX_VERSION}.x86_64-linux.tar.xz"
-        curl -sSfL --retry 5 --retry-delay 10 -o "$RUNNER_TEMP/$f" \
-          "https://ftp.gnu.org/gnu/guix/$f"
-        echo "${GUIX_SHA256}  $RUNNER_TEMP/$f" | sha256sum -c -
+        # The pinned SHA-256 is the trust anchor, so any mirror will do:
+        # try them in order (ftp.gnu.org alone has timed out on runners;
+        # ftpmirror.gnu.org redirects to a nearby mirror)
+        # and take the first file that matches.
+        ok=
+        for m in https://ftpmirror.gnu.org/gnu/guix \
+                 https://ftp.gnu.org/gnu/guix \
+                 https://ftp.fau.de/gnu/guix \
+                 https://mirrors.ocf.berkeley.edu/gnu/guix; do
+          echo "Fetching $m/$f"
+          if curl -sSfL --connect-timeout 20 --retry 2 --retry-delay 5 \
+                  -o "$RUNNER_TEMP/$f" "$m/$f" \
+             && echo "${GUIX_SHA256}  $RUNNER_TEMP/$f" | sha256sum -c -; then
+            ok=1; break
+          fi
+          rm -f "$RUNNER_TEMP/$f"
+        done
+        [ -n "$ok" ] || { echo "::error::no mirror served $f with the pinned SHA-256"; exit 1; }
         sudo tar --warning=no-timestamp -xJf "$RUNNER_TEMP/$f" -C /
         rm -f "$RUNNER_TEMP/$f"
 
