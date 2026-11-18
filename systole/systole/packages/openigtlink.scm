@@ -138,6 +138,12 @@ developers.")
           #~(list
              "-DSlicerOpenIGTLink_SUPERBUILD:BOOL=OFF"
              "-DBUILD_TESTING:BOOL=OFF"
+             ;; Upstream declares cmake_minimum_required(VERSION 3.5), so
+             ;; CMP0071 is OLD and AUTOMOC skips GENERATED headers.  CTK's
+             ;; ctkMacroWrapPythonQt (Slicer 5.12) relies on AUTOMOC to moc
+             ;; the generated osm_*.h PythonQt wrapper header; without it
+             ;; the *PythonQt.so link fails on missing vtables.
+             "-DCMAKE_POLICY_DEFAULT_CMP0071=NEW"
              ;; vtk-slicer-9.6's cmake config calls find_package(Python3)
              (string-append "-DPython3_EXECUTABLE="
                             #$python
