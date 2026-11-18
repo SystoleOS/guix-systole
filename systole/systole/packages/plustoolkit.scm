@@ -178,7 +178,11 @@ data by the PlusLib test suite.
              ;; XML stamping step and not the installed cmake config.
              (string-append "-DPLUSLIB_DATA_DIR="
                             #$(this-package-input "pluslibdata")
-                            "/share/PlusLib-2.9"))))
+                            "/share/PlusLib-2.9"))
+          #:phases
+          #~(modify-phases %standard-phases
+              (add-after 'unpack 'add-missing-iostream-includes
+                #$%add-missing-iostream-includes))))
    (inputs
     (list vtk-slicer-9.6
           itk-slicer-5.4.6
@@ -311,7 +315,11 @@ require proprietary vendor SDKs.  The virtual and network data sources
                             "/share/PlusLib-2.9/TestImages")
              (string-append "-DPLUSCONFIG_MODEL_DIR="
                             #$(this-package-input "pluslibdata")
-                            "/share/PlusLib-2.9/CADModels"))))
+                            "/share/PlusLib-2.9/CADModels"))
+          #:phases
+          #~(modify-phases %standard-phases
+              (add-after 'unpack 'add-missing-iostream-includes
+                #$%add-missing-iostream-includes))))
    (inputs
     (list pluslib
           pluslibdata

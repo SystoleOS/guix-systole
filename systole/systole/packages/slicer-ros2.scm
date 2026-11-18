@@ -38,6 +38,7 @@
   #:use-module (guix packages)
   #:use-module (guix utils)
   #:use-module (gnu packages python)
+  #:use-module (systole packages)
   #:use-module (gnu packages qt)
   #:use-module (systole packages slicer)
   #:use-module (systole packages ros2 jazzy)
@@ -86,6 +87,8 @@
                                "/lib/Slicer-5.12"))
         #:phases
         #~(modify-phases %standard-phases
+            (add-after 'unpack 'add-missing-iostream-includes
+              #$%add-missing-iostream-includes)
             (add-after 'unpack 'patch-install-layout
               (lambda _
                 ;; (1) Upstream forces CMAKE_INSTALL_PREFIX to Slicer_DIR

@@ -23,7 +23,7 @@
   #:use-module (guix i18n)
   #:use-module (ice-9 match)
   #:replace (%patch-path search-patch search-patches)
-  #:export (systole-patches slicer-patch))
+  #:export (systole-patches slicer-patch %add-missing-iostream-includes))
 
 (define %systole-root-directory
   ;; This is like %distro-root-directory from (gnu packages), with adjusted
@@ -99,3 +99,34 @@ NAME may include a subdirectory prefix, e.g. \"terminologies/0001-ENH-…\"."
 (define-syntax-rule (search-patches file-name ...)
   "Return the list of absolute file names corresponding to each FILE-NAME found in %PATCH-PATH."
   (list (search-patch file-name) ...))
+
+(define %add-missing-iostream-includes
+  ;; Build-side phase procedure: (add-after 'unpack 'add-missing-iostream-includes
+  ;; #$%add-missing-iostream-includes).  VTK 9.6 headers no longer include
+  ;; <iostream> transitively, nor provide the global using-declarations for
+  ;; cout/cerr/clog, so code written against older VTK fails with "'cerr' is
+  ;; not a member of 'std'" or "'cerr' was not declared in this scope".  For
+  ;; every C++ file using these streams: qualify bare uses with std:: and
+  ;; prepend #include <iostream> if it is missing.  Files are read and written
+  ;; as ISO-8859-1, which maps every byte to a character and back unchanged, so
+  ;; sources that are not valid UTF-8 (PlusLib has Latin-1 ones) survive intact.
+  #~(lambda _
+      (let ((get-string-all (@ (ice-9 textual-ports) get-string-all))
+            (uses-stream (make-regexp
+                          "(^|[^A-Za-z0-9_])w?c(out|err|log)[^A-Za-z0-9_]"))
+            (bare "(^|[^:A-Za-z0-9_])(w?c(out|err|log))([^A-Za-z0-9_]|$)"))
+        (with-fluids ((%default-port-encoding "ISO-8859-1"))
+          (for-each
+           (lambda (file)
+             (when (regexp-exec uses-stream
+                                (call-with-input-file file get-string-all))
+               (substitute* file
+                 ((bare all pre name kind post)
+                  (string-append pre "std::" name post)))
+               (let ((text (call-with-input-file file get-string-all)))
+                 (unless (string-contains text "<iostream>")
+                   (call-with-output-file file
+                     (lambda (port)
+                       (display "#include <iostream>\n" port)
+                       (display text port)))))))
+           (find-files "." "\\.(cxx|cpp|h|hxx|txx)$"))))))

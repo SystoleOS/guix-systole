@@ -109,9 +109,11 @@
                   (string-append "-DGLEW_INCLUDE_DIR="
                                  #$(this-package-input "glew") "/include/GL")
                   (string-append "-DGLEW_LIBRARY="
-                                 #$(this-package-input "glew") "/lib/libGLEW.so")
-
-                  )))
+                                 #$(this-package-input "glew") "/lib/libGLEW.so"))
+          #:phases
+          #~(modify-phases %standard-phases
+              (add-after 'unpack 'add-missing-iostream-includes
+                #$%add-missing-iostream-includes))))
    (inputs (list
             vtk-slicer-9.6
             itk-slicer-5.4.6
@@ -203,6 +205,8 @@ SlicerIGSIO 3D Slicer extensions.")
              #$extra-configure-flags)
           #:phases
           #~(modify-phases %standard-phases
+              (add-after 'unpack 'add-missing-iostream-includes
+                #$%add-missing-iostream-includes)
               (replace 'configure
                 (lambda* (#:key configure-flags #:allow-other-keys)
                   (apply invoke "cmake"
