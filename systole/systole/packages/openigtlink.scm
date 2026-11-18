@@ -151,6 +151,14 @@ developers.")
                             "/lib/libpython"
                             #$(version-major+minor (package-version python))
                             ".so")
+             ;; vtkAddon 9.6's vtkWrapPython.cmake still reads the
+             ;; FindPythonLibs-era PYTHON_LIBRARY for the *Python.so
+             ;; wrappers' link line (see slicer-factory.scm).
+             (string-append "-DPYTHON_LIBRARY="
+                            #$python
+                            "/lib/libpython"
+                            #$(version-major+minor (package-version python))
+                            ".so")
              ;; SlicerConfig.cmake forces Slicer_USE_PYTHONQT=ON; WRAP_PYTHONQT in
              ;; Widgets/CMakeLists.txt then requires PythonQt to be findable.
              (string-append "-DPYTHONQT_INSTALL_DIR="

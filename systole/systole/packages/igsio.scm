@@ -201,7 +201,15 @@ SlicerIGSIO 3D Slicer extensions.")
                    (string-append "-DPYTHONQT_INSTALL_DIR="
                                   #$pythonqt-commontk-for-slicer-5.12)
                    (string-append "-DIGSIO_DIR="
-                                  #$igsio "/lib/cmake/IGSIO"))
+                                  #$igsio "/lib/cmake/IGSIO")
+                   ;; vtkAddon 9.6's vtkWrapPython.cmake still reads the
+                   ;; FindPythonLibs-era PYTHON_LIBRARY for the *Python.so
+                   ;; wrappers' link line (see slicer-factory.scm).
+                   (string-append "-DPYTHON_LIBRARY=" #$python-3.12
+                                  "/lib/libpython"
+                                  #$(version-major+minor
+                                     (package-version python-3.12))
+                                  ".so"))
              #$extra-configure-flags)
           #:phases
           #~(modify-phases %standard-phases

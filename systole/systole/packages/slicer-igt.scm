@@ -19,6 +19,7 @@
   #:use-module ((guix licenses)
                 #:prefix license:)
   #:use-module (gnu packages)
+  #:use-module (gnu packages python)
   #:use-module (guix build-system cmake)
   #:use-module (guix build-system trivial)
   #:use-module (guix git-download)
@@ -48,6 +49,22 @@
    (file-name (git-file-name "slicer-igt" %slicer-igt-version))
    (sha256
     (base32 "1laslq1vw4j4sx65m84mg09hig3ga5rglb6blc70g4hv3bsbcnlq"))))
+
+;; vtkAddon 9.6's vtkWrapPython.cmake (reached via vtkMacroKitPythonWrap)
+;; still fills VTK_Python3_LIBRARIES from the FindPythonLibs-era
+;; PYTHON_LIBRARY variable; without it the *Python.so wrappers link no
+;; libpython and fail with undefined Py* symbols.  Same fix as the
+;; built-in module factory in slicer-factory.scm.
+(define %slicer-igt-python-flags
+  (let ((pyver (version-major+minor (package-version python-3.12))))
+    #~(list (string-append "-DPython3_EXECUTABLE=" #$python-3.12
+                           "/bin/python3")
+            (string-append "-DPython3_INCLUDE_DIR=" #$python-3.12
+                           "/include/python" #$pyver)
+            (string-append "-DPython3_LIBRARY=" #$python-3.12
+                           "/lib/libpython" #$pyver ".so")
+            (string-append "-DPYTHON_LIBRARY=" #$python-3.12
+                           "/lib/libpython" #$pyver ".so"))))
 
 ;;;
 ;;; Factory for standalone SlicerIGT loadable-module packages.
@@ -90,6 +107,7 @@
                                   #$slicer-5.12 "/lib/Slicer-5.12")
                    (string-append "-DPYTHONQT_INSTALL_DIR="
                                   #$pythonqt-commontk-for-slicer-5.12))
+             #$%slicer-igt-python-flags
              #$extra-configure-flags)
           #:phases
           #~(modify-phases %standard-phases

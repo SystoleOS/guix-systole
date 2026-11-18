@@ -84,7 +84,15 @@
                 ;; Point cmake directly at Slicer's config dir.
                 (string-append "-DSlicer_DIR="
                                #$(this-package-input "slicer-5.12")
-                               "/lib/Slicer-5.12"))
+                               "/lib/Slicer-5.12")
+                ;; vtkAddon 9.6's vtkWrapPython.cmake still reads the
+                ;; FindPythonLibs-era PYTHON_LIBRARY for the *Python.so
+                ;; wrappers' link line (see slicer-factory.scm).
+                (string-append "-DPYTHON_LIBRARY=" #$python
+                               "/lib/libpython"
+                               #$(version-major+minor
+                                  (package-version python))
+                               ".so"))
         #:phases
         #~(modify-phases %standard-phases
             (add-after 'unpack 'add-missing-iostream-includes
