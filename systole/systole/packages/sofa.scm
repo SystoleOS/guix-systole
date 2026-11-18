@@ -61,7 +61,11 @@
        (method git-fetch)
        (uri (git-reference
              (url "https://github.com/sofa-framework/Tight-Inclusion")
-             (commit "v1.0.6-export-target")))
+             ;; Head of upstream's v1.0.6-export-target branch, the ref
+             ;; SOFA 26.06 fetches.  Pinned by commit: the branch was
+             ;; force-moved on 2026-07-29 (a273db8, spdlog bump), which
+             ;; broke the recorded hash.
+             (commit "a08a7c68abe51ae292ef370f74dde9022b987a29")))
        (file-name (git-file-name name version))
        (sha256
         (base32 "10dpph0naaj12b4szzx3lpxk8xfw5aq071hg0lhyfwn61rzfwjr2"))))
