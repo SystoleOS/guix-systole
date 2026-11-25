@@ -124,9 +124,14 @@
               "-DVTK_Group_Qt:BOOL=ON"
               "-DVTK_ENABLE_KITS:BOOL=ON")))
     (inputs (modify-inputs (package-inputs imgproc:vtk)
-            (replace "hdf5" hdf5-1.10)
-            (delete "netcdf")
-              (append netcdf-slicer python-pyqt qtbase-5 tbb openmpi)))))
+              (replace "hdf5" hdf5-1.10)
+              ;; Upstream VTK uses Qt 6; the Slicer stack is Qt 5
+              ;; (VTK_QT_VERSION=5).  Replace rather than append, so that
+              ;; only one input is labelled "qtbase" and Qt 6 stays out of
+              ;; the build environment.
+              (replace "qtbase" qtbase-5)
+              (delete "netcdf")
+              (append netcdf-slicer python-pyqt tbb openmpi)))))
 
 ;; Python-enabled VTK for use by the Slicer stack.
 ;; Adds VTK Python wrappers (vtkmodules/*.so) and the Guix python package.
