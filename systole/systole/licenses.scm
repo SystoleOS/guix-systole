@@ -31,10 +31,11 @@
 
 ;; The CISST Software License 1.0 (JHU): BSD-like, but with its own
 ;; attribution and endorsement clauses, so it is declared as such rather
-;; than approximated by bsd-3.
+;; than approximated by bsd-3.  The URL is pinned to the commit that added
+;; the v1.0 text (the file has not changed since), not to a moving branch.
 (define cisst-license
   (license "CISST Software License 1.0"
-           "https://github.com/jhu-cisst/cisst/blob/main/license.txt"
+           "https://github.com/jhu-cisst/cisst/blob/26e85b883ac489c868f4ab01c200f29f7eb3682b/license.txt"
            "BSD-like licence of the JHU cisst libraries."))
 
 ;; 3D Systems proprietary EULA that ships with OpenHaptics 3.4 Developer
