@@ -73,7 +73,8 @@
                "0002-ENH-Restrict-find_package-VTK-to-required-components.patch"
                "0003-COMP-Fall-back-to-find_library-when-vtkAddonTargets..patch"
                "0004-COMP-Install-vtkigsiocalibration_export.h-generated-header.patch"
-               "0005-COMP-Always-install-VolumeReconstruction-headers-on-all-platforms.patch"))))
+               "0005-COMP-Always-install-VolumeReconstruction-headers-on-all-platforms.patch"
+               "0006-COMP-Add-missing-iostream-includes-for-VTK-9.6.patch"))))
    (build-system cmake-build-system)
    (arguments
     (list #:tests? #f
@@ -109,11 +110,7 @@
                   (string-append "-DGLEW_INCLUDE_DIR="
                                  #$(this-package-input "glew") "/include/GL")
                   (string-append "-DGLEW_LIBRARY="
-                                 #$(this-package-input "glew") "/lib/libGLEW.so"))
-          #:phases
-          #~(modify-phases %standard-phases
-              (add-after 'unpack 'add-missing-iostream-includes
-                #$%add-missing-iostream-includes))))
+                                 #$(this-package-input "glew") "/lib/libGLEW.so"))))
    (inputs (list
             vtk-slicer-9.6
             itk-slicer-5.4.6
@@ -175,7 +172,8 @@ SlicerIGSIO 3D Slicer extensions.")
     (base32 "0wwb6irfygx4jnmksni3kl9wzm7awvq3xdvzlb5pissj3bzy27g8"))
    (patches (search-patches
              "0001-ENH-Add-standalone-CMake-preamble-for-SlicerIGSIOCom.patch"
-             "0002-COMP-Guard-vtkIGSIOMkvSequenceIO-include-behind-IGSI.patch"))))
+             "0002-COMP-Guard-vtkIGSIOMkvSequenceIO-include-behind-IGSI.patch"
+             "0003-COMP-Add-missing-iostream-include-to-SlicerIGSIOCommon.patch"))))
 
 ;;; Factory for SlicerIGSIOCommon.
 (define* (make-slicer-igsio-common
@@ -214,8 +212,6 @@ SlicerIGSIO 3D Slicer extensions.")
              #$extra-configure-flags)
           #:phases
           #~(modify-phases %standard-phases
-              (add-after 'unpack 'add-missing-iostream-includes
-                #$%add-missing-iostream-includes)
               (replace 'configure
                 (lambda* (#:key configure-flags #:allow-other-keys)
                   (apply invoke "cmake"

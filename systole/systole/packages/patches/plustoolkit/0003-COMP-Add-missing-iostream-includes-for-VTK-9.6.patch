@@ -1,0 +1,845 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: SystoleOS <systole@example.org>
+Date: Fri, 27 Nov 2026 16:30:00 +0100
+Subject: [PATCH] COMP: Add missing <iostream> includes for VTK 9.6
+
+VTK 9.6 headers no longer include <iostream> transitively, nor provide
+the global using-declarations for cout/cerr/clog, so code written
+against older VTK fails with "'cerr' is not a member of 'std'" or
+"'cerr' was not declared in this scope".  Include <iostream> in every
+source file that uses these streams and qualify bare uses with std::.
+---
+ .../PatternLocAlgo/PlusFidSegmentation.cxx        |  2 +-
+ .../Testing/vtkCenterOfRotationCalibAlgoTest.cxx  |  1 +
+ .../Testing/vtkLineSegmentationAlgoTest.cxx       |  1 +
+ .../Testing/vtkSpacingCalibAlgoTest.cxx           |  1 +
+ .../Testing/vtkTRUSCalibrationTest.cxx            |  1 +
+ src/PlusCalibration/Tools/TemporalCalibration.cxx |  1 +
+ src/PlusCommon/Tools/EditSequenceFile.cxx         |  1 +
+ .../Agilent/vtkPlusAgilentScopeTracker.cxx        |  2 +-
+ .../vtkPlusBkProFocusCameraLinkVideoSource.cxx    |  1 +
+ .../Haptics/vtkPlusPolydataForce.cxx              | 15 ++++++++-------
+ .../PointGrey/vtkPlusSpinnakerVideoSource.cxx     |  3 ++-
+ .../Telemed/TelemedUltrasound.cxx                 |  1 +
+ src/PlusDataCollection/Testing/NDICertusTest.cxx  |  1 +
+ .../Testing/ReplayRecordedDataTest.cxx            |  1 +
+ .../Testing/TimestampFilteringTest.cxx            |  1 +
+ src/PlusDataCollection/Testing/TrackingTest.cxx   |  1 +
+ .../Testing/TransformInterpolationTest.cxx        |  1 +
+ .../Testing/vtk3DDataCollectorTest1.cxx           |  1 +
+ .../Testing/vtkAndorVideoSourceTest.cxx           |  1 +
+ .../Testing/vtkAzureKinectTest.cxx                |  1 +
+ .../vtkBkProFocusCameraLinkVideoSourceTest.cxx    |  1 +
+ .../Testing/vtkBkProFocusOemVideoSourceTest.cxx   |  1 +
+ .../Testing/vtkCapistranoVideoSourceTest.cxx      |  1 +
+ src/PlusDataCollection/Testing/vtkClariusTest.cxx |  1 +
+ .../Testing/vtkDAQVideoSourceTest.cxx             |  1 +
+ .../Testing/vtkDataCollectorFileTest.cxx          |  1 +
+ .../Testing/vtkDataCollectorTest1.cxx             |  1 +
+ .../Testing/vtkDataCollectorTest2.cxx             |  1 +
+ .../Testing/vtkDataCollectorVideoAcqTest.cxx      |  1 +
+ .../Testing/vtkEpiphanVideoSourceTest.cxx         |  1 +
+ .../Testing/vtkGenericSensorTrackerTest.cxx       |  1 +
+ .../Testing/vtkICCapturingSourceTest1.cxx         |  1 +
+ .../Testing/vtkInfraredSeekCamTest.cxx            |  1 +
+ .../Testing/vtkInfraredTEEV2CamTest.cxx           |  1 +
+ .../Testing/vtkInfraredTEQ1CamTest.cxx            |  1 +
+ .../Testing/vtkIntelRealSenseCamTest.cxx          |  1 +
+ .../Testing/vtkIntelRealSenseTrackerTest.cxx      |  1 +
+ .../vtkIntersonArraySDKCxxVideoSourceTest.cxx     |  1 +
+ .../Testing/vtkIntersonSDKCxxVideoSourceTest.cxx  |  1 +
+ .../Testing/vtkIntersonVideoSourceTest.cxx        |  1 +
+ .../Testing/vtkLeapMotionTest1.cxx                |  1 +
+ .../Testing/vtkMicronTrackerTest.cxx              |  1 +
+ .../Testing/vtkMmfVideoSourceTest.cxx             |  1 +
+ .../Testing/vtkNvidiaDVPVideoSourceTest.cxx       |  1 +
+ .../Testing/vtkOpenHapticsDeviceTest.cxx          |  1 +
+ .../Testing/vtkOpenIGTLinkTrackerTest.cxx         |  1 +
+ .../Testing/vtkOvrvisionProVideoSourceTest.cxx    |  1 +
+ .../Testing/vtkPhilips3DProbeVideoSourceTest1.cxx |  1 +
+ .../Testing/vtkPlusDeviceFactoryTest.cxx          |  1 +
+ .../Testing/vtkRevopoint3DCameraTest.cxx          |  1 +
+ .../Testing/vtkSonixPortaVideoSourceTest.cxx      |  1 +
+ .../Testing/vtkSonixVideoSourceTest1.cxx          |  1 +
+ .../Testing/vtkTelemedVideoSourceTest.cxx         |  1 +
+ .../Testing/vtkThorLabsVideoSourceTest.cxx        |  1 +
+ .../Testing/vtkURFSavedVideoSourceTest1.cxx       |  1 +
+ .../Testing/vtkUSDigitalEncodersTrackerTest.cxx   |  1 +
+ .../Testing/vtkUltravioletPCOUVCamTest.cxx        |  1 +
+ .../Testing/vtkVirtualTextRecognizerTest.cxx      |  1 +
+ .../Testing/vtkWin32VideoSourceTest.cxx           |  1 +
+ .../Testing/vtkWinProbeVideoSourceTest.cxx        |  1 +
+ src/PlusDataCollection/Tools/PlusVersion.cxx      |  1 +
+ src/PlusDataCollection/Tools/ViewSequenceFile.cxx |  1 +
+ src/PlusImageProcessing/Tools/DrawScanLines.cxx   |  1 +
+ src/PlusImageProcessing/Tools/EnhanceBone.cxx     |  1 +
+ .../Tools/EnhanceUsTrpSequence.cxx                |  1 +
+ .../Tools/ExtractScanLines.cxx                    |  1 +
+ src/PlusImageProcessing/Tools/ScanConvert.cxx     |  1 +
+ .../vtkPlusRfToBrightnessConvert.cxx              |  1 +
+ src/PlusRendering/Tools/ModelRenderer.cxx         |  1 +
+ src/PlusServer/Testing/vtkPlusServerTest.cxx      |  1 +
+ src/PlusServer/Tools/PlusServer.cxx               |  1 +
+ src/PlusServer/Tools/PlusServerRemoteControl.cxx  |  1 +
+ .../Tools/DrawClipRegion.cxx                      |  1 +
+ .../Tools/VolumeReconstructor.cxx                 |  1 +
+ src/SEIDrv/SEIDrv.cpp                             |  1 +
+ src/Utilities/Ransac/Examples/planeEstimation.cxx |  1 +
+ .../Ransac/Examples/sphereEstimation.cxx          |  1 +
+ .../Testing/PlaneParametersEstimatorTest.cxx      |  1 +
+ 78 files changed, 86 insertions(+), 10 deletions(-)
+
+diff --git a/src/PlusCalibration/PatternLocAlgo/PlusFidSegmentation.cxx b/src/PlusCalibration/PatternLocAlgo/PlusFidSegmentation.cxx
+index 71bd37c..83f4224 100644
+--- a/src/PlusCalibration/PatternLocAlgo/PlusFidSegmentation.cxx
++++ b/src/PlusCalibration/PatternLocAlgo/PlusFidSegmentation.cxx
+@@ -923,7 +923,7 @@ void PlusFidSegmentation::DilateCircle(PlusFidSegmentation::PixelType* dest, Plu
+       sr_exist[si] = true, n++;
+     }
+   }
+-  //cout << "shift_exist: " << n << endl;
++  //std::cout << "shift_exist: " << n << endl;
+ 
+   PlusCoordinate2D* newDots = new PlusCoordinate2D[slen];
+   PlusCoordinate2D* oldDots = new PlusCoordinate2D[slen];
+diff --git a/src/PlusCalibration/Testing/vtkCenterOfRotationCalibAlgoTest.cxx b/src/PlusCalibration/Testing/vtkCenterOfRotationCalibAlgoTest.cxx
+index c42e787..e749943 100644
+--- a/src/PlusCalibration/Testing/vtkCenterOfRotationCalibAlgoTest.cxx
++++ b/src/PlusCalibration/Testing/vtkCenterOfRotationCalibAlgoTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusCalibration/Testing/vtkLineSegmentationAlgoTest.cxx b/src/PlusCalibration/Testing/vtkLineSegmentationAlgoTest.cxx
+index 67eb641..4beee12 100644
+--- a/src/PlusCalibration/Testing/vtkLineSegmentationAlgoTest.cxx
++++ b/src/PlusCalibration/Testing/vtkLineSegmentationAlgoTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusCalibration/Testing/vtkSpacingCalibAlgoTest.cxx b/src/PlusCalibration/Testing/vtkSpacingCalibAlgoTest.cxx
+index bd3e621..43077c8 100644
+--- a/src/PlusCalibration/Testing/vtkSpacingCalibAlgoTest.cxx
++++ b/src/PlusCalibration/Testing/vtkSpacingCalibAlgoTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusCalibration/Testing/vtkTRUSCalibrationTest.cxx b/src/PlusCalibration/Testing/vtkTRUSCalibrationTest.cxx
+index f93f915..9187579 100644
+--- a/src/PlusCalibration/Testing/vtkTRUSCalibrationTest.cxx
++++ b/src/PlusCalibration/Testing/vtkTRUSCalibrationTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusCalibration/Tools/TemporalCalibration.cxx b/src/PlusCalibration/Tools/TemporalCalibration.cxx
+index 2f3685b..5865a20 100644
+--- a/src/PlusCalibration/Tools/TemporalCalibration.cxx
++++ b/src/PlusCalibration/Tools/TemporalCalibration.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusCommon/Tools/EditSequenceFile.cxx b/src/PlusCommon/Tools/EditSequenceFile.cxx
+index a6eec15..e7af020 100644
+--- a/src/PlusCommon/Tools/EditSequenceFile.cxx
++++ b/src/PlusCommon/Tools/EditSequenceFile.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Agilent/vtkPlusAgilentScopeTracker.cxx b/src/PlusDataCollection/Agilent/vtkPlusAgilentScopeTracker.cxx
+index c70f852..704a602 100644
+--- a/src/PlusDataCollection/Agilent/vtkPlusAgilentScopeTracker.cxx
++++ b/src/PlusDataCollection/Agilent/vtkPlusAgilentScopeTracker.cxx
+@@ -81,7 +81,7 @@ namespace
+     if (status)
+     {
+       Acqrs_errorMessage(VI_NULL, status, ErrMsg, 256);
+-      cout << functionName << ": " << ErrMsg << endl;
++      std::cout << functionName << ": " << ErrMsg << endl;
+       return true;
+     }
+ 
+diff --git a/src/PlusDataCollection/BkProFocus/vtkPlusBkProFocusCameraLinkVideoSource.cxx b/src/PlusDataCollection/BkProFocus/vtkPlusBkProFocusCameraLinkVideoSource.cxx
+index 189eb92..fbb82ed 100644
+--- a/src/PlusDataCollection/BkProFocus/vtkPlusBkProFocusCameraLinkVideoSource.cxx
++++ b/src/PlusDataCollection/BkProFocus/vtkPlusBkProFocusCameraLinkVideoSource.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Haptics/vtkPlusPolydataForce.cxx b/src/PlusDataCollection/Haptics/vtkPlusPolydataForce.cxx
+index 62c29bd..1713c9d 100644
+--- a/src/PlusDataCollection/Haptics/vtkPlusPolydataForce.cxx
++++ b/src/PlusDataCollection/Haptics/vtkPlusPolydataForce.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) John SH Baxter, Robarts Research Institute. All rights reserved.
+@@ -61,7 +62,7 @@ int vtkPlusPolydataForce::GenerateForce( vtkMatrix4x4* transformMatrix, double f
+     force[1] = ( 0 );
+     force[2] = ( 0 );
+   }
+-  cout <<  " FORCE: " << force[0] << ",  " << force[1] << ",  " << force[2] << endl;
++  std::cout <<  " FORCE: " << force[0] << ",  " << force[1] << ",  " << force[2] << endl;
+   return 1;
+ }
+ 
+@@ -99,9 +100,9 @@ void vtkPlusPolydataForce::CalculateForce( double x, double y, double z, double
+   vector[1] = fabs( y - this->lastPos[1] );
+   vector[2] = fabs( z - this->lastPos[2] );
+ 
+-  cout << "vector[0]: " << vector[0] << endl;
+-  cout << "vector[1]: " << vector[1] << endl;
+-  cout << "vector[2]: " << vector[2] << endl;
++  std::cout << "vector[0]: " << vector[0] << endl;
++  std::cout << "vector[1]: " << vector[1] << endl;
++  std::cout << "vector[2]: " << vector[2] << endl;
+ 
+   for ( int i = 0; i < 3; i++ )
+   {
+@@ -110,9 +111,9 @@ void vtkPlusPolydataForce::CalculateForce( double x, double y, double z, double
+       force[i] = ( 0.1 / ( vector[i] * vector[i] ) ) * .6;
+     }
+   }
+-  cout << "X: " << force[0] << endl;
+-  cout << "Y: " << force[1] << endl;
+-  cout << "Z: " << force[2] << endl;
++  std::cout << "X: " << force[0] << endl;
++  std::cout << "Y: " << force[1] << endl;
++  std::cout << "Z: " << force[2] << endl;
+ 
+   if ( force[0] > 1 )
+   {
+diff --git a/src/PlusDataCollection/PointGrey/vtkPlusSpinnakerVideoSource.cxx b/src/PlusDataCollection/PointGrey/vtkPlusSpinnakerVideoSource.cxx
+index 632c920..d8a5763 100644
+--- a/src/PlusDataCollection/PointGrey/vtkPlusSpinnakerVideoSource.cxx
++++ b/src/PlusDataCollection/PointGrey/vtkPlusSpinnakerVideoSource.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+@@ -696,7 +697,7 @@ PlusStatus vtkPlusSpinnakerVideoSource::InternalUpdate()
+     Spinnaker::ImagePtr pResultImage = this->Internal->CameraPtr->GetNextImage();
+     if (pResultImage->IsIncomplete())
+     {
+-      cout << "Image incomplete with image status " << pResultImage->GetImageStatus() << "..." << endl << endl;
++      std::cout << "Image incomplete with image status " << pResultImage->GetImageStatus() << "..." << endl << endl;
+     }
+ 
+     // Convert image from PointGrey to correct image type
+diff --git a/src/PlusDataCollection/Telemed/TelemedUltrasound.cxx b/src/PlusDataCollection/Telemed/TelemedUltrasound.cxx
+index c71d405..48ab38a 100644
+--- a/src/PlusDataCollection/Telemed/TelemedUltrasound.cxx
++++ b/src/PlusDataCollection/Telemed/TelemedUltrasound.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/NDICertusTest.cxx b/src/PlusDataCollection/Testing/NDICertusTest.cxx
+index a74dee4..8491c27 100644
+--- a/src/PlusDataCollection/Testing/NDICertusTest.cxx
++++ b/src/PlusDataCollection/Testing/NDICertusTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/ReplayRecordedDataTest.cxx b/src/PlusDataCollection/Testing/ReplayRecordedDataTest.cxx
+index b340f6e..101d12d 100644
+--- a/src/PlusDataCollection/Testing/ReplayRecordedDataTest.cxx
++++ b/src/PlusDataCollection/Testing/ReplayRecordedDataTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/TimestampFilteringTest.cxx b/src/PlusDataCollection/Testing/TimestampFilteringTest.cxx
+index 3c5c097..1ef5892 100644
+--- a/src/PlusDataCollection/Testing/TimestampFilteringTest.cxx
++++ b/src/PlusDataCollection/Testing/TimestampFilteringTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/TrackingTest.cxx b/src/PlusDataCollection/Testing/TrackingTest.cxx
+index 7c64699..4ef74e7 100644
+--- a/src/PlusDataCollection/Testing/TrackingTest.cxx
++++ b/src/PlusDataCollection/Testing/TrackingTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/TransformInterpolationTest.cxx b/src/PlusDataCollection/Testing/TransformInterpolationTest.cxx
+index 39eb587..66663ae 100644
+--- a/src/PlusDataCollection/Testing/TransformInterpolationTest.cxx
++++ b/src/PlusDataCollection/Testing/TransformInterpolationTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtk3DDataCollectorTest1.cxx b/src/PlusDataCollection/Testing/vtk3DDataCollectorTest1.cxx
+index b68a03e..094b96d 100644
+--- a/src/PlusDataCollection/Testing/vtk3DDataCollectorTest1.cxx
++++ b/src/PlusDataCollection/Testing/vtk3DDataCollectorTest1.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkAndorVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkAndorVideoSourceTest.cxx
+index c8dc53e..464fd3e 100644
+--- a/src/PlusDataCollection/Testing/vtkAndorVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkAndorVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkAzureKinectTest.cxx b/src/PlusDataCollection/Testing/vtkAzureKinectTest.cxx
+index 20b1c9e..166b4b4 100644
+--- a/src/PlusDataCollection/Testing/vtkAzureKinectTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkAzureKinectTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkBkProFocusCameraLinkVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkBkProFocusCameraLinkVideoSourceTest.cxx
+index dd3e748..e711212 100644
+--- a/src/PlusDataCollection/Testing/vtkBkProFocusCameraLinkVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkBkProFocusCameraLinkVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkBkProFocusOemVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkBkProFocusOemVideoSourceTest.cxx
+index ab06fa3..9063398 100644
+--- a/src/PlusDataCollection/Testing/vtkBkProFocusOemVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkBkProFocusOemVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkCapistranoVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkCapistranoVideoSourceTest.cxx
+index ee1f633..92159e0 100644
+--- a/src/PlusDataCollection/Testing/vtkCapistranoVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkCapistranoVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkClariusTest.cxx b/src/PlusDataCollection/Testing/vtkClariusTest.cxx
+index 93618d9..d4df729 100644
+--- a/src/PlusDataCollection/Testing/vtkClariusTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkClariusTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkDAQVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkDAQVideoSourceTest.cxx
+index 600fe0b..3589ca0 100644
+--- a/src/PlusDataCollection/Testing/vtkDAQVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkDAQVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkDataCollectorFileTest.cxx b/src/PlusDataCollection/Testing/vtkDataCollectorFileTest.cxx
+index 580e500..bf2067c 100644
+--- a/src/PlusDataCollection/Testing/vtkDataCollectorFileTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkDataCollectorFileTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkDataCollectorTest1.cxx b/src/PlusDataCollection/Testing/vtkDataCollectorTest1.cxx
+index 223473f..4838871 100644
+--- a/src/PlusDataCollection/Testing/vtkDataCollectorTest1.cxx
++++ b/src/PlusDataCollection/Testing/vtkDataCollectorTest1.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkDataCollectorTest2.cxx b/src/PlusDataCollection/Testing/vtkDataCollectorTest2.cxx
+index 37b6585..832dc48 100644
+--- a/src/PlusDataCollection/Testing/vtkDataCollectorTest2.cxx
++++ b/src/PlusDataCollection/Testing/vtkDataCollectorTest2.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkDataCollectorVideoAcqTest.cxx b/src/PlusDataCollection/Testing/vtkDataCollectorVideoAcqTest.cxx
+index eda4ff4..23e885a 100644
+--- a/src/PlusDataCollection/Testing/vtkDataCollectorVideoAcqTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkDataCollectorVideoAcqTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkEpiphanVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkEpiphanVideoSourceTest.cxx
+index 3617280..f4f95f3 100644
+--- a/src/PlusDataCollection/Testing/vtkEpiphanVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkEpiphanVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkGenericSensorTrackerTest.cxx b/src/PlusDataCollection/Testing/vtkGenericSensorTrackerTest.cxx
+index c42affc..4d9e571 100644
+--- a/src/PlusDataCollection/Testing/vtkGenericSensorTrackerTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkGenericSensorTrackerTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkICCapturingSourceTest1.cxx b/src/PlusDataCollection/Testing/vtkICCapturingSourceTest1.cxx
+index 7965fa5..ba6e260 100644
+--- a/src/PlusDataCollection/Testing/vtkICCapturingSourceTest1.cxx
++++ b/src/PlusDataCollection/Testing/vtkICCapturingSourceTest1.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkInfraredSeekCamTest.cxx b/src/PlusDataCollection/Testing/vtkInfraredSeekCamTest.cxx
+index b404bc2..fcc728f 100644
+--- a/src/PlusDataCollection/Testing/vtkInfraredSeekCamTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkInfraredSeekCamTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkInfraredTEEV2CamTest.cxx b/src/PlusDataCollection/Testing/vtkInfraredTEEV2CamTest.cxx
+index 5768fc2..0910407 100644
+--- a/src/PlusDataCollection/Testing/vtkInfraredTEEV2CamTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkInfraredTEEV2CamTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkInfraredTEQ1CamTest.cxx b/src/PlusDataCollection/Testing/vtkInfraredTEQ1CamTest.cxx
+index 7b14fc6..b1c2891 100644
+--- a/src/PlusDataCollection/Testing/vtkInfraredTEQ1CamTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkInfraredTEQ1CamTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkIntelRealSenseCamTest.cxx b/src/PlusDataCollection/Testing/vtkIntelRealSenseCamTest.cxx
+index 20d3ebc..407cc66 100644
+--- a/src/PlusDataCollection/Testing/vtkIntelRealSenseCamTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkIntelRealSenseCamTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkIntelRealSenseTrackerTest.cxx b/src/PlusDataCollection/Testing/vtkIntelRealSenseTrackerTest.cxx
+index fe11712..fbc3964 100644
+--- a/src/PlusDataCollection/Testing/vtkIntelRealSenseTrackerTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkIntelRealSenseTrackerTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkIntersonArraySDKCxxVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkIntersonArraySDKCxxVideoSourceTest.cxx
+index c8ef6c4..9d3545a 100644
+--- a/src/PlusDataCollection/Testing/vtkIntersonArraySDKCxxVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkIntersonArraySDKCxxVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkIntersonSDKCxxVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkIntersonSDKCxxVideoSourceTest.cxx
+index 0c6e874..7e09ad2 100644
+--- a/src/PlusDataCollection/Testing/vtkIntersonSDKCxxVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkIntersonSDKCxxVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkIntersonVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkIntersonVideoSourceTest.cxx
+index 36194b8..80b9851 100644
+--- a/src/PlusDataCollection/Testing/vtkIntersonVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkIntersonVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkLeapMotionTest1.cxx b/src/PlusDataCollection/Testing/vtkLeapMotionTest1.cxx
+index 11351c9..1dd2ba8 100644
+--- a/src/PlusDataCollection/Testing/vtkLeapMotionTest1.cxx
++++ b/src/PlusDataCollection/Testing/vtkLeapMotionTest1.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkMicronTrackerTest.cxx b/src/PlusDataCollection/Testing/vtkMicronTrackerTest.cxx
+index 89fc693..4834975 100644
+--- a/src/PlusDataCollection/Testing/vtkMicronTrackerTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkMicronTrackerTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkMmfVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkMmfVideoSourceTest.cxx
+index eeb3ad2..29ca217 100644
+--- a/src/PlusDataCollection/Testing/vtkMmfVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkMmfVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkNvidiaDVPVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkNvidiaDVPVideoSourceTest.cxx
+index 7fad2a0..098042c 100644
+--- a/src/PlusDataCollection/Testing/vtkNvidiaDVPVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkNvidiaDVPVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkOpenHapticsDeviceTest.cxx b/src/PlusDataCollection/Testing/vtkOpenHapticsDeviceTest.cxx
+index b64f074..a020ecb 100644
+--- a/src/PlusDataCollection/Testing/vtkOpenHapticsDeviceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkOpenHapticsDeviceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkOpenIGTLinkTrackerTest.cxx b/src/PlusDataCollection/Testing/vtkOpenIGTLinkTrackerTest.cxx
+index 63ea24b..0f7c8e6 100644
+--- a/src/PlusDataCollection/Testing/vtkOpenIGTLinkTrackerTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkOpenIGTLinkTrackerTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkOvrvisionProVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkOvrvisionProVideoSourceTest.cxx
+index 45eb891..1efb758 100644
+--- a/src/PlusDataCollection/Testing/vtkOvrvisionProVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkOvrvisionProVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkPhilips3DProbeVideoSourceTest1.cxx b/src/PlusDataCollection/Testing/vtkPhilips3DProbeVideoSourceTest1.cxx
+index 373ab9c..59d145c 100644
+--- a/src/PlusDataCollection/Testing/vtkPhilips3DProbeVideoSourceTest1.cxx
++++ b/src/PlusDataCollection/Testing/vtkPhilips3DProbeVideoSourceTest1.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkPlusDeviceFactoryTest.cxx b/src/PlusDataCollection/Testing/vtkPlusDeviceFactoryTest.cxx
+index 97c2509..716d044 100644
+--- a/src/PlusDataCollection/Testing/vtkPlusDeviceFactoryTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkPlusDeviceFactoryTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkRevopoint3DCameraTest.cxx b/src/PlusDataCollection/Testing/vtkRevopoint3DCameraTest.cxx
+index c3768f3..fab1169 100644
+--- a/src/PlusDataCollection/Testing/vtkRevopoint3DCameraTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkRevopoint3DCameraTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkSonixPortaVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkSonixPortaVideoSourceTest.cxx
+index 1c166ae..ed453a4 100644
+--- a/src/PlusDataCollection/Testing/vtkSonixPortaVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkSonixPortaVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkSonixVideoSourceTest1.cxx b/src/PlusDataCollection/Testing/vtkSonixVideoSourceTest1.cxx
+index 1261a0a..0382456 100644
+--- a/src/PlusDataCollection/Testing/vtkSonixVideoSourceTest1.cxx
++++ b/src/PlusDataCollection/Testing/vtkSonixVideoSourceTest1.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkTelemedVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkTelemedVideoSourceTest.cxx
+index 5d54e96..6585d93 100644
+--- a/src/PlusDataCollection/Testing/vtkTelemedVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkTelemedVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkThorLabsVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkThorLabsVideoSourceTest.cxx
+index 29d6763..cf2b4ac 100644
+--- a/src/PlusDataCollection/Testing/vtkThorLabsVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkThorLabsVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkURFSavedVideoSourceTest1.cxx b/src/PlusDataCollection/Testing/vtkURFSavedVideoSourceTest1.cxx
+index d8764be..6ec3c4d 100644
+--- a/src/PlusDataCollection/Testing/vtkURFSavedVideoSourceTest1.cxx
++++ b/src/PlusDataCollection/Testing/vtkURFSavedVideoSourceTest1.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkUSDigitalEncodersTrackerTest.cxx b/src/PlusDataCollection/Testing/vtkUSDigitalEncodersTrackerTest.cxx
+index 1ec9031..4f5d465 100644
+--- a/src/PlusDataCollection/Testing/vtkUSDigitalEncodersTrackerTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkUSDigitalEncodersTrackerTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkUltravioletPCOUVCamTest.cxx b/src/PlusDataCollection/Testing/vtkUltravioletPCOUVCamTest.cxx
+index 5c98f23..19458fa 100644
+--- a/src/PlusDataCollection/Testing/vtkUltravioletPCOUVCamTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkUltravioletPCOUVCamTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkVirtualTextRecognizerTest.cxx b/src/PlusDataCollection/Testing/vtkVirtualTextRecognizerTest.cxx
+index ceecf03..601dd38 100644
+--- a/src/PlusDataCollection/Testing/vtkVirtualTextRecognizerTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkVirtualTextRecognizerTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkWin32VideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkWin32VideoSourceTest.cxx
+index 0d36d09..6f20ca5 100644
+--- a/src/PlusDataCollection/Testing/vtkWin32VideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkWin32VideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Testing/vtkWinProbeVideoSourceTest.cxx b/src/PlusDataCollection/Testing/vtkWinProbeVideoSourceTest.cxx
+index 0837ec0..095b2b1 100644
+--- a/src/PlusDataCollection/Testing/vtkWinProbeVideoSourceTest.cxx
++++ b/src/PlusDataCollection/Testing/vtkWinProbeVideoSourceTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Tools/PlusVersion.cxx b/src/PlusDataCollection/Tools/PlusVersion.cxx
+index 33e2d81..babcd69 100644
+--- a/src/PlusDataCollection/Tools/PlusVersion.cxx
++++ b/src/PlusDataCollection/Tools/PlusVersion.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusDataCollection/Tools/ViewSequenceFile.cxx b/src/PlusDataCollection/Tools/ViewSequenceFile.cxx
+index bfbf1a0..40a3b78 100644
+--- a/src/PlusDataCollection/Tools/ViewSequenceFile.cxx
++++ b/src/PlusDataCollection/Tools/ViewSequenceFile.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusImageProcessing/Tools/DrawScanLines.cxx b/src/PlusImageProcessing/Tools/DrawScanLines.cxx
+index 4eb7096..c52f85c 100644
+--- a/src/PlusImageProcessing/Tools/DrawScanLines.cxx
++++ b/src/PlusImageProcessing/Tools/DrawScanLines.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusImageProcessing/Tools/EnhanceBone.cxx b/src/PlusImageProcessing/Tools/EnhanceBone.cxx
+index 8767a89..f09382d 100644
+--- a/src/PlusImageProcessing/Tools/EnhanceBone.cxx
++++ b/src/PlusImageProcessing/Tools/EnhanceBone.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusImageProcessing/Tools/EnhanceUsTrpSequence.cxx b/src/PlusImageProcessing/Tools/EnhanceUsTrpSequence.cxx
+index aa86b07..c1e1b1b 100644
+--- a/src/PlusImageProcessing/Tools/EnhanceUsTrpSequence.cxx
++++ b/src/PlusImageProcessing/Tools/EnhanceUsTrpSequence.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ #include "PlusConfigure.h"
+ #include "igsioTrackedFrame.h"
+ #include "vtkImageCast.h"
+diff --git a/src/PlusImageProcessing/Tools/ExtractScanLines.cxx b/src/PlusImageProcessing/Tools/ExtractScanLines.cxx
+index 8d4061d..222ad27 100644
+--- a/src/PlusImageProcessing/Tools/ExtractScanLines.cxx
++++ b/src/PlusImageProcessing/Tools/ExtractScanLines.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ #include "PlusConfigure.h"
+ #include "igsioTrackedFrame.h"
+ #include "vtkImageCast.h"
+diff --git a/src/PlusImageProcessing/Tools/ScanConvert.cxx b/src/PlusImageProcessing/Tools/ScanConvert.cxx
+index 91ee4fa..cf3d864 100644
+--- a/src/PlusImageProcessing/Tools/ScanConvert.cxx
++++ b/src/PlusImageProcessing/Tools/ScanConvert.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ #include "PlusConfigure.h"
+ #include "igsioTrackedFrame.h"
+ #include "vtkSmartPointer.h"
+diff --git a/src/PlusImageProcessing/vtkPlusRfToBrightnessConvert.cxx b/src/PlusImageProcessing/vtkPlusRfToBrightnessConvert.cxx
+index 5248b0f..70aedd6 100644
+--- a/src/PlusImageProcessing/vtkPlusRfToBrightnessConvert.cxx
++++ b/src/PlusImageProcessing/vtkPlusRfToBrightnessConvert.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusRendering/Tools/ModelRenderer.cxx b/src/PlusRendering/Tools/ModelRenderer.cxx
+index de009a6..4803d69 100644
+--- a/src/PlusRendering/Tools/ModelRenderer.cxx
++++ b/src/PlusRendering/Tools/ModelRenderer.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusServer/Testing/vtkPlusServerTest.cxx b/src/PlusServer/Testing/vtkPlusServerTest.cxx
+index 9484870..602e78e 100644
+--- a/src/PlusServer/Testing/vtkPlusServerTest.cxx
++++ b/src/PlusServer/Testing/vtkPlusServerTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusServer/Tools/PlusServer.cxx b/src/PlusServer/Tools/PlusServer.cxx
+index 2e8b40f..4cbf29e 100644
+--- a/src/PlusServer/Tools/PlusServer.cxx
++++ b/src/PlusServer/Tools/PlusServer.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusServer/Tools/PlusServerRemoteControl.cxx b/src/PlusServer/Tools/PlusServerRemoteControl.cxx
+index 04640e8..b735fc1 100644
+--- a/src/PlusServer/Tools/PlusServerRemoteControl.cxx
++++ b/src/PlusServer/Tools/PlusServerRemoteControl.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusVolumeReconstruction/Tools/DrawClipRegion.cxx b/src/PlusVolumeReconstruction/Tools/DrawClipRegion.cxx
+index f74c7d5..93e82f8 100644
+--- a/src/PlusVolumeReconstruction/Tools/DrawClipRegion.cxx
++++ b/src/PlusVolumeReconstruction/Tools/DrawClipRegion.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/PlusVolumeReconstruction/Tools/VolumeReconstructor.cxx b/src/PlusVolumeReconstruction/Tools/VolumeReconstructor.cxx
+index 387abe5..04a30a8 100644
+--- a/src/PlusVolumeReconstruction/Tools/VolumeReconstructor.cxx
++++ b/src/PlusVolumeReconstruction/Tools/VolumeReconstructor.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/src/SEIDrv/SEIDrv.cpp b/src/SEIDrv/SEIDrv.cpp
+index a6f5cc3..36e6499 100644
+--- a/src/SEIDrv/SEIDrv.cpp
++++ b/src/SEIDrv/SEIDrv.cpp
+@@ -1,3 +1,4 @@
++#include <iostream>
+ #include "SEIDrv.h"
+ #include <string>
+ #include <Windows.h> // for QueryDosDevice
+diff --git a/src/Utilities/Ransac/Examples/planeEstimation.cxx b/src/Utilities/Ransac/Examples/planeEstimation.cxx
+index 239df10..21ca6c1 100644
+--- a/src/Utilities/Ransac/Examples/planeEstimation.cxx
++++ b/src/Utilities/Ransac/Examples/planeEstimation.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ #include <fstream>
+ #include "RANSAC.h"
+ #include "PlaneParametersEstimator.h"
+diff --git a/src/Utilities/Ransac/Examples/sphereEstimation.cxx b/src/Utilities/Ransac/Examples/sphereEstimation.cxx
+index c727d48..b3909d3 100644
+--- a/src/Utilities/Ransac/Examples/sphereEstimation.cxx
++++ b/src/Utilities/Ransac/Examples/sphereEstimation.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ #include <fstream>
+ #include "RANSAC.h"
+ #include "RandomNumberGenerator.h"
+diff --git a/src/Utilities/Ransac/Testing/PlaneParametersEstimatorTest.cxx b/src/Utilities/Ransac/Testing/PlaneParametersEstimatorTest.cxx
+index 222585f..440c39f 100644
+--- a/src/Utilities/Ransac/Testing/PlaneParametersEstimatorTest.cxx
++++ b/src/Utilities/Ransac/Testing/PlaneParametersEstimatorTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ #include<vector>
+ #include <fstream>
+ #include <itkPoint.h>

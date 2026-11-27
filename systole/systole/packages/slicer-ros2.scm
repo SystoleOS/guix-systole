@@ -61,7 +61,10 @@
                (commit commit)))
          (file-name (git-file-name name commit))
          (sha256
-          (base32 "1dcjwah2gd6qy7214hb8dj5lx7d4j02fxkb68825v9jgcffjc11n"))))
+          (base32 "1dcjwah2gd6qy7214hb8dj5lx7d4j02fxkb68825v9jgcffjc11n"))
+         (patches
+          (search-patches
+           "slicer-ros2/0001-COMP-Add-missing-iostream-includes-for-VTK-9.6.patch"))))
       (build-system cmake-build-system)
       (arguments
        (list
@@ -95,8 +98,6 @@
                                ".so"))
         #:phases
         #~(modify-phases %standard-phases
-            (add-after 'unpack 'add-missing-iostream-includes
-              #$%add-missing-iostream-includes)
             (add-after 'unpack 'patch-install-layout
               (lambda _
                 ;; (1) Upstream forces CMAKE_INSTALL_PREFIX to Slicer_DIR

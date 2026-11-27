@@ -1,0 +1,53 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: SystoleOS <systole@example.org>
+Date: Fri, 27 Nov 2026 16:30:00 +0100
+Subject: [PATCH] COMP: Add missing <iostream> includes for VTK 9.6
+
+VTK 9.6 headers no longer include <iostream> transitively, nor provide
+the global using-declarations for cout/cerr/clog, so code written
+against older VTK fails with "'cerr' is not a member of 'std'" or
+"'cerr' was not declared in this scope".  Include <iostream> in every
+source file that uses these streams and qualify bare uses with std::.
+---
+ DiagnosticTools/DiagDataCollection.cxx                         | 1 +
+ PlusServerLauncher/Testing/PlusServerLauncherRemoteControl.cxx | 1 +
+ PointSetExtractor/PointSetExtractor.cxx                        | 1 +
+ fCal/vtkPlusVisualizationController.cxx                        | 1 +
+ 4 files changed, 4 insertions(+)
+
+diff --git a/DiagnosticTools/DiagDataCollection.cxx b/DiagnosticTools/DiagDataCollection.cxx
+index eb0b5cc..428a56e 100644
+--- a/DiagnosticTools/DiagDataCollection.cxx
++++ b/DiagnosticTools/DiagDataCollection.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/PlusServerLauncher/Testing/PlusServerLauncherRemoteControl.cxx b/PlusServerLauncher/Testing/PlusServerLauncherRemoteControl.cxx
+index 85023e3..de19138 100644
+--- a/PlusServerLauncher/Testing/PlusServerLauncherRemoteControl.cxx
++++ b/PlusServerLauncher/Testing/PlusServerLauncherRemoteControl.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/PointSetExtractor/PointSetExtractor.cxx b/PointSetExtractor/PointSetExtractor.cxx
+index 87e6a2c..df29175 100644
+--- a/PointSetExtractor/PointSetExtractor.cxx
++++ b/PointSetExtractor/PointSetExtractor.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/fCal/vtkPlusVisualizationController.cxx b/fCal/vtkPlusVisualizationController.cxx
+index e2b4d58..f235bf4 100644
+--- a/fCal/vtkPlusVisualizationController.cxx
++++ b/fCal/vtkPlusVisualizationController.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.

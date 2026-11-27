@@ -104,7 +104,9 @@ data by the PlusLib test suite.
   (list (search-patch
          "plustoolkit/0001-COMP-Find-vtkAddon-for-transitively-required-headers.patch")
         (search-patch
-         "plustoolkit/0002-COMP-Read-write-PlusConfig.xml-from-XDG_CONFIG_HOME-.patch")))
+         "plustoolkit/0002-COMP-Read-write-PlusConfig.xml-from-XDG_CONFIG_HOME-.patch")
+        (search-patch
+         "plustoolkit/0003-COMP-Add-missing-iostream-includes-for-VTK-9.6.patch")))
 
 (define-public pluslib
   (package
@@ -178,11 +180,7 @@ data by the PlusLib test suite.
              ;; XML stamping step and not the installed cmake config.
              (string-append "-DPLUSLIB_DATA_DIR="
                             #$(this-package-input "pluslibdata")
-                            "/share/PlusLib-2.9"))
-          #:phases
-          #~(modify-phases %standard-phases
-              (add-after 'unpack 'add-missing-iostream-includes
-                #$%add-missing-iostream-includes))))
+                            "/share/PlusLib-2.9"))))
    (inputs
     (list vtk-slicer-9.6
           itk-slicer-5.4.6
@@ -250,7 +248,9 @@ require proprietary vendor SDKs.  The virtual and network data sources
 (define %plusapp-version (git-version "2.9.0" "0" %plusapp-commit))
 (define %plusapp-patches
   (list (search-patch
-         "plusapp/0001-COMP-Guard-CPack-inclusion-behind-PLUSAPP_BUILD_PACK.patch")))
+         "plusapp/0001-COMP-Guard-CPack-inclusion-behind-PLUSAPP_BUILD_PACK.patch")
+        (search-patch
+         "plusapp/0002-COMP-Add-missing-iostream-includes-for-VTK-9.6.patch")))
 
 (define-public plusapp
   (package
@@ -315,11 +315,7 @@ require proprietary vendor SDKs.  The virtual and network data sources
                             "/share/PlusLib-2.9/TestImages")
              (string-append "-DPLUSCONFIG_MODEL_DIR="
                             #$(this-package-input "pluslibdata")
-                            "/share/PlusLib-2.9/CADModels"))
-          #:phases
-          #~(modify-phases %standard-phases
-              (add-after 'unpack 'add-missing-iostream-includes
-                #$%add-missing-iostream-includes))))
+                            "/share/PlusLib-2.9/CADModels"))))
    (inputs
     (list pluslib
           pluslibdata

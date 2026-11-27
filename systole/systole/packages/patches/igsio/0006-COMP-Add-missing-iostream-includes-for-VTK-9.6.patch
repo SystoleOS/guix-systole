@@ -1,0 +1,136 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: SystoleOS <systole@example.org>
+Date: Fri, 27 Nov 2026 16:30:00 +0100
+Subject: [PATCH] COMP: Add missing <iostream> includes for VTK 9.6
+
+VTK 9.6 headers no longer include <iostream> transitively, nor provide
+the global using-declarations for cout/cerr/clog, so code written
+against older VTK fails with "'cerr' is not a member of 'std'" or
+"'cerr' was not declared in this scope".  Include <iostream> in every
+source file that uses these streams and qualify bare uses with std::.
+---
+ IGSIOCommon/Testing/AccurateTimerTest.cxx                | 1 +
+ IGSIOCommon/Testing/igsioCommonTest.cxx                  | 1 +
+ IGSIOCommon/Testing/igsioMathTest.cxx                    | 1 +
+ IGSIOCommon/Testing/vtkIGSIOLoggerTest.cxx               | 1 +
+ IGSIOCommon/Testing/vtkTransformRepositoryTest.cxx       | 1 +
+ IGSIOCommon/vtkIGSIOLogger.cxx                           | 1 +
+ SequenceIO/Testing/vtkMetaImageSequenceIOTest.cxx        | 1 +
+ SequenceIO/Testing/vtkMkvSequenceIOTest.cxx              | 1 +
+ SequenceIO/vtkIGSIOMetaImageSequenceIO.cxx               | 2 +-
+ VolumeReconstruction/Testing/VolumeReconstructorTest.cxx | 1 +
+ VolumeReconstruction/vtkIGSIOVolumeReconstructor.cxx     | 3 ++-
+ 11 files changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/IGSIOCommon/Testing/AccurateTimerTest.cxx b/IGSIOCommon/Testing/AccurateTimerTest.cxx
+index df4801c..b4dc33a 100644
+--- a/IGSIOCommon/Testing/AccurateTimerTest.cxx
++++ b/IGSIOCommon/Testing/AccurateTimerTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/IGSIOCommon/Testing/igsioCommonTest.cxx b/IGSIOCommon/Testing/igsioCommonTest.cxx
+index 4ee74f0..540cd5b 100644
+--- a/IGSIOCommon/Testing/igsioCommonTest.cxx
++++ b/IGSIOCommon/Testing/igsioCommonTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/IGSIOCommon/Testing/igsioMathTest.cxx b/IGSIOCommon/Testing/igsioMathTest.cxx
+index e521cdb..9468b03 100644
+--- a/IGSIOCommon/Testing/igsioMathTest.cxx
++++ b/IGSIOCommon/Testing/igsioMathTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/IGSIOCommon/Testing/vtkIGSIOLoggerTest.cxx b/IGSIOCommon/Testing/vtkIGSIOLoggerTest.cxx
+index d556073..d3a72dc 100644
+--- a/IGSIOCommon/Testing/vtkIGSIOLoggerTest.cxx
++++ b/IGSIOCommon/Testing/vtkIGSIOLoggerTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/IGSIOCommon/Testing/vtkTransformRepositoryTest.cxx b/IGSIOCommon/Testing/vtkTransformRepositoryTest.cxx
+index 5b73455..0425036 100644
+--- a/IGSIOCommon/Testing/vtkTransformRepositoryTest.cxx
++++ b/IGSIOCommon/Testing/vtkTransformRepositoryTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+   Program: Plus
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/IGSIOCommon/vtkIGSIOLogger.cxx b/IGSIOCommon/vtkIGSIOLogger.cxx
+index c8b6fbf..b740134 100644
+--- a/IGSIOCommon/vtkIGSIOLogger.cxx
++++ b/IGSIOCommon/vtkIGSIOLogger.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/SequenceIO/Testing/vtkMetaImageSequenceIOTest.cxx b/SequenceIO/Testing/vtkMetaImageSequenceIOTest.cxx
+index 5df2c66..e7f92d2 100644
+--- a/SequenceIO/Testing/vtkMetaImageSequenceIOTest.cxx
++++ b/SequenceIO/Testing/vtkMetaImageSequenceIOTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/SequenceIO/Testing/vtkMkvSequenceIOTest.cxx b/SequenceIO/Testing/vtkMkvSequenceIOTest.cxx
+index 932d7ba..98b67f8 100644
+--- a/SequenceIO/Testing/vtkMkvSequenceIOTest.cxx
++++ b/SequenceIO/Testing/vtkMkvSequenceIOTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=Plus=header=begin======================================================
+ Program: Plus
+ Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/SequenceIO/vtkIGSIOMetaImageSequenceIO.cxx b/SequenceIO/vtkIGSIOMetaImageSequenceIO.cxx
+index 5c939f6..19f6be8 100644
+--- a/SequenceIO/vtkIGSIOMetaImageSequenceIO.cxx
++++ b/SequenceIO/vtkIGSIOMetaImageSequenceIO.cxx
+@@ -367,7 +367,7 @@ igsioStatus vtkIGSIOMetaImageSequenceIO::ReadImagePixels()
+     }
+     catch (std::bad_alloc& e)
+     {
+-      cerr << e.what() << endl;
++      std::cerr << e.what() << endl;
+       LOG_ERROR("vtkIGSIOMetaImageSequenceIO::ReadImagePixels failed due to out of memory. Try to reduce image buffer sizes or use a 64-bit build of Plus.");
+       return IGSIO_FAIL;
+     }
+diff --git a/VolumeReconstruction/Testing/VolumeReconstructorTest.cxx b/VolumeReconstruction/Testing/VolumeReconstructorTest.cxx
+index 2312e4f..11339e8 100644
+--- a/VolumeReconstruction/Testing/VolumeReconstructorTest.cxx
++++ b/VolumeReconstruction/Testing/VolumeReconstructorTest.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=IGSIO=header=begin======================================================
+   Program: IGSIO
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+diff --git a/VolumeReconstruction/vtkIGSIOVolumeReconstructor.cxx b/VolumeReconstruction/vtkIGSIOVolumeReconstructor.cxx
+index a4bb8b3..c4bca76 100644
+--- a/VolumeReconstruction/vtkIGSIOVolumeReconstructor.cxx
++++ b/VolumeReconstruction/vtkIGSIOVolumeReconstructor.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*=IGSIO=header=begin======================================================
+   Program: IGSIO
+   Copyright (c) Laboratory for Percutaneous Surgery. All rights reserved.
+@@ -474,7 +475,7 @@ igsioStatus vtkIGSIOVolumeReconstructor::SetOutputExtentFromFrameList(vtkIGSIOTr
+   }
+   catch (std::bad_alloc& e)
+   {
+-    cerr << e.what() << endl;
++    std::cerr << e.what() << endl;
+     errorDescription = "StartReconstruction failed due to out of memory. Try to reduce the size or increase spacing of the output volume.";
+     LOG_ERROR(errorDescription);
+     return IGSIO_FAIL;

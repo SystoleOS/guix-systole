@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: SystoleOS <systole@example.org>
+Date: Fri, 27 Nov 2026 16:30:00 +0100
+Subject: [PATCH] COMP: Add missing <iostream> include to SlicerIGSIOCommon
+
+VTK 9.6 headers no longer include <iostream> transitively, nor provide
+the global using-declarations for cout/cerr/clog, so code written
+against older VTK fails with "'cerr' is not a member of 'std'" or
+"'cerr' was not declared in this scope".  Include <iostream> in every
+source file that uses these streams and qualify bare uses with std::.
+---
+ SlicerIGSIOCommon/vtkSlicerIGSIOLogger.cxx | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/SlicerIGSIOCommon/vtkSlicerIGSIOLogger.cxx b/SlicerIGSIOCommon/vtkSlicerIGSIOLogger.cxx
+index 5fa5495..d88791a 100644
+--- a/SlicerIGSIOCommon/vtkSlicerIGSIOLogger.cxx
++++ b/SlicerIGSIOCommon/vtkSlicerIGSIOLogger.cxx
+@@ -1,3 +1,4 @@
++#include <iostream>
+ /*==============================================================================
+ 
+ Copyright (c) Laboratory for Percutaneous Surgery (PerkLab)
