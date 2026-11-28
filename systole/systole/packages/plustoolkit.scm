@@ -163,7 +163,7 @@ data by the PlusLib test suite.
                             #$(this-package-input "igsio")
                             "/lib/cmake/IGSIO")
              (string-append "-DvtkAddon_DIR="
-                            #$(this-package-input "vtkaddon-9.6")
+                            #$(this-package-input "vtkaddon-for-slicer-5.12")
                             "/lib/cmake")
              (string-append "-DOpenIGTLink_DIR="
                             #$(this-package-input "openigtlink")
@@ -184,7 +184,7 @@ data by the PlusLib test suite.
    (inputs
     (list vtk-slicer-9.6
           itk-slicer-5.4.6
-          vtkaddon-9.6
+          vtkaddon-for-slicer-5.12
           igsio
           openigtlink
           openigtlinkio
@@ -290,7 +290,7 @@ require proprietary vendor SDKs.  The virtual and network data sources
              ;; dirs (needed transitively via igsioVideoFrame.h). vtkAddon uses
              ;; a flat cmake directory, so we must provide the path explicitly.
              (string-append "-DvtkAddon_DIR="
-                            #$(this-package-input "vtkaddon-9.6")
+                            #$(this-package-input "vtkaddon-for-slicer-5.12")
                             "/lib/cmake")
              ;; PlusLibConfig.cmake calls find_package(VTK) which in turn
              ;; calls find_package(Python3); provide explicit paths.
@@ -320,7 +320,7 @@ require proprietary vendor SDKs.  The virtual and network data sources
     (list pluslib
           pluslibdata
           itk-slicer-5.4.6
-          vtkaddon-9.6
+          vtkaddon-for-slicer-5.12
           python
           ;; Qt5 components used by fCal and PlusServerLauncher
           qtbase-5

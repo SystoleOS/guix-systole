@@ -263,7 +263,7 @@
                             (add-before 'configure 'set-cmake-paths
                                         (lambda _
                                           (setenv "CMAKE_PREFIX_PATH"
-                                                  (string-append #$(this-package-input "vtkaddon-9.5")
+                                                  (string-append #$(this-package-input "vtkaddon-for-slicer-5.10")
                                                                  "/lib/cmake:"
                                                                  (or (getenv "CMAKE_PREFIX_PATH")
                                                                      "")))))
@@ -365,7 +365,7 @@
            itk-slicer-5.4.4
            libarchive-slicer
            teem-slicer
-           vtkaddon-9.5
+           vtkaddon-for-slicer-5.10
            slicerexecutionmodel
            qrestapi))
     (native-inputs (list patchelf pkg-config))
@@ -415,7 +415,8 @@ visualization and medical image computing.")
             (string-append "-DPYTHONQT_INSTALL_DIR="
                            #$(this-package-input "pythonqt-commontk-for-slicer-5.10"))
             (string-append "-DvtkAddon_CMAKE_DIR="
-                           #$(this-package-input "vtkaddon-9.5") "/lib/cmake"))
+                           #$(this-package-input "vtkaddon-for-slicer-5.10")
+                           "/lib/cmake"))
            (filter (lambda (f)
                      (not (member f '("-DVTK_WRAP_PYTHON:BOOL=OFF"
                                       "-DSlicer_USE_PYTHONQT:BOOL=OFF"
@@ -429,7 +430,7 @@ visualization and medical image computing.")
                 (setenv "CMAKE_PREFIX_PATH"
                         (string-append
                          #$(this-package-input "pythonqt-commontk-for-slicer-5.10") "/lib/cmake:"
-                         #$(this-package-input "vtkaddon-9.5") "/lib/cmake:"
+                         #$(this-package-input "vtkaddon-for-slicer-5.10") "/lib/cmake:"
                          (or (getenv "CMAKE_PREFIX_PATH") "")))))
             (add-after 'install-slicer-symlink 'patch-python-extension-runpath
               (lambda _
@@ -444,7 +445,7 @@ visualization and medical image computing.")
             (add-after 'patch-python-extension-runpath 'link-vtkaddon-python
               (lambda _
                 (symlink
-                 (string-append #$(this-package-input "vtkaddon-9.5")
+                 (string-append #$(this-package-input "vtkaddon-for-slicer-5.10")
                                 "/lib/vtkAddonPython.so")
                  (string-append #$output
                                 "/lib/Slicer-5.10/vtkAddonPython.so"))))
@@ -457,7 +458,7 @@ visualization and medical image computing.")
     (inputs
      (modify-inputs (package-inputs %slicer-5.10)
        (prepend python-3.12 pythonqt-commontk-for-slicer-5.10)))
-    (propagated-inputs (list vtk-slicer-9.5 ctk-for-slicer-5.10 vtkaddon-9.5 hdf5-1.10 libtheora
+    (propagated-inputs (list vtk-slicer-9.5 ctk-for-slicer-5.10 vtkaddon-for-slicer-5.10 hdf5-1.10 libtheora
                              netcdf-slicer proj jsoncpp libharu gl2ps eigen
                              openmpi double-conversion lz4 libxml2
                              qtbase-5 qttools-5 qtxmlpatterns-5 qtsvg-5

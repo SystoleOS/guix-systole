@@ -94,7 +94,7 @@
                                  #$(this-package-input "itk-slicer")
                                  "/lib/cmake/ITK-5.4")
                   (string-append "-DvtkAddon_DIR="
-                                 #$(this-package-input "vtkaddon-9.6")
+                                 #$(this-package-input "vtkaddon-for-slicer-5.12")
                                  "/lib/cmake")
                   (string-append "-DQt5_DIR="
                                  #$(this-package-input "qtbase")
@@ -114,7 +114,7 @@
    (inputs (list
             vtk-slicer-9.6
             itk-slicer-5.4.6
-            vtkaddon-9.6
+            vtkaddon-for-slicer-5.12
             zlib
             ;; VTK external deps — VTK's cmake config (and ITK's UseITK.cmake, which
             ;; calls find_package(VTK) internally) requires all packages that
@@ -141,7 +141,7 @@
             tbb
             python))
 
-   (propagated-inputs (list vtk-slicer-9.6 ctk-for-slicer-5.12 vtkaddon-9.6))
+   (propagated-inputs (list vtk-slicer-9.6 ctk-for-slicer-5.12 vtkaddon-for-slicer-5.12))
 
    (home-page "https://github.com/IGSIO/IGSIO")
    (synopsis "Image Guided Surgery InterOperability library")
