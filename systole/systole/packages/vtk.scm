@@ -280,7 +280,7 @@ future.")
        (prepend python-3.12)))))
 
 ;; Private non-Python base for vtkAddon (Slicer 5.10).
-(define %vtkaddon-9.5
+(define %vtkaddon-for-slicer-5.10
   (let ((commit "b1fa5034077fc04b10457fe25004c65af6091a37")
         (revision "0"))
   (package
@@ -302,19 +302,24 @@ future.")
               (replace "vtk-slicer" %vtk-slicer-9.5))))))
 
 ;; Python-enabled vtkAddon for Slicer 5.10.
-(define-public vtkaddon-9.5
+(define-public vtkaddon-for-slicer-5.10
   (package
-    (inherit %vtkaddon-9.5)
-    (name "vtkaddon-9.5")
+    (inherit %vtkaddon-for-slicer-5.10)
+    (name "vtkaddon-for-slicer-5.10")
     (arguments
-     (substitute-keyword-arguments (package-arguments %vtkaddon-9.5)
+     (substitute-keyword-arguments (package-arguments %vtkaddon-for-slicer-5.10)
        ((#:configure-flags flags)
         #~(cons "-DvtkAddon_WRAP_PYTHON:BOOL=ON"
                 (delete "-DvtkAddon_WRAP_PYTHON:BOOL=OFF" #$flags)))))
     (inputs
-     (modify-inputs (package-inputs %vtkaddon-9.5)
+     (modify-inputs (package-inputs %vtkaddon-for-slicer-5.10)
        (replace "vtk-slicer" vtk-slicer-9.5)
        (prepend python-3.12)))))
+
+;; Deprecated name: the suffix named the VTK it links against, not a vtkAddon
+;; release (vtkAddon has none).  Renamed to match ctk-for-slicer-*.
+(define-public vtkaddon-9.5
+  (deprecated-package "vtkaddon-9.5" vtkaddon-for-slicer-5.10))
 
 ;;
 ;; Slicer 5.12 variants — VTK 9.6.2 + matching vtkAddon
@@ -363,7 +368,7 @@ future.")
 ;; dropped here: upstream vtkAddon 2ed3e222 migrated vtkMacroKitPythonWrap to
 ;; the VTK_Python3_LIBRARIES machinery, so the legacy find_package(PythonLibs)
 ;; path that the patch worked around is gone.
-(define %vtkaddon-9.6
+(define %vtkaddon-for-slicer-5.12
   (let ((commit "2ed3e2226cf25958b4dbf8bf917b2f7793ecd6a2")
         (revision "0"))
   (package
@@ -387,16 +392,21 @@ future.")
               (prepend openmpi))))))
 
 ;; Python-enabled vtkAddon for Slicer 5.12.
-(define-public vtkaddon-9.6
+(define-public vtkaddon-for-slicer-5.12
   (package
-    (inherit %vtkaddon-9.6)
-    (name "vtkaddon-9.6")
+    (inherit %vtkaddon-for-slicer-5.12)
+    (name "vtkaddon-for-slicer-5.12")
     (arguments
-     (substitute-keyword-arguments (package-arguments %vtkaddon-9.6)
+     (substitute-keyword-arguments (package-arguments %vtkaddon-for-slicer-5.12)
        ((#:configure-flags flags)
         #~(cons "-DvtkAddon_WRAP_PYTHON:BOOL=ON"
                 (delete "-DvtkAddon_WRAP_PYTHON:BOOL=OFF" #$flags)))))
     (inputs
-     (modify-inputs (package-inputs %vtkaddon-9.6)
+     (modify-inputs (package-inputs %vtkaddon-for-slicer-5.12)
        (delete "vtk-slicer")
        (prepend vtk-slicer-9.6 python-3.12)))))
+
+;; Deprecated name: the suffix named the VTK it links against, not a vtkAddon
+;; release (vtkAddon has none).  Renamed to match ctk-for-slicer-*.
+(define-public vtkaddon-9.6
+  (deprecated-package "vtkaddon-9.6" vtkaddon-for-slicer-5.12))

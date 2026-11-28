@@ -85,7 +85,7 @@ LINT_PACKAGES=(
     # The current Slicer stack (5.12) and the packages it builds on.  The
     # 5.8 stack is frozen; lint follows the stack under active work.
     "vtk-slicer-9.6"
-    "vtkaddon-9.6"
+    "vtkaddon-for-slicer-5.12"
     "itk-slicer@5.4.6"
     "pythonqt-commontk-for-slicer-5.12"
     "ctk-for-slicer-5.12"

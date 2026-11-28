@@ -271,7 +271,7 @@ developers.")
           ctkapplauncher
           libarchive-slicer
           teem-slicer
-          vtkaddon-9.6
+          vtkaddon-for-slicer-5.12
           qrestapi
           openigtlink
           openigtlinkio
@@ -377,7 +377,7 @@ protocol.")
          ctkapplauncher
          libarchive-slicer
          teem-slicer
-         vtkaddon-9.6
+         vtkaddon-for-slicer-5.12
          qrestapi
          openigtlink))
   (synopsis "VTK- and Qt-based wrapper library around OpenIGTLink")

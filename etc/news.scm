@@ -6,6 +6,19 @@
 (channel-news
  (version 0)
 
+ (entry (commit "346e02e5bcd67e57cf201549fd4bc15c7729510c")
+        (title (en "vtkAddon variants renamed after their Slicer stack"))
+        (body
+         (en "@code{vtkaddon-9.5} and @code{vtkaddon-9.6} are now
+@code{vtkaddon-for-slicer-5.10} and @code{vtkaddon-for-slicer-5.12}.
+vtkAddon has no releases of its own; the old suffix named the VTK version
+each variant links against.  The new names match
+@code{ctk-for-slicer-5.12} and @code{pythonqt-commontk-for-slicer-5.12}.
+The old names still work as deprecated aliases, so manifests keep
+working, but please update them.  Packages that depend on vtkAddon
+rebuild because the package name is part of the store path; nothing else
+changes.")))
+
  (entry (commit "2c00922dbe4b16e2b250c42f4bf77cbe1d00635e")
         (title (en "Slicer 5.8 and 5.10 stacks are frozen"))
         (body
